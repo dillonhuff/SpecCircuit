@@ -246,7 +246,11 @@ namespace FlatCircuit {
       SignalBit driverBit{driverId, driverPort, 0};
       SignalBit receiverBit{receiverId, receiverPort, 0};
 
-      cout << "Adding drivers for cells " << cDef.cellName(elemsToCells.at(fstSrc)) << " and " << cDef.cellName(elemsToCells.at(sndSrc)) << endl;
+      cout << "Adding drivers for" << endl;
+      cout << "\tDriver           : " << driverSel->toString() << endl;
+      cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
+      cout << "\tDriver Port      : " << driverPort << endl;
+      cout << "\tReceiver Port    : " << receiverPort << endl;
 
       receiver.setDriver(receiverPort, 0, driverBit);
 

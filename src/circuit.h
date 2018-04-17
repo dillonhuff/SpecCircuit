@@ -124,11 +124,17 @@ namespace FlatCircuit {
          const std::map<Parameter, BitVector> & parameters_) :
       parameters(parameters_), cellType(cellType_) {
       std::cout << "Creating cell type " << cellType << std::endl;
+
+      // NOTE: Need to include input port type and output port type
       if (cellType == CELL_TYPE_PORT) {
         BitVector width = parameters.at(PARAM_OUT_WIDTH);
+        int wd = width.to_type<int>();
+
         assert(width.bitLength() == 32);
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
       } else if (isBinop(cellType)) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
@@ -137,7 +143,8 @@ namespace FlatCircuit {
         int wd = width.to_type<int>();
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN0, SignalBus(wd)});
@@ -152,7 +159,8 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
@@ -170,7 +178,8 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN0, SignalBus(wd)});
@@ -188,7 +197,8 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
@@ -199,7 +209,8 @@ namespace FlatCircuit {
         int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        receivers.insert({PORT_ID_OUT, {}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
 
       } else {
         std::cout << "No processing rule for cell type " << cellType << std::endl;
@@ -243,6 +254,12 @@ namespace FlatCircuit {
     }
     
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
+      if (!contains_key(port, drivers)) {
+        std::cout << "All ports: " << std::endl;
+        for (auto port : drivers) {
+          std::cout << "\t" << port.first << std::endl;
+        }
+      }
       assert(contains_key(port, drivers));
 
       auto& sigBus = drivers[port];
