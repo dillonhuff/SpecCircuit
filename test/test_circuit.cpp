@@ -142,11 +142,11 @@ namespace FlatCircuit {
 
     REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
 
-    // Q: How to check connections?
-
     const Cell& clkPort = def.getPortCell("clk");
 
     REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
+
+    REQUIRE(clkPort.getPortReceivers(PORT_ID_OUT).size() > 0);
     
     deleteContext(c);
   }

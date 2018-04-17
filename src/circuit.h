@@ -41,7 +41,14 @@ namespace FlatCircuit {
 #define CELL_TYPE_CONST 17
 
   typedef uint64_t CellId;
+
   typedef uint64_t PortId;
+
+#define PORT_ID_IN 0
+#define PORT_ID_IN0 1
+#define PORT_ID_IN1 2
+#define PORT_ID_OUT 3
+#define PORT_ID_SEL 4
 
   enum PortType {
     PORT_TYPE_IN,
@@ -78,7 +85,22 @@ namespace FlatCircuit {
     Cell() {}
 
     Cell(const CellType cellType_,
-         const std::map<Parameter, BitVector> & parameters_) : parameters(parameters_), cellType(cellType_) {}
+         const std::map<Parameter, BitVector> & parameters_) :
+      parameters(parameters_), cellType(cellType_) {
+      if (cellType == CELL_TYPE_PORT) {
+        BitVector width = parameters.at(PARAM_OUT_WIDTH);
+        assert(width.bitLength() == 32);
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+      }
+    }
+
+    const std::vector<std::vector<SignalBit> >&
+    getPortReceivers(const PortId pid) const {
+      assert(contains_key(pid, receivers));
+
+      return receivers.at(pid);
+    }
 
     BitVector getParameterValue(const Parameter val) const {
       return parameters.at(val);
