@@ -42,6 +42,10 @@ namespace FlatCircuit {
       return PORT_ID_IN0;
     } else if (fstPort == "in1") {
       return PORT_ID_IN1;
+    } else if (fromSelf(sel)) {
+      // Every select off of self is driven by a port cells output port
+      // FIX port overloading
+      return PORT_ID_OUT;
     }
 
     cout << "Unsupported port " << fstPort << " in sel " << sel->toString() << endl;
@@ -232,7 +236,6 @@ namespace FlatCircuit {
       //   - Each bit could be: bit select off array or bit output
       // Array by array connection
 
-
       // Port on driver driving connectoin
       PortId driverPort = getPortId(driverSel);
 
@@ -246,6 +249,9 @@ namespace FlatCircuit {
       cout << "Adding drivers for cells " << cDef.cellName(elemsToCells.at(fstSrc)) << " and " << cDef.cellName(elemsToCells.at(sndSrc)) << endl;
 
       receiver.setDriver(receiverPort, 0, driverBit);
+
+      cout << "Set driver on receiver port" << endl;
+
       driver.addReceiver(driverPort, 0, receiverBit);
 
       cout << "Done adding drivers" << endl;

@@ -101,6 +101,12 @@ namespace FlatCircuit {
   class SignalBus {
   public:
     std::vector<SignalBit> signals;
+
+    SignalBus() : signals() {}
+    
+    SignalBus(const int width) : signals() {
+      signals.resize(width);
+    }
   };
 
   class Cell {
@@ -128,63 +134,69 @@ namespace FlatCircuit {
         BitVector width = parameters.at(PARAM_WIDTH);
         assert(width.bitLength() == 32);
 
+        int wd = width.to_type<int>();
+
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN0, {}});
+        drivers.insert({PORT_ID_IN0, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN1, {}});
+        drivers.insert({PORT_ID_IN1, SignalBus(wd)});
         
       } else if (cellType == CELL_TYPE_REG_ARST) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, {}});
+        drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_CLK, {}});
+        drivers.insert({PORT_ID_CLK, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_ARST, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_ARST, {}});
+        drivers.insert({PORT_ID_ARST, SignalBus(wd)});
         
       } else if (cellType == CELL_TYPE_MUX) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN0, {}});
+        drivers.insert({PORT_ID_IN0, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN1, {}});
+        drivers.insert({PORT_ID_IN1, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_SEL, {}});
+        drivers.insert({PORT_ID_SEL, SignalBus(wd)});
         
       } else if (isUnop(cellType)) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, {}});
+        drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (cellType == CELL_TYPE_CONST) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
@@ -223,14 +235,19 @@ namespace FlatCircuit {
     void addReceiver(const PortId port, const int offset, const SignalBit receiver) {
       assert(contains_key(port, receivers));
 
-      receivers[port][offset].push_back(receiver);
+      auto& rcv = receivers[port];
+
+      assert(rcv.size() > offset);
+      
+      rcv[offset].push_back(receiver);
     }
     
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
       assert(contains_key(port, drivers));
 
       auto& sigBus = drivers[port];
-      //drivers[port].signals[offset] = driver;
+
+      assert(sigBus.signals.size() > offset);
 
       sigBus.signals[offset] = driver;
     }
