@@ -45,7 +45,12 @@ namespace FlatCircuit {
     } else if (fromSelf(sel)) {
       // Every select off of self is driven by a port cells output port
       // FIX port overloading
-      return PORT_ID_OUT;
+
+      if (sel->getType()->getDir() == Type::DirKind::DK_In) {
+        return PORT_ID_OUT;
+      } else {
+        return PORT_ID_IN;
+      }
     }
 
     cout << "Unsupported port " << fstPort << " in sel " << sel->toString() << endl;
