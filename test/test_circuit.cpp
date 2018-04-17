@@ -300,9 +300,20 @@ namespace FlatCircuit {
     const Cell& clkPort = def.getPortCell("clk");
 
     REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
+
     REQUIRE(clkPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_INPUT);
 
+    REQUIRE(clkPort.hasPort(PORT_ID_OUT));
+
+    const Cell& resPort = def.getPortCell("out");
+    REQUIRE(resPort.getCellType() == CELL_TYPE_PORT);
+    REQUIRE(resPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_OUTPUT);
+    REQUIRE(resPort.hasPort(PORT_ID_IN));
+
+    // Check connections
+
     REQUIRE(clkPort.getPortReceivers(PORT_ID_OUT).size() > 0);
+
     
     deleteContext(c);
   }

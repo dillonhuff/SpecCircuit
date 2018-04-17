@@ -259,6 +259,10 @@ namespace FlatCircuit {
     int getPortType(const PortId port) const {
       return portWidths.at(port).type;
     }
+
+    bool hasPort(const PortId port) const {
+      return contains_key(port, portWidths);
+    }
     
     CellType getCellType() const {
       return cellType;
