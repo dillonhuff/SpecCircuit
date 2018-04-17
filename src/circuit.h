@@ -21,6 +21,24 @@ namespace FlatCircuit {
   typedef uint64_t CellType;
 
 #define CELL_TYPE_PORT 0
+#define CELL_TYPE_PASSTHROUGH 1
+#define CELL_TYPE_OR 2
+#define CELL_TYPE_AND 3
+#define CELL_TYPE_XOR 4
+#define CELL_TYPE_NOT 5
+#define CELL_TYPE_ORR 5
+#define CELL_TYPE_ANDR 6
+#define CELL_TYPE_XORR 7
+#define CELL_TYPE_ADD 8
+#define CELL_TYPE_SUB 9
+#define CELL_TYPE_GT 10
+#define CELL_TYPE_LT 11
+#define CELL_TYPE_EQ 12
+#define CELL_TYPE_NEQ 13
+#define CELL_TYPE_REG 14
+#define CELL_TYPE_REG_ARST 15
+#define CELL_TYPE_MUX 16
+#define CELL_TYPE_CONST 17
 
   typedef uint64_t CellId;
   typedef uint64_t PortId;

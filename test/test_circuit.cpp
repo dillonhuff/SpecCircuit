@@ -13,8 +13,26 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
-  CellType primitiveForMod(const Env& e, CoreIR::Module* const mod) {
-    return 0;
+  CellType primitiveForMod(const Env& e, CoreIR::Instance* const inst) {
+    string name = getQualifiedOpName(*inst);
+    if (name == "coreir.wrap") {
+      return CELL_TYPE_PASSTHROUGH;
+    } else if (name == "coreir.or") {
+      return CELL_TYPE_OR;
+    } else if (name == "coreir.orr") {
+      return CELL_TYPE_ORR;
+    } else if (name == "coreir.eq") {
+      return CELL_TYPE_EQ;
+    } else if (name == "coreir.mux") {
+      return CELL_TYPE_MUX;
+    } else if (name == "coreir.reg_arst") {
+      return CELL_TYPE_REG_ARST;
+    } else if (name == "coreir.const" || name == "corebit.const") {
+      return CELL_TYPE_CONST;
+    } else {
+      cout << "Error: Unsupported module type = " << name << endl;
+    }
+    assert(false);
   }
 
   Env convertFromCoreIR(CoreIR::Context* const c,
@@ -64,7 +82,7 @@ namespace FlatCircuit {
       // Only handle primitives for now
       assert(!instMod->hasDef());
 
-      CellType instType = primitiveForMod(e, instMod);
+      CellType instType = primitiveForMod(e, inst);
       // TODO: Actually fill in parameters
       map<Parameter, BitVector> params;
 
