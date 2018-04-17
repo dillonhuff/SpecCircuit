@@ -85,6 +85,9 @@ namespace FlatCircuit {
   class CellDefinition {
     std::map<CellId, Cell> cells;
     std::map<std::string, PortId> portNames;
+    std::map<std::string, Cell> cellNames;
+
+    CellId next;
 
     // How to represent connections? Map from ports to drivers? Map
     // from PortIds to receivers as well?
@@ -95,10 +98,24 @@ namespace FlatCircuit {
 
   public:
 
+    CellDefinition() : next(0) {}
+
+    CellId addCell(const std::string& name, const CellType cell, const std::map<Parameter, BitVector>& params) {
+      auto id = next;
+      next++;
+
+      cells[id] = Cell(cell, params);
+      return id;
+    }
+
     void setDriver(const SignalBit receiver,
                    const SignalBit driver) {
       cells[receiver.cell].setDriver(receiver.port, receiver.offset, driver);
       cells[driver.cell].addReceiver(driver.port, driver.offset, receiver);
+    }
+
+    int numCells() const {
+      return cells.size();
     }
   };
 
@@ -153,6 +170,14 @@ namespace FlatCircuit {
       nextType++;
 
       return tp;
+    }
+
+    CellDefinition& getDef(const CellType tp) {
+      return cellDefs.at(tp);
+    }
+    
+    CellDefinition& getDef(const std::string& cellName) {
+      return cellDefs.at(cellTypeNames.at(cellName));
     }
 
     const std::map<CellType, CellDefinition>& getCellDefs() const {
