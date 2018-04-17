@@ -13,6 +13,24 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  int getBitOffset(CoreIR::Select* const sel) {
+    Type& tp = *(sel->getType());
+
+    if (isa<NamedType>(&tp)) {
+      assert(cast<NamedType>(&tp)->getSize() == 1);
+
+      return 0;
+    }
+
+    assert(isBitType(tp));
+
+    if (isNumber(sel->getSelStr())) {
+      return std::stoi(sel->getSelStr());
+    }
+
+    return 0;
+  }
+
   // Note: Like everything else in this conversion code this function assumes
   // that the select has type bit or array[bit]
   PortId getPortId(CoreIR::Select* const sel) {
@@ -109,13 +127,13 @@ namespace FlatCircuit {
 
       int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
 
-      cout << "Creating reg_arst" << endl;
+      //cout << "Creating reg_arst" << endl;
       bool rstPos = inst->getModArgs().at("arst_posedge")->get<bool>();
       bool clkPos = inst->getModArgs().at("clk_posedge")->get<bool>();
       BitVector init =
         inst->getModArgs().at("init")->get<BitVector>();      
 
-      cout << "Done creating reg_arst params" << endl;
+      //cout << "Done creating reg_arst params" << endl;
       return {{PARAM_WIDTH, BitVector(32, width)},
           {PARAM_INIT_VALUE, init}};
 
@@ -181,7 +199,7 @@ namespace FlatCircuit {
     for (auto instR : top->getDef()->getInstances()) {
       Instance* inst = instR.second;
 
-      cout << "Adding instance " << inst->toString() << endl;
+      //cout << "Adding instance " << inst->toString() << endl;
       
       Module* instMod = inst->getModuleRef();
 
@@ -193,10 +211,10 @@ namespace FlatCircuit {
 
       CellId cid = cDef.addCell(inst->toString(), instType, params);
       elemsToCells.insert({inst, cid});
-      cout << "Added instance " << inst->toString() << endl;
+      //cout << "Added instance " << inst->toString() << endl;
     }
 
-    cout << "Added all instances" << endl;
+    //cout << "Added all instances" << endl;
 
     for (auto conn : top->getDef()->getConnections()) {
       Wireable* fst = conn.first;
@@ -248,15 +266,15 @@ namespace FlatCircuit {
       // Port on receiver receiving connection
       PortId receiverPort = getPortId(receiverSel);
 
-      cout << "Adding drivers for" << endl;
-      cout << "\tDriver           : " << driverSel->toString() << endl;
-      cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
+      // cout << "Adding drivers for" << endl;
+      // cout << "\tDriver           : " << driverSel->toString() << endl;
+      // cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
 
-      cout << "\tDriver Cell      : " << driverId << endl;
-      cout << "\tReceiver Cell    : " << receiverId << endl;
+      // cout << "\tDriver Cell      : " << driverId << endl;
+      // cout << "\tReceiver Cell    : " << receiverId << endl;
 
-      cout << "\tDriver Port      : " << driverPort << endl;
-      cout << "\tReceiver Port    : " << receiverPort << endl;
+      // cout << "\tDriver Port      : " << driverPort << endl;
+      // cout << "\tReceiver Port    : " << receiverPort << endl;
 
       // NOTE: Assuming named types are clk or reset
       bool isBitConn = isBitType(*(driverSel->getType())) || isa<NamedType>(driverSel->getType());
@@ -264,8 +282,8 @@ namespace FlatCircuit {
         assert(isBitType(*(receiverSel->getType())) || isa<NamedType>(receiverSel->getType()));
 
         // TODO: Compute real connection offsets
-        int driverOffset = 0;
-        int receiverOffset = 0;
+        int driverOffset = getBitOffset(driverSel);
+        int receiverOffset = getBitOffset(receiverSel);
 
         SignalBit driverBit{driverId, driverPort, driverOffset};
         SignalBit receiverBit{receiverId, receiverPort, receiverOffset};
@@ -274,11 +292,11 @@ namespace FlatCircuit {
 
         receiver.setDriver(receiverPort, receiverOffset, driverBit);
 
-        cout << "Set driver on receiver port" << endl;
+        //cout << "Set driver on receiver port" << endl;
 
         driver.addReceiver(driverPort, driverOffset, receiverBit);
 
-        cout << "Done adding drivers" << endl;
+        //cout << "Done adding drivers" << endl;
       } else {
         assert(isBitArray(*(driverSel->getType())));
         assert(isBitArray(*(receiverSel->getType())));
@@ -294,10 +312,10 @@ namespace FlatCircuit {
           
         }
 
-        cout << "After connecting" << endl;
-        for (auto sigBit : receiver.getDrivers(receiverPort).signals) {
-          cout << "\t" << toString(sigBit) << endl;
-        }
+        // cout << "After connecting" << endl;
+        // for (auto sigBit : receiver.getDrivers(receiverPort).signals) {
+        //   cout << "\t" << toString(sigBit) << endl;
+        // }
         
       }
     }

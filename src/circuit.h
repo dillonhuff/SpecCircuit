@@ -139,7 +139,7 @@ namespace FlatCircuit {
     Cell(const CellType cellType_,
          const std::map<Parameter, BitVector> & parameters_) :
       parameters(parameters_), cellType(cellType_) {
-      std::cout << "Creating cell type " << cellType << std::endl;
+      //std::cout << "Creating cell type " << cellType << std::endl;
 
       // NOTE: Need to include input port type and output port type
       if (cellType == CELL_TYPE_PORT) {
@@ -250,7 +250,7 @@ namespace FlatCircuit {
         assert(false);
       }
 
-      std::cout << "Done creating cell" << cellType << std::endl;
+      //std::cout << "Done creating cell" << cellType << std::endl;
     }
 
     const SignalBus& getDrivers(const PortId port) const {
