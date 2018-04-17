@@ -9,6 +9,7 @@ using namespace dbhc;
 namespace FlatCircuit {
 
   enum Parameter {
+    PARAM_WIDTH,
     PARAM_IN0_WIDTH,
     PARAM_IN1_WIDTH,
     PARAM_OUT_WIDTH,
@@ -26,19 +27,19 @@ namespace FlatCircuit {
 #define CELL_TYPE_AND 3
 #define CELL_TYPE_XOR 4
 #define CELL_TYPE_NOT 5
-#define CELL_TYPE_ORR 5
-#define CELL_TYPE_ANDR 6
-#define CELL_TYPE_XORR 7
-#define CELL_TYPE_ADD 8
-#define CELL_TYPE_SUB 9
-#define CELL_TYPE_GT 10
-#define CELL_TYPE_LT 11
-#define CELL_TYPE_EQ 12
-#define CELL_TYPE_NEQ 13
-#define CELL_TYPE_REG 14
-#define CELL_TYPE_REG_ARST 15
-#define CELL_TYPE_MUX 16
-#define CELL_TYPE_CONST 17
+#define CELL_TYPE_ORR 6
+#define CELL_TYPE_ANDR 7
+#define CELL_TYPE_XORR 8
+#define CELL_TYPE_ADD 9
+#define CELL_TYPE_SUB 10
+#define CELL_TYPE_GT 11
+#define CELL_TYPE_LT 12
+#define CELL_TYPE_EQ 13
+#define CELL_TYPE_NEQ 14
+#define CELL_TYPE_REG 15
+#define CELL_TYPE_REG_ARST 16
+#define CELL_TYPE_MUX 17
+#define CELL_TYPE_CONST 18
 
   typedef uint64_t CellId;
 
@@ -49,7 +50,36 @@ namespace FlatCircuit {
 #define PORT_ID_IN1 2
 #define PORT_ID_OUT 3
 #define PORT_ID_SEL 4
+#define PORT_ID_CLK 5
+#define PORT_ID_ARST 6
 
+  static inline bool isUnop(const CellType tp) {
+    std::vector<CellType> unops{CELL_TYPE_PORT,
+        CELL_TYPE_PASSTHROUGH,
+        CELL_TYPE_NOT,
+        CELL_TYPE_ORR,
+        CELL_TYPE_ANDR,
+        CELL_TYPE_XORR};
+
+    return elem(tp, unops);
+  }
+
+  static inline bool isBinop(const CellType tp) {
+    std::vector<CellType> binops{
+      CELL_TYPE_OR,
+        CELL_TYPE_AND,
+        CELL_TYPE_XOR,
+        CELL_TYPE_ADD,
+        CELL_TYPE_SUB,
+        CELL_TYPE_GT,
+        CELL_TYPE_LT,
+        CELL_TYPE_EQ,
+        CELL_TYPE_NEQ
+    };
+
+    return elem(tp, binops);
+  }
+  
   enum PortType {
     PORT_TYPE_IN,
     PORT_TYPE_OUT
@@ -87,12 +117,84 @@ namespace FlatCircuit {
     Cell(const CellType cellType_,
          const std::map<Parameter, BitVector> & parameters_) :
       parameters(parameters_), cellType(cellType_) {
+      std::cout << "Creating cell type " << cellType << std::endl;
       if (cellType == CELL_TYPE_PORT) {
         BitVector width = parameters.at(PARAM_OUT_WIDTH);
         assert(width.bitLength() == 32);
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         receivers.insert({PORT_ID_OUT, {}});
+      } else if (isBinop(cellType)) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+
+        portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN0, {}});
+
+        portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN1, {}});
+        
+      } else if (cellType == CELL_TYPE_REG_ARST) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+
+        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, {}});
+
+        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_CLK, {}});
+
+        portWidths.insert({PORT_ID_ARST, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_ARST, {}});
+        
+      } else if (cellType == CELL_TYPE_MUX) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+
+        portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN0, {}});
+
+        portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN1, {}});
+
+        portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_SEL, {}});
+        
+      } else if (isUnop(cellType)) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+
+        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, {}});
+
+      } else if (cellType == CELL_TYPE_CONST) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        assert(width.bitLength() == 32);
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        receivers.insert({PORT_ID_OUT, {}});
+
+      } else {
+        std::cout << "No processing rule for cell type " << cellType << std::endl;
+        assert(false);
       }
+
+      std::cout << "Done creating cell" << cellType << std::endl;
     }
 
     const std::vector<std::vector<SignalBit> >&
@@ -119,11 +221,18 @@ namespace FlatCircuit {
     }
 
     void addReceiver(const PortId port, const int offset, const SignalBit receiver) {
+      assert(contains_key(port, receivers));
+
       receivers[port][offset].push_back(receiver);
     }
     
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
-      drivers[port].signals[offset] = driver;
+      assert(contains_key(port, drivers));
+
+      auto& sigBus = drivers[port];
+      //drivers[port].signals[offset] = driver;
+
+      sigBus.signals[offset] = driver;
     }
   };
 
@@ -136,6 +245,7 @@ namespace FlatCircuit {
 
     std::map<std::string, PortId> portNames;
     std::map<std::string, CellId> cellNames;
+    std::map<CellId, std::string> cellIdsToNames;
 
     CellId next;
     PortId nextPort;
@@ -173,14 +283,27 @@ namespace FlatCircuit {
       return pid;
     }
 
-    const Cell& getPortCell(const std::string& name) const {
+    Cell& getCellRef(const CellId c) {
+      return cells.at(c);
+    }
+
+    std::string cellName(const CellId id) const {
+      return cellIdsToNames.at(id);
+    }
+
+    CellId getPortCellId(const std::string& name) const {
       assert(contains_key(name, portNames));
       auto pid = portNames.at(name);
 
       assert(contains_key(pid, portsToCells));
 
       auto cellId = portsToCells.at(pid);
-      return cells.at(cellId);
+
+      return cellId;
+    }
+
+    const Cell& getPortCell(const std::string& name) const {
+      return cells.at(getPortCellId(name));
     }
 
     CellId addCell(const std::string& name, const CellType cell, const std::map<Parameter, BitVector>& params) {
@@ -192,6 +315,7 @@ namespace FlatCircuit {
       assert(!contains_key(name, cellNames));
 
       cellNames[name] = id;
+      cellIdsToNames[id] = name;
       return id;
     }
 

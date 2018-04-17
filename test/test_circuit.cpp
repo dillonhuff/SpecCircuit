@@ -13,6 +13,41 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  // Note: Like everything else in this conversion code this function assumes
+  // that the select has type bit or array[bit]
+  PortId getPortId(CoreIR::Select* const sel) {
+    string fstPort = sel->getSelStr();
+
+    if (isNumber(fstPort)) {
+      Wireable* pr = cast<Select>(sel)->getParent();
+      assert(isa<Select>(pr));
+      fstPort = cast<Select>(pr)->getSelStr();
+
+      if (isNumber(fstPort)) {
+        cout << "Select failure: " << sel->toString() << ", fstPort = " << fstPort << endl;
+        assert(false);
+      }
+      assert(!isNumber(fstPort));
+    }
+
+    if (fstPort == "in") {
+      return PORT_ID_IN;
+    } else if (fstPort == "out") {
+      return PORT_ID_OUT;
+    } else if (fstPort == "sel") {
+      return PORT_ID_SEL;
+    } else if (fstPort == "clk") {
+      return PORT_ID_CLK;
+    } else if (fstPort == "in0") {
+      return PORT_ID_IN0;
+    } else if (fstPort == "in1") {
+      return PORT_ID_IN1;
+    }
+
+    cout << "Unsupported port " << fstPort << " in sel " << sel->toString() << endl;
+    assert(false);
+  }
+
   CellType primitiveForMod(const Env& e, CoreIR::Instance* const inst) {
     string name = getQualifiedOpName(*inst);
     if (name == "coreir.wrap") {
@@ -39,25 +74,50 @@ namespace FlatCircuit {
   paramsForMod(const Env& e, CoreIR::Instance* const inst) {
     string name = getQualifiedOpName(*inst);
     if (name == "coreir.wrap") {
-      return {};
+      // TODO: Fix width issue
+      //int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      return {{PARAM_WIDTH, BitVector(32, 1)}};
     } else if (name == "coreir.or") {
-      return {};
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      return {{PARAM_WIDTH, BitVector(32, width)}};
     } else if (name == "coreir.orr") {
-      return {};
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      return {{PARAM_WIDTH, BitVector(32, width)}};
     } else if (name == "coreir.eq") {
-      return {};
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      return {{PARAM_WIDTH, BitVector(32, width)}};
     } else if (name == "coreir.mux") {
-      return {};
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      return {{PARAM_WIDTH, BitVector(32, width)}};
     } else if (name == "coreir.reg_arst") {
-      return {};
+
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+
+      cout << "Creating reg_arst" << endl;
+      bool rstPos = inst->getModArgs().at("arst_posedge")->get<bool>();
+      bool clkPos = inst->getModArgs().at("clk_posedge")->get<bool>();
+      BitVector init =
+        inst->getModArgs().at("init")->get<BitVector>();      
+
+      cout << "Done creating reg_arst params" << endl;
+      return {{PARAM_WIDTH, BitVector(32, width)},
+          {PARAM_INIT_VALUE, init}};
+
     } else if (name == "coreir.const" || name == "corebit.const") {
-      return {};
+
+      int width = 1;
+      if (name == "coreir.const") {
+        width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      }
+
+      return {{PARAM_WIDTH, BitVector(32, width)}};
+
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
     }
     assert(false);
   }
-  
+
   Env convertFromCoreIR(CoreIR::Context* const c,
                          CoreIR::Module* const top) {
     Env e;
@@ -69,6 +129,9 @@ namespace FlatCircuit {
     CellType topType = e.addCellType(top->getName());
     auto& cDef = e.getDef(topType);
 
+    //map<Instance*, CellId> instsToCells;
+    map<Wireable*, CellId> elemsToCells;
+    
     for (auto r : top->getType()->getRecord()) {
       auto field = r.first;
       auto tp = r.second;
@@ -94,12 +157,16 @@ namespace FlatCircuit {
       }
 
       cDef.addPort(field, portWidth, portTp);
+      CellId c = cDef.getPortCellId(field);
+      elemsToCells.insert({top->getDef()->sel("self")->sel(field), c});
     }
 
-    map<Instance*, CellId> instsToCells;
 
     for (auto instR : top->getDef()->getInstances()) {
       Instance* inst = instR.second;
+
+      cout << "Adding instance " << inst->toString() << endl;
+      
       Module* instMod = inst->getModuleRef();
 
       // Only handle primitives for now
@@ -109,6 +176,79 @@ namespace FlatCircuit {
       map<Parameter, BitVector> params = paramsForMod(e, inst);
 
       CellId cid = cDef.addCell(inst->toString(), instType, params);
+      elemsToCells.insert({inst, cid});
+      cout << "Added instance " << inst->toString() << endl;
+    }
+
+    cout << "Added all instances" << endl;
+
+    for (auto conn : top->getDef()->getConnections()) {
+      Wireable* fst = conn.first;
+      Wireable* snd = conn.second;
+
+      assert(isa<Select>(fst));
+      assert(isa<Select>(snd));
+
+      Wireable* fstSrc = extractSource(cast<Select>(fst));
+      Wireable* sndSrc = extractSource(cast<Select>(snd));
+
+      assert(dbhc::contains_key(fstSrc, elemsToCells));
+      assert(dbhc::contains_key(sndSrc, elemsToCells));
+
+      Cell& fstCell = cDef.getCellRef(elemsToCells.at(fstSrc));
+      Cell& sndCell = cDef.getCellRef(elemsToCells.at(sndSrc));
+
+      Cell driver;
+      Cell receiver;
+
+      CellId driverId;
+      CellId receiverId;
+
+      Select* driverSel;
+      Select* receiverSel;
+
+      if (fst->getType()->getDir() == Type::DirKind::DK_Out) {
+        driver = fstCell;
+        receiver = sndCell;
+
+        driverSel = cast<Select>(fst);
+        receiverSel = cast<Select>(snd);
+        
+        driverId = elemsToCells.at(fstSrc);
+        receiverId = elemsToCells.at(sndSrc);
+      } else {
+        driver = sndCell;
+        receiver = fstCell;
+
+        driverSel = cast<Select>(snd);
+        receiverSel = cast<Select>(fst);
+        
+        driverId = elemsToCells.at(sndSrc);
+        receiverId = elemsToCells.at(fstSrc);
+      }
+
+      // Cases:
+      // Bit by bit connection
+      //   - Each bit could be: bit select off array or bit output
+      // Array by array connection
+
+
+      // Port on driver driving connectoin
+      PortId driverPort = getPortId(driverSel);
+
+      // Port on receiver receiving connection
+      PortId receiverPort = getPortId(receiverSel);
+
+      // TODO: Compute real connection offsets
+      SignalBit driverBit{driverId, driverPort, 0};
+      SignalBit receiverBit{receiverId, receiverPort, 0};
+
+      cout << "Adding drivers for cells " << cDef.cellName(elemsToCells.at(fstSrc)) << " and " << cDef.cellName(elemsToCells.at(sndSrc)) << endl;
+
+      receiver.setDriver(receiverPort, 0, driverBit);
+      driver.addReceiver(driverPort, 0, receiverBit);
+
+      cout << "Done adding drivers" << endl;
     }
     
     return e;
