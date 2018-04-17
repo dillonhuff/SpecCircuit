@@ -145,6 +145,16 @@ namespace FlatCircuit {
     // Save space for 100 primitive operations
     Env() : nextType(100) {}
 
+    CellType addCellType(const std::string& name) {
+      auto tp = nextType;
+      cellDefs[tp] = {};
+      cellTypeNames[name] = tp;
+
+      nextType++;
+
+      return tp;
+    }
+
     const std::map<CellType, CellDefinition>& getCellDefs() const {
       return cellDefs;
     }
