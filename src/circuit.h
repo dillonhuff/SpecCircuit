@@ -2,6 +2,10 @@
 
 #include "coreir.h"
 
+#include "algorithm.h"
+
+using namespace dbhc;
+
 namespace FlatCircuit {
 
   enum Parameter {
@@ -15,6 +19,9 @@ namespace FlatCircuit {
   };
 
   typedef uint64_t CellType;
+
+#define CELL_TYPE_PORT 0
+
   typedef uint64_t CellId;
   typedef uint64_t PortId;
 
@@ -84,10 +91,14 @@ namespace FlatCircuit {
 
   class CellDefinition {
     std::map<CellId, Cell> cells;
+    std::map<PortId, Port> ports;
+    std::map<PortId, CellId> cellsToPorts;
+
     std::map<std::string, PortId> portNames;
-    std::map<std::string, Cell> cellNames;
+    std::map<std::string, CellId> cellNames;
 
     CellId next;
+    PortId nextPort;
 
     // How to represent connections? Map from ports to drivers? Map
     // from PortIds to receivers as well?
@@ -98,13 +109,38 @@ namespace FlatCircuit {
 
   public:
 
-    CellDefinition() : next(0) {}
+    CellDefinition() : next(0), nextPort(0) {}
+
+    std::vector<std::string> getPortNames() const {
+      std::vector<std::string> names;
+      for (auto p : portNames) {
+        names.push_back(p.first);
+      }
+      return names;
+    }
+
+    PortId addPort(const std::string& name, const int portWidth, const PortType tp) {
+      PortId pid = nextPort;
+
+      // TODO: Add cell ports
+      ports[pid] = Port{portWidth, tp};
+      portNames[name] = pid;
+
+      CellType cellTp = CELL_TYPE_PORT;
+      addCell(name + "_cell", cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}});
+      nextPort++;
+      return pid;
+    }
 
     CellId addCell(const std::string& name, const CellType cell, const std::map<Parameter, BitVector>& params) {
       auto id = next;
       next++;
 
       cells[id] = Cell(cell, params);
+
+      assert(!contains_key(name, cellNames));
+
+      cellNames[name] = id;
       return id;
     }
 
