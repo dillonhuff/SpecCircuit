@@ -191,80 +191,80 @@ namespace FlatCircuit {
 
     cout << "Added all instances" << endl;
 
-    for (auto conn : top->getDef()->getConnections()) {
-      Wireable* fst = conn.first;
-      Wireable* snd = conn.second;
+    // for (auto conn : top->getDef()->getConnections()) {
+    //   Wireable* fst = conn.first;
+    //   Wireable* snd = conn.second;
 
-      assert(isa<Select>(fst));
-      assert(isa<Select>(snd));
+    //   assert(isa<Select>(fst));
+    //   assert(isa<Select>(snd));
 
-      Wireable* fstSrc = extractSource(cast<Select>(fst));
-      Wireable* sndSrc = extractSource(cast<Select>(snd));
+    //   Wireable* fstSrc = extractSource(cast<Select>(fst));
+    //   Wireable* sndSrc = extractSource(cast<Select>(snd));
 
-      assert(dbhc::contains_key(fstSrc, elemsToCells));
-      assert(dbhc::contains_key(sndSrc, elemsToCells));
+    //   assert(dbhc::contains_key(fstSrc, elemsToCells));
+    //   assert(dbhc::contains_key(sndSrc, elemsToCells));
 
-      Cell& fstCell = cDef.getCellRef(elemsToCells.at(fstSrc));
-      Cell& sndCell = cDef.getCellRef(elemsToCells.at(sndSrc));
+    //   Cell& fstCell = cDef.getCellRef(elemsToCells.at(fstSrc));
+    //   Cell& sndCell = cDef.getCellRef(elemsToCells.at(sndSrc));
 
-      Cell driver;
-      Cell receiver;
+    //   Cell driver;
+    //   Cell receiver;
 
-      CellId driverId;
-      CellId receiverId;
+    //   CellId driverId;
+    //   CellId receiverId;
 
-      Select* driverSel;
-      Select* receiverSel;
+    //   Select* driverSel;
+    //   Select* receiverSel;
 
-      if (fst->getType()->getDir() == Type::DirKind::DK_Out) {
-        driver = fstCell;
-        receiver = sndCell;
+    //   if (fst->getType()->getDir() == Type::DirKind::DK_Out) {
+    //     driver = fstCell;
+    //     receiver = sndCell;
 
-        driverSel = cast<Select>(fst);
-        receiverSel = cast<Select>(snd);
+    //     driverSel = cast<Select>(fst);
+    //     receiverSel = cast<Select>(snd);
         
-        driverId = elemsToCells.at(fstSrc);
-        receiverId = elemsToCells.at(sndSrc);
-      } else {
-        driver = sndCell;
-        receiver = fstCell;
+    //     driverId = elemsToCells.at(fstSrc);
+    //     receiverId = elemsToCells.at(sndSrc);
+    //   } else {
+    //     driver = sndCell;
+    //     receiver = fstCell;
 
-        driverSel = cast<Select>(snd);
-        receiverSel = cast<Select>(fst);
+    //     driverSel = cast<Select>(snd);
+    //     receiverSel = cast<Select>(fst);
         
-        driverId = elemsToCells.at(sndSrc);
-        receiverId = elemsToCells.at(fstSrc);
-      }
+    //     driverId = elemsToCells.at(sndSrc);
+    //     receiverId = elemsToCells.at(fstSrc);
+    //   }
 
-      // Cases:
-      // Bit by bit connection
-      //   - Each bit could be: bit select off array or bit output
-      // Array by array connection
+    //   // Cases:
+    //   // Bit by bit connection
+    //   //   - Each bit could be: bit select off array or bit output
+    //   // Array by array connection
 
-      // Port on driver driving connectoin
-      PortId driverPort = getPortId(driverSel);
+    //   // Port on driver driving connectoin
+    //   PortId driverPort = getPortId(driverSel);
 
-      // Port on receiver receiving connection
-      PortId receiverPort = getPortId(receiverSel);
+    //   // Port on receiver receiving connection
+    //   PortId receiverPort = getPortId(receiverSel);
 
-      // TODO: Compute real connection offsets
-      SignalBit driverBit{driverId, driverPort, 0};
-      SignalBit receiverBit{receiverId, receiverPort, 0};
+    //   // TODO: Compute real connection offsets
+    //   SignalBit driverBit{driverId, driverPort, 0};
+    //   SignalBit receiverBit{receiverId, receiverPort, 0};
 
-      cout << "Adding drivers for" << endl;
-      cout << "\tDriver           : " << driverSel->toString() << endl;
-      cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
-      cout << "\tDriver Port      : " << driverPort << endl;
-      cout << "\tReceiver Port    : " << receiverPort << endl;
+    //   cout << "Adding drivers for" << endl;
+    //   cout << "\tDriver           : " << driverSel->toString() << endl;
+    //   cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
+    //   cout << "\tDriver Port      : " << driverPort << endl;
+    //   cout << "\tReceiver Port    : " << receiverPort << endl;
 
-      receiver.setDriver(receiverPort, 0, driverBit);
+    //   receiver.setDriver(receiverPort, 0, driverBit);
 
-      cout << "Set driver on receiver port" << endl;
+    //   cout << "Set driver on receiver port" << endl;
 
-      driver.addReceiver(driverPort, 0, receiverBit);
+    //   driver.addReceiver(driverPort, 0, receiverBit);
 
-      cout << "Done adding drivers" << endl;
-    }
+    //   cout << "Done adding drivers" << endl;
+    // }
     
     return e;
   }
@@ -300,6 +300,7 @@ namespace FlatCircuit {
     const Cell& clkPort = def.getPortCell("clk");
 
     REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
+    REQUIRE(clkPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_INPUT);
 
     REQUIRE(clkPort.getPortReceivers(PORT_ID_OUT).size() > 0);
     

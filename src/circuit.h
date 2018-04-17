@@ -54,8 +54,8 @@ namespace FlatCircuit {
 #define PORT_ID_CLK 5
 #define PORT_ID_ARST 6
 
-#define PORT_TYPE_INPUT 0
-#define PORT_TYPE_OUTPUT 1
+#define PORT_CELL_FOR_INPUT 0
+#define PORT_CELL_FOR_OUTPUT 1
 
   static inline bool isUnop(const CellType tp) {
     std::vector<CellType> unops{CELL_TYPE_PORT,
@@ -139,10 +139,10 @@ namespace FlatCircuit {
         BitVector ptp = parameters.at(PARAM_PORT_TYPE);
         int ptpInt = ptp.to_type<int>();
 
-        assert((ptpInt == PORT_TYPE_INPUT) ||
-               (ptpInt == PORT_TYPE_OUTPUT));
+        assert((ptpInt == PORT_CELL_FOR_INPUT) ||
+               (ptpInt == PORT_CELL_FOR_OUTPUT));
 
-        if (ptpInt == PORT_TYPE_INPUT) {
+        if (ptpInt == PORT_CELL_FOR_INPUT) {
 
           portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
           
@@ -150,7 +150,7 @@ namespace FlatCircuit {
           receivers.insert({PORT_ID_OUT, bus});
           
         } else {
-          assert(ptpInt == PORT_TYPE_OUTPUT);
+          assert(ptpInt == PORT_CELL_FOR_OUTPUT);
 
           portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
           drivers.insert({PORT_ID_IN, SignalBus(wd)});
@@ -343,9 +343,13 @@ namespace FlatCircuit {
       CellId cid;
 
       if (tp == PORT_TYPE_IN) {
-        cid = addCell(name, cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}, {PARAM_PORT_TYPE, BitVector(2, PORT_TYPE_INPUT)}});
+
+        cid = addCell(name, cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}, {PARAM_PORT_TYPE, BitVector(2, PORT_CELL_FOR_INPUT)}});
+
       } else {
-        cid = addCell(name, cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}, {PARAM_PORT_TYPE, BitVector(2, PORT_TYPE_OUTPUT)}});
+
+        cid = addCell(name, cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}, {PARAM_PORT_TYPE, BitVector(2, PORT_CELL_FOR_OUTPUT)}});
+
       }
       portsToCells[pid] = cid;
       nextPort++;
