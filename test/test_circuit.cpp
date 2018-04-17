@@ -214,9 +214,6 @@ namespace FlatCircuit {
       Cell& fstCell = cDef.getCellRef(elemsToCells.at(fstSrc));
       Cell& sndCell = cDef.getCellRef(elemsToCells.at(sndSrc));
 
-      Cell driver;
-      Cell receiver;
-
       CellId driverId;
       CellId receiverId;
 
@@ -224,24 +221,21 @@ namespace FlatCircuit {
       Select* receiverSel;
 
       if (fst->getType()->getDir() == Type::DirKind::DK_Out) {
-        driver = fstCell;
-        receiver = sndCell;
-
         driverSel = cast<Select>(fst);
         receiverSel = cast<Select>(snd);
         
         driverId = elemsToCells.at(fstSrc);
         receiverId = elemsToCells.at(sndSrc);
       } else {
-        driver = sndCell;
-        receiver = fstCell;
-
         driverSel = cast<Select>(snd);
         receiverSel = cast<Select>(fst);
         
         driverId = elemsToCells.at(sndSrc);
         receiverId = elemsToCells.at(fstSrc);
       }
+
+      Cell& driver = cDef.getCellRef(driverId);
+      Cell& receiver = cDef.getCellRef(receiverId);
 
       // Cases:
       // Bit by bit connection
@@ -254,23 +248,58 @@ namespace FlatCircuit {
       // Port on receiver receiving connection
       PortId receiverPort = getPortId(receiverSel);
 
-      // TODO: Compute real connection offsets
-      SignalBit driverBit{driverId, driverPort, 0};
-      SignalBit receiverBit{receiverId, receiverPort, 0};
-
       cout << "Adding drivers for" << endl;
       cout << "\tDriver           : " << driverSel->toString() << endl;
       cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
+
+      cout << "\tDriver Cell      : " << driverId << endl;
+      cout << "\tReceiver Cell    : " << receiverId << endl;
+
       cout << "\tDriver Port      : " << driverPort << endl;
       cout << "\tReceiver Port    : " << receiverPort << endl;
 
-      receiver.setDriver(receiverPort, 0, driverBit);
+      // NOTE: Assuming named types are clk or reset
+      bool isBitConn = isBitType(*(driverSel->getType())) || isa<NamedType>(driverSel->getType());
+      if (isBitConn) {
+        assert(isBitType(*(receiverSel->getType())) || isa<NamedType>(receiverSel->getType()));
 
-      cout << "Set driver on receiver port" << endl;
+        // TODO: Compute real connection offsets
+        int driverOffset = 0;
+        int receiverOffset = 0;
 
-      driver.addReceiver(driverPort, 0, receiverBit);
+        SignalBit driverBit{driverId, driverPort, driverOffset};
+        SignalBit receiverBit{receiverId, receiverPort, receiverOffset};
 
-      cout << "Done adding drivers" << endl;
+        // Connection types: Bit to bit, or array of bits to array of bits
+
+        receiver.setDriver(receiverPort, receiverOffset, driverBit);
+
+        cout << "Set driver on receiver port" << endl;
+
+        driver.addReceiver(driverPort, driverOffset, receiverBit);
+
+        cout << "Done adding drivers" << endl;
+      } else {
+        assert(isBitArray(*(driverSel->getType())));
+        assert(isBitArray(*(receiverSel->getType())));
+
+        int width = driver.getPortWidth(driverPort);
+        for (int i = 0; i < width; i++) {
+
+          SignalBit driverBit{driverId, driverPort, i};
+          SignalBit receiverBit{receiverId, receiverPort, i};
+
+          receiver.setDriver(receiverPort, i, driverBit);
+          driver.addReceiver(driverPort, i, receiverBit);
+          
+        }
+
+        cout << "After connecting" << endl;
+        for (auto sigBit : receiver.getDrivers(receiverPort).signals) {
+          cout << "\t" << toString(sigBit) << endl;
+        }
+        
+      }
     }
     
     return e;
@@ -319,8 +348,23 @@ namespace FlatCircuit {
 
     // Check connections
 
-    REQUIRE(clkPort.getPortReceivers(PORT_ID_OUT).size() > 0);
+    bool allOutBitsDriven;
+    int outWidth = resPort.getPortWidth(PORT_ID_IN);
+    
+    REQUIRE(outWidth == 16);
 
+    const SignalBus& drivers = resPort.getDrivers(PORT_ID_IN);
+
+    for (auto sigBit : drivers.signals) {
+      cout << toString(sigBit) << endl;
+    }
+
+    assert(drivers.signals.size() == 16);
+    for (int i = 0; i < outWidth; i++) {
+
+      REQUIRE(notEmpty(drivers.signals[i]));
+
+    }
     
     deleteContext(c);
   }

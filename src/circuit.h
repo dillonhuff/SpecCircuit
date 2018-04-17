@@ -102,6 +102,18 @@ namespace FlatCircuit {
     int offset;
   };
 
+  static inline bool operator==(const SignalBit a, const SignalBit b) {
+    return (a.cell == b.cell) && (a.port == b.port) && (a.offset == b.offset);
+  }
+
+  static inline std::string toString(const SignalBit bit) {
+    return "( " + std::to_string(bit.cell) + ", " + std::to_string(bit.port) + ", " + std::to_string(bit.offset) + " )";
+  }
+
+  static inline bool notEmpty(const SignalBit bit) {
+    return !(bit.cell == 0);
+  }
+
   class SignalBus {
   public:
     std::vector<SignalBit> signals;
@@ -241,6 +253,10 @@ namespace FlatCircuit {
       std::cout << "Done creating cell" << cellType << std::endl;
     }
 
+    const SignalBus& getDrivers(const PortId port) const {
+      return drivers.at(port);
+    }
+
     const std::vector<std::vector<SignalBit> >&
     getPortReceivers(const PortId pid) const {
       assert(contains_key(pid, receivers));
@@ -256,7 +272,7 @@ namespace FlatCircuit {
       return portWidths.at(port).width;
     }
 
-    int getPortType(const PortId port) const {
+    PortType getPortType(const PortId port) const {
       return portWidths.at(port).type;
     }
 
@@ -299,6 +315,8 @@ namespace FlatCircuit {
       assert(sigBus.signals.size() > offset);
 
       sigBus.signals[offset] = driver;
+
+      assert(getDrivers(port).signals[offset] == driver);
     }
   };
 
@@ -325,7 +343,8 @@ namespace FlatCircuit {
 
   public:
 
-    CellDefinition() : next(0), nextPort(0) {}
+    // Cell 0 is reserved to indicated a non-existant cell
+    CellDefinition() : next(1), nextPort(0) {}
 
     std::vector<std::string> getPortNames() const {
       std::vector<std::string> names;
