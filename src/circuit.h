@@ -78,7 +78,7 @@ namespace FlatCircuit {
     Cell() {}
 
     Cell(const CellType cellType_,
-         const std::map<Parameter, BitVector> & parameters_) {}
+         const std::map<Parameter, BitVector> & parameters_) : parameters(parameters_), cellType(cellType_) {}
 
     BitVector getParameterValue(const Parameter val) const {
       return parameters.at(val);
@@ -110,7 +110,7 @@ namespace FlatCircuit {
   class CellDefinition {
     std::map<CellId, Cell> cells;
     std::map<PortId, Port> ports;
-    std::map<PortId, CellId> cellsToPorts;
+    std::map<PortId, CellId> portsToCells;
 
     std::map<std::string, PortId> portNames;
     std::map<std::string, CellId> cellNames;
@@ -145,9 +145,20 @@ namespace FlatCircuit {
       portNames[name] = pid;
 
       CellType cellTp = CELL_TYPE_PORT;
-      addCell(name + "_cell", cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}});
+      auto cid = addCell(name, cellTp, {{PARAM_OUT_WIDTH, BitVector(32, portWidth)}});
+      portsToCells[pid] = cid;
       nextPort++;
       return pid;
+    }
+
+    const Cell& getPortCell(const std::string& name) const {
+      assert(contains_key(name, portNames));
+      auto pid = portNames.at(name);
+
+      assert(contains_key(pid, portsToCells));
+
+      auto cellId = portsToCells.at(pid);
+      return cells.at(cellId);
     }
 
     CellId addCell(const std::string& name, const CellType cell, const std::map<Parameter, BitVector>& params) {

@@ -35,6 +35,29 @@ namespace FlatCircuit {
     assert(false);
   }
 
+  std::map<Parameter, BitVector>
+  paramsForMod(const Env& e, CoreIR::Instance* const inst) {
+    string name = getQualifiedOpName(*inst);
+    if (name == "coreir.wrap") {
+      return {};
+    } else if (name == "coreir.or") {
+      return {};
+    } else if (name == "coreir.orr") {
+      return {};
+    } else if (name == "coreir.eq") {
+      return {};
+    } else if (name == "coreir.mux") {
+      return {};
+    } else if (name == "coreir.reg_arst") {
+      return {};
+    } else if (name == "coreir.const" || name == "corebit.const") {
+      return {};
+    } else {
+      cout << "Error: Unsupported module type = " << name << endl;
+    }
+    assert(false);
+  }
+  
   Env convertFromCoreIR(CoreIR::Context* const c,
                          CoreIR::Module* const top) {
     Env e;
@@ -83,8 +106,7 @@ namespace FlatCircuit {
       assert(!instMod->hasDef());
 
       CellType instType = primitiveForMod(e, inst);
-      // TODO: Actually fill in parameters
-      map<Parameter, BitVector> params;
+      map<Parameter, BitVector> params = paramsForMod(e, inst);
 
       CellId cid = cDef.addCell(inst->toString(), instType, params);
     }
@@ -119,6 +141,12 @@ namespace FlatCircuit {
     REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
 
     REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
+
+    // Q: How to check connections?
+
+    const Cell& clkPort = def.getPortCell("clk");
+
+    REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
     
     deleteContext(c);
   }
