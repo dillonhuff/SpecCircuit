@@ -38,14 +38,52 @@ namespace FlatCircuit {
 
       std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
-        if (c.second.getCellType() == CELL_TYPE_CONST) {
-          // TODO: Insert real values
-          CellId cid = c.first;
-          Cell cl = c.second;
+        auto tp = c.second.getCellType();
 
+        CellId cid = c.first;
+        Cell cl = c.second;
+
+
+        if (tp == CELL_TYPE_CONST) {
           BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
           portValues[{cid, PORT_ID_OUT}] = initVal;
-          combChanges.insert({cid, PORT_ID_OUT});
+
+          const Cell& c = def.getCellRef(cid);
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+        } else if (tp == CELL_TYPE_PORT) {
+          if (cl.hasPort(PORT_ID_OUT)) {
+            int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
+            BitVector initVal = bsim::unknown_bv(width);
+            portValues[{cid, PORT_ID_OUT}] = initVal;
+
+            const Cell& c = def.getCellRef(cid);
+            for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+              for (auto& sigBit : receiverBus) {
+                combChanges.insert({sigBit.cell, sigBit.port});
+              }
+            }
+
+          }
+        } else if (isBinop(tp) || isUnop(tp) || (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST)) {
+
+          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>();
+          BitVector initVal = bsim::unknown_bv(width);
+          portValues[{cid, PORT_ID_OUT}] = initVal;
+
+          const Cell& c = def.getCellRef(cid);
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+
+        } else {
+          std::cout << "No initialization for cell type " << toString(tp) << std::endl;
+          assert(false);
         }
       }
 
@@ -57,10 +95,24 @@ namespace FlatCircuit {
       
       // Add user inputs to combChanges
       for (auto in : userInputs) {
-        combChanges.insert(in);
+        const Cell& c = def.getCellRef(in.cell);
+        for (auto& receiverBus : c.getPortReceivers(in.port)) {
+          for (auto& sigBit : receiverBus) {
+            combChanges.insert({sigBit.cell, sigBit.port});
+          }
+        }
+
+        //combChanges.insert(in);
       }
 
       userInputs = {};
+
+      std::cout << "Comb values than changed" << std::endl;
+      for (auto val : combChanges) {
+        std::cout << "\t" << def.getCellName(val.cell) << ", " << portIdString(val.port) << std::endl;
+      }
+
+      std::cout << "Done with values" << std::endl;
 
       // do while updates
       do {
@@ -101,7 +153,7 @@ namespace FlatCircuit {
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
         BitVector sel = materializeInput({sigPort.cell, PORT_ID_SEL});
 
-        BitVector oldOut = portValues.at(sigPort);
+        BitVector oldOut = getBitVec(sigPort.cell, sigPort.port); //getPortValue(sigPort); //portValues.at(sigPort);
 
         assert(sel.bitLength() == 1);
 
@@ -126,7 +178,7 @@ namespace FlatCircuit {
 
       for (int i = 0; i < (int) sigBus.signals.size(); i++) {
         SignalBit b = sigBus.signals.at(i);
-        val.set(i, portValues.at({b.cell, b.port}).get(b.offset));
+        val.set(i, getBitVec(b.cell, b.port).get(b.offset));
       }
         
       return val;
@@ -148,6 +200,7 @@ namespace FlatCircuit {
 
     BitVector getBitVec(const CellId cid,
                         const PortId pid) {
+      assert(contains_key({cid, pid}, portValues));
       return portValues.at({cid, pid});
     }    
 

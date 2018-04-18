@@ -47,6 +47,12 @@ namespace FlatCircuit {
       return "CELL_TYPE_CONST";
     } else if (cellTp == CELL_TYPE_MUX) {
       return "CELL_TYPE_MUX";
+    } else if (cellTp == CELL_TYPE_PORT) {
+      return "CELL_TYPE_PORT";
+    } else if (cellTp == CELL_TYPE_OR) {
+      return "CELL_TYPE_OR";
+    } else if (cellTp == CELL_TYPE_ORR) {
+      return "CELL_TYPE_ORR";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -65,6 +71,39 @@ namespace FlatCircuit {
 #define PORT_ID_CLK 5
 #define PORT_ID_ARST 6
 
+  static inline std::string portIdString(const PortId portId) {
+    if (portId == PORT_ID_IN0) {
+      return "PORT_ID_IN0";
+    }
+
+    if (portId == PORT_ID_IN1) {
+      return "PORT_ID_IN1";
+    }
+
+    if (portId == PORT_ID_IN) {
+      return "PORT_ID_IN";
+    }
+
+    if (portId == PORT_ID_OUT) {
+      return "PORT_ID_OUT";
+    }
+
+    if (portId == PORT_ID_SEL) {
+      return "PORT_ID_SEL";
+    }
+
+    if (portId == PORT_ID_CLK) {
+      return "PORT_ID_CLK";
+    }
+
+    if (portId == PORT_ID_ARST) {
+      return "PORT_ID_ARST";
+    }
+    
+    std::cout << "No string for port id " << portId << std::endl;
+    assert(false);
+  }
+  
 #define PORT_CELL_FOR_INPUT 0
 #define PORT_CELL_FOR_OUTPUT 1
 
@@ -430,6 +469,11 @@ namespace FlatCircuit {
       return id;
     }
 
+    std::string getCellName(const CellId cellId) {
+      assert(contains_key(cellId, cellIdsToNames));
+      return cellIdsToNames.at(cellId);
+    }
+
     void setDriver(const SignalBit receiver,
                    const SignalBit driver) {
       cells[receiver.cell].setDriver(receiver.port, receiver.offset, driver);
@@ -465,13 +509,6 @@ namespace FlatCircuit {
   // All loops could be broken by setting a mux (programmable switch)
   // The output of any loop mux does not affect the select on any other loop mux
   // Assumption: No data will be put down the datapath until configuration is finished
-  // Q: Can any dangerous loops form in this scheme?
-
-  // Q: Can I prove that given this setup I dont need full event based simulation
-  //    even during configuration loading?
-  //    Really what I want to check is whether each loop contains a mux that breaks
-  //    the loop at each stage of configuration
-
   class Env {
   protected:
     std::map<CellType, CellDefinition> cellDefs;
