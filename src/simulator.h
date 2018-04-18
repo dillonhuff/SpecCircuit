@@ -142,25 +142,16 @@ namespace FlatCircuit {
 
           updatePort(nextComb);
 
-          // if (changed) {
-          //   const Cell& c = def.getCellRef(nextComb.cell);
-          //   // Update output ports
-          //   for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
-          //     for (auto& sigBit : receiverBus) {
-          //       combChanges.insert({sigBit.cell, sigBit.port});
-          //     }
-          //   }
-          // }
-
         }
 
         // TODO: Add sequential updates
         std::cout << "Sequential updates" << std::endl;
         for (auto s : seqChanges) {
           std::cout << "\tUpdating " << sigPortString(def, s) << std::endl;
-        }
 
-        assert(false);
+          // Note: This should reall delay updates to values?
+          updatePort(s);
+        }
 
       } while (combChanges.size() > 0);
 
@@ -195,18 +186,31 @@ namespace FlatCircuit {
       }
 
       return changed;
-      
-
     }
 
     bool updatePort(const SigPort sigPort) {
 
-      std::cout << "Updating port " << def.getCellName(sigPort.cell) << ", " << portIdString(sigPort.port) << std::endl;
+      std::cout << "Updating port " << sigPortString(def, sigPort) << std::endl; //def.getCellName(sigPort.cell) << ", " << portIdString(sigPort.port) << std::endl;
 
       Cell& c = def.getCellRef(sigPort.cell);
       CellType tp = c.getCellType();
 
       if ((tp == CELL_TYPE_PORT) || (tp == CELL_TYPE_CONST)) {
+        if (tp == CELL_TYPE_PORT) {
+          std::cout << "Updating port" << std::endl;
+          
+          BitVector ptp = c.getParameterValue(PARAM_PORT_TYPE);
+          int ptpInt = ptp.to_type<int>();
+          if (ptpInt == PORT_CELL_FOR_OUTPUT) {
+            std::cout << "Updating output port" << std::endl;
+
+            portValues[sigPort] = materializeInput(sigPort);
+
+            std::cout << "Done updating output port" << std::endl;
+
+          }
+        }
+
         return false;
       } else if (tp == CELL_TYPE_PASSTHROUGH) {
         BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
