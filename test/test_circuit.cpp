@@ -6,6 +6,7 @@
 #include "coreir/libs/rtlil.h"
 #include "coreir/libs/commonlib.h"
 
+#include "simulator.h"
 #include "circuit.h"
 
 using namespace std;
@@ -144,7 +145,16 @@ namespace FlatCircuit {
         width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
       }
 
-      return {{PARAM_WIDTH, BitVector(32, width)}};
+      BitVector init;
+
+      if (name == "coreir.const") {
+        init = inst->getModArgs().at("value")->get<BitVector>();
+      } else {
+        bool val = inst->getModArgs().at("value")->get<bool>();
+        init = BitVector(1, val == true);
+      }
+      
+      return {{PARAM_WIDTH, BitVector(32, width)}, {PARAM_INIT_VALUE, init}};
 
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
@@ -383,6 +393,26 @@ namespace FlatCircuit {
       REQUIRE(notEmpty(drivers.signals[i]));
 
     }
+
+    // Simulate the connect box
+    Simulator sim(circuitEnv, def);
+    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+
+    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+    sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+    sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+    
+    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+    sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
     
     deleteContext(c);
   }

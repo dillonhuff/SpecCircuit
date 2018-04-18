@@ -346,6 +346,10 @@ namespace FlatCircuit {
     // Cell 0 is reserved to indicated a non-existant cell
     CellDefinition() : next(1), nextPort(0) {}
 
+    const std::map<CellId, Cell>& getCellMap() const {
+      return cells;
+    }
+
     std::vector<std::string> getPortNames() const {
       std::vector<std::string> names;
       for (auto p : portNames) {
