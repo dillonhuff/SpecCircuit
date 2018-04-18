@@ -153,7 +153,7 @@ namespace FlatCircuit {
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
         BitVector sel = materializeInput({sigPort.cell, PORT_ID_SEL});
 
-        BitVector oldOut = getBitVec(sigPort.cell, sigPort.port); //getPortValue(sigPort); //portValues.at(sigPort);
+        BitVector oldOut = getBitVec(sigPort.cell, sigPort.port);
 
         assert(sel.bitLength() == 1);
 

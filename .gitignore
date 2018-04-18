@@ -3,3 +3,5 @@ all-tests
 cmake_install.cmake
 all-tests.dSYM/
 Makefile
+CMakeCache.txt
+CMakeFiles/
