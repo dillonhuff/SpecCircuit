@@ -42,6 +42,17 @@ namespace FlatCircuit {
 #define CELL_TYPE_MUX 17
 #define CELL_TYPE_CONST 18
 
+  static inline std::string toString(const CellType cellTp) {
+    if (cellTp == CELL_TYPE_CONST) {
+      return "CELL_TYPE_CONST";
+    } else if (cellTp == CELL_TYPE_MUX) {
+      return "CELL_TYPE_MUX";
+    }
+
+    std::cout << "No string for cell type " << cellTp << std::endl;
+    assert(false);
+  }
+
   typedef uint64_t CellId;
 
   typedef uint64_t PortId;
