@@ -371,6 +371,11 @@ namespace FlatCircuit {
       setFreshValue(cid, id, bv);
     }
 
+    void setFreshValue(const std::string& cellName,
+                       const BitVector& bv) {
+      setFreshValue(cellName, PORT_ID_OUT, bv);
+    }
+    
     void setFreshValue(const CellId cid,
                        const PortId pid,
                        const BitVector& bv) {
