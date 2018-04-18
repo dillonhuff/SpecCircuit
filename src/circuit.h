@@ -16,7 +16,7 @@ namespace FlatCircuit {
     PARAM_OUT_WIDTH,
     PARAM_SEL_WIDTH,
     PARAM_CLK_POSEDGE,
-    PARAM_CLK_NEGEDGE,
+    PARAM_ARST_POSEDGE,
     PARAM_INIT_VALUE
   };
 
@@ -55,6 +55,10 @@ namespace FlatCircuit {
       return "CELL_TYPE_ORR";
     } else if (cellTp == CELL_TYPE_EQ) {
       return "CELL_TYPE_EQ";
+    } else if (cellTp == CELL_TYPE_REG_ARST) {
+      return "CELL_TYPE_REG_ARST";
+    } else if (cellTp == CELL_TYPE_PASSTHROUGH) {
+      return "CELL_TYPE_PASSTHROUGH";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -108,6 +112,10 @@ namespace FlatCircuit {
   
 #define PORT_CELL_FOR_INPUT 0
 #define PORT_CELL_FOR_OUTPUT 1
+
+  static inline int bvToInt(const BitVector& bv) {
+    return bv.to_type<int>();
+  }
 
   static inline bool isUnop(const CellType tp) {
     std::vector<CellType> unops{CELL_TYPE_PORT,
@@ -251,10 +259,10 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_CLK, SignalBus(wd)});
+        drivers.insert({PORT_ID_CLK, SignalBus(1)});
 
         portWidths.insert({PORT_ID_ARST, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_ARST, SignalBus(wd)});
+        drivers.insert({PORT_ID_ARST, SignalBus(1)});
         
       } else if (cellType == CELL_TYPE_MUX) {
 
@@ -334,6 +342,20 @@ namespace FlatCircuit {
     
     CellType getCellType() const {
       return cellType;
+    }
+
+    BitVector initValue() const {
+      return getParameterValue(PARAM_INIT_VALUE);
+    }
+
+    bool rstPosedge() const {
+      BitVector bv = getParameterValue(PARAM_ARST_POSEDGE);
+      return bv.get(0).is_binary() && (bv.get(0).binary_value() == 1);
+    }
+    
+    bool clkPosedge() const {
+      BitVector bv = getParameterValue(PARAM_CLK_POSEDGE);
+      return bv.get(0).is_binary() && (bv.get(0).binary_value() == 1);
     }
 
     void addReceiver(const PortId port, const int offset, const SignalBit receiver) {

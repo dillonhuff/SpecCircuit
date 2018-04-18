@@ -138,7 +138,9 @@ namespace FlatCircuit {
 
       //cout << "Done creating reg_arst params" << endl;
       return {{PARAM_WIDTH, BitVector(32, width)},
-          {PARAM_INIT_VALUE, init}};
+          {PARAM_INIT_VALUE, init},
+            {PARAM_CLK_POSEDGE, BitVector(1, clkPos)},
+              {PARAM_ARST_POSEDGE, BitVector(1, rstPos)}};
 
     } else if (name == "coreir.const" || name == "corebit.const") {
 
@@ -447,20 +449,37 @@ namespace FlatCircuit {
     // Simulate the connect box
     Simulator sim(circuitEnv, def);
     sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+    sim.update();
     sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+    sim.update();
     sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+    sim.update();
 
     sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
     sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
     sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
     sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+    sim.update();
+    
     sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+    sim.update();
+
+    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+    sim.update();
     
     sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
     sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
-
     sim.update();
+
+
+    cout << "Values" << endl;
+    for (auto val : sim.portValues) {
+      SigPort sp = val.first;
+      BitVector bv = val.second;
+      
+      cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
+    }
 
     REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
     

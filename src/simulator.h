@@ -24,16 +24,20 @@ namespace FlatCircuit {
 
   class Simulator {
 
+  public:
+
     CellDefinition& def;
 
     std::map<SigPort, BitVector> portValues;
     std::set<SigPort> userInputs;
     std::set<SigPort> combChanges;
     std::set<SigPort> seqChanges;
-    
-    
-  public:
 
+
+    // Use this to save clock ports
+    std::map<SigPort, BitVector> pastValues;
+    
+    
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
       std::cout << "Start init" << std::endl;
@@ -80,6 +84,14 @@ namespace FlatCircuit {
             for (auto& sigBit : receiverBus) {
               combChanges.insert({sigBit.cell, sigBit.port});
             }
+          }
+
+          if (tp == CELL_TYPE_REG_ARST) {
+            BitVector initVal(1, 0); // = //bsim::unknown_bv(1);
+            SigPort clkPort = {cid, PORT_ID_CLK};
+            SigPort rstPort = {cid, PORT_ID_ARST};
+            pastValues[clkPort] = initVal;
+            pastValues[rstPort] = initVal;
           }
 
         } else {
@@ -138,6 +150,8 @@ namespace FlatCircuit {
         }
 
         // TODO: Add sequential updates
+        assert(false);
+
       } while (combChanges.size() > 0);
 
       std::cout << "Done with update" << std::endl;
@@ -145,12 +159,100 @@ namespace FlatCircuit {
       assert(combChanges.size() == 0);
     }
 
+    bool combinationalSignalChange(const SigPort sigPort,
+                                   const BitVector& bv) {
+      BitVector oldVal = portValues.at(sigPort);
+      portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
+
+      const Cell& c = def.getCellRef(sigPort.cell);
+
+      for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
+        for (auto& sigBit : receiverBus) {
+
+          if (notEmpty(sigBit)) {
+            if ((sigBit.port != PORT_ID_ARST) &&
+                (sigBit.port != PORT_ID_CLK)) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            } else {
+              seqChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+        }
+      }
+      
+      return !same_representation(oldVal, bv);
+    }
+
     bool updatePort(const SigPort sigPort) {
 
       std::cout << "Updating port " << def.getCellName(sigPort.cell) << ", " << portIdString(sigPort.port) << std::endl;
-      CellType tp = def.getCellRef(sigPort.cell).getCellType();
+
+      Cell& c = def.getCellRef(sigPort.cell);
+      CellType tp = c.getCellType();
+
       if ((tp == CELL_TYPE_PORT) || (tp == CELL_TYPE_CONST)) {
         return false;
+      } else if (tp == CELL_TYPE_PASSTHROUGH) {
+        BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = in;
+
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+
+        return !same_representation(oldOut, newOut);
+      } else if (tp == CELL_TYPE_REG_ARST) {
+        BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
+        BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
+
+        // assert(newClk.is_binary());
+        // assert(newRst.is_binary());
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
+        BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
+
+        // assert(oldClk.is_binary());
+        // assert(oldRst.is_binary());
+        
+        bool clkPos = c.clkPosedge();
+        bool rstPos = c.rstPosedge();
+
+        BitVector newOut = oldOut;
+
+        if (clkPos &&
+            newClk.is_binary() &&
+            oldClk.is_binary() &&
+            (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        }
+
+        if (!clkPos &&
+            newClk.is_binary() &&
+            oldClk.is_binary() &&
+            (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
+          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        }
+
+        if (rstPos &&
+            newRst.is_binary() &&
+            oldRst.is_binary() &&
+            (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
+          newOut = c.initValue();
+        }
+
+        if (!rstPos &&
+            newRst.is_binary() &&
+            oldRst.is_binary() &&
+            (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
+          newOut = c.initValue();
+        }
+
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        
+        return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_MUX) {
         
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -161,7 +263,15 @@ namespace FlatCircuit {
 
         assert(sel.bitLength() == 1);
 
-        BitVector newOut = oldOut;
+        BitVector newOut = in0;
+
+        if (sel.is_binary()) {
+          int i = bvToInt(sel);
+          newOut = i == 1 ? in1 : in0; 
+        }
+
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+
         return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_OR) {
 
@@ -171,6 +281,8 @@ namespace FlatCircuit {
         BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = in0 | in1;
+
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
         return !same_representation(oldOut, newOut);
         
@@ -182,6 +294,8 @@ namespace FlatCircuit {
 
         BitVector newOut = orr(in0);
 
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+
         return !same_representation(oldOut, newOut);
 
       } else if (tp == CELL_TYPE_EQ) {
@@ -192,6 +306,8 @@ namespace FlatCircuit {
         BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = BitVector(1, in0 == in1);
+
+        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
         return !same_representation(oldOut, newOut);
         
