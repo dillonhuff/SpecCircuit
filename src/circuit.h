@@ -53,6 +53,8 @@ namespace FlatCircuit {
       return "CELL_TYPE_OR";
     } else if (cellTp == CELL_TYPE_ORR) {
       return "CELL_TYPE_ORR";
+    } else if (cellTp == CELL_TYPE_EQ) {
+      return "CELL_TYPE_EQ";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -271,7 +273,7 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_IN1, SignalBus(wd)});
 
         portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_SEL, SignalBus(wd)});
+        drivers.insert({PORT_ID_SEL, SignalBus(1)});
         
       } else if (isUnop(cellType)) {
 
