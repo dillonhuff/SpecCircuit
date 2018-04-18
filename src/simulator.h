@@ -45,7 +45,7 @@ namespace FlatCircuit {
     
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
-      std::cout << "Start init" << std::endl;
+      //std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
@@ -105,11 +105,11 @@ namespace FlatCircuit {
         }
       }
 
-      std::cout << "End init" << std::endl;
+      //std::cout << "End init" << std::endl;
     }
 
     void update() {
-      std::cout << "Starting with update" << std::endl;
+      //std::cout << "Starting with update" << std::endl;
       
       // Add user inputs to combChanges
       for (auto in : userInputs) {
@@ -125,12 +125,12 @@ namespace FlatCircuit {
 
       userInputs = {};
 
-      std::cout << "Comb values than changed" << std::endl;
-      for (auto val : combChanges) {
-        std::cout << "\t" << def.getCellName(val.cell) << ", " << portIdString(val.port) << std::endl;
-      }
+      //std::cout << "Comb values than changed" << std::endl;
+      // for (auto val : combChanges) {
+      //   std::cout << "\t" << def.getCellName(val.cell) << ", " << portIdString(val.port) << std::endl;
+      // }
 
-      std::cout << "Done with values" << std::endl;
+      // std::cout << "Done with values" << std::endl;
 
       // do while updates
       do {
@@ -145,9 +145,9 @@ namespace FlatCircuit {
         }
 
         // TODO: Add sequential updates
-        std::cout << "Sequential updates" << std::endl;
+        //std::cout << "Sequential updates" << std::endl;
         for (auto s : seqChanges) {
-          std::cout << "\tUpdating " << sigPortString(def, s) << std::endl;
+          //std::cout << "\tUpdating " << sigPortString(def, s) << std::endl;
 
           // Note: This should reall delay updates to values?
           updatePort(s);
@@ -155,7 +155,7 @@ namespace FlatCircuit {
 
       } while (combChanges.size() > 0);
 
-      std::cout << "Done with update" << std::endl;
+      //std::cout << "Done with update" << std::endl;
 
       assert(combChanges.size() == 0);
     }
@@ -190,23 +190,25 @@ namespace FlatCircuit {
 
     bool updatePort(const SigPort sigPort) {
 
-      std::cout << "Updating port " << sigPortString(def, sigPort) << std::endl; //def.getCellName(sigPort.cell) << ", " << portIdString(sigPort.port) << std::endl;
+      //std::cout << "Updating port " << sigPortString(def, sigPort) << std::endl; //def.getCellName(sigPort.cell) << ", " << portIdString(sigPort.port) << std::endl;
 
       Cell& c = def.getCellRef(sigPort.cell);
       CellType tp = c.getCellType();
 
       if ((tp == CELL_TYPE_PORT) || (tp == CELL_TYPE_CONST)) {
         if (tp == CELL_TYPE_PORT) {
-          std::cout << "Updating port" << std::endl;
-          
+          //          std::cout << "Updating port" << std::endl;
+
+          // This is an odd value because in general the simulator does not
+          // store values of input ports in portValues
           BitVector ptp = c.getParameterValue(PARAM_PORT_TYPE);
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
-            std::cout << "Updating output port" << std::endl;
+            //            std::cout << "Updating output port" << std::endl;
 
             portValues[sigPort] = materializeInput(sigPort);
 
-            std::cout << "Done updating output port" << std::endl;
+            //            std::cout << "Done updating output port" << std::endl;
 
           }
         }
@@ -220,9 +222,7 @@ namespace FlatCircuit {
         BitVector newOut = in;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
-        // return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_REG_ARST) {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
