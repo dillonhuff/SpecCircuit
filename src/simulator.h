@@ -45,13 +45,14 @@ namespace FlatCircuit {
     
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
-      //std::cout << "Start init" << std::endl;
+      std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
         CellId cid = c.first;
         Cell cl = c.second;
 
+        std::cout << "Initializing " << def.cellName(cid) << std::endl;
 
         if (tp == CELL_TYPE_CONST) {
           BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
@@ -77,8 +78,14 @@ namespace FlatCircuit {
             }
 
           }
+        } else if (tp == CELL_TYPE_ZEXT) {
+          int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
+          BitVector initVal = bsim::unknown_bv(width);
+
+          combinationalSignalChange({cid, PORT_ID_OUT}, initVal);
         } else if (isBinop(tp) || isUnop(tp) ||
-                   (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST)) {
+                   (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST) ||
+                   (tp == CELL_TYPE_REG)) {
 
           int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>();
           BitVector initVal = bsim::unknown_bv(width);
@@ -99,13 +106,21 @@ namespace FlatCircuit {
             pastValues[rstPort] = initVal;
           }
 
+          if (tp == CELL_TYPE_REG) {
+            std::cout << "making reg" << std::endl;
+            BitVector initVal(1, 0);
+            SigPort clkPort = {cid, PORT_ID_CLK};
+            pastValues[clkPort] = initVal;
+            std::cout << "done reg" << std::endl;
+          }
+          
         } else {
           std::cout << "No initialization for cell type " << toString(tp) << std::endl;
           assert(false);
         }
       }
 
-      //std::cout << "End init" << std::endl;
+      std::cout << "End init" << std::endl;
     }
 
     void update() {

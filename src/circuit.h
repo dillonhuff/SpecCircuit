@@ -11,6 +11,9 @@ namespace FlatCircuit {
   enum Parameter {
     PARAM_PORT_TYPE,
     PARAM_WIDTH,
+    PARAM_HIGH,
+    PARAM_LOW,
+    PARAM_IN_WIDTH,
     PARAM_IN0_WIDTH,
     PARAM_IN1_WIDTH,
     PARAM_OUT_WIDTH,
@@ -33,14 +36,20 @@ namespace FlatCircuit {
 #define CELL_TYPE_XORR 8
 #define CELL_TYPE_ADD 9
 #define CELL_TYPE_SUB 10
-#define CELL_TYPE_GT 11
-#define CELL_TYPE_LT 12
+#define CELL_TYPE_UGT 11
+#define CELL_TYPE_ULT 12
 #define CELL_TYPE_EQ 13
 #define CELL_TYPE_NEQ 14
 #define CELL_TYPE_REG 15
 #define CELL_TYPE_REG_ARST 16
 #define CELL_TYPE_MUX 17
 #define CELL_TYPE_CONST 18
+#define CELL_TYPE_LSHR 19
+#define CELL_TYPE_ASHR 20
+#define CELL_TYPE_SHL 21
+#define CELL_TYPE_ZEXT 22
+#define CELL_TYPE_MUL 23
+#define CELL_TYPE_SLICE 24
 
   static inline std::string toString(const CellType cellTp) {
     if (cellTp == CELL_TYPE_CONST) {
@@ -59,6 +68,8 @@ namespace FlatCircuit {
       return "CELL_TYPE_REG_ARST";
     } else if (cellTp == CELL_TYPE_PASSTHROUGH) {
       return "CELL_TYPE_PASSTHROUGH";
+    } else if (cellTp == CELL_TYPE_REG) {
+      return "CELL_TYPE_REG";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -123,7 +134,8 @@ namespace FlatCircuit {
         CELL_TYPE_NOT,
         CELL_TYPE_ORR,
         CELL_TYPE_ANDR,
-        CELL_TYPE_XORR};
+        CELL_TYPE_XORR,
+        CELL_TYPE_ZEXT};
 
     return elem(tp, unops);
   }
@@ -135,10 +147,14 @@ namespace FlatCircuit {
         CELL_TYPE_XOR,
         CELL_TYPE_ADD,
         CELL_TYPE_SUB,
-        CELL_TYPE_GT,
-        CELL_TYPE_LT,
+        CELL_TYPE_MUL,
+        CELL_TYPE_UGT,
+        CELL_TYPE_ULT,
         CELL_TYPE_EQ,
-        CELL_TYPE_NEQ
+        CELL_TYPE_NEQ,
+        CELL_TYPE_ASHR,
+        CELL_TYPE_LSHR,
+        CELL_TYPE_SHL
     };
 
     return elem(tp, binops);
@@ -202,7 +218,38 @@ namespace FlatCircuit {
       //std::cout << "Creating cell type " << cellType << std::endl;
 
       // NOTE: Need to include input port type and output port type
-      if (cellType == CELL_TYPE_PORT) {
+      if (cellType == CELL_TYPE_SLICE) {
+        BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
+
+        BitVector hi_b = parameters.at(PARAM_HIGH);
+        int hi = hi_b.to_type<int>();
+
+        BitVector lo_b = parameters.at(PARAM_LOW);
+        int lo = lo_b.to_type<int>();
+        
+        portWidths.insert({PORT_ID_OUT, {hi - lo, PORT_TYPE_OUT}});
+        std::vector<std::vector<SignalBit> > bus(hi - lo);
+        receivers.insert({PORT_ID_OUT, bus});
+
+        portWidths.insert({PORT_ID_IN, {wd, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+
+      } else if (cellType == CELL_TYPE_ZEXT) {
+        BitVector out_width = parameters.at(PARAM_OUT_WIDTH);
+        int out_wd = out_width.to_type<int>();
+
+        BitVector in_width = parameters.at(PARAM_IN_WIDTH);
+        int in_wd = in_width.to_type<int>();
+
+        portWidths.insert({PORT_ID_OUT, {out_wd, PORT_TYPE_OUT}});
+        std::vector<std::vector<SignalBit> > bus(out_wd);
+        receivers.insert({PORT_ID_OUT, bus});
+
+        portWidths.insert({PORT_ID_IN, {in_wd, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, SignalBus(in_wd)});
+        
+      } else if (cellType == CELL_TYPE_PORT) {
         BitVector width = parameters.at(PARAM_OUT_WIDTH);
         int wd = width.to_type<int>();
 
@@ -230,6 +277,8 @@ namespace FlatCircuit {
         }
       } else if (isBinop(cellType)) {
 
+        // TODO: Distinguish comparators like eq, gt that have out width 1 from
+        // operands with same in and out width
         BitVector width = parameters.at(PARAM_WIDTH);
         assert(width.bitLength() == 32);
 
@@ -304,6 +353,22 @@ namespace FlatCircuit {
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
         std::vector<std::vector<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
+
+      } else if (cellType == CELL_TYPE_REG) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+        std::vector<std::vector<SignalBit> > bus(wd);
+        receivers.insert({PORT_ID_OUT, bus});
+
+        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+
+        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_CLK, SignalBus(1)});
 
       } else {
         std::cout << "No processing rule for cell type " << cellType << std::endl;

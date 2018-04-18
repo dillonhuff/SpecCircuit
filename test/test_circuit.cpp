@@ -140,7 +140,7 @@ namespace FlatCircuit {
       return CELL_TYPE_ORR;
     } else if (name == "coreir.eq") {
       return CELL_TYPE_EQ;
-    } else if (name == "coreir.mux") {
+    } else if ((name == "coreir.mux") || (name == "corebit.mux")) {
       return CELL_TYPE_MUX;
     } else if (name == "coreir.reg_arst") {
       return CELL_TYPE_REG_ARST;
@@ -150,12 +150,34 @@ namespace FlatCircuit {
       return CELL_TYPE_AND;
     } else if (name == "coreir.neq") {
       return CELL_TYPE_NEQ;
-    } else if (name == "coreir.lt") {
-      return CELL_TYPE_LT;
-    } else if (name == "coreir.gt") {
-      return CELL_TYPE_GT;
+    } else if (name == "coreir.ult") {
+      return CELL_TYPE_ULT;
+    } else if (name == "coreir.ugt") {
+      return CELL_TYPE_UGT;
     } else if ((name == "coreir.not") || (name == "corebit.not")) {
       return CELL_TYPE_NOT;
+    } else if (name == "coreir.reg") {
+      return CELL_TYPE_REG;
+    } else if (name == "coreir.ashr") {
+      return CELL_TYPE_ASHR;
+    } else if (name == "coreir.lshr") {
+      return CELL_TYPE_LSHR;
+    } else if (name == "coreir.shl") {
+      return CELL_TYPE_SHL;
+    } else if (name == "coreir.andr") {
+      return CELL_TYPE_ANDR;
+    } else if (name == "coreir.zext") {
+      return CELL_TYPE_ZEXT;
+    } else if (name == "coreir.add") {
+      return CELL_TYPE_ADD;
+    } else if (name == "coreir.sub") {
+      return CELL_TYPE_SUB;
+    } else if (name == "coreir.mul") {
+      return CELL_TYPE_MUL;
+    } else if ((name == "coreir.xor") || (name == "corebit.xor")) {
+      return CELL_TYPE_XOR;
+    } else if (name == "coreir.slice") {
+      return CELL_TYPE_SLICE;
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
     }
@@ -170,8 +192,29 @@ namespace FlatCircuit {
     if (name == "coreir.wrap") {
       // TODO: Fix width issue
       return {{PARAM_WIDTH, BitVector(32, 1)}};
+    } else if (tp == CELL_TYPE_SLICE) {
+
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+      int lo = inst->getModuleRef()->getGenArgs().at("lo")->get<int>();
+      int hi = inst->getModuleRef()->getGenArgs().at("hi")->get<int>();
+
+      return {{PARAM_WIDTH, BitVector(32, width)},
+          {PARAM_LOW, BitVector(32, lo)},
+            {PARAM_HIGH, BitVector(32, hi)}};
+
+    } else if (tp == CELL_TYPE_ZEXT) {
+
+      //cout << "Getting zext width" << endl;
+      int width_in = inst->getModuleRef()->getGenArgs().at("width_in")->get<int>();
+      int width_out = inst->getModuleRef()->getGenArgs().at("width_out")->get<int>();
+
+      //cout << "Done getting zex width" << endl;
+
+      return {{PARAM_IN_WIDTH, BitVector(32, width_in)},
+          {PARAM_OUT_WIDTH, BitVector(32, width_out)}};
+      
     } else if (isUnop(tp) || isBinop(tp) || (tp == CELL_TYPE_MUX)) {
-      cout << "Processing instance " << inst->toString() << endl;
+      //cout << "Processing instance " << inst->toString() << endl;
 
       int width = 1;
       if (inst->getModuleRef()->getNamespace()->getName() == "coreir") {
@@ -179,6 +222,8 @@ namespace FlatCircuit {
       } else {
         assert(inst->getModuleRef()->getNamespace()->getName() == "corebit");
       }
+
+      //cout << "Done processing instance " << inst->toString() << endl;
 
       return {{PARAM_WIDTH, BitVector(32, width)}};
 
@@ -198,6 +243,18 @@ namespace FlatCircuit {
             {PARAM_CLK_POSEDGE, BitVector(1, clkPos)},
               {PARAM_ARST_POSEDGE, BitVector(1, rstPos)}};
 
+    } else if (name == "coreir.reg") {
+      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
+
+      //cout << "Creating reg_arst" << endl;
+      bool clkPos = inst->getModArgs().at("clk_posedge")->get<bool>();
+      BitVector init =
+        inst->getModArgs().at("init")->get<BitVector>();      
+
+      return {{PARAM_WIDTH, BitVector(32, width)},
+          {PARAM_INIT_VALUE, init},
+            {PARAM_CLK_POSEDGE, BitVector(1, clkPos)}};
+      
     } else if (name == "coreir.const" || name == "corebit.const") {
 
       int width = 1;
@@ -284,7 +341,7 @@ namespace FlatCircuit {
       //cout << "Added instance " << inst->toString() << endl;
     }
 
-    //cout << "Added all instances" << endl;
+    cout << "Added all instances" << endl;
 
     for (auto conn : top->getDef()->getConnections()) {
       Wireable* fst = conn.first;
@@ -570,6 +627,7 @@ namespace FlatCircuit {
 
     // NOTE: Unknown value on cg_en causes problems?
     Simulator sim(circuitEnv, def);
+
     sim.setFreshValue("tile_id", BitVector("16'h15"));
 
     sim.setFreshValue("in_BUS1_S1_T0", BitVector("1'h1"));
