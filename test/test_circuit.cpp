@@ -83,11 +83,12 @@ namespace FlatCircuit {
     assert(false);
   }
 
-  CellType primitiveForMod(const Env& e, CoreIR::Instance* const inst) {
+  //CellType primitiveForMod(const Env& e, CoreIR::Instance* const inst) {
+  CellType primitiveForMod(CoreIR::Instance* const inst) {
     string name = getQualifiedOpName(*inst);
     if (name == "coreir.wrap") {
       return CELL_TYPE_PASSTHROUGH;
-    } else if (name == "coreir.or") {
+    } else if ((name == "coreir.or") || (name == "corebit.or")) {
       return CELL_TYPE_OR;
     } else if (name == "coreir.orr") {
       return CELL_TYPE_ORR;
@@ -99,6 +100,14 @@ namespace FlatCircuit {
       return CELL_TYPE_REG_ARST;
     } else if (name == "coreir.const" || name == "corebit.const") {
       return CELL_TYPE_CONST;
+    } else if ((name == "coreir.and") || (name == "corebit.and")) {
+      return CELL_TYPE_AND;
+    } else if (name == "coreir.neq") {
+      return CELL_TYPE_NEQ;
+    } else if (name == "coreir.lt") {
+      return CELL_TYPE_LT;
+    } else if (name == "coreir.gt") {
+      return CELL_TYPE_GT;
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
     }
@@ -108,20 +117,13 @@ namespace FlatCircuit {
   std::map<Parameter, BitVector>
   paramsForMod(const Env& e, CoreIR::Instance* const inst) {
     string name = getQualifiedOpName(*inst);
+
+    CellType tp = primitiveForMod(inst);
     if (name == "coreir.wrap") {
       // TODO: Fix width issue
-      //int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
       return {{PARAM_WIDTH, BitVector(32, 1)}};
-    } else if (name == "coreir.or") {
-      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
-      return {{PARAM_WIDTH, BitVector(32, width)}};
-    } else if (name == "coreir.orr") {
-      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
-      return {{PARAM_WIDTH, BitVector(32, width)}};
-    } else if (name == "coreir.eq") {
-      int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
-      return {{PARAM_WIDTH, BitVector(32, width)}};
-    } else if (name == "coreir.mux") {
+    } else if (isUnop(tp) || isBinop(tp) || (tp == CELL_TYPE_MUX)) {
+      cout << "Processing instance " << inst->toString() << endl;
       int width = inst->getModuleRef()->getGenArgs().at("width")->get<int>();
       return {{PARAM_WIDTH, BitVector(32, width)}};
     } else if (name == "coreir.reg_arst") {
@@ -157,7 +159,7 @@ namespace FlatCircuit {
       return {{PARAM_WIDTH, BitVector(32, width)}, {PARAM_INIT_VALUE, init}};
 
     } else {
-      cout << "Error: Unsupported module type = " << name << endl;
+      cout << "Error: Unsupported parameters module type = " << name << endl;
     }
     assert(false);
   }
@@ -216,7 +218,7 @@ namespace FlatCircuit {
       // Only handle primitives for now
       assert(!instMod->hasDef());
 
-      CellType instType = primitiveForMod(e, inst);
+      CellType instType = primitiveForMod(inst);
       map<Parameter, BitVector> params = paramsForMod(e, inst);
 
       CellId cid = cDef.addCell(inst->toString(), instType, params);
@@ -333,6 +335,54 @@ namespace FlatCircuit {
     return e;
   }
 
+  // Need to build
+  // TEST_CASE("Loading cgra") {
+
+  //   Context* c = newContext();
+  //   Namespace* g = c->getGlobal();
+
+  //   CoreIRLoadLibrary_rtlil(c);
+
+  //   Module* top;
+  //   if (!loadFromFile(c,"../EventSim/test/top.json", &top)) {
+  //     cout << "Could not Load from json!!" << endl;
+  //     c->die();
+  //   }
+
+  //   top = c->getModule("global.top");
+
+  //   assert(top != nullptr);
+
+  //   c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+
+  //   Env circuitEnv = convertFromCoreIR(c, top);
+
+  //   CellDefinition& def = circuitEnv.getDef(top->getName());
+
+  //   Simulator sim(circuitEnv, def);
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+
+  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+  //   sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+    
+  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+
+  //   sim.update();
+
+  //   REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+    
+    
+  //   deleteContext(c);
+
+  // }
+
   TEST_CASE("Loading Connect box") {
     Context* c = newContext();
     Namespace* g = c->getGlobal();
@@ -416,4 +466,5 @@ namespace FlatCircuit {
     
     deleteContext(c);
   }
+
 }
