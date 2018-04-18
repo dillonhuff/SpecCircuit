@@ -461,6 +461,10 @@ namespace FlatCircuit {
       return cells.at(c);
     }
 
+    const Cell& getCellRefConst(const CellId c) const {
+      return cells.at(c);
+    }
+    
     std::string cellName(const CellId id) const {
       return cellIdsToNames.at(id);
     }

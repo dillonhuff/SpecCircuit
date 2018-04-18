@@ -10,6 +10,11 @@ namespace FlatCircuit {
     PortId port;
   };
 
+  static inline std::string sigPortString(const CellDefinition& def,
+                                          const SigPort port) {
+    return "( " + def.cellName(port.cell) + ", " + portIdString(port.port) + ", " + toString(def.getCellRefConst(port.cell).getCellType()) + " )";
+  }
+
   static inline bool operator<(const SigPort a, const SigPort b) {
     if (a.cell > b.cell) {
       return false;
@@ -135,21 +140,26 @@ namespace FlatCircuit {
           SigPort nextComb = *std::begin(combChanges);
           combChanges.erase(nextComb);
 
-          bool changed = updatePort(nextComb);
+          updatePort(nextComb);
 
-          if (changed) {
-            const Cell& c = def.getCellRef(nextComb.cell);
-            // Update output ports
-            for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
-              for (auto& sigBit : receiverBus) {
-                combChanges.insert({sigBit.cell, sigBit.port});
-              }
-            }
-          }
+          // if (changed) {
+          //   const Cell& c = def.getCellRef(nextComb.cell);
+          //   // Update output ports
+          //   for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+          //     for (auto& sigBit : receiverBus) {
+          //       combChanges.insert({sigBit.cell, sigBit.port});
+          //     }
+          //   }
+          // }
 
         }
 
         // TODO: Add sequential updates
+        std::cout << "Sequential updates" << std::endl;
+        for (auto s : seqChanges) {
+          std::cout << "\tUpdating " << sigPortString(def, s) << std::endl;
+        }
+
         assert(false);
 
       } while (combChanges.size() > 0);
@@ -166,21 +176,27 @@ namespace FlatCircuit {
 
       const Cell& c = def.getCellRef(sigPort.cell);
 
-      for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
-        for (auto& sigBit : receiverBus) {
+      bool changed = !same_representation(oldVal, bv);
 
-          if (notEmpty(sigBit)) {
-            if ((sigBit.port != PORT_ID_ARST) &&
-                (sigBit.port != PORT_ID_CLK)) {
-              combChanges.insert({sigBit.cell, sigBit.port});
-            } else {
-              seqChanges.insert({sigBit.cell, sigBit.port});
+      if (changed) {
+        for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
+          for (auto& sigBit : receiverBus) {
+
+            if (notEmpty(sigBit)) {
+              if ((sigBit.port != PORT_ID_ARST) &&
+                  (sigBit.port != PORT_ID_CLK)) {
+                combChanges.insert({sigBit.cell, sigBit.port});
+              } else {
+                seqChanges.insert({sigBit.cell, sigBit.port});
+              }
             }
           }
         }
       }
+
+      return changed;
       
-      return !same_representation(oldVal, bv);
+
     }
 
     bool updatePort(const SigPort sigPort) {
@@ -199,9 +215,10 @@ namespace FlatCircuit {
 
         BitVector newOut = in;
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
-        return !same_representation(oldOut, newOut);
+        // return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_REG_ARST) {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
@@ -250,9 +267,10 @@ namespace FlatCircuit {
           newOut = c.initValue();
         }
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
         
-        return !same_representation(oldOut, newOut);
+        // return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_MUX) {
         
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -270,9 +288,10 @@ namespace FlatCircuit {
           newOut = i == 1 ? in1 : in0; 
         }
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);                
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
-        return !same_representation(oldOut, newOut);
+        // return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_OR) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -282,9 +301,10 @@ namespace FlatCircuit {
 
         BitVector newOut = in0 | in1;
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
 
-        return !same_representation(oldOut, newOut);
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        // return !same_representation(oldOut, newOut);
         
       } else if (tp == CELL_TYPE_ORR) {
 
@@ -294,9 +314,10 @@ namespace FlatCircuit {
 
         BitVector newOut = orr(in0);
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
-        return !same_representation(oldOut, newOut);
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        // return !same_representation(oldOut, newOut);
 
       } else if (tp == CELL_TYPE_EQ) {
 
@@ -307,9 +328,10 @@ namespace FlatCircuit {
 
         BitVector newOut = BitVector(1, in0 == in1);
 
-        portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
-        return !same_representation(oldOut, newOut);
+        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        // return !same_representation(oldOut, newOut);
         
       } else {
         std::cout << "No update for cell type " << toString(tp) << std::endl;
