@@ -45,14 +45,14 @@ namespace FlatCircuit {
     
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
-      std::cout << "Start init" << std::endl;
+      //std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
         CellId cid = c.first;
         Cell cl = c.second;
 
-        std::cout << "Initializing " << def.cellName(cid) << std::endl;
+        //std::cout << "Initializing " << def.cellName(cid) << std::endl;
 
         if (tp == CELL_TYPE_CONST) {
           BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
@@ -78,11 +78,31 @@ namespace FlatCircuit {
             }
 
           }
+        } else if (tp == CELL_TYPE_SLICE) {
+
+          int hi = cl.getParameterValue(PARAM_HIGH).to_type<int>();
+          int lo = cl.getParameterValue(PARAM_LOW).to_type<int>();
+          BitVector initVal = bsim::unknown_bv(hi - lo);
+
+          // TODO: Ignore empty sigbits
+          const Cell& c = def.getCellRef(cid);
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+          
         } else if (tp == CELL_TYPE_ZEXT) {
           int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
           BitVector initVal = bsim::unknown_bv(width);
 
-          combinationalSignalChange({cid, PORT_ID_OUT}, initVal);
+          const Cell& c = def.getCellRef(cid);
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+          
         } else if (isBinop(tp) || isUnop(tp) ||
                    (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST) ||
                    (tp == CELL_TYPE_REG)) {
@@ -107,11 +127,11 @@ namespace FlatCircuit {
           }
 
           if (tp == CELL_TYPE_REG) {
-            std::cout << "making reg" << std::endl;
+            //std::cout << "making reg" << std::endl;
             BitVector initVal(1, 0);
             SigPort clkPort = {cid, PORT_ID_CLK};
             pastValues[clkPort] = initVal;
-            std::cout << "done reg" << std::endl;
+            //std::cout << "done reg" << std::endl;
           }
           
         } else {
@@ -120,7 +140,7 @@ namespace FlatCircuit {
         }
       }
 
-      std::cout << "End init" << std::endl;
+      //std::cout << "End init" << std::endl;
     }
 
     void update() {
@@ -286,10 +306,36 @@ namespace FlatCircuit {
           newOut = c.initValue();
         }
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
+
+      } else if (tp == CELL_TYPE_REG) {
+
+        BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
         
-        // return !same_representation(oldOut, newOut);
+        bool clkPos = c.clkPosedge();
+
+        BitVector newOut = oldOut;
+
+        if (clkPos &&
+            newClk.is_binary() &&
+            oldClk.is_binary() &&
+            (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        }
+
+        if (!clkPos &&
+            newClk.is_binary() &&
+            oldClk.is_binary() &&
+            (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
+          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        }
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
+
       } else if (tp == CELL_TYPE_MUX) {
         
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -311,6 +357,17 @@ namespace FlatCircuit {
         // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
         // return !same_representation(oldOut, newOut);
+      } else if (tp == CELL_TYPE_AND) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = in0 & in1;
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
       } else if (tp == CELL_TYPE_OR) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -328,15 +385,38 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_ORR) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
-
         BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = orr(in0);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
-        // return !same_representation(oldOut, newOut);
+      } else if (tp == CELL_TYPE_ANDR) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+        BitVector newOut = andr(in0);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+
+      } else if (tp == CELL_TYPE_NOT) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = ~in0;
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+
+      } else if (tp == CELL_TYPE_NEQ) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = BitVector(1, in0 != in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_EQ) {
 
