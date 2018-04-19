@@ -473,15 +473,20 @@ namespace FlatCircuit {
 
   //   Simulator sim(circuitEnv, def);
   //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
   //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.update();
   //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
 
   //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
   //   sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
   //   sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
   //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
   //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.update();
     
   //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
   //   sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));

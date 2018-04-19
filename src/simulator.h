@@ -45,7 +45,7 @@ namespace FlatCircuit {
     
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
-      //std::cout << "Start init" << std::endl;
+      std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
@@ -142,7 +142,7 @@ namespace FlatCircuit {
         }
       }
 
-      //std::cout << "End init" << std::endl;
+      std::cout << "End init" << std::endl;
     }
 
     void update() {
@@ -463,7 +463,7 @@ namespace FlatCircuit {
 
         BitVector newOut = in0 | in1;
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
         
       } else if (tp == CELL_TYPE_ORR) {
 
