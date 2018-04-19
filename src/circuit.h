@@ -276,6 +276,8 @@ namespace FlatCircuit {
         BitVector in_width = map_find(PARAM_IN_WIDTH, parameters); //.at(PARAM_IN_WIDTH);
         int in_wd = in_width.to_type<int>();
 
+        assert(in_wd <= out_wd);
+
         portWidths.insert({PORT_ID_OUT, {out_wd, PORT_TYPE_OUT}});
         std::vector<std::vector<SignalBit> > bus(out_wd);
         receivers.insert({PORT_ID_OUT, bus});

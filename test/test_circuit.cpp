@@ -737,20 +737,20 @@ namespace FlatCircuit {
     cout << sim.getBitVec("out_BUS16_S3_T3") << endl;
     cout << sim.getBitVec("out_BUS16_S3_T4") << endl;
 
-    // cout << "Values" << endl;
-    // for (auto val : sim.portValues) {
-    //   SigPort sp = val.first;
-    //   BitVector bv = val.second;
+    cout << "Values" << endl;
+    for (auto val : sim.portValues) {
+      SigPort sp = val.first;
+      BitVector bv = val.second;
       
-    //   cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
-    // }
-
-    cout << "Values related to outputs" << endl;
-    vector<SigPort> trace = sim.traceValue("out_BUS16_S0_T0", PORT_ID_IN);
-    
-    for (auto port : trace) {
-      cout << "\t" << sigPortString(def, port) << endl;
+      cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
     }
+
+    // cout << "Values related to outputs" << endl;
+    // vector<SigPort> trace = sim.traceValue("out_BUS16_S0_T0", PORT_ID_IN);
+    
+    // for (auto port : trace) {
+    //   cout << "\t" << sigPortString(def, port) << endl;
+    // }
 
     REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));

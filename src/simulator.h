@@ -234,18 +234,13 @@ namespace FlatCircuit {
 
       if ((tp == CELL_TYPE_PORT) || (tp == CELL_TYPE_CONST)) {
         if (tp == CELL_TYPE_PORT) {
-          //          std::cout << "Updating port" << std::endl;
-
           // This is an odd value because in general the simulator does not
           // store values of input ports in portValues
           BitVector ptp = c.getParameterValue(PARAM_PORT_TYPE);
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
-            //            std::cout << "Updating output port" << std::endl;
 
             portValues[sigPort] = materializeInput(sigPort);
-
-            //            std::cout << "Done updating output port" << std::endl;
 
           }
         }
@@ -382,7 +377,7 @@ namespace FlatCircuit {
 
         assert((hi - lo) > 0);
 
-        BitVector res(hi - lo, 1);
+        BitVector res(hi - lo, 0);
         for (uint i = lo; i < hi; i++) {
           res.set(i - lo, in.get(i));
         }
