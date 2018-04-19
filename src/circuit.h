@@ -163,6 +163,17 @@ namespace FlatCircuit {
 
     return elem(tp, binops);
   }
+
+  static inline bool isComparator(const CellType tp) {
+    std::vector<CellType> comparators{
+        CELL_TYPE_UGT,
+        CELL_TYPE_ULT,
+        CELL_TYPE_EQ,
+        CELL_TYPE_NEQ
+    };
+
+    return elem(tp, comparators);
+  }
   
   enum PortType {
     PORT_TYPE_IN,
@@ -288,9 +299,16 @@ namespace FlatCircuit {
 
         int wd = width.to_type<int>();
 
-        portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
-        receivers.insert({PORT_ID_OUT, bus});
+        if (!isComparator(cellType)) {
+          portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
+          std::vector<std::vector<SignalBit> > bus(wd);
+          receivers.insert({PORT_ID_OUT, bus});
+        } else {
+          portWidths.insert({PORT_ID_OUT, {1, PORT_TYPE_OUT}});
+          std::vector<std::vector<SignalBit> > bus(1);
+          receivers.insert({PORT_ID_OUT, bus});
+
+        }
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN0, SignalBus(wd)});

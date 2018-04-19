@@ -711,35 +711,35 @@ namespace FlatCircuit {
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
 
-    // cout << "Data0     = " << sim.getBitVec("test_pe$self.data0") << endl;
-    // cout << "Data1     = " << sim.getBitVec("test_pe$self.data1") << endl;
-    // cout << "res       = " << sim.getBitVec("test_pe$self.res") << endl;
+    cout << sim.getBitVec("out_BUS16_S0_T0") << endl;
+    cout << sim.getBitVec("out_BUS16_S0_T1") << endl;
+    cout << sim.getBitVec("out_BUS16_S0_T2") << endl;
+    cout << sim.getBitVec("out_BUS16_S0_T3") << endl;
+    cout << sim.getBitVec("out_BUS16_S0_T4") << endl;
+    cout << sim.getBitVec("out_BUS16_S1_T0") << endl;
+    cout << sim.getBitVec("out_BUS16_S1_T1") << endl;
+    cout << sim.getBitVec("out_BUS16_S1_T2") << endl;
+    cout << sim.getBitVec("out_BUS16_S1_T3") << endl;
+    cout << sim.getBitVec("out_BUS16_S1_T4") << endl;
+    cout << sim.getBitVec("out_BUS16_S2_T0") << endl;
+    cout << sim.getBitVec("out_BUS16_S2_T1") << endl;
+    cout << sim.getBitVec("out_BUS16_S2_T2") << endl;
+    cout << sim.getBitVec("out_BUS16_S2_T3") << endl;
+    cout << sim.getBitVec("out_BUS16_S2_T4") << endl;
+    cout << sim.getBitVec("out_BUS16_S3_T0") << endl;
+    cout << sim.getBitVec("out_BUS16_S3_T1") << endl;
+    cout << sim.getBitVec("out_BUS16_S3_T2") << endl;
+    cout << sim.getBitVec("out_BUS16_S3_T3") << endl;
+    cout << sim.getBitVec("out_BUS16_S3_T4") << endl;
 
-    // cout << "compa     = " << sim.getBitVec("test_pe$test_pe_comp$self.op_a") << endl;
-    // cout << "compb     = " << sim.getBitVec("test_pe$test_pe_comp$self.op_b") << endl;
-    // cout << "compr     = " << sim.getBitVec("test_pe$test_pe_comp$self.res") << endl;
+    cout << "Values" << endl;
+    for (auto val : sim.portValues) {
+      SigPort sp = val.first;
+      BitVector bv = val.second;
+      
+      cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
+    }
     
-    // cout << sim.getBitVec("self.out_BUS16_S0_T0") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S0_T1") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S0_T2") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S0_T3") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S0_T4") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S1_T0") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S1_T1") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S1_T2") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S1_T3") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S1_T4") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S2_T0") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S2_T1") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S2_T2") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S2_T3") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S2_T4") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S3_T0") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S3_T1") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S3_T2") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S3_T3") << endl;
-    // cout << sim.getBitVec("self.out_BUS16_S3_T4") << endl;
-
     REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));

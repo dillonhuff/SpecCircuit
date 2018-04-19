@@ -254,8 +254,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_ZEXT) {
         BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         int outWidth = c.getPortWidth(PORT_ID_OUT);
         BitVector res(outWidth, 0);
         for (uint i = 0; i < in.bitLength(); i++) {
@@ -269,8 +267,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_PASSTHROUGH) {
         BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = in;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
@@ -279,17 +275,11 @@ namespace FlatCircuit {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
 
-        // assert(newClk.is_binary());
-        // assert(newRst.is_binary());
-
         BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
         BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
 
-        // assert(oldClk.is_binary());
-        // assert(oldRst.is_binary());
-        
         bool clkPos = c.clkPosedge();
         bool rstPos = c.rstPosedge();
 
@@ -323,6 +313,9 @@ namespace FlatCircuit {
           newOut = c.initValue();
         }
 
+        pastValues[{sigPort.cell, PORT_ID_CLK}] = newClk;
+        pastValues[{sigPort.cell, PORT_ID_ARST}] = newRst;
+        
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
 
       } else if (tp == CELL_TYPE_REG) {
@@ -351,6 +344,8 @@ namespace FlatCircuit {
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
 
+        pastValues[{sigPort.cell, PORT_ID_CLK}] = newClk;
+        
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
 
       } else if (tp == CELL_TYPE_MUX) {
@@ -358,8 +353,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
         BitVector sel = materializeInput({sigPort.cell, PORT_ID_SEL});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         assert(sel.bitLength() == 1);
 
@@ -370,15 +363,11 @@ namespace FlatCircuit {
           newOut = i == 1 ? in1 : in0; 
         }
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);                
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
 
-        // return !same_representation(oldOut, newOut);
       } else if (tp == CELL_TYPE_ULT) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = BitVector(1, in0 < in1);
 
@@ -387,7 +376,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_SLICE) {
 
         BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         uint lo = c.getParameterValue(PARAM_LOW).to_type<int>();
         uint hi = c.getParameterValue(PARAM_HIGH).to_type<int>();
@@ -405,8 +393,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = shl(in0, in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
@@ -415,8 +401,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = ashr(in0, in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
@@ -424,8 +408,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_LSHR) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = lshr(in0, in1);
 
@@ -436,8 +418,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = in0 ^ in1;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
@@ -446,8 +426,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = sub_general_width_bv(in0, in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
@@ -455,8 +433,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_MUL) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = mul_general_width_bv(in0, in1);
 
@@ -467,8 +443,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = add_general_width_bv(in0, in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
@@ -477,8 +451,6 @@ namespace FlatCircuit {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = in0 & in1;
 
@@ -489,8 +461,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = in0 | in1;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
@@ -498,7 +468,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_ORR) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
         BitVector newOut = orr(in0);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
@@ -506,7 +475,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_ANDR) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
         BitVector newOut = andr(in0);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
@@ -514,7 +482,6 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_NOT) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN});
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = ~in0;
 
@@ -525,8 +492,6 @@ namespace FlatCircuit {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
-
         BitVector newOut = BitVector(1, in0 != in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
@@ -535,8 +500,6 @@ namespace FlatCircuit {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
-
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
         BitVector newOut = BitVector(1, in0 == in1);
 
@@ -605,5 +568,9 @@ namespace FlatCircuit {
       return getBitVec(cid, id);
     }
 
+    BitVector getBitVec(const std::string& cellName) {
+      return getBitVec(cellName, PORT_ID_IN);
+    }
+    
   };
 }
