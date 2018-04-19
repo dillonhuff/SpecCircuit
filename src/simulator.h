@@ -571,6 +571,17 @@ namespace FlatCircuit {
     BitVector getBitVec(const std::string& cellName) {
       return getBitVec(cellName, PORT_ID_IN);
     }
+
+    std::vector<SigPort> traceValue(const std::string& cellName,
+                                    const PortId portId) {
+      return traceValue(def.getPortCellId(cellName), portId);
+    }
+
+    std::vector<SigPort> traceValue(const CellId id,
+                                    const PortId portId);
+
+    std::vector<SigPort> dataSources(const SigPort sp);
+    std::vector<SigPort> getDataPorts(const CellId sp);
     
   };
 }

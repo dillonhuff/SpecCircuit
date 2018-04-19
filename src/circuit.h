@@ -74,6 +74,24 @@ namespace FlatCircuit {
       return "CELL_TYPE_ADD";
     } else if (cellTp == CELL_TYPE_ULT) {
       return "CELL_TYPE_ULT";
+    } else if (cellTp == CELL_TYPE_XOR) {
+      return "CELL_TYPE_XOR";
+    } else if (cellTp == CELL_TYPE_AND) {
+      return "CELL_TYPE_AND";
+    } else if (cellTp == CELL_TYPE_MUL) {
+      return "CELL_TYPE_MUL";
+    } else if (cellTp == CELL_TYPE_ZEXT) {
+      return "CELL_TYPE_ZEXT";
+    } else if (cellTp == CELL_TYPE_SLICE) {
+      return "CELL_TYPE_SLICE";
+    } else if (cellTp == CELL_TYPE_ASHR) {
+      return "CELL_TYPE_ASHR";
+    } else if (cellTp == CELL_TYPE_LSHR) {
+      return "CELL_TYPE_LSHR";
+    } else if (cellTp == CELL_TYPE_NOT) {
+      return "CELL_TYPE_NOT";
+    } else if (cellTp == CELL_TYPE_NEQ) {
+      return "CELL_TYPE_NEQ";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -133,7 +151,8 @@ namespace FlatCircuit {
   }
 
   static inline bool isUnop(const CellType tp) {
-    std::vector<CellType> unops{CELL_TYPE_PORT,
+    // Why is cell type port here?
+    std::vector<CellType> unops{
         CELL_TYPE_PASSTHROUGH,
         CELL_TYPE_NOT,
         CELL_TYPE_ORR,
@@ -234,13 +253,13 @@ namespace FlatCircuit {
 
       // NOTE: Need to include input port type and output port type
       if (cellType == CELL_TYPE_SLICE) {
-        BitVector width = parameters.at(PARAM_WIDTH);
+        BitVector width = map_find(PARAM_WIDTH, parameters);
         int wd = width.to_type<int>();
 
-        BitVector hi_b = parameters.at(PARAM_HIGH);
+        BitVector hi_b = map_find(PARAM_HIGH, parameters);
         int hi = hi_b.to_type<int>();
 
-        BitVector lo_b = parameters.at(PARAM_LOW);
+        BitVector lo_b = map_find(PARAM_LOW, parameters);
         int lo = lo_b.to_type<int>();
         
         portWidths.insert({PORT_ID_OUT, {hi - lo, PORT_TYPE_OUT}});
@@ -251,10 +270,10 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (cellType == CELL_TYPE_ZEXT) {
-        BitVector out_width = parameters.at(PARAM_OUT_WIDTH);
+        BitVector out_width = map_find(PARAM_OUT_WIDTH, parameters); //parameters.at(PARAM_OUT_WIDTH);
         int out_wd = out_width.to_type<int>();
 
-        BitVector in_width = parameters.at(PARAM_IN_WIDTH);
+        BitVector in_width = map_find(PARAM_IN_WIDTH, parameters); //.at(PARAM_IN_WIDTH);
         int in_wd = in_width.to_type<int>();
 
         portWidths.insert({PORT_ID_OUT, {out_wd, PORT_TYPE_OUT}});
@@ -412,15 +431,20 @@ namespace FlatCircuit {
     }
 
     BitVector getParameterValue(const Parameter val) const {
-      return parameters.at(val);
+      return map_find(val, parameters); //parameters.at(val);
     }
 
     int getPortWidth(const PortId port) const {
-      return portWidths.at(port).width;
+      return map_find(port, portWidths).width;// .at(port).width;
     }
 
     PortType getPortType(const PortId port) const {
-      return portWidths.at(port).type;
+      return map_find(port, portWidths).type; //portWidths.at(port).type;
+    }
+
+    bool isInputPortCell() const {
+      int pt = bvToInt(getParameterValue(PARAM_PORT_TYPE));
+      return pt == PORT_CELL_FOR_INPUT;
     }
 
     bool hasPort(const PortId port) const {
