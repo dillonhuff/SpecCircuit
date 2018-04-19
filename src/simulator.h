@@ -83,6 +83,7 @@ namespace FlatCircuit {
           int hi = cl.getParameterValue(PARAM_HIGH).to_type<int>();
           int lo = cl.getParameterValue(PARAM_LOW).to_type<int>();
           BitVector initVal = bsim::unknown_bv(hi - lo);
+          portValues[{cid, PORT_ID_OUT}] = initVal;
 
           // TODO: Ignore empty sigbits
           const Cell& c = def.getCellRef(cid);
@@ -95,6 +96,7 @@ namespace FlatCircuit {
         } else if (tp == CELL_TYPE_ZEXT) {
           int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
           BitVector initVal = bsim::unknown_bv(width);
+          portValues[{cid, PORT_ID_OUT}] = initVal;
 
           const Cell& c = def.getCellRef(cid);
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
@@ -249,6 +251,21 @@ namespace FlatCircuit {
         }
 
         return false;
+      } else if (tp == CELL_TYPE_ZEXT) {
+        BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        int outWidth = c.getPortWidth(PORT_ID_OUT);
+        BitVector res(outWidth, 0);
+        for (uint i = 0; i < in.bitLength(); i++) {
+          res.set(i, in.get(i));
+        }
+        
+        BitVector newOut = res;
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        
       } else if (tp == CELL_TYPE_PASSTHROUGH) {
         BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
 
@@ -357,6 +374,105 @@ namespace FlatCircuit {
         // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
 
         // return !same_representation(oldOut, newOut);
+      } else if (tp == CELL_TYPE_ULT) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = BitVector(1, in0 < in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        
+      } else if (tp == CELL_TYPE_SLICE) {
+
+        BitVector in = materializeInput({sigPort.cell, PORT_ID_IN});
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        uint lo = c.getParameterValue(PARAM_LOW).to_type<int>();
+        uint hi = c.getParameterValue(PARAM_HIGH).to_type<int>();
+
+        assert((hi - lo) > 0);
+
+        BitVector res(hi - lo, 1);
+        for (uint i = lo; i < hi; i++) {
+          res.set(i - lo, in.get(i));
+        }
+        BitVector newOut = res;
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        
+      } else if (tp == CELL_TYPE_SHL) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = shl(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_ASHR) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = ashr(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_LSHR) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = lshr(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_XOR) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = in0 ^ in1;
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_SUB) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = sub_general_width_bv(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_MUL) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = mul_general_width_bv(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
+      } else if (tp == CELL_TYPE_ADD) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+
+        BitVector newOut = add_general_width_bv(in0, in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+
       } else if (tp == CELL_TYPE_AND) {
 
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -377,10 +493,7 @@ namespace FlatCircuit {
 
         BitVector newOut = in0 | in1;
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
-
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
-        // return !same_representation(oldOut, newOut);
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
         
       } else if (tp == CELL_TYPE_ORR) {
 
@@ -428,9 +541,6 @@ namespace FlatCircuit {
         BitVector newOut = BitVector(1, in0 == in1);
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
-
-        // portValues[{sigPort.cell, PORT_ID_OUT}] = newOut;
-        // return !same_representation(oldOut, newOut);
         
       } else {
         std::cout << "No update for cell type " << toString(tp) << std::endl;

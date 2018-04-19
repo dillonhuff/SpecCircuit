@@ -70,6 +70,10 @@ namespace FlatCircuit {
       return "CELL_TYPE_PASSTHROUGH";
     } else if (cellTp == CELL_TYPE_REG) {
       return "CELL_TYPE_REG";
+    } else if (cellTp == CELL_TYPE_ADD) {
+      return "CELL_TYPE_ADD";
+    } else if (cellTp == CELL_TYPE_ULT) {
+      return "CELL_TYPE_ULT";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -578,30 +582,6 @@ namespace FlatCircuit {
     }
   };
 
-  // Problem: How to deal with module parameters?
-  // I cant just store one piece of code that represents
-  // each cell type. I have to store a different piece of code
-  // (or data structure that represents how to simulate the cell)
-  // for each cell type based on each parameter value, 16 bit add,
-  // 8 bit add, etc.
-
-  // Q: Can modargs be passed in to the execution code for simulation?
-
-  // Q: How do we isolate pieces of code that we can compile into simulatable
-  //    fragments?
-
-  // A: Sortable combinational portions are an easy one
-  //    Problems: Clock gated circuits, sequential elements
-
-  // Issue: All the combinational loops (forgetting about clock gating)
-  //        should not get feedback from outputs (if that makes sense),
-  //        so the output of one of the muxes in the loop does not change
-  //        the output of any of the muxes in the rest of the circuit
-
-
-  // All loops could be broken by setting a mux (programmable switch)
-  // The output of any loop mux does not affect the select on any other loop mux
-  // Assumption: No data will be put down the datapath until configuration is finished
   class Env {
   protected:
     std::map<CellType, CellDefinition> cellDefs;

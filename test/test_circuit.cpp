@@ -204,11 +204,8 @@ namespace FlatCircuit {
 
     } else if (tp == CELL_TYPE_ZEXT) {
 
-      //cout << "Getting zext width" << endl;
       int width_in = inst->getModuleRef()->getGenArgs().at("width_in")->get<int>();
       int width_out = inst->getModuleRef()->getGenArgs().at("width_out")->get<int>();
-
-      //cout << "Done getting zex width" << endl;
 
       return {{PARAM_IN_WIDTH, BitVector(32, width_in)},
           {PARAM_OUT_WIDTH, BitVector(32, width_out)}};
@@ -650,6 +647,7 @@ namespace FlatCircuit {
     for (int i = 0; i < configValues.size(); i++) {
 
       sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
 
       cout << "Evaluating " << i << endl;
 
@@ -660,6 +658,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", BitVec(32, configData));
 
       sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
 
     }
 
@@ -706,10 +705,10 @@ namespace FlatCircuit {
     
     cout << "Done setting inputs" << endl;
 
-    sim.setFreshValue("self.clk_in", BitVec(1, 0));
+    sim.setFreshValue("clk_in", BitVec(1, 0));
     sim.update();
 
-    sim.setFreshValue("self.clk_in", BitVec(1, 1));
+    sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
 
     // cout << "Data0     = " << sim.getBitVec("test_pe$self.data0") << endl;
