@@ -34,7 +34,7 @@ namespace FlatCircuit {
     CellDefinition& def;
 
     std::map<SigPort, BitVector> portValues;
-    std::set<SigPort> userInputs;
+    std::set<std::pair<SigPort, BitVector> > userInputs;
     std::set<SigPort> combChanges;
     std::set<SigPort> seqChanges;
 
@@ -109,9 +109,16 @@ namespace FlatCircuit {
                    (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST) ||
                    (tp == CELL_TYPE_REG)) {
 
-          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>();
-          BitVector initVal = bsim::unknown_bv(width);
-          portValues[{cid, PORT_ID_OUT}] = initVal;
+          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>();       
+          if ((tp == CELL_TYPE_REG) ||
+              (tp == CELL_TYPE_REG_ARST)) {
+            BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
+            std::cout << "Register init value = " << initVal << std::endl;
+            portValues[{cid, PORT_ID_OUT}] = initVal;
+          } else {
+            BitVector initVal = bsim::unknown_bv(width);
+            portValues[{cid, PORT_ID_OUT}] = initVal;
+          }
 
           const Cell& c = def.getCellRef(cid);
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
@@ -150,12 +157,17 @@ namespace FlatCircuit {
       
       // Add user inputs to combChanges
       for (auto in : userInputs) {
-        const Cell& c = def.getCellRef(in.cell);
-        for (auto& receiverBus : c.getPortReceivers(in.port)) {
-          for (auto& sigBit : receiverBus) {
-            combChanges.insert({sigBit.cell, sigBit.port});
-          }
-        }
+        //const Cell& c = def.getCellRef(in.first.cell);
+
+        combinationalSignalChange({in.first.cell, in.first.port}, in.second);
+
+        // Q: How should I handle fresh inputs?
+
+        // for (auto& receiverBus : c.getPortReceivers(in.port)) {
+        //   for (auto& sigBit : receiverBus) {
+        //     combChanges.insert({sigBit.cell, sigBit.port});
+        //   }
+        // }
 
         //combChanges.insert(in);
       }
@@ -215,6 +227,7 @@ namespace FlatCircuit {
                   (sigBit.port != PORT_ID_CLK)) {
                 combChanges.insert({sigBit.cell, sigBit.port});
               } else {
+                pastValues[sigPort] = oldVal;
                 seqChanges.insert({sigBit.cell, sigBit.port});
               }
             }
@@ -280,10 +293,16 @@ namespace FlatCircuit {
 
         BitVector newOut = oldOut;
 
+        std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        std::cout << "\told clock = " << oldClk << std::endl;
+        std::cout << "\tnew clock = " << newClk << std::endl;
         if (clkPos &&
             newClk.is_binary() &&
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+
+          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
 
@@ -291,6 +310,8 @@ namespace FlatCircuit {
             newClk.is_binary() &&
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
+
+          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
 
@@ -298,6 +319,8 @@ namespace FlatCircuit {
             newRst.is_binary() &&
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
+
+          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
@@ -305,12 +328,11 @@ namespace FlatCircuit {
             newRst.is_binary() &&
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
+
+          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
-        pastValues[{sigPort.cell, PORT_ID_CLK}] = newClk;
-        pastValues[{sigPort.cell, PORT_ID_ARST}] = newRst;
-        
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
 
       } else if (tp == CELL_TYPE_REG) {
@@ -355,7 +377,7 @@ namespace FlatCircuit {
 
         if (sel.is_binary()) {
           int i = bvToInt(sel);
-          newOut = i == 1 ? in1 : in0; 
+          newOut = (i == 1) ? in1 : in0; 
         }
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
@@ -431,7 +453,7 @@ namespace FlatCircuit {
 
         BitVector newOut = mul_general_width_bv(in0, in1);
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_ADD) {
 
@@ -440,7 +462,7 @@ namespace FlatCircuit {
 
         BitVector newOut = add_general_width_bv(in0, in1);
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_AND) {
 
@@ -542,8 +564,8 @@ namespace FlatCircuit {
     void setFreshValue(const CellId cid,
                        const PortId pid,
                        const BitVector& bv) {
-      portValues[{cid, pid}] = bv;
-      userInputs.insert({cid, pid});
+      //portValues[{cid, pid}] = bv;
+      userInputs.insert({{cid, pid}, bv});
     }
 
     BitVector getBitVec(const CellId cid,

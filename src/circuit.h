@@ -217,8 +217,9 @@ namespace FlatCircuit {
   }
 
   static inline std::string toString(const SignalBit bit) {
-    return "( " + std::to_string(bit.cell) + ", " + std::to_string(bit.port) + ", " + std::to_string(bit.offset) + " )";
+    return "( " + std::to_string(bit.cell) + ", " + portIdString(bit.port) + ", " + std::to_string(bit.offset) + " )";
   }
+
 
   static inline bool notEmpty(const SignalBit bit) {
     return !(bit.cell == 0);
@@ -270,10 +271,10 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (cellType == CELL_TYPE_ZEXT) {
-        BitVector out_width = map_find(PARAM_OUT_WIDTH, parameters); //parameters.at(PARAM_OUT_WIDTH);
+        BitVector out_width = map_find(PARAM_OUT_WIDTH, parameters);
         int out_wd = out_width.to_type<int>();
 
-        BitVector in_width = map_find(PARAM_IN_WIDTH, parameters); //.at(PARAM_IN_WIDTH);
+        BitVector in_width = map_find(PARAM_IN_WIDTH, parameters);
         int in_wd = in_width.to_type<int>();
 
         assert(in_wd <= out_wd);
@@ -666,5 +667,10 @@ namespace FlatCircuit {
     }
     
   };
+
+  static inline std::string toString(const CellDefinition& def,
+                                     const SignalBit bit) {
+    return "( " + def.cellName(bit.cell) + ", " + toString(def.getCellRefConst(bit.cell).getCellType()) + ", " + portIdString(bit.port) + ", " + std::to_string(bit.offset) + " )";
+  }
   
 }
