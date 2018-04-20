@@ -864,72 +864,72 @@ namespace FlatCircuit {
     cout << sim.getBitVec("out_BUS16_S3_T3") << endl;
     cout << sim.getBitVec("out_BUS16_S3_T4") << endl;
 
-    cout << "Values in cb0" << endl;
-    for (auto val : sim.portValues) {
-      SigPort sp = val.first;
-      BitVector bv = val.second;
+    // cout << "Values in cb0" << endl;
+    // for (auto val : sim.portValues) {
+    //   SigPort sp = val.first;
+    //   BitVector bv = val.second;
 
-      string name = sim.def.cellName(sp.cell);
-      string prefix = name.substr(0, name.find("$"));
-      string suffix = name.substr(name.find("$") + 1);
+    //   string name = sim.def.cellName(sp.cell);
+    //   string prefix = name.substr(0, name.find("$"));
+    //   string suffix = name.substr(name.find("$") + 1);
 
-      if (prefix == "cb_data0") {
-        // string prefix2 = suffix.substr(0, suffix.find("$"));
-        // string suffix2 = suffix.substr(suffix.find("$") + 1);
+    //   if (prefix == "cb_data0") {
+    //     // string prefix2 = suffix.substr(0, suffix.find("$"));
+    //     // string suffix2 = suffix.substr(suffix.find("$") + 1);
 
-        //if (prefix2 == "sb_wide") {
-        CellId cid = sp.cell;
-        const Cell& cell = sim.def.getCellRefConst(cid);
-        cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
-        if (cell.getCellType() == CELL_TYPE_MUX) {
-          cout << "\tIs a mux that sends to " << endl;
-          auto receivers = cell.getPortReceivers(PORT_ID_OUT);
-          assert(receivers.size() == cell.getPortWidth(PORT_ID_OUT));
-          for (auto bitReceivers : receivers) {
-            for (auto sigBit : bitReceivers) {
-              cout << "\t\t" << toString(sim.def, sigBit) << endl;
-            }
+    //     //if (prefix2 == "sb_wide") {
+    //     CellId cid = sp.cell;
+    //     const Cell& cell = sim.def.getCellRefConst(cid);
+    //     cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
+    //     if (cell.getCellType() == CELL_TYPE_MUX) {
+    //       cout << "\tIs a mux that sends to " << endl;
+    //       auto receivers = cell.getPortReceivers(PORT_ID_OUT);
+    //       assert(receivers.size() == cell.getPortWidth(PORT_ID_OUT));
+    //       for (auto bitReceivers : receivers) {
+    //         for (auto sigBit : bitReceivers) {
+    //           cout << "\t\t" << toString(sim.def, sigBit) << endl;
+    //         }
 
-          }
-        }
-          //}
-      }
-    }
+    //       }
+    //     }
+    //       //}
+    //   }
+    // }
 
-    cout << "Values in test_opt_reg_a" << endl;
-    for (auto val : sim.portValues) {
-      SigPort sp = val.first;
-      BitVector bv = val.second;
+    // cout << "Values in test_opt_reg_a" << endl;
+    // for (auto val : sim.portValues) {
+    //   SigPort sp = val.first;
+    //   BitVector bv = val.second;
 
-      string name = sim.def.cellName(sp.cell);
-      string prefix = name.substr(0, name.find("$"));
-      string suffix = name.substr(name.find("$") + 1);
+    //   string name = sim.def.cellName(sp.cell);
+    //   string prefix = name.substr(0, name.find("$"));
+    //   string suffix = name.substr(name.find("$") + 1);
 
-      if (prefix == "test_pe") {
-        string prefix2 = suffix.substr(0, suffix.find("$"));
-        string suffix2 = suffix.substr(suffix.find("$") + 1);
+    //   if (prefix == "test_pe") {
+    //     string prefix2 = suffix.substr(0, suffix.find("$"));
+    //     string suffix2 = suffix.substr(suffix.find("$") + 1);
 
-        if (prefix2 == "test_opt_reg_a") {
-          const Cell& c = sim.def.getCellRefConst(sp.cell);
-          cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
+    //     if (prefix2 == "test_opt_reg_a") {
+    //       const Cell& c = sim.def.getCellRefConst(sp.cell);
+    //       cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
 
-          if (isBinop(c.getCellType())) {
-            auto in0Drivers = c.getDrivers(PORT_ID_IN0);
-            cout << "\t\tIn0 = " << sim.materializeInput({sp.cell, PORT_ID_IN0}) << " has drivers" << endl;
-            for (auto sigBit : in0Drivers.signals) {
-              cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
-            }
+    //       if (isBinop(c.getCellType())) {
+    //         auto in0Drivers = c.getDrivers(PORT_ID_IN0);
+    //         cout << "\t\tIn0 = " << sim.materializeInput({sp.cell, PORT_ID_IN0}) << " has drivers" << endl;
+    //         for (auto sigBit : in0Drivers.signals) {
+    //           cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
+    //         }
 
-            auto in1Drivers = c.getDrivers(PORT_ID_IN1);
-            cout << "\t\tIn1 = " << sim.materializeInput({sp.cell, PORT_ID_IN1}) << " has drivers" << endl;
-            for (auto sigBit : in1Drivers.signals) {
-              cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
-            }
+    //         auto in1Drivers = c.getDrivers(PORT_ID_IN1);
+    //         cout << "\t\tIn1 = " << sim.materializeInput({sp.cell, PORT_ID_IN1}) << " has drivers" << endl;
+    //         for (auto sigBit : in1Drivers.signals) {
+    //           cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
+    //         }
 
-          }
-        }
-      }
-    }
+    //       }
+    //     }
+    //   }
+    // }
     
     // cout << "Multiply value" << endl;
 

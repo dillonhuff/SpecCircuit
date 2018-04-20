@@ -113,7 +113,7 @@ namespace FlatCircuit {
           if ((tp == CELL_TYPE_REG) ||
               (tp == CELL_TYPE_REG_ARST)) {
             BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
-            std::cout << "Register init value = " << initVal << std::endl;
+            //std::cout << "Register init value = " << initVal << std::endl;
             portValues[{cid, PORT_ID_OUT}] = initVal;
             registerValues[cid] = initVal;
           } else {
@@ -282,15 +282,15 @@ namespace FlatCircuit {
 
         BitVector newOut = oldOut;
 
-        std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-        std::cout << "\told clock = " << oldClk << std::endl;
-        std::cout << "\tnew clock = " << newClk << std::endl;
+        //std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        //std::cout << "\told clock = " << oldClk << std::endl;
+        //std::cout << "\tnew clock = " << newClk << std::endl;
         if (clkPos &&
             newClk.is_binary() &&
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
 
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
@@ -300,7 +300,7 @@ namespace FlatCircuit {
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
 
@@ -309,7 +309,7 @@ namespace FlatCircuit {
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
@@ -318,7 +318,7 @@ namespace FlatCircuit {
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
