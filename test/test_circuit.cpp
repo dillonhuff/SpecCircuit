@@ -603,11 +603,13 @@ namespace FlatCircuit {
 
     cout << "Loaded connect box" << endl;
 
-    CellDefinition& def = circuitEnv.getDef("global.cb_unq1"); //top->getName());
+    CellDefinition& def = circuitEnv.getDef("cb_unq1"); //top->getName());
 
-      //REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
+    cout << "Getting def" << endl;
 
-      //REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
+    // REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
+
+    // REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
 
     const Cell& clkPort = def.getPortCell("clk");
 
@@ -617,6 +619,8 @@ namespace FlatCircuit {
 
     REQUIRE(clkPort.hasPort(PORT_ID_OUT));
 
+    cout << "Getting res port" << endl;
+    
     const Cell& resPort = def.getPortCell("out");
     REQUIRE(resPort.getCellType() == CELL_TYPE_PORT);
     REQUIRE(resPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_OUTPUT);
