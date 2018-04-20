@@ -399,92 +399,92 @@ namespace FlatCircuit {
 
         return false;
 
-        BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
-        BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
+        // BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
+        // BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+        // BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
-        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
-        BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
+        // BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
+        // BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
 
-        bool clkPos = c.clkPosedge();
-        bool rstPos = c.rstPosedge();
+        // bool clkPos = c.clkPosedge();
+        // bool rstPos = c.rstPosedge();
 
-        BitVector newOut = oldOut;
+        // BitVector newOut = oldOut;
 
-        std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-        std::cout << "\told clock = " << oldClk << std::endl;
-        std::cout << "\tnew clock = " << newClk << std::endl;
-        if (clkPos &&
-            newClk.is_binary() &&
-            oldClk.is_binary() &&
-            (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+        // std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        // std::cout << "\told clock = " << oldClk << std::endl;
+        // std::cout << "\tnew clock = " << newClk << std::endl;
+        // if (clkPos &&
+        //     newClk.is_binary() &&
+        //     oldClk.is_binary() &&
+        //     (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        //   std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
 
-          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
-        }
+        //   newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        // }
 
-        if (!clkPos &&
-            newClk.is_binary() &&
-            oldClk.is_binary() &&
-            (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
+        // if (!clkPos &&
+        //     newClk.is_binary() &&
+        //     oldClk.is_binary() &&
+        //     (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
-        }
+        //   std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        //   newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        // }
 
-        if (rstPos &&
-            newRst.is_binary() &&
-            oldRst.is_binary() &&
-            (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
+        // if (rstPos &&
+        //     newRst.is_binary() &&
+        //     oldRst.is_binary() &&
+        //     (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-          newOut = c.initValue();
-        }
+        //   std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        //   newOut = c.initValue();
+        // }
 
-        if (!rstPos &&
-            newRst.is_binary() &&
-            oldRst.is_binary() &&
-            (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
+        // if (!rstPos &&
+        //     newRst.is_binary() &&
+        //     oldRst.is_binary() &&
+        //     (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
 
-          std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-          newOut = c.initValue();
-        }
+        //   std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
+        //   newOut = c.initValue();
+        // }
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
+        // return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
 
       } else if (tp == CELL_TYPE_REG) {
 
         return false;
 
-        BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
+        // BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
 
-        BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
+        // BitVector oldOut = getBitVec(sigPort.cell, PORT_ID_OUT);
 
-        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
+        // BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
         
-        bool clkPos = c.clkPosedge();
+        // bool clkPos = c.clkPosedge();
 
-        BitVector newOut = oldOut;
+        // BitVector newOut = oldOut;
 
-        if (clkPos &&
-            newClk.is_binary() &&
-            oldClk.is_binary() &&
-            (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
-          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
-        }
+        // if (clkPos &&
+        //     newClk.is_binary() &&
+        //     oldClk.is_binary() &&
+        //     (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+        //   newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        // }
 
-        if (!clkPos &&
-            newClk.is_binary() &&
-            oldClk.is_binary() &&
-            (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
-          newOut = materializeInput({sigPort.cell, PORT_ID_IN});
-        }
+        // if (!clkPos &&
+        //     newClk.is_binary() &&
+        //     oldClk.is_binary() &&
+        //     (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
+        //   newOut = materializeInput({sigPort.cell, PORT_ID_IN});
+        // }
 
-        pastValues[{sigPort.cell, PORT_ID_CLK}] = newClk;
+        // pastValues[{sigPort.cell, PORT_ID_CLK}] = newClk;
         
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
+        // return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut); 
 
       } else if (tp == CELL_TYPE_MUX) {
         
