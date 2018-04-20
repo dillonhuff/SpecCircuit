@@ -500,6 +500,56 @@ namespace FlatCircuit {
 
   // }
 
+  TEST_CASE("Simulating a mux loop") {
+
+    Context* c = newContext();
+    Namespace* g = c->getGlobal();
+
+    uint width = 2;
+
+    Type* twoMuxType =
+      c->Record({
+          {"in", c->BitIn()->Arr(width)},
+            {"sel", c->BitIn()},
+              {"out", c->Bit()->Arr(width)}
+        });
+
+    Module* twoMux = c->getGlobal()->newModuleDecl("twoMux", twoMuxType);
+    ModuleDef* def = twoMux->newModuleDef();
+
+    def->addInstance("mux0",
+                     "coreir.mux",
+                     {{"width", Const::make(c, width)}});
+
+    def->connect("self.sel", "mux0.sel");
+    def->connect("self.in", "mux0.in0");
+    def->connect("mux0.out", "mux0.in1");
+    def->connect("mux0.out", "self.out");
+
+    twoMux->setDef(def);
+
+    cout << "Creating twoMux simulation" << endl;
+
+    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+
+    Env circuitEnv = convertFromCoreIR(c, twoMux);
+
+    REQUIRE(circuitEnv.getCellDefs().size() == 1);
+
+    CellDefinition& cDef = circuitEnv.getDef(twoMux->getName());
+    
+    Simulator state(circuitEnv, cDef);
+
+    state.setFreshValue("sel", BitVector(1, 0));
+    state.setFreshValue("in", BitVector(width, "11"));
+    state.update();
+
+    REQUIRE(state.getBitVec("out") == BitVector(width, "11"));
+      
+    deleteContext(c);
+    
+  }
+  
   TEST_CASE("Loading Connect box") {
     Context* c = newContext();
     Namespace* g = c->getGlobal();
