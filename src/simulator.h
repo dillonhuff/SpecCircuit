@@ -206,6 +206,8 @@ namespace FlatCircuit {
           }
         }
 
+        seqChanges = {};
+
         for (auto cid : registersToUpdate) {
           combinationalSignalChange({cid, PORT_ID_OUT},
                                     map_find(cid, registerValues));
@@ -216,6 +218,7 @@ namespace FlatCircuit {
       //std::cout << "Done with update" << std::endl;
 
       assert(combChanges.size() == 0);
+      assert(seqChanges.size() == 0);
     }
 
     bool combinationalSignalChange(const SigPort sigPort,
