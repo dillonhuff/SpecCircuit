@@ -601,6 +601,8 @@ namespace FlatCircuit {
 
     Env circuitEnv = loadFromCoreIR("global.cb_unq1", "./test/cb_unq1.json");
 
+    cout << "Loaded connect box" << endl;
+
     CellDefinition& def = circuitEnv.getDef("global.cb_unq1"); //top->getName());
 
       //REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
