@@ -549,20 +549,22 @@ namespace FlatCircuit {
     deleteContext(c);
     
   }
-  
-  TEST_CASE("Loading Connect box") {
+
+  Env loadFromCoreIR(const std::string& topName,
+                     const std::string& fileName) {
     Context* c = newContext();
     Namespace* g = c->getGlobal();
 
     CoreIRLoadLibrary_rtlil(c);
 
     Module* top;
-    if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
+    //if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
+    if (!loadFromFile(c, fileName, &top)) {
       cout << "Could not Load from json!!" << endl;
       c->die();
     }
 
-    top = c->getModule("global.cb_unq1");
+    top = c->getModule(topName); //("global.cb_unq1");
 
     assert(top != nullptr);
 
@@ -570,13 +572,40 @@ namespace FlatCircuit {
 
     Env circuitEnv = convertFromCoreIR(c, top);
 
-    REQUIRE(circuitEnv.getCellDefs().size() == 1);
+    deleteContext(c);
+    
+    return circuitEnv;
+  }
+  
+  TEST_CASE("Loading Connect box") {
+    // Context* c = newContext();
+    // Namespace* g = c->getGlobal();
 
-    CellDefinition& def = circuitEnv.getDef(top->getName());
+    // CoreIRLoadLibrary_rtlil(c);
 
-    REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
+    // Module* top;
+    // if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
+    //   cout << "Could not Load from json!!" << endl;
+    //   c->die();
+    // }
 
-    REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
+    // top = c->getModule("global.cb_unq1");
+
+    // assert(top != nullptr);
+
+    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+
+    // Env circuitEnv = convertFromCoreIR(c, top);
+
+    // REQUIRE(circuitEnv.getCellDefs().size() == 1);
+
+    Env circuitEnv = loadFromCoreIR("global.cb_unq1", "./test/cb_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("global.cb_unq1"); //top->getName());
+
+      //REQUIRE(def.numCells() == (top->getDef()->getInstances().size() + top->getType()->getFields().size()));
+
+      //REQUIRE(def.getPortNames().size() == top->getType()->getFields().size());
 
     const Cell& clkPort = def.getPortCell("clk");
 
@@ -672,7 +701,7 @@ namespace FlatCircuit {
 
     REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
     
-    deleteContext(c);
+    //deleteContext(c);
   }
 
   // TEST_CASE("CGRA PE tile") {
