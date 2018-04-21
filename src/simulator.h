@@ -27,6 +27,20 @@ namespace FlatCircuit {
     return true;
   }
 
+  class SimMemory {
+  public:
+    int depth;
+    int width;
+    std::vector<BitVector> mem;
+
+    SimMemory(const int depth, const int width) {
+      mem.resize(depth);
+      for (int i = 0; i < depth; i++) {
+        mem[i] = BitVector(width, 0);
+      }
+    }
+  };
+
   class Simulator {
 
   public:
@@ -42,6 +56,8 @@ namespace FlatCircuit {
 
     // Use this to save clock / reset port past values to detect edges
     std::map<SigPort, BitVector> pastValues;
+
+    std::map<CellId, SimMemory> memories;
     
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
