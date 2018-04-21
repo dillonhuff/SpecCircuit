@@ -556,18 +556,18 @@ namespace FlatCircuit {
 
   // }
 
-  TEST_CASE("Simulating memory") {
-    Env circuitEnv = loadFromCoreIR("global.top",
-                                    "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+  // TEST_CASE("Simulating memory") {
+  //   Env circuitEnv = loadFromCoreIR("global.top",
+  //                                   "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     
-    CellDefinition& def = circuitEnv.getDef("top");
-    Simulator sim(circuitEnv, def);
+  //   CellDefinition& def = circuitEnv.getDef("top");
+  //   Simulator sim(circuitEnv, def);
 
-    cout << sim.getBitVec("in_BUS16_S2_T0", PORT_ID_OUT) << endl;
+  //   cout << sim.getBitVec("in_BUS16_S2_T0", PORT_ID_OUT) << endl;
 
-    cout << "Output" << endl;
-  }
+  //   cout << "Output" << endl;
+  // }
 
   TEST_CASE("Simulating a mux loop") {
 
