@@ -178,6 +178,10 @@ namespace FlatCircuit {
       return CELL_TYPE_XOR;
     } else if (name == "coreir.slice") {
       return CELL_TYPE_SLICE;
+    } else if (name == "coreir.uge") {
+      return CELL_TYPE_UGE;
+    } else if (name == "coreir.ule") {
+      return CELL_TYPE_ULE;
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
     }

@@ -50,6 +50,8 @@ namespace FlatCircuit {
 #define CELL_TYPE_ZEXT 22
 #define CELL_TYPE_MUL 23
 #define CELL_TYPE_SLICE 24
+#define CELL_TYPE_UGE 25
+#define CELL_TYPE_ULE 26
 
   static inline std::string toString(const CellType cellTp) {
     if (cellTp == CELL_TYPE_CONST) {
@@ -177,7 +179,9 @@ namespace FlatCircuit {
         CELL_TYPE_NEQ,
         CELL_TYPE_ASHR,
         CELL_TYPE_LSHR,
-        CELL_TYPE_SHL
+        CELL_TYPE_SHL,
+        CELL_TYPE_UGE,
+        CELL_TYPE_ULE
     };
 
     return elem(tp, binops);
@@ -185,11 +189,13 @@ namespace FlatCircuit {
 
   static inline bool isComparator(const CellType tp) {
     std::vector<CellType> comparators{
-        CELL_TYPE_UGT,
+      CELL_TYPE_UGT,
         CELL_TYPE_ULT,
         CELL_TYPE_EQ,
-        CELL_TYPE_NEQ
-    };
+        CELL_TYPE_NEQ,
+        CELL_TYPE_UGE,
+        CELL_TYPE_ULE
+        };
 
     return elem(tp, comparators);
   }
