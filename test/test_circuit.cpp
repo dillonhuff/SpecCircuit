@@ -338,6 +338,12 @@ namespace FlatCircuit {
         portWidth = artp->getLen();
       } else if (isBitType(*tp)) {
         portWidth = 1;
+      } else if (isa<NamedType>(tp)) {
+        NamedType* ntp = cast<NamedType>(tp);
+
+        assert(ntp->getSize() == 1);
+
+        portWidth = ntp->getSize();
       } else {
         cout << "Field " << field << " has unsupported type " << tp->toString() << endl;
         assert(false);
@@ -567,6 +573,206 @@ namespace FlatCircuit {
   //   cout << sim.getBitVec("in_BUS16_S2_T0", PORT_ID_OUT) << endl;
 
   //   cout << "Output" << endl;
+  // }
+
+  TEST_CASE("Memory") {
+    Context* c = newContext();
+    Namespace* g = c->getGlobal();
+
+    uint width = 20;
+    uint depth = 4;
+    uint index = 2;
+
+    Type* memoryType = c->Record({
+        {"clk", c->Named("coreir.clkIn")},
+          {"write_data", c->BitIn()->Arr(width)},
+            {"write_addr", c->BitIn()->Arr(index)},
+              {"write_en", c->BitIn()},
+                {"read_data", c->Bit()->Arr(width)},
+                  {"read_addr", c->BitIn()->Arr(index)}
+      });
+
+      
+    Module* memory = c->getGlobal()->newModuleDecl("memory0", memoryType);
+    ModuleDef* def = memory->newModuleDef();
+
+    def->addInstance("m0",
+                     "coreir.mem",
+                     {{"width", Const::make(c,width)},{"depth", Const::make(c,depth)}});
+
+    def->connect("self.clk", "m0.clk");
+    def->connect("self.write_en", "m0.wen");
+    def->connect("self.write_data", "m0.wdata");
+    def->connect("self.write_addr", "m0.waddr");
+    def->connect("self.read_data", "m0.rdata");
+    def->connect("self.read_addr", "m0.raddr");
+
+    memory->setDef(def);
+
+    c->runPasses({"rungenerators","flattentypes","flatten"});      
+
+    Env circuitEnv = convertFromCoreIR(c, memory);
+    CellDefinition cDef = circuitEnv.getDef("memory0");
+
+    Simulator state(circuitEnv, cDef);
+
+    state.setFreshValue("clk", BitVec(1, 0));
+    state.update();
+
+    // Do not write when write_en == 0
+    state.setFreshValue("clk", BitVec(1, 1));
+    state.setFreshValue("write_en", BitVec(1, 0));
+    state.setFreshValue("write_addr", BitVec(index, 0));
+    state.setFreshValue("write_data", BitVec(width, 23));
+    state.setFreshValue("read_addr", BitVec(index, 0));
+    state.update();
+
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+    state.setFreshValue("clk", BitVec(1, 0));
+    state.update();
+
+    state.setFreshValue("clk", BitVec(1, 1));
+    state.setFreshValue("write_en", BitVec(1, 1));
+    state.update();
+
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    REQUIRE(state.getBitVec("write_addr") == BitVec(index, 0));
+
+    state.update();
+
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
+
+    state.setFreshValue("write_addr", BitVec(index, 1));
+    state.setFreshValue("write_data", BitVec(width, 5));
+    state.setFreshValue("read_addr", BitVec(index, 1));
+    state.update();
+
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+    state.setFreshValue("read_addr", BitVec(index, 6));
+    state.update();
+    
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 5));
+
+    deleteContext(c);
+  }
+    
+  // TEST_CASE("Memory2") {
+  //   uint width = 20;
+  //   uint depth = 4;
+  //   uint index = 2;
+
+  //   Type* memoryType = c->Record({
+  //       {"clk", c->Named("coreir.clkIn")},
+  //         {"write_data", c->BitIn()->Arr(width)},
+  //           {"write_addr", c->BitIn()->Arr(index)},
+  //             {"write_en", c->BitIn()},
+  //               {"read_data", c->Bit()->Arr(width)},
+  //                 {"read_addr", c->BitIn()->Arr(index)}
+  //     });
+
+      
+  //   Module* memory = c->getGlobal()->newModuleDecl("memory0", memoryType);
+  //   ModuleDef* def = memory->newModuleDef();
+
+  //   def->addInstance("m0",
+  //                    "coreir.mem",
+  //                    {{"width", Const::make(c,width)},{"depth", Const::make(c,depth)}});
+
+  //   def->connect("self.clk", "m0.clk");
+  //   def->connect("self.write_en", "m0.wen");
+  //   def->connect("self.write_data", "m0.wdata");
+  //   def->connect("self.write_addr", "m0.waddr");
+  //   def->connect("self.read_data", "m0.rdata");
+  //   def->connect("self.read_addr", "m0.raddr");
+
+  //   memory->setDef(def);
+
+  //   c->runPasses({"rungenerators","flattentypes","flatten"});      
+
+  //   SimulatorState state(memory);
+
+  //   SECTION("Memory default is zero") {
+  //     REQUIRE(state.getMemory("m0", BitVec(index, 0)) == BitVec(width, 0));
+  //   }
+
+  //   SECTION("rdata default is zero") {
+  //     REQUIRE(state.getBitVec("m0.rdata") == BitVec(width, 0));
+  //   }
+      
+  //   state.setMemory("m0", BitVec(index, 0), BitVec(width, 0));
+  //   state.setMemory("m0", BitVec(index, 1), BitVec(width, 1));
+  //   state.setMemory("m0", BitVec(index, 2), BitVec(width, 2));
+  //   state.setMemory("m0", BitVec(index, 3), BitVec(width, 3));
+
+  //   SECTION("Setting memory manually") {
+  //     REQUIRE(state.getMemory("m0", BitVec(index, 2)) == BitVec(width, 2));
+  //   }
+
+  //   SECTION("Re-setting memory manually") {
+  //     state.setMemory("m0", BitVec(index, 3), BitVec(width, 23));
+
+  //     REQUIRE(state.getMemory("m0", BitVec(index, 3)) == BitVec(width, 23));
+  //   }
+
+  //   SECTION("Write to address zero") {
+
+  //     SECTION("Read is combinational") {
+  //       state.setClock("self.clk", 0, 0);
+  //       state.setValue("self.write_en", BitVec(1, 0));
+  //       state.setValue("self.write_addr", BitVec(index, 0));
+  //       state.setValue("self.write_data", BitVec(width, 23));
+          
+  //       state.setValue("self.read_addr", BitVec(index, 2));
+
+  //       state.execute();
+
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 2));
+
+  //       state.setClock("self.clk", 0, 0);
+  //       state.setValue("self.read_addr", BitVec(index, 0));
+
+  //       state.execute();
+
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 0));
+
+  //     }
+
+  //     state.setClock("self.clk", 0, 1);
+  //     state.setValue("self.write_en", BitVec(1, 1));
+  //     state.setValue("self.write_addr", BitVec(index, 0));
+  //     state.setValue("self.write_data", BitVec(width, 23));
+  //     state.setValue("self.read_addr", BitVec(index, 0));
+
+  //     state.exeCombinational();
+
+  //     SECTION("read_data is 0 after zeroth clock cycle, even though the address being read is set by write_addr") {
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 0));
+  //     }
+
+  //     state.execute();
+
+  //     SECTION("read_data is 23 after the first rising edge") {
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
+  //     }
+
+  //     state.execute();
+
+  //     SECTION("One cycle after setting write_data the result has been updated") {
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
+  //     }
+
+  //     state.execute();
+
+  //     cout << "read data later = " << state.getBitVec("self.read_data") << endl;
+
+  //     SECTION("Re-updating does not change the value") {
+  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
+  //     }
+	
+  //   }
+      
   // }
 
   TEST_CASE("Simulating a mux loop") {

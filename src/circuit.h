@@ -505,6 +505,16 @@ namespace FlatCircuit {
       return getParameterValue(PARAM_INIT_VALUE);
     }
 
+    int getMemWidth() const {
+      BitVector bv = getParameterValue(PARAM_MEM_WIDTH);
+      return bv.to_type<int>();
+    }
+
+    int getMemDepth() const {
+      BitVector bv = getParameterValue(PARAM_MEM_DEPTH);
+      return bv.to_type<int>();
+    }
+    
     bool rstPosedge() const {
       BitVector bv = getParameterValue(PARAM_ARST_POSEDGE);
       return bv.get(0).is_binary() && (bv.get(0).binary_value() == 1);

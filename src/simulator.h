@@ -33,6 +33,11 @@ namespace FlatCircuit {
     int width;
     std::vector<BitVector> mem;
 
+    SimMemory() {
+      depth = 0;
+      width = 0;
+    }
+
     SimMemory(const int depth, const int width) {
       mem.resize(depth);
       for (int i = 0; i < depth; i++) {
@@ -80,6 +85,28 @@ namespace FlatCircuit {
               combChanges.insert({sigBit.cell, sigBit.port});
             }
           }
+        } else if (tp == CELL_TYPE_MEM) {
+          int memWidth = cl.getMemWidth();
+          int memDepth = cl.getMemDepth();
+
+          SimMemory defaultMem(memDepth, memWidth);
+
+          memories[cid] = defaultMem;
+
+          BitVector initVal(memWidth, 0);
+          portValues[{cid, PORT_ID_RDATA}] = initVal;
+
+          BitVector clkVal(1, 0);
+          SigPort clkPort = {cid, PORT_ID_CLK};
+          pastValues[clkPort] = clkVal;
+          
+          const Cell& c = def.getCellRef(cid);
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_RDATA)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+
         } else if (tp == CELL_TYPE_PORT) {
           if (cl.hasPort(PORT_ID_OUT)) {
             int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
@@ -192,11 +219,18 @@ namespace FlatCircuit {
 
 
         std::vector<CellId> registersToUpdate;
+        std::vector<CellId> memoriesToUpdate;
         for (auto s : seqChanges) {
 
-          bool registerChanged = updateSequentialPort(s);
-          if (registerChanged) {
-            registersToUpdate.push_back(s.cell);
+          bool stateChanged = updateSequentialPort(s);
+          CellType tp = def.getCellRefConst(s.cell).getCellType();
+          if (stateChanged) {
+            if ((tp == CELL_TYPE_REG) || (tp == CELL_TYPE_REG_ARST)) {
+              registersToUpdate.push_back(s.cell);
+            } else {
+              assert(tp == CELL_TYPE_MEM);
+              memoriesToUpdate.push_back(s.cell);
+            }
           }
         }
 
@@ -207,6 +241,11 @@ namespace FlatCircuit {
                                     map_find(cid, registerValues));
         }
 
+        // for (auto cid : registersToUpdate) {
+        //   combinationalSignalChange({cid, PORT_ID_RADDR},
+        //                             map_find(cid, memories));
+        // }
+        
       } while (combChanges.size() > 0);
 
       assert(combChanges.size() == 0);
@@ -240,6 +279,21 @@ namespace FlatCircuit {
       }
 
       return changed;
+    }
+
+    bool memoryStateChange(const CellId cid,
+                           const BitVector& writeAddr,
+                           const BitVector& writeData) {
+      int addr = writeAddr.to_type<int>();
+      BitVector oldVal = map_find(cid, memories).mem.at(addr);
+
+      if (same_representation(oldVal, writeData)) {
+        return false;
+      }
+
+      map_find(cid, memories).mem[addr] = writeData;
+
+      return true;
     }
 
     bool registerStateChange(const CellId id,
@@ -343,6 +397,21 @@ namespace FlatCircuit {
 
         return registerStateChange(sigPort.cell, newOut);
 
+      } else if (tp == CELL_TYPE_MEM) {
+        BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
+        BitVector oldClk = map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
+
+        if (newClk.is_binary() &&
+            oldClk.is_binary() &&
+            (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+          BitVector writeAddr = materializeInput({sigPort.cell, PORT_ID_WADDR});
+          BitVector writeData = materializeInput({sigPort.cell, PORT_ID_WDATA});
+
+          return memoryStateChange(sigPort.cell, writeAddr, writeData);
+        }
+
+        return false;
+        
       } else {
         assert(false);
       }
@@ -390,6 +459,17 @@ namespace FlatCircuit {
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
+      } else if (tp == CELL_TYPE_MEM) {
+
+        // Reads are combinational, writes are sequential
+        BitVector raddr = materializeInput({sigPort.cell, PORT_ID_RADDR});
+        BitVector rdata(def.getCellRefConst(sigPort.cell).getMemWidth(), 0);
+
+        if (raddr.is_binary()) {
+          rdata = map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
+        }
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_RDATA}, rdata);
       } else if (tp == CELL_TYPE_REG_ARST) {
 
         return false;
