@@ -120,16 +120,24 @@ namespace FlatCircuit {
       return PORT_ID_IN1;
     } else if (fstPort == "arst") {
       return PORT_ID_ARST;
+    } else if (fstPort == "raddr") {
+      return PORT_ID_RADDR;
+    } else if (fstPort == "rdata") {
+      return PORT_ID_RDATA;
+    } else if (fstPort == "waddr") {
+      return PORT_ID_WADDR;
+    } else if (fstPort == "wdata") {
+      return PORT_ID_WDATA;
+    } else if (fstPort == "wen") {
+      return PORT_ID_WEN;
     } else if (fromSelf(sel)) {
       assert(false);
-
     }
 
     cout << "Unsupported port " << fstPort << " in sel " << sel->toString() << endl;
     assert(false);
   }
 
-  //CellType primitiveForMod(const Env& e, CoreIR::Instance* const inst) {
   CellType primitiveForMod(CoreIR::Instance* const inst) {
     string name = getQualifiedOpName(*inst);
     if (name == "coreir.wrap") {
@@ -182,6 +190,8 @@ namespace FlatCircuit {
       return CELL_TYPE_UGE;
     } else if (name == "coreir.ule") {
       return CELL_TYPE_ULE;
+    } else if (name == "coreir.mem") {
+      return CELL_TYPE_MEM;
     } else {
       cout << "Error: Unsupported module type = " << name << endl;
     }
@@ -274,6 +284,21 @@ namespace FlatCircuit {
       
       return {{PARAM_WIDTH, BitVector(32, width)}, {PARAM_INIT_VALUE, init}};
 
+    } else if (tp == CELL_TYPE_MEM) {
+      BitVector depth =
+        BitVector(32, inst->getModuleRef()->getGenArgs().at("depth")->get<int>());
+      BitVector width =
+        BitVector(32, inst->getModuleRef()->getGenArgs().at("width")->get<int>());
+
+      bool hasInit = inst->getModuleRef()->getGenArgs().at("has_init")->get<bool>();
+      map<Parameter, BitVector> params{{PARAM_MEM_WIDTH, width},
+          {PARAM_MEM_DEPTH, depth},
+            {PARAM_HAS_INIT, BitVector(1, hasInit)}};
+      if (hasInit) {
+        BitVector init = inst->getModArgs().at("init")->get<BitVector>();
+        params.insert({PARAM_HAS_INIT, init});
+      }
+      return params;
     } else {
       cout << "Error: Unsupported parameters module type = " << name << endl;
     }
@@ -451,21 +476,21 @@ namespace FlatCircuit {
     return e;
   }
 
-  // Need to build
-  TEST_CASE("Loading cgra") {
-
+  Env loadFromCoreIR(const std::string& topName,
+                     const std::string& fileName) {
     Context* c = newContext();
     Namespace* g = c->getGlobal();
 
     CoreIRLoadLibrary_rtlil(c);
 
     Module* top;
-    if (!loadFromFile(c,"../EventSim/test/top.json", &top)) {
+    //if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
+    if (!loadFromFile(c, fileName, &top)) {
       cout << "Could not Load from json!!" << endl;
       c->die();
     }
 
-    top = c->getModule("global.top");
+    top = c->getModule(topName); //("global.cb_unq1");
 
     assert(top != nullptr);
 
@@ -473,35 +498,75 @@ namespace FlatCircuit {
 
     Env circuitEnv = convertFromCoreIR(c, top);
 
-    CellDefinition& def = circuitEnv.getDef(top->getName());
-
-    Simulator sim(circuitEnv, def);
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
-    sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
-    sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
-
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
-    
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
-    sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
-
-    sim.update();
-
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
-    
-    
     deleteContext(c);
+    
+    return circuitEnv;
+  }
+  
+  // Need to build
+  // TEST_CASE("Loading cgra") {
 
+  //   Context* c = newContext();
+  //   Namespace* g = c->getGlobal();
+
+  //   CoreIRLoadLibrary_rtlil(c);
+
+  //   Module* top;
+  //   if (!loadFromFile(c,"../EventSim/test/top.json", &top)) {
+  //     cout << "Could not Load from json!!" << endl;
+  //     c->die();
+  //   }
+
+  //   top = c->getModule("global.top");
+
+  //   assert(top != nullptr);
+
+  //   c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+
+  //   Env circuitEnv = convertFromCoreIR(c, top);
+
+  //   CellDefinition& def = circuitEnv.getDef(top->getName());
+
+  //   Simulator sim(circuitEnv, def);
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.update();
+  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
+
+  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+  //   sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.update();
+  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+  //   sim.update();
+    
+  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+  //   sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+
+  //   sim.update();
+
+  //   REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+    
+    
+  //   deleteContext(c);
+
+  // }
+
+  TEST_CASE("Simulating memory") {
+    Env circuitEnv = loadFromCoreIR("global.top",
+                                    "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+
+    
+    CellDefinition& def = circuitEnv.getDef("top");
+    Simulator sim(circuitEnv, def);
+
+    cout << sim.getBitVec("in_BUS16_S2_T0", PORT_ID_OUT) << endl;
+
+    cout << "Output" << endl;
   }
 
   TEST_CASE("Simulating a mux loop") {
@@ -552,33 +617,6 @@ namespace FlatCircuit {
       
     deleteContext(c);
     
-  }
-
-  Env loadFromCoreIR(const std::string& topName,
-                     const std::string& fileName) {
-    Context* c = newContext();
-    Namespace* g = c->getGlobal();
-
-    CoreIRLoadLibrary_rtlil(c);
-
-    Module* top;
-    //if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
-    if (!loadFromFile(c, fileName, &top)) {
-      cout << "Could not Load from json!!" << endl;
-      c->die();
-    }
-
-    top = c->getModule(topName); //("global.cb_unq1");
-
-    assert(top != nullptr);
-
-    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
-
-    Env circuitEnv = convertFromCoreIR(c, top);
-
-    deleteContext(c);
-    
-    return circuitEnv;
   }
   
   TEST_CASE("Loading Connect box") {
@@ -921,6 +959,30 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
+
+    // int nCycles = 40000;
+    
+    // cout << "Running tile for " << nCycles << " cycles " << endl;
+
+    // clock_t start = clock();
+    
+    // for (int i = 0; i < nCycles / 2; i++) {
+    //   sim.setFreshValue("clk_in", BitVec(1, 0));
+    //   sim.update();
+
+    //   sim.setFreshValue("in_BUS16_S2_T0", BitVec(16, i));
+    //   sim.setFreshValue("clk_in", BitVec(1, 1));
+    //   sim.update();
+    // }
+
+    // cout << "out_BUS16_S0_T0 = " << sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) << endl;
+
+    // clock_t timeElapsed = clock() - start;
+    // unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
+
+
+    // cout << "Time (ms) for " << nCycles << " cycles = " << msElapsed << endl;
+    // cout << "Done" << endl;
   
     deleteContext(c);
   }

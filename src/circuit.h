@@ -20,7 +20,10 @@ namespace FlatCircuit {
     PARAM_SEL_WIDTH,
     PARAM_CLK_POSEDGE,
     PARAM_ARST_POSEDGE,
-    PARAM_INIT_VALUE
+    PARAM_INIT_VALUE,
+    PARAM_MEM_WIDTH,
+    PARAM_MEM_DEPTH,
+    PARAM_HAS_INIT
   };
 
   typedef uint64_t CellType;
@@ -52,6 +55,7 @@ namespace FlatCircuit {
 #define CELL_TYPE_SLICE 24
 #define CELL_TYPE_UGE 25
 #define CELL_TYPE_ULE 26
+#define CELL_TYPE_MEM 27
 
   static inline std::string toString(const CellType cellTp) {
     if (cellTp == CELL_TYPE_CONST) {
@@ -94,6 +98,8 @@ namespace FlatCircuit {
       return "CELL_TYPE_NOT";
     } else if (cellTp == CELL_TYPE_NEQ) {
       return "CELL_TYPE_NEQ";
+    } else if (cellTp == CELL_TYPE_MEM) {
+      return "CELL_TYPE_MEM";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -111,6 +117,11 @@ namespace FlatCircuit {
 #define PORT_ID_SEL 4
 #define PORT_ID_CLK 5
 #define PORT_ID_ARST 6
+#define PORT_ID_RADDR 7
+#define PORT_ID_RDATA 8
+#define PORT_ID_WADDR 9
+#define PORT_ID_WDATA 10
+#define PORT_ID_WEN 11  
 
   static inline std::string portIdString(const PortId portId) {
     if (portId == PORT_ID_IN0) {
@@ -276,6 +287,32 @@ namespace FlatCircuit {
         portWidths.insert({PORT_ID_IN, {wd, PORT_TYPE_IN}});
         drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
+      } else if (cellType == CELL_TYPE_MEM) {
+        // TODO: Fill in the memory cell
+        BitVector depth = map_find(PARAM_MEM_DEPTH, parameters);
+
+        BitVector width = map_find(PARAM_MEM_WIDTH, parameters);
+        int addrWidth = ceil(log2(depth.to_type<int>()));
+
+        portWidths.insert({PORT_ID_RADDR, {addrWidth, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_RADDR, SignalBus(addrWidth)});
+
+        portWidths.insert({PORT_ID_WADDR, {addrWidth, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_WADDR, SignalBus(addrWidth)});
+
+        portWidths.insert({PORT_ID_WDATA, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_WDATA, SignalBus(width.to_type<int>())});
+
+        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_CLK, SignalBus(1)});
+
+        portWidths.insert({PORT_ID_WEN, {1, PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_WEN, SignalBus(1)});
+        
+        portWidths.insert({PORT_ID_RDATA, {width.to_type<int>(), PORT_TYPE_OUT}});
+        std::vector<std::vector<SignalBit> > bus(width.to_type<int>());
+        receivers.insert({PORT_ID_RDATA, bus});
+        
       } else if (cellType == CELL_TYPE_ZEXT) {
         BitVector out_width = map_find(PARAM_OUT_WIDTH, parameters);
         int out_wd = out_width.to_type<int>();
