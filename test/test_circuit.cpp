@@ -508,17 +508,33 @@ namespace FlatCircuit {
     
     return circuitEnv;
   }
+
+  std::vector<std::string> splitString(const std::string& str,
+                                       const std::string& delimiter) {
+    string s = str;
+    size_t pos = 0;
+    vector<string> strs;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+      std::string token;
+      token = s.substr(0, pos);
+      strs.push_back(token);
+      s.erase(0, pos + delimiter.length());
+    }
+
+    return strs;
+  }
   
   TEST_CASE("Simulating memory") {
+    auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
     Env circuitEnv =
       loadFromCoreIR("global.top",
                      "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     CellDefinition& def = circuitEnv.getDef("top");
 
-    auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
+    
 
-    BitVector input("16'hffff");
+    BitVector input("16'hf0ff");
 
     Simulator sim(circuitEnv, def);
     sim.setFreshValue("reset_in", BitVector("1'h0"));
@@ -559,6 +575,10 @@ namespace FlatCircuit {
     sim.setFreshValue("clk_in", BitVec(1, 0));
     sim.update();
 
+    cout << "Register values" << endl;
+    for (auto r : sim.registerValues) {
+      cout << "\t" << sim.def.cellName(r.first) << " --> " << r.second << endl;
+    }
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
 
@@ -646,87 +666,103 @@ namespace FlatCircuit {
     
     sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+    cout << "Inputs" << endl;
+    for (int side = 0; side < 4; side++) {
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        cout << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+      }
+    }
     
+    cout << "Computing 40 cycles of data" << endl;
+    for (int i = 0; i < 40; i++) {
+      cout << "Cycle " << i << endl;
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
     cout << "Outputs" << endl;
 
-    cout << "pad_S0_T0_out = " << sim.getBitVec("pad_S0_T0_out") << endl;
-    cout << "pad_S0_T1_out = " << sim.getBitVec("pad_S0_T1_out") << endl;
-    cout << "pad_S0_T2_out = " << sim.getBitVec("pad_S0_T2_out") << endl;
-    cout << "pad_S0_T3_out = " << sim.getBitVec("pad_S0_T3_out") << endl;
-    cout << "pad_S0_T4_out = " << sim.getBitVec("pad_S0_T4_out") << endl;
-    cout << "pad_S0_T5_out = " << sim.getBitVec("pad_S0_T5_out") << endl;
-    cout << "pad_S0_T6_out = " << sim.getBitVec("pad_S0_T6_out") << endl;
-    cout << "pad_S0_T7_out = " << sim.getBitVec("pad_S0_T7_out") << endl;
-    cout << "pad_S0_T8_out = " << sim.getBitVec("pad_S0_T8_out") << endl;
-    cout << "pad_S0_T9_out = " << sim.getBitVec("pad_S0_T9_out") << endl;
-    cout << "pad_S0_T10_out = " << sim.getBitVec("pad_S0_T10_out") << endl;
-    cout << "pad_S0_T11_out = " << sim.getBitVec("pad_S0_T11_out") << endl;
-    cout << "pad_S0_T12_out = " << sim.getBitVec("pad_S0_T12_out") << endl;
-    cout << "pad_S0_T13_out = " << sim.getBitVec("pad_S0_T13_out") << endl;
-    cout << "pad_S0_T14_out = " << sim.getBitVec("pad_S0_T14_out") << endl;
-    cout << "pad_S0_T15_out = " << sim.getBitVec("pad_S0_T15_out") << endl;
+    for (int side = 0; side < 4; side++) {
+      for (int track = 0; track < 16; track++) {
+        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+        cout << "outName = " << sim.getBitVec(outName) << endl;
+      }
+    }
 
-    cout << "pad_S1_T0_out = " << sim.getBitVec("pad_S1_T0_out") << endl;
-    cout << "pad_S1_T1_out = " << sim.getBitVec("pad_S1_T1_out") << endl;
-    cout << "pad_S1_T2_out = " << sim.getBitVec("pad_S1_T2_out") << endl;
-    cout << "pad_S1_T3_out = " << sim.getBitVec("pad_S1_T3_out") << endl;
-    cout << "pad_S1_T4_out = " << sim.getBitVec("pad_S1_T4_out") << endl;
-    cout << "pad_S1_T5_out = " << sim.getBitVec("pad_S1_T5_out") << endl;
-    cout << "pad_S1_T6_out = " << sim.getBitVec("pad_S1_T6_out") << endl;
-    cout << "pad_S1_T7_out = " << sim.getBitVec("pad_S1_T7_out") << endl;
-    cout << "pad_S1_T8_out = " << sim.getBitVec("pad_S1_T8_out") << endl;
-    cout << "pad_S1_T9_out = " << sim.getBitVec("pad_S1_T9_out") << endl;
-    cout << "pad_S1_T10_out = " << sim.getBitVec("pad_S1_T10_out") << endl;
-    cout << "pad_S1_T11_out = " << sim.getBitVec("pad_S1_T11_out") << endl;
-    cout << "pad_S1_T12_out = " << sim.getBitVec("pad_S1_T12_out") << endl;
-    cout << "pad_S1_T13_out = " << sim.getBitVec("pad_S1_T13_out") << endl;
-    cout << "pad_S1_T14_out = " << sim.getBitVec("pad_S1_T14_out") << endl;
-    cout << "pad_S1_T15_out = " << sim.getBitVec("pad_S1_T15_out") << endl;
+    
+    
+    // cout << "pad_S0_T0_out = " << sim.getBitVec("pad_S0_T0_out") << endl;
+    // cout << "pad_S0_T1_out = " << sim.getBitVec("pad_S0_T1_out") << endl;
+    // cout << "pad_S0_T2_out = " << sim.getBitVec("pad_S0_T2_out") << endl;
+    // cout << "pad_S0_T3_out = " << sim.getBitVec("pad_S0_T3_out") << endl;
+    // cout << "pad_S0_T4_out = " << sim.getBitVec("pad_S0_T4_out") << endl;
+    // cout << "pad_S0_T5_out = " << sim.getBitVec("pad_S0_T5_out") << endl;
+    // cout << "pad_S0_T6_out = " << sim.getBitVec("pad_S0_T6_out") << endl;
+    // cout << "pad_S0_T7_out = " << sim.getBitVec("pad_S0_T7_out") << endl;
+    // cout << "pad_S0_T8_out = " << sim.getBitVec("pad_S0_T8_out") << endl;
+    // cout << "pad_S0_T9_out = " << sim.getBitVec("pad_S0_T9_out") << endl;
+    // cout << "pad_S0_T10_out = " << sim.getBitVec("pad_S0_T10_out") << endl;
+    // cout << "pad_S0_T11_out = " << sim.getBitVec("pad_S0_T11_out") << endl;
+    // cout << "pad_S0_T12_out = " << sim.getBitVec("pad_S0_T12_out") << endl;
+    // cout << "pad_S0_T13_out = " << sim.getBitVec("pad_S0_T13_out") << endl;
+    // cout << "pad_S0_T14_out = " << sim.getBitVec("pad_S0_T14_out") << endl;
+    // cout << "pad_S0_T15_out = " << sim.getBitVec("pad_S0_T15_out") << endl;
 
-    cout << "pad_S2_T0_out = " << sim.getBitVec("pad_S2_T0_out") << endl;
-    cout << "pad_S2_T1_out = " << sim.getBitVec("pad_S2_T1_out") << endl;
-    cout << "pad_S2_T2_out = " << sim.getBitVec("pad_S2_T2_out") << endl;
-    cout << "pad_S2_T3_out = " << sim.getBitVec("pad_S2_T3_out") << endl;
-    cout << "pad_S2_T4_out = " << sim.getBitVec("pad_S2_T4_out") << endl;
-    cout << "pad_S2_T5_out = " << sim.getBitVec("pad_S2_T5_out") << endl;
-    cout << "pad_S2_T6_out = " << sim.getBitVec("pad_S2_T6_out") << endl;
-    cout << "pad_S2_T7_out = " << sim.getBitVec("pad_S2_T7_out") << endl;
-    cout << "pad_S2_T8_out = " << sim.getBitVec("pad_S2_T8_out") << endl;
-    cout << "pad_S2_T9_out = " << sim.getBitVec("pad_S2_T9_out") << endl;
-    cout << "pad_S2_T10_out = " << sim.getBitVec("pad_S2_T10_out") << endl;
-    cout << "pad_S2_T11_out = " << sim.getBitVec("pad_S2_T11_out") << endl;
-    cout << "pad_S2_T12_out = " << sim.getBitVec("pad_S2_T12_out") << endl;
-    cout << "pad_S2_T13_out = " << sim.getBitVec("pad_S2_T13_out") << endl;
-    cout << "pad_S2_T14_out = " << sim.getBitVec("pad_S2_T14_out") << endl;
-    cout << "pad_S2_T15_out = " << sim.getBitVec("pad_S2_T15_out") << endl;
+    // cout << "pad_S1_T0_out = " << sim.getBitVec("pad_S1_T0_out") << endl;
+    // cout << "pad_S1_T1_out = " << sim.getBitVec("pad_S1_T1_out") << endl;
+    // cout << "pad_S1_T2_out = " << sim.getBitVec("pad_S1_T2_out") << endl;
+    // cout << "pad_S1_T3_out = " << sim.getBitVec("pad_S1_T3_out") << endl;
+    // cout << "pad_S1_T4_out = " << sim.getBitVec("pad_S1_T4_out") << endl;
+    // cout << "pad_S1_T5_out = " << sim.getBitVec("pad_S1_T5_out") << endl;
+    // cout << "pad_S1_T6_out = " << sim.getBitVec("pad_S1_T6_out") << endl;
+    // cout << "pad_S1_T7_out = " << sim.getBitVec("pad_S1_T7_out") << endl;
+    // cout << "pad_S1_T8_out = " << sim.getBitVec("pad_S1_T8_out") << endl;
+    // cout << "pad_S1_T9_out = " << sim.getBitVec("pad_S1_T9_out") << endl;
+    // cout << "pad_S1_T10_out = " << sim.getBitVec("pad_S1_T10_out") << endl;
+    // cout << "pad_S1_T11_out = " << sim.getBitVec("pad_S1_T11_out") << endl;
+    // cout << "pad_S1_T12_out = " << sim.getBitVec("pad_S1_T12_out") << endl;
+    // cout << "pad_S1_T13_out = " << sim.getBitVec("pad_S1_T13_out") << endl;
+    // cout << "pad_S1_T14_out = " << sim.getBitVec("pad_S1_T14_out") << endl;
+    // cout << "pad_S1_T15_out = " << sim.getBitVec("pad_S1_T15_out") << endl;
 
-    cout << "pad_S3_T0_out = " << sim.getBitVec("pad_S3_T0_out") << endl;
-    cout << "pad_S3_T1_out = " << sim.getBitVec("pad_S3_T1_out") << endl;
-    cout << "pad_S3_T2_out = " << sim.getBitVec("pad_S3_T2_out") << endl;
-    cout << "pad_S3_T3_out = " << sim.getBitVec("pad_S3_T3_out") << endl;
-    cout << "pad_S3_T4_out = " << sim.getBitVec("pad_S3_T4_out") << endl;
-    cout << "pad_S3_T5_out = " << sim.getBitVec("pad_S3_T5_out") << endl;
-    cout << "pad_S3_T6_out = " << sim.getBitVec("pad_S3_T6_out") << endl;
-    cout << "pad_S3_T7_out = " << sim.getBitVec("pad_S3_T7_out") << endl;
-    cout << "pad_S3_T8_out = " << sim.getBitVec("pad_S3_T8_out") << endl;
-    cout << "pad_S3_T9_out = " << sim.getBitVec("pad_S3_T9_out") << endl;
-    cout << "pad_S3_T10_out = " << sim.getBitVec("pad_S3_T10_out") << endl;
-    cout << "pad_S3_T11_out = " << sim.getBitVec("pad_S3_T11_out") << endl;
-    cout << "pad_S3_T12_out = " << sim.getBitVec("pad_S3_T12_out") << endl;
-    cout << "pad_S3_T13_out = " << sim.getBitVec("pad_S3_T13_out") << endl;
-    cout << "pad_S3_T14_out = " << sim.getBitVec("pad_S3_T14_out") << endl;
-    cout << "pad_S3_T15_out = " << sim.getBitVec("pad_S3_T15_out") << endl;
+    // cout << "pad_S2_T0_out = " << sim.getBitVec("pad_S2_T0_out") << endl;
+    // cout << "pad_S2_T1_out = " << sim.getBitVec("pad_S2_T1_out") << endl;
+    // cout << "pad_S2_T2_out = " << sim.getBitVec("pad_S2_T2_out") << endl;
+    // cout << "pad_S2_T3_out = " << sim.getBitVec("pad_S2_T3_out") << endl;
+    // cout << "pad_S2_T4_out = " << sim.getBitVec("pad_S2_T4_out") << endl;
+    // cout << "pad_S2_T5_out = " << sim.getBitVec("pad_S2_T5_out") << endl;
+    // cout << "pad_S2_T6_out = " << sim.getBitVec("pad_S2_T6_out") << endl;
+    // cout << "pad_S2_T7_out = " << sim.getBitVec("pad_S2_T7_out") << endl;
+    // cout << "pad_S2_T8_out = " << sim.getBitVec("pad_S2_T8_out") << endl;
+    // cout << "pad_S2_T9_out = " << sim.getBitVec("pad_S2_T9_out") << endl;
+    // cout << "pad_S2_T10_out = " << sim.getBitVec("pad_S2_T10_out") << endl;
+    // cout << "pad_S2_T11_out = " << sim.getBitVec("pad_S2_T11_out") << endl;
+    // cout << "pad_S2_T12_out = " << sim.getBitVec("pad_S2_T12_out") << endl;
+    // cout << "pad_S2_T13_out = " << sim.getBitVec("pad_S2_T13_out") << endl;
+    // cout << "pad_S2_T14_out = " << sim.getBitVec("pad_S2_T14_out") << endl;
+    // cout << "pad_S2_T15_out = " << sim.getBitVec("pad_S2_T15_out") << endl;
+
+    // cout << "pad_S3_T0_out = " << sim.getBitVec("pad_S3_T0_out") << endl;
+    // cout << "pad_S3_T1_out = " << sim.getBitVec("pad_S3_T1_out") << endl;
+    // cout << "pad_S3_T2_out = " << sim.getBitVec("pad_S3_T2_out") << endl;
+    // cout << "pad_S3_T3_out = " << sim.getBitVec("pad_S3_T3_out") << endl;
+    // cout << "pad_S3_T4_out = " << sim.getBitVec("pad_S3_T4_out") << endl;
+    // cout << "pad_S3_T5_out = " << sim.getBitVec("pad_S3_T5_out") << endl;
+    // cout << "pad_S3_T6_out = " << sim.getBitVec("pad_S3_T6_out") << endl;
+    // cout << "pad_S3_T7_out = " << sim.getBitVec("pad_S3_T7_out") << endl;
+    // cout << "pad_S3_T8_out = " << sim.getBitVec("pad_S3_T8_out") << endl;
+    // cout << "pad_S3_T9_out = " << sim.getBitVec("pad_S3_T9_out") << endl;
+    // cout << "pad_S3_T10_out = " << sim.getBitVec("pad_S3_T10_out") << endl;
+    // cout << "pad_S3_T11_out = " << sim.getBitVec("pad_S3_T11_out") << endl;
+    // cout << "pad_S3_T12_out = " << sim.getBitVec("pad_S3_T12_out") << endl;
+    // cout << "pad_S3_T13_out = " << sim.getBitVec("pad_S3_T13_out") << endl;
+    // cout << "pad_S3_T14_out = " << sim.getBitVec("pad_S3_T14_out") << endl;
+    // cout << "pad_S3_T15_out = " << sim.getBitVec("pad_S3_T15_out") << endl;
     
 
   }
