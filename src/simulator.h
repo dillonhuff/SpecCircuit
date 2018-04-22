@@ -188,7 +188,8 @@ namespace FlatCircuit {
           }
           
         } else {
-          std::cout << "No initialization for cell type " << toString(tp) << std::endl;
+          std::cout << "No initialization for cell type " << toString(tp) <<
+            std::endl;
           assert(false);
         }
       }
@@ -236,7 +237,7 @@ namespace FlatCircuit {
 
         seqChanges = {};
 
-        std::cout << "# of memory updates = " << memoriesToUpdate.size() << std::endl;
+        //std::cout << "# of memory updates = " << memoriesToUpdate.size() << std::endl;
 
         // Change to udpate port?
         for (auto cid : registersToUpdate) {
@@ -256,7 +257,7 @@ namespace FlatCircuit {
 
     bool combinationalSignalChange(const SigPort sigPort,
                                    const BitVector& bv) {
-      std::cout << "Combinational signal change for " << sigPortString(def, sigPort) << " to " << bv << std::endl;
+      //std::cout << "Combinational signal change for " << sigPortString(def, sigPort) << " to " << bv << std::endl;
 
       BitVector oldVal = portValues.at(sigPort);
       //portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
@@ -268,13 +269,13 @@ namespace FlatCircuit {
 
       if (changed) {
 
-        std::cout << "Value changed" << std::endl;
+        //std::cout << "Value changed" << std::endl;
 
         for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
           for (auto& sigBit : receiverBus) {
 
             if (notEmpty(sigBit)) {
-              std::cout << "Updating receiver " << toString(def, sigBit) << std::endl;
+              //std::cout << "Updating receiver " << toString(def, sigBit) << std::endl;
               if ((sigBit.port != PORT_ID_ARST) &&
                   (sigBit.port != PORT_ID_CLK)) {
                 combChanges.insert({sigBit.cell, sigBit.port});
@@ -325,7 +326,7 @@ namespace FlatCircuit {
 
     bool updateSequentialPort(const SigPort sigPort) {
 
-      std::cout << "Updating sequential port " << sigPortString(def, sigPort) << std::endl;
+      //std::cout << "Updating sequential port " << sigPortString(def, sigPort) << std::endl;
 
       Cell& c = def.getCellRef(sigPort.cell);
       CellType tp = c.getCellType();
@@ -428,12 +429,12 @@ namespace FlatCircuit {
             (writeEnable.get(0) == 1) &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
 
-          std::cout << "Getting inputs on high clock" << std::endl;
+          //std::cout << "Getting inputs on high clock" << std::endl;
 
           BitVector writeAddr = materializeInput({sigPort.cell, PORT_ID_WADDR});
           BitVector writeData = materializeInput({sigPort.cell, PORT_ID_WDATA});
 
-          std::cout << "Got inputs" << std::endl;
+          //std::cout << "Got inputs" << std::endl;
 
           return memoryStateChange(sigPort.cell, writeAddr, writeData);
         }
