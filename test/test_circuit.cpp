@@ -509,71 +509,227 @@ namespace FlatCircuit {
     return circuitEnv;
   }
   
-  // Need to build
-  // TEST_CASE("Loading cgra") {
+  TEST_CASE("Simulating memory") {
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
-  //   Context* c = newContext();
-  //   Namespace* g = c->getGlobal();
+    CellDefinition& def = circuitEnv.getDef("top");
 
-  //   CoreIRLoadLibrary_rtlil(c);
+    auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
 
-  //   Module* top;
-  //   if (!loadFromFile(c,"../EventSim/test/top.json", &top)) {
-  //     cout << "Could not Load from json!!" << endl;
-  //     c->die();
-  //   }
+    BitVector input("16'hffff");
 
-  //   top = c->getModule("global.top");
+    Simulator sim(circuitEnv, def);
+    sim.setFreshValue("reset_in", BitVector("1'h0"));
+    sim.update();
+    sim.setFreshValue("reset_in", BitVector("1'h1"));
+    sim.update();
+    sim.setFreshValue("reset_in", BitVector("1'h0"));
+    sim.update();
 
-  //   assert(top != nullptr);
+    cout << "Reset chip" << endl;
+    for (int i = 0; i < configValues.size(); i++) {
 
-  //   c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
 
-  //   Env circuitEnv = convertFromCoreIR(c, top);
+      cout << "Evaluating " << i << endl;
 
-  //   CellDefinition& def = circuitEnv.getDef(top->getName());
+      unsigned int configAddr = configValues[i].first;
+      unsigned int configData = configValues[i].second;
 
-  //   Simulator sim(circuitEnv, def);
-  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-  //   sim.update();
-  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
-  //   sim.update();
-  //   sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-  //   sim.update();
+      sim.setFreshValue("config_addr_in", BitVec(32, configAddr));
+      sim.setFreshValue("config_data_in", BitVec(32, configData));
 
-  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
-  //   sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
-  //   sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
 
-  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-  //   sim.update();
-  //   sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-  //   sim.update();
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+      
+    }
+
+    cout << "Done configuring PE tile" << endl;
+
+    sim.setFreshValue("config_addr_in", BitVec(32, 0));
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
+
+    cout << "Done setting inputs" << endl;
+
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
+
+    sim.setFreshValue("pad_S0_T0_in", BitVec(1, input.get(0).binary_value()));
+    sim.setFreshValue("pad_S0_T1_in", BitVec(1, input.get(1).binary_value()));
+    sim.setFreshValue("pad_S0_T2_in", BitVec(1, input.get(2).binary_value()));
+    sim.setFreshValue("pad_S0_T3_in", BitVec(1, input.get(3).binary_value()));
+    sim.setFreshValue("pad_S0_T4_in", BitVec(1, input.get(4).binary_value()));
+    sim.setFreshValue("pad_S0_T5_in", BitVec(1, input.get(5).binary_value()));
+    sim.setFreshValue("pad_S0_T6_in", BitVec(1, input.get(6).binary_value()));
+    sim.setFreshValue("pad_S0_T7_in", BitVec(1, input.get(7).binary_value()));
+    sim.setFreshValue("pad_S0_T8_in", BitVec(1, input.get(8).binary_value()));
+    sim.setFreshValue("pad_S0_T9_in", BitVec(1, input.get(9).binary_value()));
+    sim.setFreshValue("pad_S0_T10_in", BitVec(1, input.get(10).binary_value()));
+    sim.setFreshValue("pad_S0_T11_in", BitVec(1, input.get(11).binary_value()));
+    sim.setFreshValue("pad_S0_T12_in", BitVec(1, input.get(12).binary_value()));
+    sim.setFreshValue("pad_S0_T13_in", BitVec(1, input.get(13).binary_value()));
+    sim.setFreshValue("pad_S0_T14_in", BitVec(1, input.get(14).binary_value()));
+    sim.setFreshValue("pad_S0_T15_in", BitVec(1, input.get(15).binary_value()));
+
+    sim.setFreshValue("pad_S1_T0_in", BitVec(1, input.get(0).binary_value()));
+    sim.setFreshValue("pad_S1_T1_in", BitVec(1, input.get(1).binary_value()));
+    sim.setFreshValue("pad_S1_T2_in", BitVec(1, input.get(2).binary_value()));
+    sim.setFreshValue("pad_S1_T3_in", BitVec(1, input.get(3).binary_value()));
+    sim.setFreshValue("pad_S1_T4_in", BitVec(1, input.get(4).binary_value()));
+    sim.setFreshValue("pad_S1_T5_in", BitVec(1, input.get(5).binary_value()));
+    sim.setFreshValue("pad_S1_T6_in", BitVec(1, input.get(6).binary_value()));
+    sim.setFreshValue("pad_S1_T7_in", BitVec(1, input.get(7).binary_value()));
+    sim.setFreshValue("pad_S1_T8_in", BitVec(1, input.get(8).binary_value()));
+    sim.setFreshValue("pad_S1_T9_in", BitVec(1, input.get(9).binary_value()));
+    sim.setFreshValue("pad_S1_T10_in", BitVec(1, input.get(10).binary_value()));
+    sim.setFreshValue("pad_S1_T11_in", BitVec(1, input.get(11).binary_value()));
+    sim.setFreshValue("pad_S1_T12_in", BitVec(1, input.get(12).binary_value()));
+    sim.setFreshValue("pad_S1_T13_in", BitVec(1, input.get(13).binary_value()));
+    sim.setFreshValue("pad_S1_T14_in", BitVec(1, input.get(14).binary_value()));
+    sim.setFreshValue("pad_S1_T15_in", BitVec(1, input.get(15).binary_value()));
+
+    sim.setFreshValue("pad_S2_T0_in", BitVec(1, input.get(0).binary_value()));
+    sim.setFreshValue("pad_S2_T1_in", BitVec(1, input.get(1).binary_value()));
+    sim.setFreshValue("pad_S2_T2_in", BitVec(1, input.get(2).binary_value()));
+    sim.setFreshValue("pad_S2_T3_in", BitVec(1, input.get(3).binary_value()));
+    sim.setFreshValue("pad_S2_T4_in", BitVec(1, input.get(4).binary_value()));
+    sim.setFreshValue("pad_S2_T5_in", BitVec(1, input.get(5).binary_value()));
+    sim.setFreshValue("pad_S2_T6_in", BitVec(1, input.get(6).binary_value()));
+    sim.setFreshValue("pad_S2_T7_in", BitVec(1, input.get(7).binary_value()));
+    sim.setFreshValue("pad_S2_T8_in", BitVec(1, input.get(8).binary_value()));
+    sim.setFreshValue("pad_S2_T9_in", BitVec(1, input.get(9).binary_value()));
+    sim.setFreshValue("pad_S2_T10_in", BitVec(1, input.get(10).binary_value()));
+    sim.setFreshValue("pad_S2_T11_in", BitVec(1, input.get(11).binary_value()));
+    sim.setFreshValue("pad_S2_T12_in", BitVec(1, input.get(12).binary_value()));
+    sim.setFreshValue("pad_S2_T13_in", BitVec(1, input.get(13).binary_value()));
+    sim.setFreshValue("pad_S2_T14_in", BitVec(1, input.get(14).binary_value()));
+    sim.setFreshValue("pad_S2_T15_in", BitVec(1, input.get(15).binary_value()));
+
+    sim.setFreshValue("pad_S3_T0_in", BitVec(1, input.get(0).binary_value()));
+    sim.setFreshValue("pad_S3_T1_in", BitVec(1, input.get(1).binary_value()));
+    sim.setFreshValue("pad_S3_T2_in", BitVec(1, input.get(2).binary_value()));
+    sim.setFreshValue("pad_S3_T3_in", BitVec(1, input.get(3).binary_value()));
+    sim.setFreshValue("pad_S3_T4_in", BitVec(1, input.get(4).binary_value()));
+    sim.setFreshValue("pad_S3_T5_in", BitVec(1, input.get(5).binary_value()));
+    sim.setFreshValue("pad_S3_T6_in", BitVec(1, input.get(6).binary_value()));
+    sim.setFreshValue("pad_S3_T7_in", BitVec(1, input.get(7).binary_value()));
+    sim.setFreshValue("pad_S3_T8_in", BitVec(1, input.get(8).binary_value()));
+    sim.setFreshValue("pad_S3_T9_in", BitVec(1, input.get(9).binary_value()));
+    sim.setFreshValue("pad_S3_T10_in", BitVec(1, input.get(10).binary_value()));
+    sim.setFreshValue("pad_S3_T11_in", BitVec(1, input.get(11).binary_value()));
+    sim.setFreshValue("pad_S3_T12_in", BitVec(1, input.get(12).binary_value()));
+    sim.setFreshValue("pad_S3_T13_in", BitVec(1, input.get(13).binary_value()));
+    sim.setFreshValue("pad_S3_T14_in", BitVec(1, input.get(14).binary_value()));
+    sim.setFreshValue("pad_S3_T15_in", BitVec(1, input.get(15).binary_value()));
     
-  //   sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
-  //   sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+    sim.update();
 
-  //   sim.update();
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.update();
 
-  //   REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
     
+    cout << "Outputs" << endl;
+
+    cout << "pad_S0_T0_out = " << sim.getBitVec("pad_S0_T0_out") << endl;
+    cout << "pad_S0_T1_out = " << sim.getBitVec("pad_S0_T1_out") << endl;
+    cout << "pad_S0_T2_out = " << sim.getBitVec("pad_S0_T2_out") << endl;
+    cout << "pad_S0_T3_out = " << sim.getBitVec("pad_S0_T3_out") << endl;
+    cout << "pad_S0_T4_out = " << sim.getBitVec("pad_S0_T4_out") << endl;
+    cout << "pad_S0_T5_out = " << sim.getBitVec("pad_S0_T5_out") << endl;
+    cout << "pad_S0_T6_out = " << sim.getBitVec("pad_S0_T6_out") << endl;
+    cout << "pad_S0_T7_out = " << sim.getBitVec("pad_S0_T7_out") << endl;
+    cout << "pad_S0_T8_out = " << sim.getBitVec("pad_S0_T8_out") << endl;
+    cout << "pad_S0_T9_out = " << sim.getBitVec("pad_S0_T9_out") << endl;
+    cout << "pad_S0_T10_out = " << sim.getBitVec("pad_S0_T10_out") << endl;
+    cout << "pad_S0_T11_out = " << sim.getBitVec("pad_S0_T11_out") << endl;
+    cout << "pad_S0_T12_out = " << sim.getBitVec("pad_S0_T12_out") << endl;
+    cout << "pad_S0_T13_out = " << sim.getBitVec("pad_S0_T13_out") << endl;
+    cout << "pad_S0_T14_out = " << sim.getBitVec("pad_S0_T14_out") << endl;
+    cout << "pad_S0_T15_out = " << sim.getBitVec("pad_S0_T15_out") << endl;
+
+    cout << "pad_S1_T0_out = " << sim.getBitVec("pad_S1_T0_out") << endl;
+    cout << "pad_S1_T1_out = " << sim.getBitVec("pad_S1_T1_out") << endl;
+    cout << "pad_S1_T2_out = " << sim.getBitVec("pad_S1_T2_out") << endl;
+    cout << "pad_S1_T3_out = " << sim.getBitVec("pad_S1_T3_out") << endl;
+    cout << "pad_S1_T4_out = " << sim.getBitVec("pad_S1_T4_out") << endl;
+    cout << "pad_S1_T5_out = " << sim.getBitVec("pad_S1_T5_out") << endl;
+    cout << "pad_S1_T6_out = " << sim.getBitVec("pad_S1_T6_out") << endl;
+    cout << "pad_S1_T7_out = " << sim.getBitVec("pad_S1_T7_out") << endl;
+    cout << "pad_S1_T8_out = " << sim.getBitVec("pad_S1_T8_out") << endl;
+    cout << "pad_S1_T9_out = " << sim.getBitVec("pad_S1_T9_out") << endl;
+    cout << "pad_S1_T10_out = " << sim.getBitVec("pad_S1_T10_out") << endl;
+    cout << "pad_S1_T11_out = " << sim.getBitVec("pad_S1_T11_out") << endl;
+    cout << "pad_S1_T12_out = " << sim.getBitVec("pad_S1_T12_out") << endl;
+    cout << "pad_S1_T13_out = " << sim.getBitVec("pad_S1_T13_out") << endl;
+    cout << "pad_S1_T14_out = " << sim.getBitVec("pad_S1_T14_out") << endl;
+    cout << "pad_S1_T15_out = " << sim.getBitVec("pad_S1_T15_out") << endl;
+
+    cout << "pad_S2_T0_out = " << sim.getBitVec("pad_S2_T0_out") << endl;
+    cout << "pad_S2_T1_out = " << sim.getBitVec("pad_S2_T1_out") << endl;
+    cout << "pad_S2_T2_out = " << sim.getBitVec("pad_S2_T2_out") << endl;
+    cout << "pad_S2_T3_out = " << sim.getBitVec("pad_S2_T3_out") << endl;
+    cout << "pad_S2_T4_out = " << sim.getBitVec("pad_S2_T4_out") << endl;
+    cout << "pad_S2_T5_out = " << sim.getBitVec("pad_S2_T5_out") << endl;
+    cout << "pad_S2_T6_out = " << sim.getBitVec("pad_S2_T6_out") << endl;
+    cout << "pad_S2_T7_out = " << sim.getBitVec("pad_S2_T7_out") << endl;
+    cout << "pad_S2_T8_out = " << sim.getBitVec("pad_S2_T8_out") << endl;
+    cout << "pad_S2_T9_out = " << sim.getBitVec("pad_S2_T9_out") << endl;
+    cout << "pad_S2_T10_out = " << sim.getBitVec("pad_S2_T10_out") << endl;
+    cout << "pad_S2_T11_out = " << sim.getBitVec("pad_S2_T11_out") << endl;
+    cout << "pad_S2_T12_out = " << sim.getBitVec("pad_S2_T12_out") << endl;
+    cout << "pad_S2_T13_out = " << sim.getBitVec("pad_S2_T13_out") << endl;
+    cout << "pad_S2_T14_out = " << sim.getBitVec("pad_S2_T14_out") << endl;
+    cout << "pad_S2_T15_out = " << sim.getBitVec("pad_S2_T15_out") << endl;
+
+    cout << "pad_S3_T0_out = " << sim.getBitVec("pad_S3_T0_out") << endl;
+    cout << "pad_S3_T1_out = " << sim.getBitVec("pad_S3_T1_out") << endl;
+    cout << "pad_S3_T2_out = " << sim.getBitVec("pad_S3_T2_out") << endl;
+    cout << "pad_S3_T3_out = " << sim.getBitVec("pad_S3_T3_out") << endl;
+    cout << "pad_S3_T4_out = " << sim.getBitVec("pad_S3_T4_out") << endl;
+    cout << "pad_S3_T5_out = " << sim.getBitVec("pad_S3_T5_out") << endl;
+    cout << "pad_S3_T6_out = " << sim.getBitVec("pad_S3_T6_out") << endl;
+    cout << "pad_S3_T7_out = " << sim.getBitVec("pad_S3_T7_out") << endl;
+    cout << "pad_S3_T8_out = " << sim.getBitVec("pad_S3_T8_out") << endl;
+    cout << "pad_S3_T9_out = " << sim.getBitVec("pad_S3_T9_out") << endl;
+    cout << "pad_S3_T10_out = " << sim.getBitVec("pad_S3_T10_out") << endl;
+    cout << "pad_S3_T11_out = " << sim.getBitVec("pad_S3_T11_out") << endl;
+    cout << "pad_S3_T12_out = " << sim.getBitVec("pad_S3_T12_out") << endl;
+    cout << "pad_S3_T13_out = " << sim.getBitVec("pad_S3_T13_out") << endl;
+    cout << "pad_S3_T14_out = " << sim.getBitVec("pad_S3_T14_out") << endl;
+    cout << "pad_S3_T15_out = " << sim.getBitVec("pad_S3_T15_out") << endl;
     
-  //   deleteContext(c);
 
-  // }
-
-  // TEST_CASE("Simulating memory") {
-  //   Env circuitEnv = loadFromCoreIR("global.top",
-  //                                   "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
-
-    
-  //   CellDefinition& def = circuitEnv.getDef("top");
-  //   Simulator sim(circuitEnv, def);
-
-  //   cout << sim.getBitVec("in_BUS16_S2_T0", PORT_ID_OUT) << endl;
-
-  //   cout << "Output" << endl;
-  // }
+  }
 
   TEST_CASE("Memory") {
     Context* c = newContext();
@@ -654,138 +810,9 @@ namespace FlatCircuit {
 
     REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
 
-    // state.setFreshValue("write_addr", BitVec(index, 1));
-    // state.setFreshValue("write_data", BitVec(width, 5));
-    // state.setFreshValue("read_addr", BitVec(index, 1));
-    // state.update();
-
-    // REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
-
-    // state.setFreshValue("read_addr", BitVec(index, 6));
-    // state.update();
-    
-    // REQUIRE(state.getBitVec("read_data") == BitVec(width, 5));
-
     deleteContext(c);
   }
     
-  // TEST_CASE("Memory2") {
-  //   uint width = 20;
-  //   uint depth = 4;
-  //   uint index = 2;
-
-  //   Type* memoryType = c->Record({
-  //       {"clk", c->Named("coreir.clkIn")},
-  //         {"write_data", c->BitIn()->Arr(width)},
-  //           {"write_addr", c->BitIn()->Arr(index)},
-  //             {"write_en", c->BitIn()},
-  //               {"read_data", c->Bit()->Arr(width)},
-  //                 {"read_addr", c->BitIn()->Arr(index)}
-  //     });
-
-      
-  //   Module* memory = c->getGlobal()->newModuleDecl("memory0", memoryType);
-  //   ModuleDef* def = memory->newModuleDef();
-
-  //   def->addInstance("m0",
-  //                    "coreir.mem",
-  //                    {{"width", Const::make(c,width)},{"depth", Const::make(c,depth)}});
-
-  //   def->connect("self.clk", "m0.clk");
-  //   def->connect("self.write_en", "m0.wen");
-  //   def->connect("self.write_data", "m0.wdata");
-  //   def->connect("self.write_addr", "m0.waddr");
-  //   def->connect("self.read_data", "m0.rdata");
-  //   def->connect("self.read_addr", "m0.raddr");
-
-  //   memory->setDef(def);
-
-  //   c->runPasses({"rungenerators","flattentypes","flatten"});      
-
-  //   SimulatorState state(memory);
-
-  //   SECTION("Memory default is zero") {
-  //     REQUIRE(state.getMemory("m0", BitVec(index, 0)) == BitVec(width, 0));
-  //   }
-
-  //   SECTION("rdata default is zero") {
-  //     REQUIRE(state.getBitVec("m0.rdata") == BitVec(width, 0));
-  //   }
-      
-  //   state.setMemory("m0", BitVec(index, 0), BitVec(width, 0));
-  //   state.setMemory("m0", BitVec(index, 1), BitVec(width, 1));
-  //   state.setMemory("m0", BitVec(index, 2), BitVec(width, 2));
-  //   state.setMemory("m0", BitVec(index, 3), BitVec(width, 3));
-
-  //   SECTION("Setting memory manually") {
-  //     REQUIRE(state.getMemory("m0", BitVec(index, 2)) == BitVec(width, 2));
-  //   }
-
-  //   SECTION("Re-setting memory manually") {
-  //     state.setMemory("m0", BitVec(index, 3), BitVec(width, 23));
-
-  //     REQUIRE(state.getMemory("m0", BitVec(index, 3)) == BitVec(width, 23));
-  //   }
-
-  //   SECTION("Write to address zero") {
-
-  //     SECTION("Read is combinational") {
-  //       state.setClock("self.clk", 0, 0);
-  //       state.setValue("self.write_en", BitVec(1, 0));
-  //       state.setValue("self.write_addr", BitVec(index, 0));
-  //       state.setValue("self.write_data", BitVec(width, 23));
-          
-  //       state.setValue("self.read_addr", BitVec(index, 2));
-
-  //       state.execute();
-
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 2));
-
-  //       state.setClock("self.clk", 0, 0);
-  //       state.setValue("self.read_addr", BitVec(index, 0));
-
-  //       state.execute();
-
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 0));
-
-  //     }
-
-  //     state.setClock("self.clk", 0, 1);
-  //     state.setValue("self.write_en", BitVec(1, 1));
-  //     state.setValue("self.write_addr", BitVec(index, 0));
-  //     state.setValue("self.write_data", BitVec(width, 23));
-  //     state.setValue("self.read_addr", BitVec(index, 0));
-
-  //     state.exeCombinational();
-
-  //     SECTION("read_data is 0 after zeroth clock cycle, even though the address being read is set by write_addr") {
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 0));
-  //     }
-
-  //     state.execute();
-
-  //     SECTION("read_data is 23 after the first rising edge") {
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
-  //     }
-
-  //     state.execute();
-
-  //     SECTION("One cycle after setting write_data the result has been updated") {
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
-  //     }
-
-  //     state.execute();
-
-  //     cout << "read data later = " << state.getBitVec("self.read_data") << endl;
-
-  //     SECTION("Re-updating does not change the value") {
-  //       REQUIRE(state.getBitVec("self.read_data") == BitVec(width, 23));
-  //     }
-	
-  //   }
-      
-  // }
-
   TEST_CASE("Simulating a mux loop") {
 
     Context* c = newContext();
@@ -1045,13 +1072,6 @@ namespace FlatCircuit {
     sim.setFreshValue("in_BUS16_S3_T3", BitVec(16, top_val));
     sim.setFreshValue("in_BUS16_S3_T4", BitVec(16, top_val));
 
-    // cout << "Data0 = " << sim.getBitVec("test_pe$self.data0") << endl;
-    // cout << "Data1 = " << sim.getBitVec("test_pe$self.data1") << endl;
-    // cout << "res   = " << sim.getBitVec("test_pe$self.res") << endl;
-
-    // cout << "cb0 out = " << sim.getBitVec("cb_data0$self.out") << endl;
-    // cout << "cb1 out = " << sim.getBitVec("cb_data1$self.out") << endl;
-    
     cout << "Done setting inputs" << endl;
 
     sim.setFreshValue("clk_in", BitVec(1, 0));
@@ -1088,119 +1108,11 @@ namespace FlatCircuit {
     cout << sim.getBitVec("out_BUS16_S3_T3") << endl;
     cout << sim.getBitVec("out_BUS16_S3_T4") << endl;
 
-    // cout << "Values in cb0" << endl;
-    // for (auto val : sim.portValues) {
-    //   SigPort sp = val.first;
-    //   BitVector bv = val.second;
-
-    //   string name = sim.def.cellName(sp.cell);
-    //   string prefix = name.substr(0, name.find("$"));
-    //   string suffix = name.substr(name.find("$") + 1);
-
-    //   if (prefix == "cb_data0") {
-    //     // string prefix2 = suffix.substr(0, suffix.find("$"));
-    //     // string suffix2 = suffix.substr(suffix.find("$") + 1);
-
-    //     //if (prefix2 == "sb_wide") {
-    //     CellId cid = sp.cell;
-    //     const Cell& cell = sim.def.getCellRefConst(cid);
-    //     cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
-    //     if (cell.getCellType() == CELL_TYPE_MUX) {
-    //       cout << "\tIs a mux that sends to " << endl;
-    //       auto receivers = cell.getPortReceivers(PORT_ID_OUT);
-    //       assert(receivers.size() == cell.getPortWidth(PORT_ID_OUT));
-    //       for (auto bitReceivers : receivers) {
-    //         for (auto sigBit : bitReceivers) {
-    //           cout << "\t\t" << toString(sim.def, sigBit) << endl;
-    //         }
-
-    //       }
-    //     }
-    //       //}
-    //   }
-    // }
-
-    // cout << "Values in test_opt_reg_a" << endl;
-    // for (auto val : sim.portValues) {
-    //   SigPort sp = val.first;
-    //   BitVector bv = val.second;
-
-    //   string name = sim.def.cellName(sp.cell);
-    //   string prefix = name.substr(0, name.find("$"));
-    //   string suffix = name.substr(name.find("$") + 1);
-
-    //   if (prefix == "test_pe") {
-    //     string prefix2 = suffix.substr(0, suffix.find("$"));
-    //     string suffix2 = suffix.substr(suffix.find("$") + 1);
-
-    //     if (prefix2 == "test_opt_reg_a") {
-    //       const Cell& c = sim.def.getCellRefConst(sp.cell);
-    //       cout << "\t" << sim.def.cellName(sp.cell) << ", " << portIdString(sp.port) << " --> " << bv << endl;
-
-    //       if (isBinop(c.getCellType())) {
-    //         auto in0Drivers = c.getDrivers(PORT_ID_IN0);
-    //         cout << "\t\tIn0 = " << sim.materializeInput({sp.cell, PORT_ID_IN0}) << " has drivers" << endl;
-    //         for (auto sigBit : in0Drivers.signals) {
-    //           cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
-    //         }
-
-    //         auto in1Drivers = c.getDrivers(PORT_ID_IN1);
-    //         cout << "\t\tIn1 = " << sim.materializeInput({sp.cell, PORT_ID_IN1}) << " has drivers" << endl;
-    //         for (auto sigBit : in1Drivers.signals) {
-    //           cout << "\t\t\t" << toString(sim.def, sigBit) << endl;
-    //         }
-
-    //       }
-    //     }
-    //   }
-    // }
-    
-    // cout << "Multiply value" << endl;
-
-    // cout << "test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____DOT____FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__523$extendA = " <<
-    //   sim.getBitVec("test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____DOT____FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__523$extendA", PORT_ID_OUT) << endl;
-
-    // cout << "test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____DOT____FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__523$extendB = " <<
-    //   sim.getBitVec("test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____DOT____FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__523$extendB", PORT_ID_OUT) << endl;
-
-    //test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____DOT____FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__523$op0, PORT_ID_OUT --> 0000000000000000000000000000000000
-    
-    // cout << "Values related to outputs" << endl;
-    // vector<SigPort> trace = sim.traceValue("out_BUS16_S0_T0", PORT_ID_IN);
-    
-    // for (auto port : trace) {
-    //   cout << "\t" << sigPortString(def, port) << endl;
-    // }
-
     REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
 
-    // int nCycles = 40000;
-    
-    // cout << "Running tile for " << nCycles << " cycles " << endl;
-
-    // clock_t start = clock();
-    
-    // for (int i = 0; i < nCycles / 2; i++) {
-    //   sim.setFreshValue("clk_in", BitVec(1, 0));
-    //   sim.update();
-
-    //   sim.setFreshValue("in_BUS16_S2_T0", BitVec(16, i));
-    //   sim.setFreshValue("clk_in", BitVec(1, 1));
-    //   sim.update();
-    // }
-
-    // cout << "out_BUS16_S0_T0 = " << sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) << endl;
-
-    // clock_t timeElapsed = clock() - start;
-    // unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
-
-
-    // cout << "Time (ms) for " << nCycles << " cycles = " << msElapsed << endl;
-    // cout << "Done" << endl;
-  
     deleteContext(c);
   }
   

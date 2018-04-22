@@ -498,7 +498,7 @@ namespace FlatCircuit {
           rdata = map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
         }
 
-        std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
+        //std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_RDATA}, rdata);
       } else if (tp == CELL_TYPE_REG_ARST) {
@@ -531,6 +531,24 @@ namespace FlatCircuit {
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
 
         BitVector newOut = BitVector(1, in0 < in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        
+      } else if (tp == CELL_TYPE_UGE) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector newOut = BitVector(1, (in0 > in1) || (in0 == in1));
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+        
+      } else if (tp == CELL_TYPE_ULE) {
+
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector newOut = BitVector(1, (in0 < in1) || (in0 == in1));
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
         
