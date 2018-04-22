@@ -11,7 +11,9 @@ SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CXX_OCL_LINK_FLAGS}")
 
 INCLUDE_DIRECTORIES(./src/)
 
-SET(CPP_FILES ./src/simulator.cpp)
+SET(CPP_FILES ./src/simulator.cpp
+              ./src/convert_coreir.cpp
+              ./src/circuit.cpp)
 
 SET(TEST_FILES ./test/test_circuit.cpp)
 
