@@ -236,15 +236,17 @@ namespace FlatCircuit {
 
         seqChanges = {};
 
+        std::cout << "# of memory updates = " << memoriesToUpdate.size() << std::endl;
+
+        // Change to udpate port?
         for (auto cid : registersToUpdate) {
           combinationalSignalChange({cid, PORT_ID_OUT},
                                     map_find(cid, registerValues));
         }
 
-        // for (auto cid : registersToUpdate) {
-        //   combinationalSignalChange({cid, PORT_ID_RADDR},
-        //                             map_find(cid, memories));
-        // }
+        for (auto cid : memoriesToUpdate) {
+          updatePort({cid, PORT_ID_RDATA});
+        }
         
       } while (combChanges.size() > 0);
 
@@ -291,7 +293,12 @@ namespace FlatCircuit {
         return false;
       }
 
-      map_find(cid, memories).mem[addr] = writeData;
+      assert(contains_key(cid, memories));
+
+      auto& mem = memories[cid].mem;
+      mem[addr] = writeData;
+
+      assert(same_representation(map_find(cid, memories).mem[addr], writeData));
 
       return true;
     }
@@ -309,6 +316,8 @@ namespace FlatCircuit {
     }
 
     bool updateSequentialPort(const SigPort sigPort) {
+
+      std::cout << "Updating sequential port " << sigPortString(def, sigPort) << std::endl;
 
       Cell& c = def.getCellRef(sigPort.cell);
       CellType tp = c.getCellType();
@@ -331,6 +340,7 @@ namespace FlatCircuit {
         //std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
         //std::cout << "\told clock = " << oldClk << std::endl;
         //std::cout << "\tnew clock = " << newClk << std::endl;
+
         if (clkPos &&
             newClk.is_binary() &&
             oldClk.is_binary() &&
@@ -398,14 +408,20 @@ namespace FlatCircuit {
         return registerStateChange(sigPort.cell, newOut);
 
       } else if (tp == CELL_TYPE_MEM) {
+
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector oldClk = map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
 
         if (newClk.is_binary() &&
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
+
+          std::cout << "Getting inputs on high clock" << std::endl;
+
           BitVector writeAddr = materializeInput({sigPort.cell, PORT_ID_WADDR});
           BitVector writeData = materializeInput({sigPort.cell, PORT_ID_WDATA});
+
+          std::cout << "Got inputs" << std::endl;
 
           return memoryStateChange(sigPort.cell, writeAddr, writeData);
         }
@@ -463,11 +479,13 @@ namespace FlatCircuit {
 
         // Reads are combinational, writes are sequential
         BitVector raddr = materializeInput({sigPort.cell, PORT_ID_RADDR});
-        BitVector rdata(def.getCellRefConst(sigPort.cell).getMemWidth(), 0);
+        BitVector rdata(def.getCellRefConst(sigPort.cell).getMemWidth(), 21);
 
         if (raddr.is_binary()) {
           rdata = map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
         }
+
+        std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_RDATA}, rdata);
       } else if (tp == CELL_TYPE_REG_ARST) {
