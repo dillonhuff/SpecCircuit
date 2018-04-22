@@ -256,18 +256,25 @@ namespace FlatCircuit {
 
     bool combinationalSignalChange(const SigPort sigPort,
                                    const BitVector& bv) {
+      std::cout << "Combinational signal change for " << sigPortString(def, sigPort) << " to " << bv << std::endl;
+
       BitVector oldVal = portValues.at(sigPort);
-      portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
+      //portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
+      portValues[{sigPort.cell, sigPort.port}] = bv;
 
       const Cell& c = def.getCellRef(sigPort.cell);
 
       bool changed = !same_representation(oldVal, bv);
 
       if (changed) {
+
+        std::cout << "Value changed" << std::endl;
+
         for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
           for (auto& sigBit : receiverBus) {
 
             if (notEmpty(sigBit)) {
+              std::cout << "Updating receiver " << toString(def, sigBit) << std::endl;
               if ((sigBit.port != PORT_ID_ARST) &&
                   (sigBit.port != PORT_ID_CLK)) {
                 combChanges.insert({sigBit.cell, sigBit.port});
@@ -276,6 +283,7 @@ namespace FlatCircuit {
                 seqChanges.insert({sigBit.cell, sigBit.port});
               }
             }
+
           }
         }
       }
@@ -412,8 +420,12 @@ namespace FlatCircuit {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector oldClk = map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
 
+        BitVector writeEnable = materializeInput({sigPort.cell, PORT_ID_WEN});
+
         if (newClk.is_binary() &&
             oldClk.is_binary() &&
+            writeEnable.is_binary() &&
+            (writeEnable.get(0) == 1) &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
 
           std::cout << "Getting inputs on high clock" << std::endl;

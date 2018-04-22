@@ -151,6 +151,26 @@ namespace FlatCircuit {
     if (portId == PORT_ID_ARST) {
       return "PORT_ID_ARST";
     }
+
+    if (portId == PORT_ID_RADDR) {
+      return "PORT_ID_RADDR";
+    }
+
+    if (portId == PORT_ID_WADDR) {
+      return "PORT_ID_WADDR";
+    }
+
+    if (portId == PORT_ID_WDATA) {
+      return "PORT_ID_WDATA";
+    }
+
+    if (portId == PORT_ID_RDATA) {
+      return "PORT_ID_RDATA";
+    }
+
+    if (portId == PORT_ID_WEN) {
+      return "PORT_ID_WEN";
+    }
     
     std::cout << "No string for port id " << portId << std::endl;
     assert(false);
