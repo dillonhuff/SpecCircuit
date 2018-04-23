@@ -63,8 +63,29 @@ namespace FlatCircuit {
         maybe<BitVector> bv = getInput(nextCell, PORT_ID_SEL, def);
 
         if (bv.has_value()) {
-          // TODO: Add rewiring for muxes with constant value selects
-          assert(false);
+          BitVector bitVec = bv.get_value();
+
+          assert(bitVec.bitLength() == 1);
+
+          if (bitVec.get(0).is_binary()) {
+            bool selIn1 = bitVec.get(0).binary_value() == 1;
+
+            PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
+            int width = nextCell.getPortWidth(inPort);
+
+            vector<SignalBit> inDrivers = nextCell.getDrivers(inPort).signals;
+            auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
+            for (int offset = 0; offset < width; offset++) {
+              SignalBit newDriver = inDrivers[offset];
+              auto offsetReceivers = outReceivers[offset];
+
+              for (auto receiverBit : offsetReceivers) {
+                def.setDriver(receiverBit, newDriver);
+              }
+            }
+
+            nextCell.clearReceivers(PORT_ID_OUT);
+          }
         }
       } else {
         maybe<BitVector> bv = getOutput(nextCell, def);
