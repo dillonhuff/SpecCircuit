@@ -6,14 +6,17 @@ namespace FlatCircuit {
 
   maybe<BitVector> getOutput(Cell& nextCell,
                              CellDefinition& def) {
-    
+    assert(false);
     return {};
   }
 
+  // NOTE: This structure will not quite work for muxes. Need to come up
+  // with a slightly different structure for them.
   void foldConstants(CellDefinition& def) {
     set<CellId> candidates;
     for (auto cellPair : def.getCellMap()) {
-      if (cellPair.first == CELL_TYPE_CONST) {
+      if (cellPair.second.getCellType() == CELL_TYPE_CONST) {
+        cout << "Found const cell" << endl;
         for (auto sigBus : cellPair.second.getPortReceivers(PORT_ID_OUT)) {
           for (auto sigBit : sigBus) {
             candidates.insert(sigBit.cell);
@@ -21,6 +24,8 @@ namespace FlatCircuit {
         }
       }
     }
+
+    cout << "# of candidates = " << candidates.size() << endl;
 
     while (candidates.size() > 0) {
       CellId next = *std::begin(candidates);
