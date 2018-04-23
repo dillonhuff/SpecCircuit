@@ -584,8 +584,6 @@ namespace FlatCircuit {
     }
   };
 
-  // Random: Maybe each port on each cell should have its own unique identifier?
-
   class CellDefinition {
     std::map<CellId, Cell> cells;
     std::map<PortId, Port> ports;
@@ -598,13 +596,6 @@ namespace FlatCircuit {
     CellId next;
     PortId nextPort;
 
-    // How to represent connections? Map from ports to drivers? Map
-    // from PortIds to receivers as well?
-
-    // Q: What do I want to do with this code?
-    // A: For a given port get all receiver ports (and offsets)
-    //    For a given port get the list of driver ports (and offsets)
-
   public:
 
     // Cell 0 is reserved to indicated a non-existant cell
@@ -612,6 +603,26 @@ namespace FlatCircuit {
 
     const std::map<CellId, Cell>& getCellMap() const {
       return cells;
+    }
+
+    void connect(const CellId driverCellId, const PortId driverPID,
+                 const CellId receiverCellId, const PortId receiverPID) {
+
+      Cell& driverCell = getCellRef(driverCellId);
+      Cell& receiverCell = getCellRef(receiverCellId);
+
+      int driverWidth = driverCell.getPortWidth(driverPID);
+      int receiverWidth = receiverCell.getPortWidth(receiverPID);
+
+      assert(driverWidth == receiverWidth);
+
+      for (int offset = 0; offset < driverWidth; offset++) {
+        SignalBit driverBit{driverCellId, driverPID, offset};
+        SignalBit receiverBit{receiverCellId, receiverPID, offset};
+
+        setDriver(receiverBit, driverBit);
+      }
+      
     }
 
     std::vector<std::string> getPortNames() const {
@@ -670,7 +681,11 @@ namespace FlatCircuit {
       return cellId;
     }
 
-    const Cell& getPortCell(const std::string& name) const {
+    Cell& getPortCell(const std::string& name) {
+      return cells.at(getPortCellId(name));
+    }
+    
+    const Cell& getPortCellConst(const std::string& name) const {
       return cells.at(getPortCellId(name));
     }
 
@@ -696,6 +711,33 @@ namespace FlatCircuit {
                    const SignalBit driver) {
       cells[receiver.cell].setDriver(receiver.port, receiver.offset, driver);
       cells[driver.cell].addReceiver(driver.port, driver.offset, receiver);
+    }
+
+    void replacePortWithConstant(const std::string& portName,
+                                 const BitVector& constValue) {
+      CellId constId = addCell(portName + "_const_replacement",
+                               CELL_TYPE_CONST,
+                               {{PARAM_WIDTH, BitVector(32, constValue.bitLength())},
+                                   {PARAM_INIT_VALUE, constValue}});
+
+      //Cell& constCell = getCellRef(constId);
+
+      CellId portId = getPortCellId(portName);
+
+      Cell& portCell = getCellRef(portId);
+
+      
+      std::vector<std::vector<SignalBit> > receivers =
+        portCell.getPortReceivers(PORT_ID_OUT);
+      
+      for (int offset = 0; offset < receivers.size(); offset++) {
+        auto& sigBus = receivers.at(offset);
+        SignalBit driverSignal{constId, PORT_ID_OUT, offset};
+        for (auto receiverSignal : sigBus) {
+          setDriver(receiverSignal, driverSignal);
+        }
+      }
+      // DELETE portCell
     }
 
     int numCells() const {

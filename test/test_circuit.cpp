@@ -24,6 +24,66 @@ namespace FlatCircuit {
 
     return strs;
   }
+
+  TEST_CASE("Specialization of inputs") {
+    Env e;
+    CellType modType = e.addCellType("one_mux");
+    CellDefinition def = e.getDef(modType);
+    def.addPort("in0", 4, PORT_TYPE_IN);
+    def.addPort("in1", 4, PORT_TYPE_IN);
+    def.addPort("sel", 1, PORT_TYPE_IN);
+    def.addPort("out", 4, PORT_TYPE_OUT);
+
+    CellId muxId = def.addCell("mux0", CELL_TYPE_MUX, {{PARAM_WIDTH, BitVector(32, 4)}});
+
+    CellId in0Cell = def.getPortCellId("in0");
+    CellId in1Cell = def.getPortCellId("in1");
+    CellId selCell = def.getPortCellId("sel");
+    CellId outSel = def.getPortCellId("out");
+
+    def.connect(in0Cell, PORT_ID_OUT,
+                muxId, PORT_ID_IN0);
+
+    def.connect(in1Cell, PORT_ID_OUT,
+                muxId, PORT_ID_IN1);
+
+    def.connect(selCell, PORT_ID_OUT,
+                muxId, PORT_ID_SEL);
+
+    def.connect(selCell, PORT_ID_OUT,
+                muxId, PORT_ID_SEL);
+
+    def.connect(muxId, PORT_ID_OUT,
+                outSel, PORT_ID_IN);
+
+    SECTION("Unspecialized simulation") {
+      Simulator sim(e, def);
+      sim.setFreshValue("in0", BitVector(4, 2));
+      sim.setFreshValue("in1", BitVector(4, 13));
+      sim.setFreshValue("sel", BitVector(1, 0));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(4, 2));
+
+      sim.setFreshValue("sel", BitVector(1, 1));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(4, 13));
+
+    }
+
+    SECTION("Specializing wrt select == 1") {
+      def.replacePortWithConstant("sel", BitVec(1, 1));
+
+      Simulator sim(e, def);
+      sim.setFreshValue("in0", BitVector(4, 2));
+      sim.setFreshValue("in1", BitVector(4, 13));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(4, 13));
+    }
+    
+  }
   
   TEST_CASE("Memory") {
     Context* c = newContext();
@@ -410,123 +470,123 @@ namespace FlatCircuit {
     deleteContext(c);
   }
 
-  TEST_CASE("CGRA multiply by 2") {
-    auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
-    Env circuitEnv =
-      loadFromCoreIR("global.top",
-                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+  // TEST_CASE("CGRA multiply by 2") {
+  //   auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
+  //   Env circuitEnv =
+  //     loadFromCoreIR("global.top",
+  //                    "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
-    CellDefinition& def = circuitEnv.getDef("top");
+  //   CellDefinition& def = circuitEnv.getDef("top");
 
-    //BitVector input("16'hf0ff");
-    BitVector input(16, 23);
-    BitVector correctOutput(16, 2*23);
+  //   //BitVector input("16'hf0ff");
+  //   BitVector input(16, 23);
+  //   BitVector correctOutput(16, 2*23);
 
-    Simulator sim(circuitEnv, def);
-    sim.setFreshValue("reset_in", BitVector("1'h0"));
-    sim.update();
-    sim.setFreshValue("reset_in", BitVector("1'h1"));
-    sim.update();
-    sim.setFreshValue("reset_in", BitVector("1'h0"));
-    sim.update();
+  //   Simulator sim(circuitEnv, def);
+  //   sim.setFreshValue("reset_in", BitVector("1'h0"));
+  //   sim.update();
+  //   sim.setFreshValue("reset_in", BitVector("1'h1"));
+  //   sim.update();
+  //   sim.setFreshValue("reset_in", BitVector("1'h0"));
+  //   sim.update();
 
-    cout << "Reset chip" << endl;
-    for (int i = 0; i < configValues.size(); i++) {
+  //   cout << "Reset chip" << endl;
+  //   for (int i = 0; i < configValues.size(); i++) {
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
+  //     sim.setFreshValue("clk_in", BitVec(1, 0));
+  //     sim.update();
 
-      cout << "Evaluating " << i << endl;
+  //     cout << "Evaluating " << i << endl;
 
-      unsigned int configAddr = configValues[i].first;
-      unsigned int configData = configValues[i].second;
+  //     unsigned int configAddr = configValues[i].first;
+  //     unsigned int configData = configValues[i].second;
 
-      sim.setFreshValue("config_addr_in", BitVec(32, configAddr));
-      sim.setFreshValue("config_data_in", BitVec(32, configData));
+  //     sim.setFreshValue("config_addr_in", BitVec(32, configAddr));
+  //     sim.setFreshValue("config_data_in", BitVec(32, configData));
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
+  //     sim.setFreshValue("clk_in", BitVec(1, 1));
+  //     sim.update();
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
+  //     sim.setFreshValue("clk_in", BitVec(1, 0));
+  //     sim.update();
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
+  //     sim.setFreshValue("clk_in", BitVec(1, 1));
+  //     sim.update();
       
-    }
+  //   }
 
-    cout << "Done configuring PE tile" << endl;
+  //   cout << "Done configuring PE tile" << endl;
 
-    sim.setFreshValue("config_addr_in", BitVec(32, 0));
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
+  //   sim.setFreshValue("config_addr_in", BitVec(32, 0));
+  //   sim.setFreshValue("clk_in", BitVec(1, 0));
+  //   sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+  //   sim.setFreshValue("clk_in", BitVec(1, 1));
+  //   sim.update();
 
-    cout << "Done setting inputs" << endl;
+  //   cout << "Done setting inputs" << endl;
 
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
+  //   sim.setFreshValue("clk_in", BitVec(1, 0));
+  //   sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+  //   sim.setFreshValue("clk_in", BitVec(1, 1));
+  //   sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
+  //   sim.setFreshValue("clk_in", BitVec(1, 0));
+  //   sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+  //   sim.setFreshValue("clk_in", BitVec(1, 1));
+  //   sim.update();
 
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
-      }
-    }
+  //   for (int side = 0; side < 4; side++) {
+  //     cout << "Side " << side << endl;
+  //     for (int track = 0; track < 16; track++) {
+  //       string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+  //       sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+  //     }
+  //   }
     
-    sim.update();
+  //   sim.update();
 
-    cout << "Inputs" << endl;
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-      }
-    }
+  //   cout << "Inputs" << endl;
+  //   for (int side = 0; side < 4; side++) {
+  //     cout << "Side " << side << endl;
+  //     for (int track = 0; track < 16; track++) {
+  //       string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+  //       cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+  //     }
+  //   }
 
-    int nCycles = 4;
-    cout << "Computing " << nCycles << " cycles of data" << endl;
-    for (int i = 0; i < nCycles; i++) {
-      cout << "Cycle " << i << endl;
+  //   int nCycles = 4;
+  //   cout << "Computing " << nCycles << " cycles of data" << endl;
+  //   for (int i = 0; i < nCycles; i++) {
+  //     cout << "Cycle " << i << endl;
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
+  //     sim.setFreshValue("clk_in", BitVec(1, 0));
+  //     sim.update();
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
-    }
+  //     sim.setFreshValue("clk_in", BitVec(1, 1));
+  //     sim.update();
+  //   }
 
-    cout << "Outputs" << endl;
+  //   cout << "Outputs" << endl;
 
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-      }
-    }
+  //   for (int side = 0; side < 4; side++) {
+  //     cout << "Side " << side << endl;
+  //     for (int track = 0; track < 16; track++) {
+  //       string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+  //       cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
+  //     }
+  //   }
 
-    BitVector outputS0(16, 0);
-    for (int i = 0; i < 16; i++) {
-      outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    }
+  //   BitVector outputS0(16, 0);
+  //   for (int i = 0; i < 16; i++) {
+  //     outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
+  //   }
 
-    cout << "outputS0 = " << outputS0 << endl;
+  //   cout << "outputS0 = " << outputS0 << endl;
 
-    REQUIRE(outputS0 == correctOutput);
-  }
+  //   REQUIRE(outputS0 == correctOutput);
+  // }
 
 }
