@@ -723,33 +723,61 @@ namespace FlatCircuit {
 
     void replacePortWithConstant(const std::string& portName,
                                  const BitVector& constValue) {
-      CellId constId = addCell(portName + "_const_replacement",
+      // CellId constId = addCell(portName + "_const_replacement",
+      //                          CELL_TYPE_CONST,
+      //                          {{PARAM_WIDTH, BitVector(32, constValue.bitLength())},
+      //                              {PARAM_INIT_VALUE, constValue}});
+
+      //Cell& constCell = getCellRef(constId);
+
+      CellId portCellId = getPortCellId(portName);
+
+      replaceCellPortWithConstant(portCellId,
+                                  PORT_ID_OUT,
+                                  constValue);
+      
+      //Cell& portCell = getCellRef(portId);
+
+      
+      // std::vector<std::vector<SignalBit> > receivers =
+      //   portCell.getPortReceivers(PORT_ID_OUT);
+      
+      // for (int offset = 0; offset < receivers.size(); offset++) {
+      //   auto& sigBus = receivers.at(offset);
+      //   SignalBit driverSignal{constId, PORT_ID_OUT, offset};
+      //   for (auto receiverSignal : sigBus) {
+      //     setDriver(receiverSignal, driverSignal);
+      //   }
+      // }
+
+      // // NOTE: Drivers and receivers are not kept in sync here
+      // portCell.clearReceivers(PORT_ID_OUT);
+    }
+
+    void replaceCellPortWithConstant(const CellId cid,
+                                     const PortId pid,
+                                     const BitVector& constValue) {
+      CellId constId = addCell("cell_" + std::to_string(cid) + "_const_replacement",
                                CELL_TYPE_CONST,
                                {{PARAM_WIDTH, BitVector(32, constValue.bitLength())},
                                    {PARAM_INIT_VALUE, constValue}});
 
-      //Cell& constCell = getCellRef(constId);
+      Cell& portCell = getCellRef(cid);
 
-      CellId portId = getPortCellId(portName);
-
-      Cell& portCell = getCellRef(portId);
-
-      
       std::vector<std::vector<SignalBit> > receivers =
-        portCell.getPortReceivers(PORT_ID_OUT);
+        portCell.getPortReceivers(pid);
       
       for (int offset = 0; offset < receivers.size(); offset++) {
         auto& sigBus = receivers.at(offset);
-        SignalBit driverSignal{constId, PORT_ID_OUT, offset};
+        SignalBit driverSignal{constId, pid, offset};
         for (auto receiverSignal : sigBus) {
           setDriver(receiverSignal, driverSignal);
         }
       }
 
-      // NOTE: Drivers and receivers are not kept in sync here
-      portCell.clearReceivers(PORT_ID_OUT);
+      portCell.clearReceivers(pid);
     }
-
+    
     int numCells() const {
       return cells.size();
     }

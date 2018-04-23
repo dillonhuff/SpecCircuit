@@ -4,6 +4,7 @@
 
 #include "convert_coreir.h"
 #include "simulator.h"
+#include "transformations.h"
 
 using namespace std;
 using namespace CoreIR;
@@ -34,7 +35,9 @@ namespace FlatCircuit {
     def.addPort("sel", 1, PORT_TYPE_IN);
     def.addPort("out", 4, PORT_TYPE_OUT);
 
-    CellId muxId = def.addCell("mux0", CELL_TYPE_MUX, {{PARAM_WIDTH, BitVector(32, 4)}});
+    CellId muxId = def.addCell("mux0",
+                               CELL_TYPE_MUX,
+                               {{PARAM_WIDTH, BitVector(32, 4)}});
 
     CellId in0Cell = def.getPortCellId("in0");
     CellId in1Cell = def.getPortCellId("in1");
@@ -74,6 +77,8 @@ namespace FlatCircuit {
 
     SECTION("Specializing wrt select == 1") {
       def.replacePortWithConstant("sel", BitVec(1, 1));
+
+      foldConstants(def);
 
       Simulator sim(e, def);
       sim.setFreshValue("in0", BitVector(4, 2));
