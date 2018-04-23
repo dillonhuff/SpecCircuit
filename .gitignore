@@ -5,3 +5,5 @@ all-tests.dSYM/
 Makefile
 CMakeCache.txt
 CMakeFiles/
+log_test.txt
+test/flat_pe_tile_new_unq1.json
