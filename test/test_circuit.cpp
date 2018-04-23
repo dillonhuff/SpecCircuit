@@ -82,6 +82,17 @@ namespace FlatCircuit {
 
       REQUIRE(sim.getBitVec("out") == BitVec(4, 13));
     }
+
+    SECTION("Specializing wrt select == 0") {
+      def.replacePortWithConstant("sel", BitVec(1, 0));
+
+      Simulator sim(e, def);
+      sim.setFreshValue("in0", BitVector(4, 2));
+      sim.setFreshValue("in1", BitVector(4, 13));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(4, 2));
+    }
     
   }
   
