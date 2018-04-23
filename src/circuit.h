@@ -353,12 +353,12 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_IN, SignalBus(in_wd)});
         
       } else if (cellType == CELL_TYPE_PORT) {
-        BitVector width = parameters.at(PARAM_OUT_WIDTH);
+        BitVector width = map_find(PARAM_OUT_WIDTH, parameters); //.at(PARAM_OUT_WIDTH);
         int wd = width.to_type<int>();
 
         assert(width.bitLength() == 32);
 
-        BitVector ptp = parameters.at(PARAM_PORT_TYPE);
+        BitVector ptp = map_find(PARAM_PORT_TYPE, parameters); //.at(PARAM_PORT_TYPE);
         int ptpInt = ptp.to_type<int>();
 
         assert((ptpInt == PORT_CELL_FOR_INPUT) ||
@@ -576,7 +576,30 @@ namespace FlatCircuit {
       rcv = {};
     }
 
-    
+
+    void removeReceiver(const PortId port,
+                        const int offset,
+                        const SignalBit oldReceiver) {
+      if (!contains_key(port, receivers)) {
+        std::cout << "All ports: " << std::endl;
+        for (auto port : receivers) {
+          std::cout << "\t" << port.first << std::endl;
+        }
+      }
+
+      assert(contains_key(port, receivers));
+
+      auto& rcv = receivers[port];
+
+      assert(rcv.size() > offset);
+      
+      delete_if(rcv[offset], [oldReceiver](const SignalBit b) {
+          return b == oldReceiver;
+        });
+
+      assert(!elem(oldReceiver, rcv[offset]));
+    }
+
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
       if (!contains_key(port, drivers)) {
         std::cout << "All ports: " << std::endl;
@@ -726,6 +749,17 @@ namespace FlatCircuit {
 
     void setDriver(const SignalBit receiver,
                    const SignalBit driver) {
+
+      // Remove previous driver if it exists
+      SignalBit priorDriver =
+        cells[receiver.cell].getDrivers(receiver.port).signals.at(receiver.offset);
+
+      if (notEmpty(priorDriver)) {
+        cells[priorDriver.cell].removeReceiver(priorDriver.port,
+                                               priorDriver.offset,
+                                               receiver);
+      }
+
       cells[receiver.cell].setDriver(receiver.port, receiver.offset, driver);
       cells[driver.cell].addReceiver(driver.port, driver.offset, receiver);
     }

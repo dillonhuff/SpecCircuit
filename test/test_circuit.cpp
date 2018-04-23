@@ -81,22 +81,38 @@ namespace FlatCircuit {
       foldConstants(def);
       deleteDeadInstances(def);
 
+      // Fill in with a check to make sure all connections that are represented
+      // are to things that actually make sense
+      REQUIRE(definitionIsConsistent(def));
+
       cout << "Folded def" << endl;
       for (auto cell : def.getCellMap()) {
         cout << "\t" << def.cellName(cell.first) << endl;
         if (cell.second.hasPort(PORT_ID_OUT)) {
           cout << "\t\tReceivers" << endl;
           for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-            for (auto sigBit : sigBus) {
-              cout << "\t\t" << toString(def, sigBit) << endl;
-            }
+            // for (auto sigBit : sigBus) {
+            //   cout << "\t\t" << toString(def, sigBit) << endl;
+            // }
           }
         }
       }
 
+
+      cout << "Done printing def" << endl;
+
       Simulator sim(e, def);
+
+      cout << "Setting in0" << endl;
+
       sim.setFreshValue("in0", BitVector(4, 2));
+
+      cout << "Setting in1" << endl;
+
       sim.setFreshValue("in1", BitVector(4, 13));
+
+      cout << "Done setting in1" << endl;
+
       sim.update();
 
       REQUIRE(sim.getBitVec("out") == BitVec(4, 13));
