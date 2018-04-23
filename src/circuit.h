@@ -564,6 +564,14 @@ namespace FlatCircuit {
       
       rcv[offset].push_back(receiver);
     }
+
+    void clearReceivers(const PortId port) {
+      assert(contains_key(port, receivers));
+
+      auto& rcv = receivers[port];
+      rcv = {};
+    }
+
     
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
       if (!contains_key(port, drivers)) {
@@ -737,7 +745,9 @@ namespace FlatCircuit {
           setDriver(receiverSignal, driverSignal);
         }
       }
-      // DELETE portCell
+
+      // NOTE: Drivers and receivers are not kept in sync here
+      portCell.clearReceivers(PORT_ID_OUT);
     }
 
     int numCells() const {
