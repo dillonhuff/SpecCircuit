@@ -79,6 +79,20 @@ namespace FlatCircuit {
       def.replacePortWithConstant("sel", BitVec(1, 1));
 
       foldConstants(def);
+      deleteDeadInstances(def);
+
+      cout << "Folded def" << endl;
+      for (auto cell : def.getCellMap()) {
+        cout << "\t" << def.cellName(cell.first) << endl;
+        if (cell.second.hasPort(PORT_ID_OUT)) {
+          cout << "\t\tReceivers" << endl;
+          for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
+            for (auto sigBit : sigBus) {
+              cout << "\t\t" << toString(def, sigBit) << endl;
+            }
+          }
+        }
+      }
 
       Simulator sim(e, def);
       sim.setFreshValue("in0", BitVector(4, 2));

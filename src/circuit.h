@@ -499,16 +499,20 @@ namespace FlatCircuit {
       return receivers.at(pid);
     }
 
+    const std::map<PortId, Port>& getPorts() const {
+      return portWidths;
+    }
+
     BitVector getParameterValue(const Parameter val) const {
-      return map_find(val, parameters); //parameters.at(val);
+      return map_find(val, parameters);
     }
 
     int getPortWidth(const PortId port) const {
-      return map_find(port, portWidths).width;// .at(port).width;
+      return map_find(port, portWidths).width;
     }
 
     PortType getPortType(const PortId port) const {
-      return map_find(port, portWidths).type; //portWidths.at(port).type;
+      return map_find(port, portWidths).type;
     }
 
     bool isInputPortCell() const {
@@ -611,6 +615,11 @@ namespace FlatCircuit {
 
     const std::map<CellId, Cell>& getCellMap() const {
       return cells;
+    }
+
+    void deleteCell(const CellId cid) {
+      cellIdsToNames.erase(cid);
+      cells.erase(cid);
     }
 
     void connect(const CellId driverCellId, const PortId driverPID,

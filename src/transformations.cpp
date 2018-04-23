@@ -75,6 +75,9 @@ namespace FlatCircuit {
 
             vector<SignalBit> inDrivers = nextCell.getDrivers(inPort).signals;
             auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
+
+            assert(outReceivers.size() == inDrivers.size());
+            
             for (int offset = 0; offset < width; offset++) {
               SignalBit newDriver = inDrivers[offset];
               auto offsetReceivers = outReceivers[offset];
@@ -104,6 +107,54 @@ namespace FlatCircuit {
     }
 
     assert(candidates.size() == 0);
+  }
+
+  void deleteDeadInstances(CellDefinition& def) {
+    bool deleted = true;
+    while (deleted) {
+      deleted = false;
+      for (auto cellPair : def.getCellMap()) {
+
+        Cell& cell = cellPair.second;
+        bool allOutputsHaveNoReceivers = true;
+
+        int numOutputPorts = 0;
+
+        for (auto portPair : cell.getPorts()) {
+          PortId port = portPair.first;
+
+          if (cell.getPortType(port) == PORT_TYPE_OUT) {
+            numOutputPorts++;
+
+            for (auto sigBus : cell.getPortReceivers(port)) {
+              for (auto sigBit : sigBus) {
+                if (notEmpty(sigBit)) {
+                  allOutputsHaveNoReceivers = false;
+                  break;
+                }
+              }
+
+              if (!allOutputsHaveNoReceivers) {
+                break;
+              }
+            }
+          }
+
+          if (!allOutputsHaveNoReceivers) {
+            break;
+          }
+        }
+
+        if ((numOutputPorts > 0) && allOutputsHaveNoReceivers) {
+          cout << "Deleting " << def.cellName(cellPair.first) << endl;
+          def.deleteCell(cellPair.first);
+          deleted = true;
+          break;
+        }
+
+      }
+    }
+    
   }
 
 }

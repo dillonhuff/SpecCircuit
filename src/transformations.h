@@ -6,4 +6,6 @@ namespace FlatCircuit {
 
   void foldConstants(CellDefinition& def);
 
+  void deleteDeadInstances(CellDefinition& def);
+
 }
