@@ -145,7 +145,7 @@ namespace FlatCircuit {
           }
         }
 
-        if ((numOutputPorts > 0) && allOutputsHaveNoReceivers) {
+        if ((numOutputPorts > 0) && allOutputsHaveNoReceivers && !def.isPortCell(cellPair.first)) {
           cout << "Deleting " << def.cellName(cellPair.first) << endl;
           def.deleteCell(cellPair.first);
           deleted = true;
