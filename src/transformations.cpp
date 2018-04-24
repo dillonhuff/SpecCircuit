@@ -4,10 +4,48 @@ using namespace std;
 
 namespace FlatCircuit {
 
-  maybe<BitVector> getOutput(Cell& nextCell,
-                             CellDefinition& def) {
-    assert(false);
+  maybe<BitVector> materializeConstPort(const SigPort sp,
+                                        CellDefinition& def) {
     return {};
+  }
+
+  BitVector doBinop(const CellType tp,
+                    const BitVector& in0,
+                    const BitVector& in1) {
+    switch (tp) {
+    case CELL_TYPE_EQ:
+      return BitVector(1, in0 == in1);
+    default:
+      assert(false);
+    }
+  }
+  
+  maybe<BitVector> getOutput(const CellId cid,
+                             CellDefinition& def) {
+    const Cell& nextCell = def.getCellRef(cid);
+    
+    if (!nextCell.hasPort(PORT_ID_OUT)) {
+      return {};
+    }
+
+    if (isBinop(nextCell.getCellType())) {
+      maybe<BitVector> in0m = materializeConstPort({cid, PORT_ID_IN0}, def);
+      maybe<BitVector> in1m = materializeConstPort({cid, PORT_ID_IN1}, def);
+
+      if (in0m.has_value() &&
+          in1m.has_value()) {
+        BitVector in0 = in0m.get_value();
+        BitVector in1 = in1m.get_value();
+
+        BitVector out = doBinop(nextCell.getCellType(), in0, in1);
+        return out;
+      }
+
+      return {};
+    }
+
+    cout << "Error: Unsupported cell " << def.getCellName(cid) << " : " << toString(nextCell.getCellType()) << endl;
+    assert(false);
   }
 
   maybe<BitVector> getInput(Cell& cell,
@@ -51,9 +89,9 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of candidates = " << candidates.size() << endl;
-
     while (candidates.size() > 0) {
+      cout << "# of candidates = " << candidates.size() << endl;
+
       CellId next = *std::begin(candidates);
       candidates.erase(next);
 
@@ -67,7 +105,15 @@ namespace FlatCircuit {
 
           assert(bitVec.bitLength() == 1);
 
+          // Maybe this isnt needed? If x value constant just pick one?
           if (bitVec.get(0).is_binary()) {
+
+            for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
+              for (auto sigBit : sigBus) {
+                candidates.insert(sigBit.cell);
+              }
+            }
+
             bool selIn1 = bitVec.get(0).binary_value() == 1;
 
             PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
@@ -91,7 +137,7 @@ namespace FlatCircuit {
           }
         }
       } else {
-        maybe<BitVector> bv = getOutput(nextCell, def);
+        maybe<BitVector> bv = getOutput(next, def);
 
         if (bv.has_value()) {
           for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {

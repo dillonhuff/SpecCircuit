@@ -911,5 +911,28 @@ namespace FlatCircuit {
   }
 
   bool definitionIsConsistent(const CellDefinition& def);
-  
+
+  class SigPort {
+  public:
+    CellId cell;
+    PortId port;
+  };
+
+  static inline std::string sigPortString(const CellDefinition& def,
+                                          const SigPort port) {
+    return "( " + def.cellName(port.cell) + ", " + portIdString(port.port) + ", " + toString(def.getCellRefConst(port.cell).getCellType()) + " )";
+  }
+
+  static inline bool operator<(const SigPort a, const SigPort b) {
+    if (a.cell > b.cell) {
+      return false;
+    }
+
+    if (a.cell == b.cell) {
+      return a.port < b.port;
+    }
+
+    return true;
+  }
+
 }
