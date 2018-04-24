@@ -727,6 +727,7 @@ namespace FlatCircuit {
                        const PortId pid,
                        const BitVector& bv) {
       //portValues[{cid, pid}] = bv;
+      assert(def.hasCell(cid));
       userInputs.insert({{cid, pid}, bv});
     }
 

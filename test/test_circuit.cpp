@@ -91,9 +91,9 @@ namespace FlatCircuit {
         if (cell.second.hasPort(PORT_ID_OUT)) {
           cout << "\t\tReceivers" << endl;
           for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-            // for (auto sigBit : sigBus) {
-            //   cout << "\t\t" << toString(def, sigBit) << endl;
-            // }
+            for (auto sigBit : sigBus) {
+              cout << "\t\t" << toString(def, sigBit) << endl;
+            }
           }
         }
       }
