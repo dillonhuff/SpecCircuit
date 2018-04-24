@@ -359,21 +359,20 @@ namespace FlatCircuit {
 
     REQUIRE(definitionIsConsistent(def));
 
-    // cout << "Folded connect box def" << endl;
-    // for (auto cell : def.getCellMap()) {
-    //   cout << "\t" << def.cellName(cell.first) << endl;
-    //   if (cell.second.hasPort(PORT_ID_OUT)) {
-    //     cout << "\t\tReceivers" << endl;
-    //     for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-    //       for (auto sigBit : sigBus) {
-    //         cout << "\t\t" << toString(def, sigBit) << endl;
-    //       }
-    //     }
-    //   }
-    // }
+    cout << "Folded connect box def" << endl;
+    for (auto cell : def.getCellMap()) {
+      cout << "\t" << def.cellName(cell.first) << endl;
+      if (cell.second.hasPort(PORT_ID_OUT)) {
+        cout << "\t\tReceivers" << endl;
+        for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
+          for (auto sigBit : sigBus) {
+            cout << "\t\t" << toString(def, sigBit) << endl;
+          }
+        }
+      }
+    }
 
-
-    // cout << "Done printing def" << endl;
+    cout << "Done printing def" << endl;
 
     sim.setFreshValue("clk", BitVec(1, 0));
     sim.update();
