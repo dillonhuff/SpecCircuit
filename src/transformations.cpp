@@ -131,7 +131,7 @@ namespace FlatCircuit {
       maybe<BitVector> rstm = materializeConstPort({cid, PORT_ID_ARST}, def);
 
 
-      cout << "inputs have values?" << endl;
+      cout << "inputs to register " << def.cellName(cid) << " have values?" << endl;
       if (in0m.has_value()) {
         cout << "Register in0  = " << in0m.get_value() << endl;
       }
