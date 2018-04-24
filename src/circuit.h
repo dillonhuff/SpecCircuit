@@ -577,6 +577,13 @@ namespace FlatCircuit {
     }
 
 
+    void removeDriver(const PortId port,
+                      const int offset) {
+      assert(contains_key(port, drivers));
+      auto& dv = drivers[port];
+      dv.signals[offset] = {0, 0, 0};
+    }
+    
     void removeReceiver(const PortId port,
                         const int offset,
                         const SignalBit oldReceiver) {
@@ -640,7 +647,54 @@ namespace FlatCircuit {
       return cells;
     }
 
+    bool hasCell(const CellId id) const {
+      return contains_key(id, cells);
+    }
+
     void deleteCell(const CellId cid) {
+
+      auto& c = getCellRef(cid);
+
+      // Delete ports
+      for (auto ptp : c.getPorts()) {
+
+        PortId pid = ptp.first;
+
+        if (c.getPortType(pid) == PORT_TYPE_IN) {
+
+          auto drivers = c.getDrivers(pid);
+          for (int offset = 0; offset < drivers.signals.size(); offset++) {
+            SignalBit driverBit = drivers.signals[offset];
+            auto& driverCell = getCellRef(driverBit.cell);
+
+            if (notEmpty(driverBit)) {
+              driverCell.removeReceiver(driverBit.port,
+                                        driverBit.offset,
+                                        {cid, pid, offset});
+            }
+          }
+
+        } else {
+
+          auto receivers = c.getPortReceivers(pid);
+          int offset = 0;
+
+          for (offset = 0; offset < receivers.size(); offset++) {
+            auto sigList = receivers[offset];
+            for (auto sigBit : sigList) {
+              auto& receiverCell = getCellRef(sigBit.cell);
+              if (notEmpty(sigBit)) {
+                receiverCell.removeDriver(sigBit.port,
+                                          sigBit.offset);
+              }
+            
+
+            }
+          }
+
+        }
+      }
+      
       cellIdsToNames.erase(cid);
       cells.erase(cid);
     }
@@ -848,5 +902,7 @@ namespace FlatCircuit {
                                      const SignalBit bit) {
     return "( " + def.cellName(bit.cell) + ", " + toString(def.getCellRefConst(bit.cell).getCellType()) + ", " + portIdString(bit.port) + ", " + std::to_string(bit.offset) + " )";
   }
+
+  bool definitionIsConsistent(const CellDefinition& def);
   
 }
