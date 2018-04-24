@@ -378,6 +378,11 @@ namespace FlatCircuit {
     sim.update();
 
     REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
+
+    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 12));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 12));
     
   }
 
