@@ -4,6 +4,31 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  // Get the output of this register if its output drives its input
+  // otherwise return Nothing
+  maybe<BitVector> materializeRegisterInput(const CellId cid,
+                                            CellDefinition& def,
+                                            const BitVector& value) {
+    const Cell& cell = def.getCellRefConst(cid);
+    assert(isRegister(cell.getCellType()));
+
+    auto drivers = cell.getDrivers(PORT_ID_IN);
+
+    assert(value.bitLength() == drivers.signals.size());
+    
+    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+      SignalBit driverBit = drivers.signals[offset];
+
+      SignalBit outputValue{cid, PORT_ID_OUT, offset};
+
+      if (driverBit != outputValue) {
+        return {};
+      }
+    }
+
+    return value;
+  }
+  
   maybe<BitVector> materializeConstPort(const SigPort sp,
                                         CellDefinition& def) {
 
@@ -15,7 +40,9 @@ namespace FlatCircuit {
 
     auto& drivers = cell.getDrivers(pid);
     for (int offset = 0; offset < drivers.signals.size(); offset++) {
+
       SignalBit driver = drivers.signals.at(offset);
+
       if (notEmpty(driver)) {
         CellType driverTp = def.getCellRef(driver.cell).getCellType();
         if (driverTp != CELL_TYPE_CONST) {
@@ -46,16 +73,29 @@ namespace FlatCircuit {
       assert(false);
     }
   }
+
+  BitVector doUnop(const CellType tp,
+                   const BitVector& in) {
+    switch (tp) {
+    case CELL_TYPE_PASSTHROUGH:
+      return in;
+    default:
+      assert(false);
+    }
+  }
   
   maybe<BitVector> getOutput(const CellId cid,
-                             CellDefinition& def) {
+                             CellDefinition& def,
+                             const std::map<CellId, BitVector>& registerValues) {
     const Cell& nextCell = def.getCellRef(cid);
     
     if (!nextCell.hasPort(PORT_ID_OUT)) {
       return {};
     }
 
-    if (isBinop(nextCell.getCellType())) {
+    CellType tp = nextCell.getCellType();
+
+    if (isBinop(tp)) {
       maybe<BitVector> in0m = materializeConstPort({cid, PORT_ID_IN0}, def);
       maybe<BitVector> in1m = materializeConstPort({cid, PORT_ID_IN1}, def);
 
@@ -69,41 +109,50 @@ namespace FlatCircuit {
       }
 
       return {};
+    } else if (tp == CELL_TYPE_REG_ARST) {
+      maybe<BitVector> in0m =
+        materializeRegisterInput(cid, def, map_find(cid, registerValues));
+      maybe<BitVector> rstm = materializeConstPort({cid, PORT_ID_ARST}, def);
+
+
+      cout << "inputs have values?" << endl;
+      if (in0m.has_value()) {
+        cout << "Register in0  = " << in0m.get_value() << endl;
+      }
+      if (rstm.has_value()) {
+        cout << "Register rstm = " << rstm.get_value() << endl;
+      }
+
+      if (in0m.has_value() &&
+          rstm.has_value()) {
+        BitVector in0 = in0m.get_value();
+        //BitVector rst = rstm.get_value();
+
+        return in0;
+      }
+
+      return {};
+    } else if (isUnop(tp)) {
+
+      maybe<BitVector> inm = materializeConstPort({cid, PORT_ID_IN}, def);
+
+      if (inm.has_value()) {
+        BitVector in = inm.get_value();
+
+        BitVector out = doUnop(nextCell.getCellType(), in);
+        return out;
+      }
+
+      return {};
     }
 
     cout << "Error: Unsupported cell " << def.getCellName(cid) << " : " << toString(nextCell.getCellType()) << endl;
     assert(false);
   }
 
-  maybe<BitVector> getInput(Cell& cell,
-                            const PortId pid,
-                            CellDefinition& def) {
-    BitVector bv(cell.getPortWidth(pid), 0);
+  void foldConstants(CellDefinition& def,
+                     const std::map<CellId, BitVector>& registerValues) {
 
-    auto& drivers = cell.getDrivers(pid);
-    for (int offset = 0; offset < drivers.signals.size(); offset++) {
-      SignalBit driver = drivers.signals.at(offset);
-      if (notEmpty(driver)) {
-        CellType driverTp = def.getCellRef(driver.cell).getCellType();
-        if (driverTp != CELL_TYPE_CONST) {
-          return {};
-        }
-
-        assert(driver.port == PORT_ID_OUT);
-
-        Cell& driverCell = def.getCellRef(driver.cell);
-        BitVector driverValue = driverCell.getParameterValue(PARAM_INIT_VALUE);
-
-        bv.set(offset, driverValue.get(offset));
-      } else {
-        return {};
-      }
-    }
-
-    return bv;
-  }
-
-  void foldConstants(CellDefinition& def) {
     set<CellId> candidates;
     for (auto cellPair : def.getCellMap()) {
       if (cellPair.second.getCellType() == CELL_TYPE_CONST) {
@@ -164,7 +213,7 @@ namespace FlatCircuit {
           }
         }
       } else {
-        maybe<BitVector> bv = getOutput(next, def);
+        maybe<BitVector> bv = getOutput(next, def, registerValues);
 
         if (bv.has_value()) {
           for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {

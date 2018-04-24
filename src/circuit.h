@@ -199,6 +199,14 @@ namespace FlatCircuit {
     return elem(tp, unops);
   }
 
+  static inline bool isRegister(const CellType tp) {
+    // Why is cell type port here?
+    std::vector<CellType> regs{
+      CELL_TYPE_REG, CELL_TYPE_REG_ARST};
+
+    return elem(tp, regs);
+  }
+  
   static inline bool isBinop(const CellType tp) {
     std::vector<CellType> binops{
       CELL_TYPE_OR,
@@ -254,6 +262,10 @@ namespace FlatCircuit {
 
   static inline bool operator==(const SignalBit a, const SignalBit b) {
     return (a.cell == b.cell) && (a.port == b.port) && (a.offset == b.offset);
+  }
+
+  static inline bool operator!=(const SignalBit a, const SignalBit b) {
+    return !(a == b);
   }
 
   static inline std::string toString(const SignalBit bit) {

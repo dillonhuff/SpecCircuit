@@ -78,7 +78,7 @@ namespace FlatCircuit {
     SECTION("Specializing wrt select == 1") {
       def.replacePortWithConstant("sel", BitVec(1, 1));
 
-      foldConstants(def);
+      foldConstants(def, {});
       deleteDeadInstances(def);
 
       REQUIRE(definitionIsConsistent(def));
@@ -344,65 +344,41 @@ namespace FlatCircuit {
 
     // Q: How to fit register value specialization here?
     def.replacePortWithConstant("config_en", BitVec(1, 0));
+    def.replacePortWithConstant("reset", BitVec(1, 0));
     def.replacePortWithConstant("config_addr", BitVec(32, 0));
     def.replacePortWithConstant("config_data", BitVec(32, 0));
 
-    foldConstants(def);
+    deleteDeadInstances(def);
+    
+    cout << "# of cells in connect box before folding = " << def.getCellMap().size() << endl;
+
+    foldConstants(def, sim.registerValues);
     deleteDeadInstances(def);
 
-    cout << "Folded connect box def" << endl;
-    for (auto cell : def.getCellMap()) {
-      cout << "\t" << def.cellName(cell.first) << endl;
-      if (cell.second.hasPort(PORT_ID_OUT)) {
-        cout << "\t\tReceivers" << endl;
-        for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-          for (auto sigBit : sigBus) {
-            cout << "\t\t" << toString(def, sigBit) << endl;
-          }
-        }
-      }
-    }
+    cout << "# of cells in connect box after folding  = " << def.getCellMap().size() << endl;
+
+    REQUIRE(definitionIsConsistent(def));
+
+    // cout << "Folded connect box def" << endl;
+    // for (auto cell : def.getCellMap()) {
+    //   cout << "\t" << def.cellName(cell.first) << endl;
+    //   if (cell.second.hasPort(PORT_ID_OUT)) {
+    //     cout << "\t\tReceivers" << endl;
+    //     for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
+    //       for (auto sigBit : sigBus) {
+    //         cout << "\t\t" << toString(def, sigBit) << endl;
+    //       }
+    //     }
+    //   }
+    // }
 
 
-    cout << "Done printing def" << endl;
-    
+    // cout << "Done printing def" << endl;
+
     sim.setFreshValue("clk", BitVec(1, 0));
     sim.update();
 
     REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
-
-    
-    // // Simulate the connect box after constant folding ports away
-    // SECTION("Simulating with partial specialization") {
-
-    //   // Note: Now need to specialize live with register setting
-    //   def.replacePortWithConstant("config_en", BitVec(1, 0));
-    //   def.replacePortWithConstant("config_en", BitVec(1, 0));
-
-    //   foldConstants(def);
-    //   deleteDeadInstances(def);
-
-    //   REQUIRE(definitionIsConsistent(def));
-
-    //   cout << "Folded def" << endl;
-    //   for (auto cell : def.getCellMap()) {
-    //     cout << "\t" << def.cellName(cell.first) << endl;
-    //     if (cell.second.hasPort(PORT_ID_OUT)) {
-    //       cout << "\t\tReceivers" << endl;
-    //       for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-    //         for (auto sigBit : sigBus) {
-    //           cout << "\t\t" << toString(def, sigBit) << endl;
-    //         }
-    //       }
-    //     }
-    //   }
-
-
-    //   cout << "Done printing def" << endl;
-
-    //   Simulator sim(e, def);
-
-    // }
     
   }
 
