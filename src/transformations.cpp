@@ -6,7 +6,34 @@ namespace FlatCircuit {
 
   maybe<BitVector> materializeConstPort(const SigPort sp,
                                         CellDefinition& def) {
-    return {};
+
+    CellId cid = sp.cell;
+    Cell& cell = def.getCellRef(cid);
+    PortId pid = sp.port;
+
+    BitVector bv(cell.getPortWidth(pid), 0);
+
+    auto& drivers = cell.getDrivers(pid);
+    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+      SignalBit driver = drivers.signals.at(offset);
+      if (notEmpty(driver)) {
+        CellType driverTp = def.getCellRef(driver.cell).getCellType();
+        if (driverTp != CELL_TYPE_CONST) {
+          return {};
+        }
+
+        assert(driver.port == PORT_ID_OUT);
+
+        Cell& driverCell = def.getCellRef(driver.cell);
+        BitVector driverValue = driverCell.getParameterValue(PARAM_INIT_VALUE);
+
+        bv.set(offset, driverValue.get(offset));
+      } else {
+        return {};
+      }
+    }
+
+    return bv;
   }
 
   BitVector doBinop(const CellType tp,
@@ -98,7 +125,7 @@ namespace FlatCircuit {
       Cell& nextCell = def.getCellRef(next);
 
       if (nextCell.getCellType() == CELL_TYPE_MUX) {
-        maybe<BitVector> bv = getInput(nextCell, PORT_ID_SEL, def);
+        maybe<BitVector> bv = materializeConstPort({next, PORT_ID_SEL}, def);
 
         if (bv.has_value()) {
           BitVector bitVec = bv.get_value();
