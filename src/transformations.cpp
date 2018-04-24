@@ -69,7 +69,15 @@ namespace FlatCircuit {
     switch (tp) {
     case CELL_TYPE_EQ:
       return BitVector(1, in0 == in1);
+
+    case CELL_TYPE_OR:
+      return in0 | in1;
+
+    case CELL_TYPE_AND:
+      return in0 & in1;
+      
     default:
+      cout << "Error: Unsupported binop = " << toString(tp) << endl;
       assert(false);
     }
   }
@@ -79,7 +87,15 @@ namespace FlatCircuit {
     switch (tp) {
     case CELL_TYPE_PASSTHROUGH:
       return in;
+
+    case CELL_TYPE_ORR:
+      return orr(in);
+
+    case CELL_TYPE_ANDR:
+      return andr(in);
+
     default:
+      cout << "Error: Unsupported unop = " << toString(tp) << endl;
       assert(false);
     }
   }
@@ -198,6 +214,11 @@ namespace FlatCircuit {
             vector<SignalBit> inDrivers = nextCell.getDrivers(inPort).signals;
             auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
 
+            if (outReceivers.size() != inDrivers.size()) {
+              cout << "Error while folding " << def.getCellName(next) << ": outReceivers.size() = " << outReceivers.size() << ", but inDrivers = " << inDrivers.size() << endl;
+
+              
+            }
             assert(outReceivers.size() == inDrivers.size());
             
             for (int offset = 0; offset < width; offset++) {

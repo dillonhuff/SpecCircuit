@@ -585,7 +585,9 @@ namespace FlatCircuit {
       assert(contains_key(port, receivers));
 
       auto& rcv = receivers[port];
-      rcv = {};
+      for (int i = 0; i < rcv.size(); i++) {
+        rcv[i] = {};
+      }
     }
 
 
@@ -608,11 +610,12 @@ namespace FlatCircuit {
 
       assert(contains_key(port, receivers));
 
-      auto& rcv = receivers[port];
+      std::vector<std::vector<SignalBit> >& rcv = receivers[port];
+      std::vector<SignalBit>& rcvo = rcv[offset];
 
       assert(rcv.size() > offset);
-      
-      delete_if(rcv[offset], [oldReceiver](const SignalBit b) {
+
+      delete_if(rcvo, [oldReceiver](const SignalBit b) {
           return b == oldReceiver;
         });
 
