@@ -374,15 +374,17 @@ namespace FlatCircuit {
 
     cout << "Done printing def" << endl;
 
-    sim.setFreshValue("clk", BitVec(1, 0));
-    sim.update();
+    Simulator sim2(circuitEnv, def);
+    sim2.setFreshValue("clk", BitVec(1, 0));
+    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
+    sim2.update();
 
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
+    REQUIRE(sim2.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
 
-    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 12));
-    sim.update();
+    sim2.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 12));
+    sim2.update();
 
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 12));
+    REQUIRE(sim2.getBitVec("out", PORT_ID_IN) == BitVec(16, 12));
     
   }
 
