@@ -731,6 +731,27 @@ namespace FlatCircuit {
     cout << "outputS0 = " << outputS0 << endl;
 
     REQUIRE(outputS0 == correctOutput);
+
+    sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
+    sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
+    sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
+
+    cout << "# of cells before constant folding = " << def.numCells() << endl;
+    
+    foldConstants(def, sim.registerValues);
+    deleteDeadInstances(def);
+
+    cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
+
+    sim.refreshConstants();
+
+    // cout << "# of cells after constant folding = " << def.numCells() << endl;
+
+    // int topVal = 954;
+    // sim.setFreshValue("in_BUS16_S2_T0", BitVec(16, topVal));
+    // sim.update();
+
+    // cout << "out_BUS16_S0_T0 = " << sim.getBitVec("out_BUS16_S0_T0") << endl;;
   }
 
 }

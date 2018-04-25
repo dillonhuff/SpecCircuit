@@ -35,6 +35,33 @@ namespace FlatCircuit {
     case CELL_TYPE_EQ:
       return BitVector(1, in0 == in1);
 
+    case CELL_TYPE_NEQ:
+      return BitVector(1, in0 != in1);
+
+    case CELL_TYPE_ULT:
+      return BitVector(1, in0 < in1);
+
+    case CELL_TYPE_UGE:
+      return BitVector(1, (in0 > in1) || (in0 == in1));
+
+    case CELL_TYPE_ULE:
+      return BitVector(1, (in0 < in1) || (in0 == in1));
+
+    case CELL_TYPE_SHL:
+      return shl(in0, in1);
+
+    case CELL_TYPE_ASHR:
+      return ashr(in0, in1);
+
+    case CELL_TYPE_LSHR:
+      return lshr(in0, in1);
+
+    case CELL_TYPE_SUB:
+      return sub_general_width_bv(in0, in1);
+      
+    case CELL_TYPE_XOR:
+      return in0 ^ in1;
+      
     case CELL_TYPE_OR:
       return in0 | in1;
 
@@ -144,6 +171,27 @@ namespace FlatCircuit {
 
       return {};
 
+    } else if (tp == CELL_TYPE_SLICE) {
+      maybe<BitVector> inm = materializeConstPort({cid, PORT_ID_IN}, def);
+
+      if (inm.has_value()) {
+        BitVector in = inm.get_value();
+
+        uint lo = nextCell.getParameterValue(PARAM_LOW).to_type<int>();
+        uint hi = nextCell.getParameterValue(PARAM_HIGH).to_type<int>();
+
+        assert((hi - lo) > 0);
+
+        BitVector res(hi - lo, 0);
+        for (uint i = lo; i < hi; i++) {
+          res.set(i - lo, in.get(i));
+        }
+
+        return res;
+      }
+
+      return {};
+      
     } else if (isBinop(tp)) {
       maybe<BitVector> in0m = materializeConstPort({cid, PORT_ID_IN0}, def);
       maybe<BitVector> in1m = materializeConstPort({cid, PORT_ID_IN1}, def);
@@ -218,8 +266,12 @@ namespace FlatCircuit {
 
     while (candidates.size() > 0) {
 
+      cout << "# of candidates = " << candidates.size() << endl;
+
       CellId next = *std::begin(candidates);
       candidates.erase(next);
+
+      cout << "Checking cell " << def.cellName(next) << endl;
 
       Cell& nextCell = def.getCellRef(next);
 
@@ -265,6 +317,9 @@ namespace FlatCircuit {
             }
 
             nextCell.clearReceivers(PORT_ID_OUT);
+
+            def.deleteCell(next);
+            candidates.erase(next);
           }
         }
       } else {
@@ -278,6 +333,8 @@ namespace FlatCircuit {
           }
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
+          def.deleteCell(next);
+          candidates.erase(next);
 
         }
       }

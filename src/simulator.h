@@ -501,7 +501,7 @@ namespace FlatCircuit {
           newOut = (i == 1) ? in1 : in0; 
         }
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);        
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_ULT) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
