@@ -748,13 +748,48 @@ namespace FlatCircuit {
 
     sim.refreshConstants();
 
-    // cout << "# of cells after constant folding = " << def.numCells() << endl;
+    cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-    // int topVal = 954;
-    // sim.setFreshValue("in_BUS16_S2_T0", BitVec(16, topVal));
-    // sim.update();
+    
+    input = BitVector(16, 18);
 
-    // cout << "out_BUS16_S0_T0 = " << sim.getBitVec("out_BUS16_S0_T0") << endl;;
+
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+      }
+    }
+    
+    sim.update();
+
+    cout << "Inputs" << endl;
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+      }
+    }
+
+    cout << "Outputs" << endl;
+
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
+      }
+    }
+    
+    for (int i = 0; i < 16; i++) {
+      outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
+    }
+    
+    cout << "outputS0 = " << outputS0 << endl;;
+
+    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
   }
 
 }
