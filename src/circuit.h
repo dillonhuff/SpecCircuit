@@ -260,6 +260,28 @@ namespace FlatCircuit {
     int offset;
   };
 
+  static inline bool operator<(const SignalBit a, const SignalBit b) {
+    if (a.cell > b.cell) {
+      return false;
+    }
+
+    if (a.cell == b.cell) {
+      if (a.port > b.port) {
+        return false;
+      }
+
+      if (a.port == b.port) {
+        return a.offset < b.offset;
+      }
+
+      // a.cell <= b.cell && a.port < b.port
+      
+      return true;
+    }
+
+    return true;
+  }
+  
   static inline bool operator==(const SignalBit a, const SignalBit b) {
     return (a.cell == b.cell) && (a.port == b.port) && (a.offset == b.offset);
   }
