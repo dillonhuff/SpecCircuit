@@ -80,8 +80,6 @@ namespace FlatCircuit {
 
     auto& drivers = cell.getDrivers(pid);
 
-    cout << "Initial value of " << sigPortString(def, sp) << " = " << bv << endl;
-    
     for (int offset = 0; offset < drivers.signals.size(); offset++) {
 
       SignalBit driver = drivers.signals.at(offset);
@@ -99,13 +97,10 @@ namespace FlatCircuit {
 
         bv.set(offset, driverValue.get(driver.offset));
 
-        cout << "Now value of " << sigPortString(def, sp) << " = " << bv << endl;
       } else {
         return {};
       }
     }
-
-    cout << "Value of " << sigPortString(def, sp) << " = " << bv << endl;
 
     return bv;
   }
@@ -131,11 +126,6 @@ namespace FlatCircuit {
 
         BitVector out = doBinop(nextCell.getCellType(), in0, in1);
 
-        cout << "Doing binop " << toString(nextCell.getCellType()) << endl;
-        cout << "\tin0 = " << in0.binary_string() << endl;
-        cout << "\tin1 = " << in1.binary_string() << endl;
-        cout << "\tout = " << out.binary_string() << endl;
-
         return out;
       }
 
@@ -146,13 +136,13 @@ namespace FlatCircuit {
       maybe<BitVector> rstm = materializeConstPort({cid, PORT_ID_ARST}, def);
 
 
-      cout << "inputs to register " << def.cellName(cid) << " have values?" << endl;
-      if (in0m.has_value()) {
-        cout << "Register in0  = " << in0m.get_value() << endl;
-      }
-      if (rstm.has_value()) {
-        cout << "Register rstm = " << rstm.get_value() << endl;
-      }
+      // cout << "inputs to register " << def.cellName(cid) << " have values?" << endl;
+      // if (in0m.has_value()) {
+      //   cout << "Register in0  = " << in0m.get_value() << endl;
+      // }
+      // if (rstm.has_value()) {
+      //   cout << "Register rstm = " << rstm.get_value() << endl;
+      // }
 
       if (in0m.has_value() &&
           rstm.has_value()) {
@@ -186,7 +176,6 @@ namespace FlatCircuit {
     set<CellId> candidates;
     for (auto cellPair : def.getCellMap()) {
       if (cellPair.second.getCellType() == CELL_TYPE_CONST) {
-        cout << "Found const cell" << endl;
         for (auto sigBus : cellPair.second.getPortReceivers(PORT_ID_OUT)) {
           for (auto sigBit : sigBus) {
             candidates.insert(sigBit.cell);
@@ -196,7 +185,6 @@ namespace FlatCircuit {
     }
 
     while (candidates.size() > 0) {
-      cout << "# of candidates = " << candidates.size() << endl;
 
       CellId next = *std::begin(candidates);
       candidates.erase(next);
@@ -221,7 +209,6 @@ namespace FlatCircuit {
             }
 
             bool selIn1 = bitVec.get(0).binary_value() == 1;
-            cout << "Select in mux " << def.cellName(next) << " = " << selIn1 << endl;
 
             PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
             int width = nextCell.getPortWidth(inPort);
@@ -260,12 +247,6 @@ namespace FlatCircuit {
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
 
-          // def.deleteCell(next);
-          // candidates.erase(next);
-          // if (isRegister(def.getCellRef(next).getCellType())) {
-          //   candidates = {};
-          //   break;
-          // }
         }
       }
     }
@@ -310,7 +291,6 @@ namespace FlatCircuit {
         }
 
         if ((numOutputPorts > 0) && allOutputsHaveNoReceivers && !def.isPortCell(cellPair.first)) {
-          cout << "Deleting " << def.cellName(cellPair.first) << endl;
           def.deleteCell(cellPair.first);
           deleted = true;
           break;

@@ -383,20 +383,7 @@ namespace FlatCircuit {
       def.replacePortWithConstant("config_data", BitVec(32, 0));
 
       foldConstants(def, sim.registerValues);
-
-      cout << "Before deleting dead instances the instances left are" << endl;
-      for (auto ctp : def.getCellMap()) {
-        cout << "\t" << def.cellName(ctp.first);
-        if (def.getCellRef(ctp.first).getCellType() == CELL_TYPE_CONST) {
-          cout << " " << def.getCellRef(ctp.first).getParameterValue(PARAM_INIT_VALUE) << endl;
-        }
-        cout << endl;
-      }
-      cout << "Done listing instances" << endl;
       deleteDeadInstances(def);
-      // foldConstants(def, sim.registerValues);
-      // deleteDeadInstances(def);
-
       sim.refreshConstants();
 
       REQUIRE(definitionIsConsistent(def));
@@ -420,13 +407,13 @@ namespace FlatCircuit {
       sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 9));
       sim.update();
 
-      cout << "Port values" << endl;
-      for (auto pv : sim.portValues) {
-        if (def.hasCell(pv.first.cell)) {
-          cout << "\t" << sigPortString(def, pv.first) << " --> " <<
-            pv.second << endl;
-        }
-      }
+      // cout << "Port values" << endl;
+      // for (auto pv : sim.portValues) {
+      //   if (def.hasCell(pv.first.cell)) {
+      //     cout << "\t" << sigPortString(def, pv.first) << " --> " <<
+      //       pv.second << endl;
+      //   }
+      // }
 
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
 
