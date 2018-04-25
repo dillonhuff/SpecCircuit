@@ -403,6 +403,11 @@ namespace FlatCircuit {
       sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 9));
       sim.update();
 
+      cout << "Port values" << endl;
+      for (auto pv : sim.portValues) {
+        cout << "\t" << sigPortString(def, pv.first) << " --> " << pv.second << endl;
+      }
+
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
 
       sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 12));
