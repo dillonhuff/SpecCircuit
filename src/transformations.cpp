@@ -1,9 +1,49 @@
 #include "transformations.h"
 
+#include "simulator.h"
+
 using namespace std;
 
 namespace FlatCircuit {
 
+
+  static inline BitVector doUnop(const CellType tp,
+                                 const BitVector& in) {
+    switch (tp) {
+    case CELL_TYPE_PASSTHROUGH:
+      return in;
+
+    case CELL_TYPE_ORR:
+      return orr(in);
+
+    case CELL_TYPE_ANDR:
+      return andr(in);
+
+    default:
+      std::cout << "Error: Unsupported unop = " << toString(tp) << std::endl;
+      assert(false);
+    }
+  }
+
+  static inline BitVector doBinop(const CellType tp,
+                                  const BitVector& in0,
+                                  const BitVector& in1) {
+    switch (tp) {
+    case CELL_TYPE_EQ:
+      return BitVector(1, in0 == in1);
+
+    case CELL_TYPE_OR:
+      return in0 | in1;
+
+    case CELL_TYPE_AND:
+      return in0 & in1;
+      
+    default:
+      std::cout << "Error: Unsupported binop = " << toString(tp) << std::endl;
+      assert(false);
+    }
+  }
+  
   // Get the output of this register if its output drives its input
   // otherwise return Nothing
   maybe<BitVector> materializeRegisterInput(const CellId cid,
@@ -26,6 +66,7 @@ namespace FlatCircuit {
       }
     }
 
+    //return BitVector("32'hffffffff"); //value;
     return value;
   }
   
@@ -63,48 +104,10 @@ namespace FlatCircuit {
     return bv;
   }
 
-  BitVector doBinop(const CellType tp,
-                    const BitVector& in0,
-                    const BitVector& in1) {
-    switch (tp) {
-    case CELL_TYPE_EQ:
-      return BitVector(1, in0 == in1);
-
-    case CELL_TYPE_OR:
-      return in0 | in1;
-
-    case CELL_TYPE_AND:
-      return in0 & in1;
-      
-    default:
-      cout << "Error: Unsupported binop = " << toString(tp) << endl;
-      assert(false);
-    }
-  }
-
-  BitVector doUnop(const CellType tp,
-                   const BitVector& in) {
-    switch (tp) {
-    case CELL_TYPE_PASSTHROUGH:
-      return in;
-
-    case CELL_TYPE_ORR:
-      return orr(in);
-
-    case CELL_TYPE_ANDR:
-      return andr(in);
-
-    default:
-      cout << "Error: Unsupported unop = " << toString(tp) << endl;
-      assert(false);
-    }
-  }
-  
   maybe<BitVector> getOutput(const CellId cid,
                              CellDefinition& def,
                              const std::map<CellId, BitVector>& registerValues) {
     const Cell& nextCell = def.getCellRef(cid);
-    
     if (!nextCell.hasPort(PORT_ID_OUT)) {
       return {};
     }
@@ -142,7 +145,6 @@ namespace FlatCircuit {
       if (in0m.has_value() &&
           rstm.has_value()) {
         BitVector in0 = in0m.get_value();
-        //BitVector rst = rstm.get_value();
 
         return in0;
       }
@@ -207,6 +209,7 @@ namespace FlatCircuit {
             }
 
             bool selIn1 = bitVec.get(0).binary_value() == 1;
+            cout << "Select in mux " << def.cellName(next) << " = " << selIn1 << endl;
 
             PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
             int width = nextCell.getPortWidth(inPort);
@@ -244,6 +247,11 @@ namespace FlatCircuit {
           }
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
+
+          // if (isRegister(def.getCellRef(next).getCellType())) {
+          //   candidates = {};
+          //   break;
+          // }
         
         }
       }

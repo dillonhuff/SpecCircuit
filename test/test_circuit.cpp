@@ -249,142 +249,167 @@ namespace FlatCircuit {
   TEST_CASE("Loading Connect box") {
     Env circuitEnv = loadFromCoreIR("global.cb_unq1", "./test/cb_unq1.json");
     CellDefinition& def = circuitEnv.getDef("cb_unq1"); //top->getName());
-    const Cell& clkPort = def.getPortCell("clk");
 
-    REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
-    REQUIRE(clkPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_INPUT);
-    REQUIRE(clkPort.hasPort(PORT_ID_OUT));
+    SECTION("Simulating circuit as created") {
+      const Cell& clkPort = def.getPortCell("clk");
 
-    const Cell& resPort = def.getPortCell("out");
+      REQUIRE(clkPort.getCellType() == CELL_TYPE_PORT);
+      REQUIRE(clkPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_INPUT);
+      REQUIRE(clkPort.hasPort(PORT_ID_OUT));
 
-    REQUIRE(resPort.getCellType() == CELL_TYPE_PORT);
-    REQUIRE(resPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_OUTPUT);
-    REQUIRE(resPort.hasPort(PORT_ID_IN));
+      const Cell& resPort = def.getPortCell("out");
 
-    // Check connections
+      REQUIRE(resPort.getCellType() == CELL_TYPE_PORT);
+      REQUIRE(resPort.getParameterValue(PARAM_PORT_TYPE).to_type<int>() == PORT_CELL_FOR_OUTPUT);
+      REQUIRE(resPort.hasPort(PORT_ID_IN));
 
-    bool allOutBitsDriven;
-    int outWidth = resPort.getPortWidth(PORT_ID_IN);
+      // Check connections
+
+      bool allOutBitsDriven;
+      int outWidth = resPort.getPortWidth(PORT_ID_IN);
     
-    REQUIRE(outWidth == 16);
+      REQUIRE(outWidth == 16);
 
-    const SignalBus& drivers = resPort.getDrivers(PORT_ID_IN);
+      const SignalBus& drivers = resPort.getDrivers(PORT_ID_IN);
 
-    for (auto sigBit : drivers.signals) {
-      cout << toString(sigBit) << endl;
+      for (auto sigBit : drivers.signals) {
+        cout << toString(sigBit) << endl;
+      }
+
+      assert(drivers.signals.size() == 16);
+      for (int i = 0; i < outWidth; i++) {
+
+        REQUIRE(notEmpty(drivers.signals[i]));
+
+      }
+
+      // Simulate the connect box
+      Simulator sim(circuitEnv, def);
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 6));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+      sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 7));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 7));
+
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 2));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+      sim.setFreshValue("in_2", PORT_ID_OUT, BitVec(16, 0));
+      sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
+      sim.update();
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
     }
 
-    assert(drivers.signals.size() == 16);
-    for (int i = 0; i < outWidth; i++) {
+    SECTION("Evaluating after setting ports to constants") {
 
-      REQUIRE(notEmpty(drivers.signals[i]));
+      Simulator sim(circuitEnv, def);
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
+      sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
 
-    }
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-    // Simulate the connect box
-    Simulator sim(circuitEnv, def);
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
-    sim.setFreshValue("reset", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
-    sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
-    sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
-
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
     
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
+      sim.update();
 
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
-    sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
-    sim.update();
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
 
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 0));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+      sim.update();
+      
+      // Q: How to fit register value specialization here?
+      def.replacePortWithConstant("config_en", BitVec(1, 0));
+      def.replacePortWithConstant("reset", BitVec(1, 0));
+      def.replacePortWithConstant("config_addr", BitVec(32, 0));
+      def.replacePortWithConstant("config_data", BitVec(32, 0));
 
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
-    sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 6));
-    sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+      foldConstants(def, sim.registerValues);
+      deleteDeadInstances(def);
 
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
+      REQUIRE(definitionIsConsistent(def));
 
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    
-    sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
-    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 7));
-    sim.update();
-
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 7));
-
-    sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 2));
-    sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
-    sim.setFreshValue("in_2", PORT_ID_OUT, BitVec(16, 0));
-    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
-    sim.update();
-
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-    sim.update();
-    
-    sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-    sim.update();
-
-    REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
-
-    // Q: How to fit register value specialization here?
-    def.replacePortWithConstant("config_en", BitVec(1, 0));
-    def.replacePortWithConstant("reset", BitVec(1, 0));
-    def.replacePortWithConstant("config_addr", BitVec(32, 0));
-    def.replacePortWithConstant("config_data", BitVec(32, 0));
-
-    deleteDeadInstances(def);
-    
-    cout << "# of cells in connect box before folding = " << def.getCellMap().size() << endl;
-
-    foldConstants(def, sim.registerValues);
-    deleteDeadInstances(def);
-
-    cout << "# of cells in connect box after folding  = " << def.getCellMap().size() << endl;
-
-    REQUIRE(definitionIsConsistent(def));
-
-    cout << "Folded connect box def" << endl;
-    for (auto cell : def.getCellMap()) {
-      cout << "\t" << def.cellName(cell.first) << endl;
-      if (cell.second.hasPort(PORT_ID_OUT)) {
-        cout << "\t\tReceivers" << endl;
-        for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
-          for (auto sigBit : sigBus) {
-            cout << "\t\t" << toString(def, sigBit) << endl;
+      cout << "Folded connect box def" << endl;
+      for (auto cell : def.getCellMap()) {
+        cout << "\t" << def.cellName(cell.first) << endl;
+        if (cell.second.hasPort(PORT_ID_OUT)) {
+          cout << "\t\tReceivers" << endl;
+          for (auto sigBus : cell.second.getPortReceivers(PORT_ID_OUT)) {
+            for (auto sigBit : sigBus) {
+              cout << "\t\t" << toString(def, sigBit) << endl;
+            }
           }
         }
       }
+
+      cout << "Done printing def" << endl;
+
+      sim.setFreshValue("clk", BitVec(1, 0));
+      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 9));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
+
+      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 12));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 12));
     }
-
-    cout << "Done printing def" << endl;
-
-    Simulator sim2(circuitEnv, def);
-    sim2.setFreshValue("clk", BitVec(1, 0));
-    sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
-    sim2.update();
-
-    REQUIRE(sim2.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
-
-    sim2.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 12));
-    sim2.update();
-
-    REQUIRE(sim2.getBitVec("out", PORT_ID_IN) == BitVec(16, 12));
     
   }
 

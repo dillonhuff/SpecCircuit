@@ -741,4 +741,5 @@ namespace FlatCircuit {
     std::vector<SigPort> getDataPorts(const CellId sp);
     
   };
+
 }
