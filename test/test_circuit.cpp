@@ -385,6 +385,7 @@ namespace FlatCircuit {
 
       foldConstants(def, sim.registerValues);
       deleteDeadInstances(def);
+      sim.refreshConstants();
 
       REQUIRE(definitionIsConsistent(def));
 

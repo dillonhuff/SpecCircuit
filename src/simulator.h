@@ -735,6 +735,28 @@ namespace FlatCircuit {
       return traceValue(def.getPortCellId(cellName), portId);
     }
 
+    void refreshConstants() {
+      for (auto cp : def.getCellMap()) {
+        CellId cid = cp.first;
+
+        if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
+
+          const Cell& c = def.getCellRef(cid);
+          BitVector initVal = c.getParameterValue(PARAM_INIT_VALUE);
+          portValues[{cid, PORT_ID_OUT}] = initVal;
+
+          for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
+            for (auto& sigBit : receiverBus) {
+              combChanges.insert({sigBit.cell, sigBit.port});
+            }
+          }
+        }
+
+      }
+
+      update();
+    }
+
     std::vector<SigPort> traceValue(const CellId id,
                                     const PortId portId);
 
