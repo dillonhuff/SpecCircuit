@@ -66,10 +66,9 @@ namespace FlatCircuit {
       }
     }
 
-    //return BitVector("32'hffffffff"); //value;
     return value;
   }
-  
+
   maybe<BitVector> materializeConstPort(const SigPort sp,
                                         CellDefinition& def) {
 
@@ -80,6 +79,9 @@ namespace FlatCircuit {
     BitVector bv(cell.getPortWidth(pid), 0);
 
     auto& drivers = cell.getDrivers(pid);
+
+    cout << "Initial value of " << sigPortString(def, sp) << " = " << bv << endl;
+    
     for (int offset = 0; offset < drivers.signals.size(); offset++) {
 
       SignalBit driver = drivers.signals.at(offset);
@@ -95,11 +97,15 @@ namespace FlatCircuit {
         Cell& driverCell = def.getCellRef(driver.cell);
         BitVector driverValue = driverCell.getParameterValue(PARAM_INIT_VALUE);
 
-        bv.set(offset, driverValue.get(offset));
+        bv.set(offset, driverValue.get(driver.offset));
+
+        cout << "Now value of " << sigPortString(def, sp) << " = " << bv << endl;
       } else {
         return {};
       }
     }
+
+    cout << "Value of " << sigPortString(def, sp) << " = " << bv << endl;
 
     return bv;
   }
@@ -124,6 +130,12 @@ namespace FlatCircuit {
         BitVector in1 = in1m.get_value();
 
         BitVector out = doBinop(nextCell.getCellType(), in0, in1);
+
+        cout << "Doing binop " << toString(nextCell.getCellType()) << endl;
+        cout << "\tin0 = " << in0.binary_string() << endl;
+        cout << "\tin1 = " << in1.binary_string() << endl;
+        cout << "\tout = " << out.binary_string() << endl;
+
         return out;
       }
 
@@ -248,11 +260,12 @@ namespace FlatCircuit {
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
 
+          // def.deleteCell(next);
+          // candidates.erase(next);
           // if (isRegister(def.getCellRef(next).getCellType())) {
           //   candidates = {};
           //   break;
           // }
-        
         }
       }
     }

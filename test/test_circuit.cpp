@@ -377,14 +377,26 @@ namespace FlatCircuit {
       sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 1));
       sim.update();
       
-      // Q: How to fit register value specialization here?
       def.replacePortWithConstant("config_en", BitVec(1, 0));
       def.replacePortWithConstant("reset", BitVec(1, 0));
       def.replacePortWithConstant("config_addr", BitVec(32, 0));
       def.replacePortWithConstant("config_data", BitVec(32, 0));
 
       foldConstants(def, sim.registerValues);
+
+      cout << "Before deleting dead instances the instances left are" << endl;
+      for (auto ctp : def.getCellMap()) {
+        cout << "\t" << def.cellName(ctp.first);
+        if (def.getCellRef(ctp.first).getCellType() == CELL_TYPE_CONST) {
+          cout << " " << def.getCellRef(ctp.first).getParameterValue(PARAM_INIT_VALUE) << endl;
+        }
+        cout << endl;
+      }
+      cout << "Done listing instances" << endl;
       deleteDeadInstances(def);
+      // foldConstants(def, sim.registerValues);
+      // deleteDeadInstances(def);
+
       sim.refreshConstants();
 
       REQUIRE(definitionIsConsistent(def));
