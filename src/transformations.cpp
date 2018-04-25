@@ -19,6 +19,9 @@ namespace FlatCircuit {
     case CELL_TYPE_ANDR:
       return andr(in);
 
+    case CELL_TYPE_NOT:
+      return ~in;
+
     default:
       std::cout << "Error: Unsupported unop = " << toString(tp) << std::endl;
       assert(false);
@@ -37,13 +40,19 @@ namespace FlatCircuit {
 
     case CELL_TYPE_AND:
       return in0 & in1;
+
+    case CELL_TYPE_ADD:
+      return add_general_width_bv(in0, in1);
+
+    case CELL_TYPE_MUL:
+      return mul_general_width_bv(in0, in1);
       
     default:
       std::cout << "Error: Unsupported binop = " << toString(tp) << std::endl;
       assert(false);
     }
   }
-  
+
   // Get the output of this register if its output drives its input
   // otherwise return Nothing
   maybe<BitVector> materializeRegisterInput(const CellId cid,
@@ -115,7 +124,27 @@ namespace FlatCircuit {
 
     CellType tp = nextCell.getCellType();
 
-    if (isBinop(tp)) {
+    if (tp == CELL_TYPE_ZEXT) {
+
+      maybe<BitVector> inm = materializeConstPort({cid, PORT_ID_IN}, def);
+
+      if (inm.has_value()) {
+
+        BitVector in = inm.get_value();
+
+        int outWidth = nextCell.getPortWidth(PORT_ID_OUT);
+        BitVector res(outWidth, 0);
+        for (uint i = 0; i < in.bitLength(); i++) {
+          res.set(i, in.get(i));
+        }
+        
+        BitVector newOut = res;
+        return newOut;
+      }
+
+      return {};
+
+    } else if (isBinop(tp)) {
       maybe<BitVector> in0m = materializeConstPort({cid, PORT_ID_IN0}, def);
       maybe<BitVector> in1m = materializeConstPort({cid, PORT_ID_IN1}, def);
 
@@ -135,15 +164,6 @@ namespace FlatCircuit {
         materializeRegisterInput(cid, def, map_find(cid, registerValues));
       maybe<BitVector> rstm = materializeConstPort({cid, PORT_ID_ARST}, def);
 
-
-      // cout << "inputs to register " << def.cellName(cid) << " have values?" << endl;
-      // if (in0m.has_value()) {
-      //   cout << "Register in0  = " << in0m.get_value() << endl;
-      // }
-      // if (rstm.has_value()) {
-      //   cout << "Register rstm = " << rstm.get_value() << endl;
-      // }
-
       if (in0m.has_value() &&
           rstm.has_value()) {
         BitVector in0 = in0m.get_value();
@@ -152,6 +172,18 @@ namespace FlatCircuit {
       }
 
       return {};
+    } else if (tp == CELL_TYPE_REG) {
+      maybe<BitVector> in0m =
+        materializeRegisterInput(cid, def, map_find(cid, registerValues));
+
+      if (in0m.has_value()) {
+        BitVector in0 = in0m.get_value();
+
+        return in0;
+      }
+
+      return {};
+      
     } else if (isUnop(tp)) {
 
       maybe<BitVector> inm = materializeConstPort({cid, PORT_ID_IN}, def);

@@ -577,6 +577,27 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
 
+    sim.def.replacePortWithConstant("reset", BitVec(1, 0));
+    sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
+    sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
+    sim.def.replacePortWithConstant("tile_id", BitVec("16'h15"));
+
+    cout << "# of cells before constant folding = " << def.numCells() << endl;
+    
+    foldConstants(def, sim.registerValues);
+    deleteDeadInstances(def);
+
+    cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
+
+    sim.refreshConstants();
+
+    cout << "# of cells after constant folding = " << def.numCells() << endl;
+
+    REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
+    
     deleteContext(c);
   }
 
