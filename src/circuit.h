@@ -805,7 +805,7 @@ namespace FlatCircuit {
     }
     
     std::string cellName(const CellId id) const {
-      return cellIdsToNames.at(id);
+      return map_find(id, cellIdsToNames);
     }
 
     CellId getPortCellId(const std::string& name) const {

@@ -703,8 +703,9 @@ namespace FlatCircuit {
     void setFreshValue(const CellId cid,
                        const PortId pid,
                        const BitVector& bv) {
-      //portValues[{cid, pid}] = bv;
       assert(def.hasCell(cid));
+      assert(def.getCellRef(cid).getPortWidth(pid) == bv.bitLength());
+
       userInputs.insert({{cid, pid}, bv});
     }
 

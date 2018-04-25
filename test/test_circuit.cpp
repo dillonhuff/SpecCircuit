@@ -371,6 +371,10 @@ namespace FlatCircuit {
       sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 0));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+      sim.setFreshValue("in_0", PORT_ID_OUT, BitVec(16, 1));
+      sim.setFreshValue("in_1", PORT_ID_OUT, BitVec(16, 1));
+      sim.setFreshValue("in_2", PORT_ID_OUT, BitVec(16, 1));
+      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 1));
       sim.update();
       
       // Q: How to fit register value specialization here?
@@ -405,7 +409,10 @@ namespace FlatCircuit {
 
       cout << "Port values" << endl;
       for (auto pv : sim.portValues) {
-        cout << "\t" << sigPortString(def, pv.first) << " --> " << pv.second << endl;
+        if (def.hasCell(pv.first.cell)) {
+          cout << "\t" << sigPortString(def, pv.first) << " --> " <<
+            pv.second << endl;
+        }
       }
 
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
