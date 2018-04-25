@@ -316,7 +316,8 @@ namespace FlatCircuit {
     CellType cellType;
     std::map<PortId, Port> portWidths;
     std::map<PortId, SignalBus> drivers;
-    std::map<PortId, std::vector<std::vector<SignalBit> > > receivers;
+    //std::map<PortId, std::vector<std::vector<SignalBit> > > receivers;
+    std::map<PortId, std::vector<std::set<SignalBit> > > receivers;
 
   public:
     Cell() {}
@@ -338,7 +339,7 @@ namespace FlatCircuit {
         int lo = lo_b.to_type<int>();
         
         portWidths.insert({PORT_ID_OUT, {hi - lo, PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(hi - lo);
+        std::vector<std::set<SignalBit> > bus(hi - lo);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {wd, PORT_TYPE_IN}});
@@ -367,7 +368,7 @@ namespace FlatCircuit {
         drivers.insert({PORT_ID_WEN, SignalBus(1)});
         
         portWidths.insert({PORT_ID_RDATA, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(width.to_type<int>());
+        std::vector<std::set<SignalBit> > bus(width.to_type<int>());
         receivers.insert({PORT_ID_RDATA, bus});
         
       } else if (cellType == CELL_TYPE_ZEXT) {
@@ -380,7 +381,7 @@ namespace FlatCircuit {
         assert(in_wd <= out_wd);
 
         portWidths.insert({PORT_ID_OUT, {out_wd, PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(out_wd);
+        std::vector<std::set<SignalBit> > bus(out_wd);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {in_wd, PORT_TYPE_IN}});
@@ -402,7 +403,7 @@ namespace FlatCircuit {
 
           portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
           
-          std::vector<std::vector<SignalBit> > bus(wd);
+          std::vector<std::set<SignalBit> > bus(wd);
           receivers.insert({PORT_ID_OUT, bus});
           
         } else {
@@ -423,11 +424,11 @@ namespace FlatCircuit {
 
         if (!isComparator(cellType)) {
           portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-          std::vector<std::vector<SignalBit> > bus(wd);
+          std::vector<std::set<SignalBit> > bus(wd);
           receivers.insert({PORT_ID_OUT, bus});
         } else {
           portWidths.insert({PORT_ID_OUT, {1, PORT_TYPE_OUT}});
-          std::vector<std::vector<SignalBit> > bus(1);
+          std::vector<std::set<SignalBit> > bus(1);
           receivers.insert({PORT_ID_OUT, bus});
 
         }
@@ -445,7 +446,7 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
+        std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
@@ -464,7 +465,7 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
+        std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
@@ -483,7 +484,7 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
+        std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
@@ -495,7 +496,7 @@ namespace FlatCircuit {
         int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
+        std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
       } else if (cellType == CELL_TYPE_REG) {
@@ -505,7 +506,7 @@ namespace FlatCircuit {
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {width.to_type<int>(), PORT_TYPE_OUT}});
-        std::vector<std::vector<SignalBit> > bus(wd);
+        std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
         portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
@@ -526,7 +527,7 @@ namespace FlatCircuit {
       return drivers.at(port);
     }
 
-    const std::vector<std::vector<SignalBit> >&
+    const std::vector<std::set<SignalBit> >&
     getPortReceivers(const PortId pid) const {
       assert(contains_key(pid, receivers));
 
@@ -600,7 +601,8 @@ namespace FlatCircuit {
 
       assert(rcv.size() > offset);
       
-      rcv[offset].push_back(receiver);
+      //rcv[offset].push_back(receiver);
+      rcv[offset].insert(receiver);
     }
 
     void clearReceivers(const PortId port) {
@@ -632,14 +634,23 @@ namespace FlatCircuit {
 
       assert(contains_key(port, receivers));
 
-      std::vector<std::vector<SignalBit> >& rcv = receivers[port];
-      std::vector<SignalBit>& rcvo = rcv[offset];
+      std::vector<std::set<SignalBit> >& rcv = receivers[port];
 
       assert(rcv.size() > offset);
 
-      delete_if(rcvo, [oldReceiver](const SignalBit b) {
-          return b == oldReceiver;
-        });
+      //std::set<SignalBit>& rcvo = rcv[offset];
+      auto& rcvo = rcv[offset];
+      rcvo.erase(oldReceiver);
+
+      // for (int offset = 0; offset < rcvo.size(); offset++) {
+      //   if (oldReceiver == rcvo[offset]) {
+      //     rcvo[offset] = {0, 0, 0};
+      //   }
+      // }
+
+      // delete_if(rcvo, [oldReceiver](const SignalBit b) {
+      //     return b == oldReceiver;
+      //   });
 
       assert(!elem(oldReceiver, rcv[offset]));
     }
@@ -882,7 +893,7 @@ namespace FlatCircuit {
 
       Cell& portCell = getCellRef(cid);
 
-      std::vector<std::vector<SignalBit> > receivers =
+      std::vector<std::set<SignalBit> > receivers =
         portCell.getPortReceivers(pid);
       
       for (int offset = 0; offset < receivers.size(); offset++) {

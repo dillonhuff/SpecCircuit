@@ -264,14 +264,18 @@ namespace FlatCircuit {
       }
     }
 
+    int iterCount = 0;
     while (candidates.size() > 0) {
 
-      cout << "# of candidates = " << candidates.size() << endl;
+      if (iterCount % 100) {
+        cout << "# of candidates = " << candidates.size() << endl;
+      }
+      iterCount++;
 
       CellId next = *std::begin(candidates);
       candidates.erase(next);
 
-      cout << "Checking cell " << def.cellName(next) << endl;
+      //cout << "Checking cell " << def.cellName(next) << endl;
 
       Cell& nextCell = def.getCellRef(next);
 
@@ -343,6 +347,7 @@ namespace FlatCircuit {
     assert(candidates.size() == 0);
   }
 
+  // TODO: Change this to a scan algorithm that deletes in large batches
   void deleteDeadInstances(CellDefinition& def) {
     bool deleted = true;
     while (deleted) {
