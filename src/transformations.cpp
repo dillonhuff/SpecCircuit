@@ -267,7 +267,7 @@ namespace FlatCircuit {
     int iterCount = 0;
     while (candidates.size() > 0) {
 
-      if (iterCount % 100) {
+      if ((iterCount % 1000) == 0) {
         cout << "# of candidates = " << candidates.size() << endl;
       }
       iterCount++;
@@ -347,52 +347,125 @@ namespace FlatCircuit {
     assert(candidates.size() == 0);
   }
 
+  std::set<CellId> allDrivers(const Cell& cell) {
+    set<CellId> allDrivers;
+
+    for (auto portPair : cell.getPorts()) {
+      PortId port = portPair.first;
+
+      if (cell.getPortType(port) == PORT_TYPE_IN) {
+        for (auto sigBit : cell.getDrivers(port).signals) {
+          if (notEmpty(sigBit)) {
+            allDrivers.insert(sigBit.cell);
+          }
+        }
+            
+      }
+    }
+
+    return allDrivers;
+  }
+
   // TODO: Change this to a scan algorithm that deletes in large batches
   void deleteDeadInstances(CellDefinition& def) {
-    bool deleted = true;
-    while (deleted) {
-      deleted = false;
-      for (auto cellPair : def.getCellMap()) {
 
-        Cell& cell = cellPair.second;
-        bool allOutputsHaveNoReceivers = true;
+    std::set<CellId> toDelete;
+    for (auto cellPair : def.getCellMap()) {
 
-        int numOutputPorts = 0;
+      Cell& cell = cellPair.second;
+      bool allOutputsHaveNoReceivers = true;
 
-        for (auto portPair : cell.getPorts()) {
-          PortId port = portPair.first;
+      int numOutputPorts = 0;
+      for (auto portPair : cell.getPorts()) {
+        PortId port = portPair.first;
 
-          if (cell.getPortType(port) == PORT_TYPE_OUT) {
-            numOutputPorts++;
+        if (cell.getPortType(port) == PORT_TYPE_OUT) {
+          numOutputPorts++;
 
-            for (auto sigBus : cell.getPortReceivers(port)) {
-              for (auto sigBit : sigBus) {
-                if (notEmpty(sigBit)) {
-                  allOutputsHaveNoReceivers = false;
-                  break;
-                }
-              }
-
-              if (!allOutputsHaveNoReceivers) {
+          for (auto sigBus : cell.getPortReceivers(port)) {
+            for (auto sigBit : sigBus) {
+              if (notEmpty(sigBit)) {
+                allOutputsHaveNoReceivers = false;
                 break;
               }
             }
           }
-
-          if (!allOutputsHaveNoReceivers) {
-            break;
-          }
+            
         }
 
-        if ((numOutputPorts > 0) && allOutputsHaveNoReceivers && !def.isPortCell(cellPair.first)) {
-          def.deleteCell(cellPair.first);
-          deleted = true;
+        if (!allOutputsHaveNoReceivers) {
           break;
         }
+      }
 
+      if ((numOutputPorts > 0) &&
+          allOutputsHaveNoReceivers &&
+          !def.isPortCell(cellPair.first)) {
+        toDelete.insert(cellPair.first);
+      }
+
+    }
+
+    cout << "Collected initial instances to delete" << endl;
+
+    // set<CellId> toConsider = toDelete;
+    // while (toConsider.size() > 0) {
+    //   CellId next = *std::begin(toConsider);
+    //   toConsider.erase(next);
+
+    //   const Cell& nextCell = def.getCellRefConst(next);
+
+    //   set<CellId> drivers = allDrivers(nextCell);
+      
+    //   bool allOutputsHaveNoReceivers = true;
+
+    //   for (auto driverId : drivers) {
+    //     const Cell& cell = def.getCellRefConst(driverId);
+
+    //     int numOutputPorts = 0;
+    //     for (auto portPair : cell.getPorts()) {
+    //       PortId port = portPair.first;
+
+    //       if (cell.getPortType(port) == PORT_TYPE_OUT) {
+    //         numOutputPorts++;
+
+    //         for (auto sigBus : cell.getPortReceivers(port)) {
+    //           for (auto sigBit : sigBus) {
+    //             if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
+    //               allOutputsHaveNoReceivers = false;
+    //               break;
+    //             }
+    //           }
+    //         }
+            
+    //       }
+
+    //       if (!allOutputsHaveNoReceivers) {
+    //         break;
+    //       }
+    //     }
+
+    //     if ((numOutputPorts > 0) &&
+    //         allOutputsHaveNoReceivers &&
+    //         !def.isPortCell(driverId)) {
+    //       toConsider.insert(driverId);
+    //       toDelete.insert(driverId);
+    //     }
+
+    //   }
+      
+    // }
+
+    cout << "Starting to delete " << toDelete.size() << " cells " << endl;
+
+    for (auto cellId : toDelete) {
+
+      if (def.hasCell(cellId)) {
+        def.deleteCell(cellId);
       }
     }
-    
+
+    cout << "Done deleting" << endl;
   }
 
 }
