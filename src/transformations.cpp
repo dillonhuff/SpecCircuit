@@ -320,8 +320,6 @@ namespace FlatCircuit {
               }
             }
 
-            nextCell.clearReceivers(PORT_ID_OUT);
-
             def.deleteCell(next);
             candidates.erase(next);
           }
@@ -408,60 +406,63 @@ namespace FlatCircuit {
 
     cout << "Collected initial instances to delete" << endl;
 
-    // set<CellId> toConsider = toDelete;
-    // while (toConsider.size() > 0) {
-    //   CellId next = *std::begin(toConsider);
-    //   toConsider.erase(next);
+    set<CellId> toConsider = toDelete;
+    while (toConsider.size() > 0) {
+      CellId next = *std::begin(toConsider);
+      toConsider.erase(next);
 
-    //   const Cell& nextCell = def.getCellRefConst(next);
+      const Cell& nextCell = def.getCellRefConst(next);
 
-    //   set<CellId> drivers = allDrivers(nextCell);
+      set<CellId> drivers = allDrivers(nextCell);
       
-    //   bool allOutputsHaveNoReceivers = true;
+      bool allOutputsHaveNoReceivers = true;
 
-    //   for (auto driverId : drivers) {
-    //     const Cell& cell = def.getCellRefConst(driverId);
+      for (auto driverId : drivers) {
+        const Cell& cell = def.getCellRefConst(driverId);
 
-    //     int numOutputPorts = 0;
-    //     for (auto portPair : cell.getPorts()) {
-    //       PortId port = portPair.first;
+        int numOutputPorts = 0;
+        for (auto portPair : cell.getPorts()) {
+          PortId port = portPair.first;
 
-    //       if (cell.getPortType(port) == PORT_TYPE_OUT) {
-    //         numOutputPorts++;
+          if (cell.getPortType(port) == PORT_TYPE_OUT) {
+            numOutputPorts++;
 
-    //         for (auto sigBus : cell.getPortReceivers(port)) {
-    //           for (auto sigBit : sigBus) {
-    //             if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
-    //               allOutputsHaveNoReceivers = false;
-    //               break;
-    //             }
-    //           }
-    //         }
+            for (auto sigBus : cell.getPortReceivers(port)) {
+              for (auto sigBit : sigBus) {
+                if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
+                  allOutputsHaveNoReceivers = false;
+                  break;
+                }
+              }
+            }
             
-    //       }
+          }
 
-    //       if (!allOutputsHaveNoReceivers) {
-    //         break;
-    //       }
-    //     }
+          if (!allOutputsHaveNoReceivers) {
+            break;
+          }
+        }
 
-    //     if ((numOutputPorts > 0) &&
-    //         allOutputsHaveNoReceivers &&
-    //         !def.isPortCell(driverId)) {
-    //       toConsider.insert(driverId);
-    //       toDelete.insert(driverId);
-    //     }
+        if ((numOutputPorts > 0) &&
+            allOutputsHaveNoReceivers &&
+            !def.isPortCell(driverId)) {
+          toConsider.insert(driverId);
+          toDelete.insert(driverId);
+        }
 
-    //   }
+      }
       
-    // }
+    }
 
     cout << "Starting to delete " << toDelete.size() << " cells " << endl;
 
+    
     for (auto cellId : toDelete) {
 
       if (def.hasCell(cellId)) {
+        cout << "Deleting " << def.cellName(cellId) << endl;
         def.deleteCell(cellId);
+        assert(definitionIsConsistent(def));
       }
     }
 

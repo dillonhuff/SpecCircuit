@@ -524,6 +524,8 @@ namespace FlatCircuit {
     }
 
     const SignalBus& getDrivers(const PortId port) const {
+      assert(contains_key(port, drivers));
+
       return drivers.at(port);
     }
 
@@ -717,6 +719,7 @@ namespace FlatCircuit {
         if (c.getPortType(pid) == PORT_TYPE_IN) {
 
           auto drivers = c.getDrivers(pid);
+
           for (int offset = 0; offset < drivers.signals.size(); offset++) {
             SignalBit driverBit = drivers.signals[offset];
             auto& driverCell = getCellRef(driverBit.cell);
@@ -727,6 +730,8 @@ namespace FlatCircuit {
                                         {cid, pid, offset});
             }
           }
+
+          std::cout << "Done clearing drivers" << std::endl;
 
         } else {
 
@@ -748,9 +753,10 @@ namespace FlatCircuit {
 
         }
       }
-      
+
       cellIdsToNames.erase(cid);
       cells.erase(cid);
+
     }
 
     void connect(const CellId driverCellId, const PortId driverPID,
@@ -808,6 +814,8 @@ namespace FlatCircuit {
     }
 
     Cell& getCellRef(const CellId c) {
+      assert(contains_key(c, cells));
+
       return cells.at(c);
     }
 
