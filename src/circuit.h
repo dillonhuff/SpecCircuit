@@ -733,12 +733,12 @@ namespace FlatCircuit {
 
             auto& receivers = c.getPortReceivers(pid);
 
-            std::cout << "Receivers of " << cellName(cid) << " before" << std::endl;
-            for (auto sb : receivers) {
-              for (auto r : sb) {
-                std::cout << "\t" << toString(r) << std::endl;
-              }
-            }
+            // std::cout << "Receivers of " << cellName(cid) << " before" << std::endl;
+            // for (auto sb : receivers) {
+            //   for (auto r : sb) {
+            //     std::cout << "\t" << toString(r) << std::endl;
+            //   }
+            // }
             
             for (int offset = 0; offset < receivers.size(); offset++) {
               auto sigList = receivers[offset];
@@ -751,12 +751,12 @@ namespace FlatCircuit {
               }
             }
 
-            std::cout << "Receivers of " << cellName(cid) << " after" << std::endl;
-            for (auto sb : c.getPortReceivers(pid)) {
-              for (auto r : sb) {
-                std::cout << "\t" << toString(r) << std::endl;
-              }
-            }
+            // std::cout << "Receivers of " << cellName(cid) << " after" << std::endl;
+            // for (auto sb : c.getPortReceivers(pid)) {
+            //   for (auto r : sb) {
+            //     std::cout << "\t" << toString(r) << std::endl;
+            //   }
+            // }
             
           }
         }

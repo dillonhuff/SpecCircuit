@@ -364,9 +364,7 @@ namespace FlatCircuit {
     return allDrivers;
   }
 
-  // TODO: Change this to a scan algorithm that deletes in large batches
-  void deleteDeadInstances(CellDefinition& def) {
-
+  std::set<CellId> innerCellsWithNoReceivers(CellDefinition& def) {
     std::set<CellId> toDelete;
     for (auto cellPair : def.getCellMap()) {
 
@@ -404,70 +402,101 @@ namespace FlatCircuit {
 
     }
 
-    cout << "Collected initial instances to delete" << endl;
+    return toDelete;
+  }
 
-    set<CellId> toConsider = toDelete;
-    while (toConsider.size() > 0) {
-      CellId next = *std::begin(toConsider);
-      toConsider.erase(next);
+  // TODO: Change this to a scan algorithm that deletes in large batches
+  void deleteDeadInstances(CellDefinition& def) {
 
-      const Cell& nextCell = def.getCellRefConst(next);
+    // std::set<CellId> toDelete = innerCellsWithNoReceivers(def);
 
-      set<CellId> drivers = allDrivers(nextCell);
+    // cout << "Collected " << toDelete.size() << " initial instances to delete" << endl;
+
+    // set<CellId> toConsider = toDelete;
+    // while (toConsider.size() > 0) {
+    //   CellId next = *std::begin(toConsider);
+    //   toConsider.erase(next);
+
+    //   const Cell& nextCell = def.getCellRefConst(next);
+
+    //   set<CellId> drivers = allDrivers(nextCell);
       
-      bool allOutputsHaveNoReceivers = true;
+    //   bool allOutputsHaveNoReceivers = true;
 
-      for (auto driverId : drivers) {
-        const Cell& cell = def.getCellRefConst(driverId);
+    //   for (auto driverId : drivers) {
+    //     const Cell& cell = def.getCellRefConst(driverId);
 
-        int numOutputPorts = 0;
-        for (auto portPair : cell.getPorts()) {
-          PortId port = portPair.first;
+    //     int numOutputPorts = 0;
+    //     for (auto portPair : cell.getPorts()) {
+    //       PortId port = portPair.first;
 
-          if (cell.getPortType(port) == PORT_TYPE_OUT) {
-            numOutputPorts++;
+    //       if (cell.getPortType(port) == PORT_TYPE_OUT) {
+    //         numOutputPorts++;
 
-            for (auto sigBus : cell.getPortReceivers(port)) {
-              for (auto sigBit : sigBus) {
-                if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
-                  allOutputsHaveNoReceivers = false;
-                  break;
-                }
-              }
-            }
+    //         for (auto sigBus : cell.getPortReceivers(port)) {
+    //           for (auto sigBit : sigBus) {
+    //             if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
+    //               allOutputsHaveNoReceivers = false;
+    //               break;
+    //             }
+    //           }
+    //         }
             
-          }
+    //       }
 
-          if (!allOutputsHaveNoReceivers) {
-            break;
-          }
-        }
+    //       if (!allOutputsHaveNoReceivers) {
+    //         break;
+    //       }
+    //     }
 
-        if ((numOutputPorts > 0) &&
-            allOutputsHaveNoReceivers &&
-            !def.isPortCell(driverId)) {
-          toConsider.insert(driverId);
-          toDelete.insert(driverId);
-        }
+    //     if ((numOutputPorts > 0) &&
+    //         allOutputsHaveNoReceivers &&
+    //         !def.isPortCell(driverId)) {
+    //       toConsider.insert(driverId);
+    //       toDelete.insert(driverId);
 
-      }
-      
-    }
+    //       for (auto ptp : def.getCellRef(driverId).getPorts()) {
+    //         PortId pid = ptp.first;
+    //         if (def.getCellRef(driverId).getPortType(pid) == PORT_TYPE_IN) {
+    //           auto& drivers = def.getCellRef(driverId).getDrivers(pid);
+    //           for (auto sigBit : drivers.signals) {
+    //             if (notEmpty(sigBit) && !elem(sigBit.cell, toDelete)) {
+    //               toConsider.insert(sigBit.cell);
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
 
-    cout << "Starting to delete " << toDelete.size() << " cells " << endl;
-
-
-    def.bulkDelete(toDelete);
-    // for (auto cellId : toDelete) {
-
-    //   if (def.hasCell(cellId)) {
-    //     cout << "Deleting " << def.cellName(cellId) << endl;
-    //     def.deleteCell(cellId);
-    //     assert(definitionIsConsistent(def));
     //   }
+      
     // }
 
-    cout << "Done deleting" << endl;
+    // TODO: Create proper dataflow analysis
+
+    std::set<CellId> toDelete =
+      innerCellsWithNoReceivers(def);
+
+    while (toDelete.size() > 0) {
+      cout << "Starting to delete " << toDelete.size() << " cells " << endl;
+
+      def.bulkDelete(toDelete);
+
+      cout << "Done deleting" << endl;
+
+      toDelete = innerCellsWithNoReceivers(def);
+    }
+
+    std::set<CellId> leftOver =
+      innerCellsWithNoReceivers(def);
+    
+    cout << "# of leftovers = " << leftOver.size() << endl;
+    for (auto c : leftOver) {
+      cout << "\t" << def.cellName(c) << endl;
+    }
+
+    assert(leftOver.size() == 0);
+
   }
 
 }
