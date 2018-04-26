@@ -585,6 +585,20 @@ namespace FlatCircuit {
     sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
     sim.def.replacePortWithConstant("tile_id", BitVec("16'h15"));
 
+    for (int s = 0; s < 4; s++) {
+      for (int t = 0; t < 5; t++) {
+
+        if ((s != 2) && (t != 0)) {
+          string name16 = "in_BUS16_S" + to_string(s) + "_T" + to_string(t);
+          sim.def.replacePortWithConstant(name16, BitVec(16, 0));
+        }
+
+        string name1 = "in_BUS1_S" + to_string(s) + "_T" + to_string(t);
+        sim.def.replacePortWithConstant(name1, BitVec(1, 0));
+        
+      }
+    }
+
     cout << "# of cells before constant folding = " << def.numCells() << endl;
     
     foldConstants(def, sim.registerValues);
