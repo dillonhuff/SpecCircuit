@@ -714,7 +714,7 @@ namespace FlatCircuit {
 
       for (auto ctp : getCellMap()) {
         CellId cid = ctp.first;
-        Cell& c = def.getCellRef(cid);
+        Cell& c = getCellRef(cid);
 
         for (auto ptp : c.getPorts()) {
           PortId pid = ptp.first;
@@ -789,7 +789,7 @@ namespace FlatCircuit {
             }
           }
 
-          std::cout << "Done clearing drivers" << std::endl;
+          //std::cout << "Done clearing drivers" << std::endl;
 
         } else {
 

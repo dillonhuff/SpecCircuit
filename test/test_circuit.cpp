@@ -389,24 +389,24 @@ namespace FlatCircuit {
 
       sim.refreshConstants();
 
-      cout << "Just before calling definition is consistent" << endl;
-      for (auto ctp : def.getCellMap()) {
+      // cout << "Just before calling definition is consistent" << endl;
+      // for (auto ctp : def.getCellMap()) {
 
-        CellId cid = ctp.first;
-        Cell& c = ctp.second;
+      //   CellId cid = ctp.first;
+      //   Cell& c = ctp.second;
 
-        for (auto ptp : c.getPorts()) {
+      //   for (auto ptp : c.getPorts()) {
 
-          if (c.getPortType(pid) == PORT_TYPE_OUT) {
-            std::cout << "Receivers of " << cellName(cid) << " after" << std::endl;
-            for (auto sb : c.getPortReceivers(pid)) {
-              for (auto r : sb) {
-                std::cout << "\t" << toString(r) << std::endl;
-              }
-            }
-          }
-        }
-      }
+      //     if (c.getPortType(pid) == PORT_TYPE_OUT) {
+      //       std::cout << "Receivers of " << cellName(cid) << " after" << std::endl;
+      //       for (auto sb : c.getPortReceivers(pid)) {
+      //         for (auto r : sb) {
+      //           std::cout << "\t" << toString(r) << std::endl;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
       
       REQUIRE(definitionIsConsistent(def));
 
