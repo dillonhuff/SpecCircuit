@@ -30,7 +30,8 @@ namespace FlatCircuit {
           for (auto sigList : receivers) {
             for (auto sigBit : sigList) {
               if (!def.hasCell(sigBit.cell)) {
-                cout << "Error: Receiver " << toString(sigBit) << " no longer exists" << endl;
+                cout << "Error: Receiver " << toString(sigBit) << " of cell " <<
+                  def.cellName(cid) << " no longer exists" << endl;
               }
 
               assert(def.hasCell(sigBit.cell));

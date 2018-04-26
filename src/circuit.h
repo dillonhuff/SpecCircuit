@@ -706,6 +706,51 @@ namespace FlatCircuit {
       return elem(cid, portCells);
     }
 
+    void bulkDelete(const std::set<CellId>& toDelete) {
+      for (auto cid : toDelete) {
+        cellIdsToNames.erase(cid);
+        cells.erase(cid);
+      }
+
+      for (auto ctp : getCellMap()) {
+        auto& c = ctp.second;
+
+        for (auto ptp : c.getPorts()) {
+          PortId pid = ptp.first;
+          if (c.getPortType(pid) == PORT_TYPE_IN) {
+            auto& drivers = c.getDrivers(pid);
+
+            for (int offset = 0; offset < drivers.signals.size(); offset++) {
+              SignalBit driverBit = drivers.signals[offset];
+              if (notEmpty(driverBit) && !hasCell(driverBit.cell)) {
+                c.setDriver(pid, offset, {0, 0, 0});
+              }
+            }
+
+          } else {
+            assert(c.getPortType(pid) == PORT_TYPE_OUT);
+
+            auto& receivers = c.getPortReceivers(pid);
+
+            
+            
+            for (int offset = 0; offset < receivers.size(); offset++) {
+              auto sigList = receivers[offset];
+              for (auto sigBit : sigList) {
+                if (notEmpty(sigBit) && !hasCell(sigBit.cell)) {
+                  c.removeReceiver(pid, offset, sigBit);
+
+                  assert(!elem(sigBit, receivers[offset]));
+                }
+              }
+            }
+            
+          }
+        }
+      }
+      
+    }
+
     void deleteCell(const CellId cid) {
       assert(!isPortCell(cid));
 

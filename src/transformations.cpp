@@ -456,15 +456,16 @@ namespace FlatCircuit {
 
     cout << "Starting to delete " << toDelete.size() << " cells " << endl;
 
-    
-    for (auto cellId : toDelete) {
 
-      if (def.hasCell(cellId)) {
-        cout << "Deleting " << def.cellName(cellId) << endl;
-        def.deleteCell(cellId);
-        assert(definitionIsConsistent(def));
-      }
-    }
+    def.bulkDelete(toDelete);
+    // for (auto cellId : toDelete) {
+
+    //   if (def.hasCell(cellId)) {
+    //     cout << "Deleting " << def.cellName(cellId) << endl;
+    //     def.deleteCell(cellId);
+    //     assert(definitionIsConsistent(def));
+    //   }
+    // }
 
     cout << "Done deleting" << endl;
   }
