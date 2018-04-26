@@ -713,7 +713,8 @@ namespace FlatCircuit {
       }
 
       for (auto ctp : getCellMap()) {
-        auto& c = ctp.second;
+        CellId cid = ctp.first;
+        Cell& c = def.getCellRef(cid);
 
         for (auto ptp : c.getPorts()) {
           PortId pid = ptp.first;
@@ -732,7 +733,12 @@ namespace FlatCircuit {
 
             auto& receivers = c.getPortReceivers(pid);
 
-            
+            std::cout << "Receivers of " << cellName(cid) << " before" << std::endl;
+            for (auto sb : receivers) {
+              for (auto r : sb) {
+                std::cout << "\t" << toString(r) << std::endl;
+              }
+            }
             
             for (int offset = 0; offset < receivers.size(); offset++) {
               auto sigList = receivers[offset];
@@ -742,6 +748,13 @@ namespace FlatCircuit {
 
                   assert(!elem(sigBit, receivers[offset]));
                 }
+              }
+            }
+
+            std::cout << "Receivers of " << cellName(cid) << " after" << std::endl;
+            for (auto sb : c.getPortReceivers(pid)) {
+              for (auto r : sb) {
+                std::cout << "\t" << toString(r) << std::endl;
               }
             }
             
