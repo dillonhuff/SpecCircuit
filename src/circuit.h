@@ -964,7 +964,7 @@ namespace FlatCircuit {
       
       for (int offset = 0; offset < receivers.size(); offset++) {
         auto& sigBus = receivers.at(offset);
-        SignalBit driverSignal{constId, pid, offset};
+        SignalBit driverSignal{constId, PORT_ID_OUT, offset};
         for (auto receiverSignal : sigBus) {
           setDriver(receiverSignal, driverSignal);
         }

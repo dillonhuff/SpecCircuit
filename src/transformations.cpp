@@ -146,6 +146,12 @@ namespace FlatCircuit {
                              const std::map<CellId, BitVector>& registerValues) {
     const Cell& nextCell = def.getCellRef(cid);
     if (!nextCell.hasPort(PORT_ID_OUT)) {
+
+      if (!def.isPortCell(cid)) {
+        cout << "Cell " << def.cellName(cid) << " has no output port!" << endl;
+        assert(false);
+      }
+
       return {};
     }
 
@@ -324,6 +330,16 @@ namespace FlatCircuit {
             candidates.erase(next);
           }
         }
+      } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
+        //TODO: Add real memory constant folding
+        cout << "Warning: assuming we can constant fold memory!" << endl;
+
+        int width = nextCell.getMemWidth();
+        def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
+
+        def.deleteCell(next);
+        candidates.erase(next);
+        
       } else {
         maybe<BitVector> bv = getOutput(next, def, registerValues);
 
