@@ -64,12 +64,13 @@ namespace FlatCircuit {
             }
           }
         } else if (tp == CELL_TYPE_MEM) {
+          initMemory(cid);
           int memWidth = cl.getMemWidth();
-          int memDepth = cl.getMemDepth();
+          //int memDepth = cl.getMemDepth();
 
-          SimMemory defaultMem(memDepth, memWidth);
+          // SimMemory defaultMem(memDepth, memWidth);
 
-          memories[cid] = defaultMem;
+          // memories[cid] = defaultMem;
 
           BitVector initVal(memWidth, 0);
           //portValues[{cid, PORT_ID_RDATA}] = initVal;
@@ -726,6 +727,16 @@ namespace FlatCircuit {
     }
 
     // Internal setters / getters
+
+    void initMemory(const CellId cid) {
+      const Cell& cl = def.getCellRefConst(cid);
+      int memWidth = cl.getMemWidth();
+      int memDepth = cl.getMemDepth();
+
+      SimMemory defaultMem(memDepth, memWidth);
+      memories[cid] = defaultMem;
+    }
+
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
