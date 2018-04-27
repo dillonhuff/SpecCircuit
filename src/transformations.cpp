@@ -227,7 +227,7 @@ namespace FlatCircuit {
         BitVector in0 = in0m.get_value();
 
         if (in0 == BitVector(1, 0)) {
-          cout << "Partially evaluated an and to 0" << endl;
+          //cout << "Partially evaluated an and to 0" << endl;
           return BitVector(1, 0);
         }
 
@@ -240,8 +240,34 @@ namespace FlatCircuit {
         BitVector in1 = in1m.get_value();
 
         if (in1 == BitVector(1, 0)) {
-          cout << "Partially evaluated an and to 0" << endl;
+          //cout << "Partially evaluated an and to 0" << endl;
           return BitVector(1, 0);
+        }
+
+        return {};
+      }
+
+      if (in0m.has_value() &&
+          (tp == CELL_TYPE_OR) &&
+          (in0m.get_value().bitLength() == 1)) {
+        BitVector in0 = in0m.get_value();
+
+        if (in0 == BitVector(1, 1)) {
+          //cout << "Partially evaluated an or to 1" << endl;
+          return BitVector(1, 1);
+        }
+
+        return {};
+      }
+
+      if (in1m.has_value() &&
+          (tp == CELL_TYPE_OR) &&
+          (in1m.get_value().bitLength() == 1)) {
+        BitVector in1 = in1m.get_value();
+
+        if (in1 == BitVector(1, 1)) {
+          //cout << "Partially evaluated an and to 1" << endl;
+          return BitVector(1, 1);
         }
 
         return {};
