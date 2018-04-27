@@ -564,6 +564,24 @@ namespace FlatCircuit {
 
     return innerCells;
   }
+
+  void cullZexts(CellDefinition& def) {
+    std::set<CellId> idZexts;
+    for (auto& ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.getCellType(cid) == CELL_TYPE_ZEXT) {
+        int inWidth = bvToInt(c.getParameterValue(PARAM_IN_WIDTH));
+        int outWidth = bvToInt(c.getParameterValue(PARAM_OUT_WIDTH));
+
+        if (inWidth == outWidth) {
+          idZexts.insert(cid);
+        }
+      }
+    }
+
+    
+  }
   
   void deleteDeadInstances(CellDefinition& def) {
 

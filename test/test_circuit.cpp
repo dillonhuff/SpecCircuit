@@ -782,15 +782,30 @@ namespace FlatCircuit {
 
     cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
 
-    sim.refreshConstants();
+    set<CellId> memCells;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      string name = def.cellName(cid);
+
+      if (name.substr(0, 3) == "mem") {
+        memCells.insert(cid);
+      }
+    }
+
+    def.bulkDelete(memCells);
 
     cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-    // cout << "Cell list" << endl;
-    // for (auto& ctp : def.getCellMap()) {
-    //   cout << "\t" << def.cellName(ctp.first) << endl;
-    // }
-    
+    sim.refreshConstants();
+
+    cout << "Cell list" << endl;
+    for (auto& ctp : def.getCellMap()) {
+      cout << "\t" << def.cellName(ctp.first) << endl;
+      
+    }
+
+    REQUIRE(definitionIsConsistent(def));
+
     input = BitVector(16, 18);
 
 
