@@ -221,6 +221,32 @@ namespace FlatCircuit {
         return out;
       }
 
+      if (in0m.has_value() &&
+          (tp == CELL_TYPE_AND) &&
+          (in0m.get_value().bitLength() == 1)) {
+        BitVector in0 = in0m.get_value();
+
+        if (in0 == BitVector(1, 0)) {
+          cout << "Partially evaluated an and to 0" << endl;
+          return BitVector(1, 0);
+        }
+
+        return {};
+      }
+
+      if (in1m.has_value() &&
+          (tp == CELL_TYPE_AND) &&
+          (in1m.get_value().bitLength() == 1)) {
+        BitVector in1 = in1m.get_value();
+
+        if (in1 == BitVector(1, 0)) {
+          cout << "Partially evaluated an and to 0" << endl;
+          return BitVector(1, 0);
+        }
+
+        return {};
+      }
+      
       return {};
     } else if (tp == CELL_TYPE_REG_ARST) {
       maybe<BitVector> in0m =
@@ -269,6 +295,8 @@ namespace FlatCircuit {
   // 1. Partially evaluating ands / ors, x + 0, etc.
   // 2. Evaluating registers whose inputs are constant and whose current value
   //    equals the value of the input
+  // 3. Maybe there are loops that are disconnected from any output, none of
+  //    the elements are disconnected??
   void foldConstants(CellDefinition& def,
                      const std::map<CellId, BitVector>& registerValues) {
 
