@@ -763,14 +763,14 @@ namespace FlatCircuit {
 
     for (int side = 0; side < 4; side++) {
 
-      //if (side != 2) {
+      if (side != 2) {
         for (int track = 0; track < 16; track++) {
           string outName =
             "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
           cout << "Setting " << outName << " to a constant" << endl;
           sim.def.replacePortWithConstant(outName, BitVec(1, 0));
         }
-        //}
+      }
     }
     
     cout << "# of cells before constant folding = " << def.numCells() << endl;
