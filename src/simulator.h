@@ -40,7 +40,7 @@ namespace FlatCircuit {
     std::map<SigPort, BitVector> pastValues;
 
     std::map<CellId, SimMemory> memories;
-    
+
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
       std::cout << "Start init" << std::endl;
@@ -718,6 +718,7 @@ namespace FlatCircuit {
       userInputs.insert({{cid, pid}, bv});
     }
 
+    // Internal setters / getters
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
@@ -734,12 +735,23 @@ namespace FlatCircuit {
       registerValues[cid] = bv;
     }
 
-    std::map<CellId, BitVector> allRegisterValues() const {
-      return registerValues;
-    }
-    
     BitVector getRegisterValue(const CellId cid) {
       return map_find(cid, registerValues);
+    }
+    
+    void setPastValue(const CellId cid,
+                      const PortId pid,
+                      const BitVector& bv) {
+      pastValues[{cid, pid}] = bv;
+    }
+
+    BitVector getPastValue(const CellId cid,
+                           const PortId pid) {
+      return map_find({cid, pid}, pastValues);
+    }
+    
+    std::map<CellId, BitVector> allRegisterValues() const {
+      return registerValues;
     }
     
     // This is the user facing funtion. getPortValue is for internal use
