@@ -382,7 +382,7 @@ namespace FlatCircuit {
       def.replacePortWithConstant("config_addr", BitVec(32, 0));
       def.replacePortWithConstant("config_data", BitVec(32, 0));
 
-      foldConstants(def, sim.registerValues);
+      foldConstants(def, sim.allRegisterValues());
       deleteDeadInstances(def);
 
       REQUIRE(def.numCells() == 16);
@@ -601,7 +601,7 @@ namespace FlatCircuit {
 
     cout << "# of cells before constant folding = " << def.numCells() << endl;
     
-    foldConstants(def, sim.registerValues);
+    foldConstants(def, sim.allRegisterValues());
     deleteDeadInstances(def);
 
     cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
@@ -777,7 +777,7 @@ namespace FlatCircuit {
     
   //   cout << "# of cells before constant folding = " << def.numCells() << endl;
     
-  //   foldConstants(def, sim.registerValues);
+  //   foldConstants(def, sim.allRegisterValues());
   //   cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
 
   //   set<CellId> memCells;

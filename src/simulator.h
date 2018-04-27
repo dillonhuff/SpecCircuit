@@ -25,12 +25,12 @@ namespace FlatCircuit {
 
   class Simulator {
 
+    std::map<SigPort, BitVector> portValues;
+    std::map<CellId, BitVector> registerValues;
+
   public:
 
     CellDefinition& def;
-
-    std::map<SigPort, BitVector> portValues;
-    std::map<CellId, BitVector> registerValues;
 
     std::set<std::pair<SigPort, BitVector> > userInputs;
     std::set<SigPort> combChanges;
@@ -138,10 +138,10 @@ namespace FlatCircuit {
           if ((tp == CELL_TYPE_REG) ||
               (tp == CELL_TYPE_REG_ARST)) {
             BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
-            //std::cout << "Register init value = " << initVal << std::endl;
-            //portValues[{cid, PORT_ID_OUT}] = initVal;
+
             setPortValue(cid, PORT_ID_OUT, initVal);
-            registerValues[cid] = initVal;
+
+            setRegisterValue(cid, initVal);
           } else {
             BitVector initVal = bsim::unknown_bv(width);
             //portValues[{cid, PORT_ID_OUT}] = initVal;
@@ -226,7 +226,7 @@ namespace FlatCircuit {
         // Change to udpate port?
         for (auto cid : registersToUpdate) {
           combinationalSignalChange({cid, PORT_ID_OUT},
-                                    map_find(cid, registerValues));
+                                    getRegisterValue(cid));
         }
 
         for (auto cid : memoriesToUpdate) {
@@ -299,12 +299,12 @@ namespace FlatCircuit {
 
     bool registerStateChange(const CellId id,
                              const BitVector& newVal) {
-      BitVector oldVal = map_find(id, registerValues);
+      BitVector oldVal = getRegisterValue(id);
       if (same_representation(oldVal, newVal)) {
         return false;
       }
 
-      registerValues[id] = newVal;
+      setRegisterValue(id, newVal);
 
       return true;
     }
@@ -321,7 +321,7 @@ namespace FlatCircuit {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
 
-        BitVector oldOut = map_find(sigPort.cell, registerValues);
+        BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
 
         BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
         BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
@@ -378,7 +378,7 @@ namespace FlatCircuit {
 
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
 
-        BitVector oldOut = map_find(sigPort.cell, registerValues);
+        BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
         BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
 
         bool clkPos = c.clkPosedge();
@@ -729,6 +729,19 @@ namespace FlatCircuit {
       return map_find({cid, pid}, portValues);
     }
 
+    void setRegisterValue(const CellId cid,
+                          const BitVector& bv) {
+      registerValues[cid] = bv;
+    }
+
+    std::map<CellId, BitVector> allRegisterValues() const {
+      return registerValues;
+    }
+    
+    BitVector getRegisterValue(const CellId cid) {
+      return map_find(cid, registerValues);
+    }
+    
     // This is the user facing funtion. getPortValue is for internal use
     BitVector getBitVec(const CellId cid,
                         const PortId pid) {
