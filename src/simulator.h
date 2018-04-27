@@ -27,6 +27,7 @@ namespace FlatCircuit {
 
     std::map<SigPort, BitVector> portValues;
     std::map<CellId, BitVector> registerValues;
+    std::map<SigPort, BitVector> pastValues;
 
   public:
 
@@ -37,7 +38,6 @@ namespace FlatCircuit {
     std::set<SigPort> seqChanges;
 
     // Use this to save clock / reset port past values to detect edges
-    std::map<SigPort, BitVector> pastValues;
 
     std::map<CellId, SimMemory> memories;
 
@@ -77,7 +77,8 @@ namespace FlatCircuit {
 
           BitVector clkVal(1, 0);
           SigPort clkPort = {cid, PORT_ID_CLK};
-          pastValues[clkPort] = clkVal;
+          //pastValues[clkPort] = clkVal;
+          setPastValue(clkPort.cell, clkPort.port, clkVal);
           
           const Cell& c = def.getCellRef(cid);
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_RDATA)) {
@@ -159,15 +160,20 @@ namespace FlatCircuit {
             BitVector initVal(1, 0); // = //bsim::unknown_bv(1);
             SigPort clkPort = {cid, PORT_ID_CLK};
             SigPort rstPort = {cid, PORT_ID_ARST};
-            pastValues[clkPort] = initVal;
-            pastValues[rstPort] = initVal;
+
+            // pastValues[clkPort] = initVal;
+            // pastValues[rstPort] = initVal;
+
+            setPastValue(clkPort.cell, clkPort.port, initVal);
+            setPastValue(rstPort.cell, rstPort.port, initVal);
           }
 
           if (tp == CELL_TYPE_REG) {
             //std::cout << "making reg" << std::endl;
             BitVector initVal(1, 0);
             SigPort clkPort = {cid, PORT_ID_CLK};
-            pastValues[clkPort] = initVal;
+            //pastValues[clkPort] = initVal;
+            setPastValue(clkPort.cell, clkPort.port, initVal);
             //std::cout << "done reg" << std::endl;
           }
           
@@ -265,7 +271,8 @@ namespace FlatCircuit {
                   (sigBit.port != PORT_ID_CLK)) {
                 combChanges.insert({sigBit.cell, sigBit.port});
               } else {
-                pastValues[sigPort] = oldVal;
+                //pastValues[sigPort] = oldVal;
+                setPastValue(sigPort.cell, sigPort.port, oldVal);
                 seqChanges.insert({sigBit.cell, sigBit.port});
               }
             }
@@ -323,8 +330,8 @@ namespace FlatCircuit {
 
         BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
 
-        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
-        BitVector oldRst = pastValues.at({sigPort.cell, PORT_ID_ARST});
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //pastValues.at({sigPort.cell, PORT_ID_CLK});
+        BitVector oldRst = getPastValue(sigPort.cell, PORT_ID_ARST); //pastValues.at({sigPort.cell, PORT_ID_ARST});
 
         bool clkPos = c.clkPosedge();
         bool rstPos = c.rstPosedge();
@@ -379,7 +386,7 @@ namespace FlatCircuit {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
 
         BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
-        BitVector oldClk = pastValues.at({sigPort.cell, PORT_ID_CLK});
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //pastValues.at({sigPort.cell, PORT_ID_CLK});
 
         bool clkPos = c.clkPosedge();
 
@@ -404,7 +411,7 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_MEM) {
 
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
-        BitVector oldClk = map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
 
         BitVector writeEnable = materializeInput({sigPort.cell, PORT_ID_WEN});
 
