@@ -80,6 +80,9 @@ namespace FlatCircuit {
     }
   }
 
+  maybe<BitVector> materializeConstPort(const SigPort sp,
+                                        CellDefinition& def);
+  
   // Get the output of this register if its output drives its input
   // otherwise return Nothing
   maybe<BitVector> materializeRegisterInput(const CellId cid,
@@ -87,6 +90,12 @@ namespace FlatCircuit {
                                             const BitVector& value) {
     const Cell& cell = def.getCellRefConst(cid);
     assert(isRegister(cell.getCellType()));
+    // HASTY WARNING: Really ought to check whether the input constant matches
+    // the current state
+    maybe<BitVector> inValue = materializeConstPort({cid, PORT_ID_IN}, def);
+    if (inValue.has_value()) {
+      return inValue;
+    }
 
     auto drivers = cell.getDrivers(PORT_ID_IN);
 
@@ -256,6 +265,10 @@ namespace FlatCircuit {
     assert(false);
   }
 
+  // Other constant folding mechanisms:
+  // 1. Partially evaluating ands / ors, x + 0, etc.
+  // 2. Evaluating registers whose inputs are constant and whose current value
+  //    equals the value of the input
   void foldConstants(CellDefinition& def,
                      const std::map<CellId, BitVector>& registerValues) {
 
@@ -355,6 +368,33 @@ namespace FlatCircuit {
           candidates.erase(next);
 
         }
+      }
+    }
+
+    // Checking the result has no unfolded sources
+    for (auto& ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      Cell& cell = def.getCellRef(ctp.first);
+
+      bool allInputsConst = true;
+      int numInputPorts = 0;
+      for (auto ptp : cell.getPorts()) {
+        PortId pid = ptp.first;
+
+        if (cell.getPortType(pid) == PORT_TYPE_IN) {
+          numInputPorts++;
+          
+          maybe<BitVector> bv = materializeConstPort({cid, pid}, def);
+          if (!bv.has_value()) {
+            allInputsConst = false;
+            break;
+          }
+        }
+      }
+
+      if (allInputsConst && !def.isPortCell(cid) && (numInputPorts > 0)) {
+        cout << "Error: All inputs to " << def.cellName(cid) << " are constants, but it wasnt removed by constant folding" << endl;
+        assert(false);
       }
     }
 

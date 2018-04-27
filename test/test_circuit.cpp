@@ -784,10 +784,10 @@ namespace FlatCircuit {
 
     cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-    cout << "Cell list" << endl;
-    for (auto& ctp : def.getCellMap()) {
-      cout << "\t" << def.cellName(ctp.first) << endl;
-    }
+    // cout << "Cell list" << endl;
+    // for (auto& ctp : def.getCellMap()) {
+    //   cout << "\t" << def.cellName(ctp.first) << endl;
+    // }
     
     input = BitVector(16, 18);
 
