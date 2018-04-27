@@ -286,8 +286,6 @@ namespace FlatCircuit {
       Cell& nextCell = def.getCellRef(next);
 
       if (nextCell.getCellType() == CELL_TYPE_MUX) {
-        // cout << "HANDLE muxes with unknown values!!!" << endl;
-        // assert(false);
 
         maybe<BitVector> bv = materializeConstPort({next, PORT_ID_SEL}, def);
 
@@ -296,45 +294,41 @@ namespace FlatCircuit {
 
           assert(bitVec.bitLength() == 1);
 
-          // Maybe this isnt needed? If x value constant just pick one?
-          //if (bitVec.get(0).is_binary()) {
-
-            for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-              for (auto sigBit : sigBus) {
-                candidates.insert(sigBit.cell);
-              }
+          for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
+            for (auto sigBit : sigBus) {
+              candidates.insert(sigBit.cell);
             }
+          }
 
-            bool selIn1 = 0;
-            if (bitVec.get(0).is_binary()) {
-              selIn1 = bitVec.get(0).binary_value() == 1;
-            }
+          bool selIn1 = 0;
+          if (bitVec.get(0).is_binary()) {
+            selIn1 = bitVec.get(0).binary_value() == 1;
+          }
 
-            PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
-            int width = nextCell.getPortWidth(inPort);
+          PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
+          int width = nextCell.getPortWidth(inPort);
 
-            vector<SignalBit> inDrivers = nextCell.getDrivers(inPort).signals;
-            auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
+          vector<SignalBit> inDrivers = nextCell.getDrivers(inPort).signals;
+          auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
 
-            if (outReceivers.size() != inDrivers.size()) {
-              cout << "Error while folding " << def.getCellName(next) << ": outReceivers.size() = " << outReceivers.size() << ", but inDrivers = " << inDrivers.size() << endl;
+          if (outReceivers.size() != inDrivers.size()) {
+            cout << "Error while folding " << def.getCellName(next) << ": outReceivers.size() = " << outReceivers.size() << ", but inDrivers = " << inDrivers.size() << endl;
 
               
-            }
-            assert(outReceivers.size() == inDrivers.size());
+          }
+          assert(outReceivers.size() == inDrivers.size());
             
-            for (int offset = 0; offset < width; offset++) {
-              SignalBit newDriver = inDrivers[offset];
-              auto offsetReceivers = outReceivers[offset];
+          for (int offset = 0; offset < width; offset++) {
+            SignalBit newDriver = inDrivers[offset];
+            auto offsetReceivers = outReceivers[offset];
 
-              for (auto receiverBit : offsetReceivers) {
-                def.setDriver(receiverBit, newDriver);
-              }
+            for (auto receiverBit : offsetReceivers) {
+              def.setDriver(receiverBit, newDriver);
             }
+          }
 
-            def.deleteCell(next);
-            candidates.erase(next);
-            //        }
+          def.deleteCell(next);
+          candidates.erase(next);
         }
       } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
         //TODO: Add real memory constant folding
