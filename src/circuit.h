@@ -899,6 +899,10 @@ namespace FlatCircuit {
     Cell& getPortCell(const std::string& name) {
       return cells.at(getPortCellId(name));
     }
+
+    const std::set<CellId>& getPortCells() {
+      return portCells;
+    }
     
     const Cell& getPortCellConst(const std::string& name) const {
       return cells.at(getPortCellId(name));

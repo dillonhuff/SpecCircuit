@@ -515,7 +515,56 @@ namespace FlatCircuit {
     return toDelete;
   }
 
-  // TODO: Change this to a scan algorithm that deletes in large batches
+  std::set<CellId> isolatedCells(CellDefinition& def) {
+    set<CellId> connectedCells;
+    for (auto portCell : def.getPortCells()) {
+      connectedCells.insert(portCell);
+    }
+
+    set<CellId> toConsider = connectedCells;
+    while (toConsider.size() > 0) {
+      CellId cid = *std::begin(toConsider);
+      toConsider.erase(cid);
+
+      const Cell& cell = def.getCellRefConst(cid);
+
+      for (auto& ptp : cell.getPorts()) {
+        PortId pid = ptp.first;
+        if (cell.getPortType(pid) == PORT_ID_IN) {
+          for (auto driverBit : cell.getDrivers(pid).signals) {
+            if (notEmpty(driverBit) && !elem(driverBit.cell, connectedCells)) {
+              connectedCells.insert(driverBit.cell);
+              toConsider.insert(driverBit.cell);
+            }
+          }
+        } else {
+          assert(cell.getPortType(pid) == PORT_TYPE_OUT);
+
+          for (auto sigBus : cell.getPortReceivers(pid)) {
+            for (auto sigBit : sigBus) {
+              if (notEmpty(sigBit) && !elem(sigBit.cell, connectedCells)) {
+                connectedCells.insert(sigBit.cell);
+                toConsider.insert(sigBit.cell);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
+
+    set<CellId> innerCells;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      if (!elem(cid, connectedCells)) {
+        innerCells.insert(cid);
+      }
+    }
+
+    return innerCells;
+  }
+  
   void deleteDeadInstances(CellDefinition& def) {
 
     // TODO: Create proper dataflow analysis
@@ -532,6 +581,13 @@ namespace FlatCircuit {
 
       toDelete = innerCellsWithNoReceivers(def);
     }
+
+    std::set<CellId> unconnectedCells =
+      isolatedCells(def);
+
+    cout << "# of inner cells to delete = " << unconnectedCells.size() << endl;
+
+    def.bulkDelete(unconnectedCells);
 
     std::set<CellId> leftOver =
       innerCellsWithNoReceivers(def);
