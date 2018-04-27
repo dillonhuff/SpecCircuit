@@ -529,6 +529,15 @@ namespace FlatCircuit {
       return drivers.at(port);
     }
 
+    std::set<PortId> outputPorts() const {
+      std::set<PortId> outputs;
+      for (auto ctp : getPorts()) {
+        if (getPortType(ctp.first) == PORT_TYPE_OUT) {
+          outputs.insert(ctp.first);
+        }
+      }
+      return outputs;
+    }
     const std::vector<std::set<SignalBit> >&
     getPortReceivers(const PortId pid) const {
       assert(contains_key(pid, receivers));

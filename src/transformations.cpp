@@ -328,8 +328,9 @@ namespace FlatCircuit {
 
     set<CellId> candidates;
     for (auto cellPair : def.getCellMap()) {
-      if (cellPair.second.getCellType() == CELL_TYPE_CONST) {
-        for (auto sigBus : cellPair.second.getPortReceivers(PORT_ID_OUT)) {
+      Cell& cell = def.getCellRef(cellPair.first);
+      if (cell.getCellType() == CELL_TYPE_CONST) {
+        for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
           for (auto sigBit : sigBus) {
             candidates.insert(sigBit.cell);
           }
@@ -478,7 +479,7 @@ namespace FlatCircuit {
     std::set<CellId> toDelete;
     for (auto cellPair : def.getCellMap()) {
 
-      Cell& cell = cellPair.second;
+      Cell& cell = def.getCellRef(cellPair.first);
       bool allOutputsHaveNoReceivers = true;
 
       int numOutputPorts = 0;
@@ -565,14 +566,20 @@ namespace FlatCircuit {
     return innerCells;
   }
 
+  void elidePort(const CellId cid,
+                 const PortId in,
+                 const PortId out,
+                 CellDefinition& def) {
+  }
+
   void cullZexts(CellDefinition& def) {
     std::set<CellId> idZexts;
     for (auto& ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       const Cell& cell = def.getCellRefConst(cid);
-      if (cell.getCellType(cid) == CELL_TYPE_ZEXT) {
-        int inWidth = bvToInt(c.getParameterValue(PARAM_IN_WIDTH));
-        int outWidth = bvToInt(c.getParameterValue(PARAM_OUT_WIDTH));
+      if (cell.getCellType() == CELL_TYPE_ZEXT) {
+        int inWidth = bvToInt(cell.getParameterValue(PARAM_IN_WIDTH));
+        int outWidth = bvToInt(cell.getParameterValue(PARAM_OUT_WIDTH));
 
         if (inWidth == outWidth) {
           idZexts.insert(cid);
@@ -580,6 +587,9 @@ namespace FlatCircuit {
       }
     }
 
+    for (auto cid : idZexts) {
+      elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
+    }
     
   }
   
