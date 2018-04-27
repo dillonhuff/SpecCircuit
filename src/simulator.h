@@ -54,7 +54,8 @@ namespace FlatCircuit {
 
         if (tp == CELL_TYPE_CONST) {
           BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
-          portValues[{cid, PORT_ID_OUT}] = initVal;
+          //portValues[{cid, PORT_ID_OUT}] = initVal;
+          setPortValue(cid, PORT_ID_OUT, initVal);
 
           const Cell& c = def.getCellRef(cid);
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
@@ -71,7 +72,8 @@ namespace FlatCircuit {
           memories[cid] = defaultMem;
 
           BitVector initVal(memWidth, 0);
-          portValues[{cid, PORT_ID_RDATA}] = initVal;
+          //portValues[{cid, PORT_ID_RDATA}] = initVal;
+          setPortValue(cid, PORT_ID_RDATA, initVal);
 
           BitVector clkVal(1, 0);
           SigPort clkPort = {cid, PORT_ID_CLK};
@@ -88,7 +90,8 @@ namespace FlatCircuit {
           if (cl.hasPort(PORT_ID_OUT)) {
             int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
             BitVector initVal = bsim::unknown_bv(width);
-            portValues[{cid, PORT_ID_OUT}] = initVal;
+            //portValues[{cid, PORT_ID_OUT}] = initVal;
+            setPortValue(cid, PORT_ID_OUT, initVal);
 
             const Cell& c = def.getCellRef(cid);
             for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
@@ -103,7 +106,8 @@ namespace FlatCircuit {
           int hi = cl.getParameterValue(PARAM_HIGH).to_type<int>();
           int lo = cl.getParameterValue(PARAM_LOW).to_type<int>();
           BitVector initVal = bsim::unknown_bv(hi - lo);
-          portValues[{cid, PORT_ID_OUT}] = initVal;
+          //portValues[{cid, PORT_ID_OUT}] = initVal;
+          setPortValue(cid, PORT_ID_OUT, initVal);
 
           // TODO: Ignore empty sigbits
           const Cell& c = def.getCellRef(cid);
@@ -116,7 +120,8 @@ namespace FlatCircuit {
         } else if (tp == CELL_TYPE_ZEXT) {
           int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
           BitVector initVal = bsim::unknown_bv(width);
-          portValues[{cid, PORT_ID_OUT}] = initVal;
+          //portValues[{cid, PORT_ID_OUT}] = initVal;
+          setPortValue(cid, PORT_ID_OUT, initVal);
 
           const Cell& c = def.getCellRef(cid);
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
@@ -134,11 +139,13 @@ namespace FlatCircuit {
               (tp == CELL_TYPE_REG_ARST)) {
             BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
             //std::cout << "Register init value = " << initVal << std::endl;
-            portValues[{cid, PORT_ID_OUT}] = initVal;
+            //portValues[{cid, PORT_ID_OUT}] = initVal;
+            setPortValue(cid, PORT_ID_OUT, initVal);
             registerValues[cid] = initVal;
           } else {
             BitVector initVal = bsim::unknown_bv(width);
-            portValues[{cid, PORT_ID_OUT}] = initVal;
+            //portValues[{cid, PORT_ID_OUT}] = initVal;
+            setPortValue(cid, PORT_ID_OUT, initVal);
           }
 
           const Cell& c = def.getCellRef(cid);
@@ -236,9 +243,10 @@ namespace FlatCircuit {
                                    const BitVector& bv) {
       //std::cout << "Combinational signal change for " << sigPortString(def, sigPort) << " to " << bv << std::endl;
 
-      BitVector oldVal = portValues.at(sigPort);
+      BitVector oldVal = getPortValue(sigPort.cell, sigPort.port); //portValues.at(sigPort);
       //portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
-      portValues[{sigPort.cell, sigPort.port}] = bv;
+      //portValues[{sigPort.cell, sigPort.port}] = bv;
+      setPortValue(sigPort.cell, sigPort.port, bv);
 
       const Cell& c = def.getCellRef(sigPort.cell);
 
@@ -439,7 +447,8 @@ namespace FlatCircuit {
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
 
-            portValues[sigPort] = materializeInput(sigPort);
+            //portValues[sigPort] = materializeInput(sigPort);
+            setPortValue(sigPort.cell, sigPort.port, materializeInput(sigPort));
 
           }
         }
@@ -709,15 +718,27 @@ namespace FlatCircuit {
       userInputs.insert({{cid, pid}, bv});
     }
 
+    void setPortValue(const CellId cid,
+                      const PortId pid,
+                      const BitVector& bv) {
+      portValues[{cid, pid}] = bv;
+    }
+
+    BitVector getPortValue(const CellId cid,
+                           const PortId pid) {
+      return map_find({cid, pid}, portValues);
+    }
+
+    // This is the user facing funtion. getPortValue is for internal use
     BitVector getBitVec(const CellId cid,
                         const PortId pid) {
 
-      if (!contains_key({cid, pid}, portValues)) {
-        std::cout << "No value for " << def.getCellName(cid) << ", " << portIdString(pid) << std::endl;
-      }
+      // if (!contains_key({cid, pid}, portValues)) {
+      //   std::cout << "No value for " << def.getCellName(cid) << ", " << portIdString(pid) << std::endl;
+      // }
 
-      assert(contains_key({cid, pid}, portValues));
-      return portValues.at({cid, pid});
+      // assert(contains_key({cid, pid}, portValues));
+      return getPortValue(cid, pid); //portValues.at({cid, pid});
     }    
 
     BitVector getBitVec(const std::string& cellName,
@@ -743,7 +764,8 @@ namespace FlatCircuit {
 
           const Cell& c = def.getCellRef(cid);
           BitVector initVal = c.getParameterValue(PARAM_INIT_VALUE);
-          portValues[{cid, PORT_ID_OUT}] = initVal;
+          //portValues[{cid, PORT_ID_OUT}] = initVal;
+          setPortValue(cid, PORT_ID_OUT, initVal);
 
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
             for (auto& sigBit : receiverBus) {
