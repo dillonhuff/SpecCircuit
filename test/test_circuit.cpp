@@ -756,6 +756,8 @@ namespace FlatCircuit {
     sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
     sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
 
+    //sim.def.replacePortWithConstant("clk_in", BitVec(1, 0));
+
     sim.def.replacePortWithConstant("tck", BitVec(1, 0));
     sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
     sim.def.replacePortWithConstant("tms", BitVec(1, 0));
