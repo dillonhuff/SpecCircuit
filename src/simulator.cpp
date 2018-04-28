@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include <dlfcn.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -240,6 +241,11 @@ namespace FlatCircuit {
 
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
+    int d0 =
+      system(("rm -f " + targetBinary).c_str());
+
+    assert(d0 == 0);
+
     int ret =
       system(("clang++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
@@ -308,7 +314,7 @@ namespace FlatCircuit {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
-        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + "bsim::quad_value_bit_vector(16, 0);\n"; //argName + ";\n";
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n"; //"bsim::quad_value_bit_vector(16, 0);\n"; //argName + ";\n";
 
       } else if (cell.isInputPortCell()) {
         cppCode += ln("// No code for input port " + def.cellName(cid));

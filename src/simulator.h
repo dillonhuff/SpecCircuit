@@ -171,9 +171,15 @@ namespace FlatCircuit {
           reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
         simFunc(simValueTable);
-        for (int i = 0; i < (int) simValueTable.size(); i++) {
-          simValueTable[i] = BitVector(32, 10);
+
+        if (simValueTable.size() >= 1431) {
+          std::cout << "After execution of simvalfunc simValueTable[1431] = " << simValueTable[1418] << std::endl;
+        } else {
+          std::cout << "No entry 1431 in sim value table!" << std::endl;
         }
+        // for (int i = 0; i < (int) simValueTable.size(); i++) {
+        //   simValueTable[i] = BitVector(32, 10);
+        // }
         return;
       }
 
