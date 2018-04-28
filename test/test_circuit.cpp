@@ -193,6 +193,11 @@ namespace FlatCircuit {
 
     REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
 
+    state.setFreshValue("read_addr", BitVec(index, 2));
+    state.update();
+
+    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    
     deleteContext(c);
   }
     

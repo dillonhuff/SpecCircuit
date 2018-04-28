@@ -29,12 +29,13 @@ namespace FlatCircuit {
     std::map<SigPort, unsigned long> portOffsets;
     std::map<CellId, unsigned long> registerOffsets;
     std::map<SigPort, unsigned long> pastValueOffsets;
+    std::map<CellId, unsigned long> memoryOffsets;
 
     //std::map<SigPort, BitVector> portValues;
     //std::map<CellId, BitVector> registerValues;
 
-    std::map<SigPort, BitVector> pastValues;
-    std::map<CellId, SimMemory> memories;
+    //std::map<SigPort, BitVector> pastValues;
+    //std::map<CellId, SimMemory> memories;
 
   public:
 
@@ -719,25 +720,42 @@ namespace FlatCircuit {
 
     BitVector getMemoryValue(const CellId cid,
                              const int offset) const {
-      return map_find(cid, memories).mem.at(offset);
+      //return map_find(cid, memories).mem.at(offset);
+      assert(offset >= 0);
+
+      return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
     }
 
     void initMemory(const CellId cid) {
+      assert(!contains_key(cid, memoryOffsets));
+
       const Cell& cl = def.getCellRefConst(cid);
       int memWidth = cl.getMemWidth();
       int memDepth = cl.getMemDepth();
 
-      SimMemory defaultMem(memDepth, memWidth);
-      memories[cid] = defaultMem;
+      BitVector defaultValue(memWidth, 0);
+
+      //SimMemory defaultMem(memDepth, memWidth);
+      //memories[cid] = defaultMem;
+      unsigned long nextInd = simValueTable.size();
+      memoryOffsets[cid] = nextInd;
+      for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
+        simValueTable.push_back(defaultValue);
+      }
     }
 
     void setMemoryValue(const CellId cid,
                         const int addr,
                         const BitVector& writeData) {
-      assert(contains_key(cid, memories));
+      //assert(contains_key(cid, memories));
+      assert(contains_key(cid, memoryOffsets));
+      assert(addr >= 0);
 
-      auto& mem = memories[cid].mem;
-      mem[addr] = writeData;
+      simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
+        writeData;
+
+      // auto& mem = memories[cid].mem;
+      // mem[addr] = writeData;
     }
 
     void setPortValue(const CellId cid,
