@@ -111,7 +111,6 @@ namespace FlatCircuit {
         sim.update();
 
         REQUIRE(sim.getBitVec("out") == BitVec(4, 12));
-
       }
     }
 
