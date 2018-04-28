@@ -289,20 +289,33 @@ namespace FlatCircuit {
                            const BitVector& writeAddr,
                            const BitVector& writeData) {
       int addr = writeAddr.to_type<int>();
-      BitVector oldVal = map_find(cid, memories).mem.at(addr);
+      BitVector oldVal = getMemoryValue(cid, addr); //map_find(cid, memories).mem.at(addr);
 
       if (same_representation(oldVal, writeData)) {
         return false;
       }
 
+      setMemoryValue(cid, addr, writeData);
+
+      
+      // assert(contains_key(cid, memories));
+
+      // auto& mem = memories[cid].mem;
+      // mem[addr] = writeData;
+
+      //assert(same_representation(map_find(cid, memories).mem[addr], writeData));
+      assert(same_representation(getMemoryValue(cid, addr), writeData));
+
+      return true;
+    }
+
+    void setMemoryValue(const CellId cid,
+                        const int addr,
+                        const BitVector& writeData) {
       assert(contains_key(cid, memories));
 
       auto& mem = memories[cid].mem;
       mem[addr] = writeData;
-
-      assert(same_representation(map_find(cid, memories).mem[addr], writeData));
-
-      return true;
     }
 
     bool registerStateChange(const CellId id,
@@ -727,6 +740,11 @@ namespace FlatCircuit {
     }
 
     // Internal setters / getters
+
+    BitVector getMemoryValue(const CellId cid,
+                             const int offset) const {
+      return map_find(cid, memories).mem.at(offset);
+    }
 
     void initMemory(const CellId cid) {
       const Cell& cl = def.getCellRefConst(cid);
