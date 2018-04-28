@@ -649,7 +649,22 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
-    
+
+    // Compiling specialized code
+
+    REQUIRE(sim.compileCircuit());
+
+    REQUIRE(sim.hasSimulateFunction());
+
+    topVal = 56;
+    sim.setFreshValue("in_BUS16_S2_T0", BitVector(16, topVal));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
+
     deleteContext(c);
   }
 

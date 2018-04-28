@@ -863,6 +863,11 @@ namespace FlatCircuit {
     }
 
     void compileLevelizedCircuit(const std::vector<CellId>& levelized);
+
+    std::string codeToMaterialize(const CellId cid,
+                                  const PortId pid,
+                                  const std::string& argName);
+    
   };
 
 }

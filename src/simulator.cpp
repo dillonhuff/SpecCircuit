@@ -278,30 +278,75 @@ namespace FlatCircuit {
     return "\t" + s + ";\n";
   }
 
+  std::string Simulator::codeToMaterialize(const CellId cid,
+                                           const PortId pid,
+                                           const std::string& argName) {
+    const Cell& cell = def.getCellRefConst(cid);
+    auto drivers = cell.getDrivers(pid);
+    string cppCode = "";
+    cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
+                  to_string(drivers.signals.size()) + ", 0)");
+
+    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+      SignalBit driverBit = drivers.signals[offset];
+      string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
+      cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+    }
+
+    return cppCode;
+  }
 
   void Simulator::compileLevelizedCircuit(const std::vector<CellId>& levelized) {
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     for (auto cid : levelized) {
       const Cell& cell = def.getCellRefConst(cid);
-      cppCode += ln("// Code for cell " + def.cellName(cid));
-      if (!cell.isInputPortCell()) {
+      cppCode += ln("// ----- Code for cell " + def.cellName(cid));
+      if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
-        auto drivers = cell.getDrivers(PORT_ID_IN);
+        //auto drivers = cell.getDrivers(PORT_ID_IN);
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
-        cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
-                      to_string(drivers.signals.size()) + ", 0)");
-
-        for (int offset = 0; offset < drivers.signals.size(); offset++) {
-          SignalBit driverBit = drivers.signals[offset];
-          string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
-          cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
-        }
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n";
 
+      } else if (cell.isInputPortCell()) {
+        cppCode += ln("// No code for input port " + def.cellName(cid));
+      } else if (cell.getCellType() == CELL_TYPE_CONST) {
+        cppCode += ln("// No code for const port " + def.cellName(cid));
+      } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
+
+        string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+        int outWidth = cell.getPortWidth(PORT_ID_OUT);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = zero_extend(" + to_string(outWidth) + ", " + argName + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_MUL) {
+
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = bsim::quad_value_bit_vector(16, 0);\n"; //mul_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_ORR) {
+
+        string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = orr(" + argName + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_NOT) {
+
+        string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = ~(" + argName + ");\n";
+
       } else {
-        cppCode += "\t// Insert code for unsupported node " + def.cellName(cid) + "\n";
+        cout << "Insert code for unsupported node " + def.cellName(cid) << endl;
+        assert(false);
       }
     }
     
