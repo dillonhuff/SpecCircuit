@@ -290,11 +290,13 @@ namespace FlatCircuit {
         auto drivers = cell.getDrivers(PORT_ID_IN);
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
-        cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" + to_string(drivers.signals.size()) + ", 0)");
+        cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
+                      to_string(drivers.signals.size()) + ", 0)");
 
         for (int offset = 0; offset < drivers.signals.size(); offset++) {
-          //SignalBit driverBit = drivers.signals[offset];
-          cppCode += ln(argName + ".set(" + to_string(offset) + ", 1)");
+          SignalBit driverBit = drivers.signals[offset];
+          string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
+          cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
         }
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n";
 
