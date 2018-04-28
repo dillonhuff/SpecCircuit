@@ -308,7 +308,7 @@ namespace FlatCircuit {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
-        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n";
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + "bsim::quad_value_bit_vector(16, 0);\n"; //argName + ";\n";
 
       } else if (cell.isInputPortCell()) {
         cppCode += ln("// No code for input port " + def.cellName(cid));
@@ -330,7 +330,7 @@ namespace FlatCircuit {
         string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
         cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
-        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = bsim::quad_value_bit_vector(16, 0);\n"; //mul_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = mul_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
