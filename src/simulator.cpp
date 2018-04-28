@@ -273,14 +273,31 @@ namespace FlatCircuit {
 
     return {myLibHandle, myFuncFunV};
   }
-  
+
+  std::string ln(const std::string& s) {
+    return "\t" + s + ";\n";
+  }
+
+
   void Simulator::compileLevelizedCircuit(const std::vector<CellId>& levelized) {
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     for (auto cid : levelized) {
       const Cell& cell = def.getCellRefConst(cid);
+      cppCode += ln("// Code for cell " + def.cellName(cid));
       if (!cell.isInputPortCell()) {
-        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = bsim::quad_value_bit_vector(16, 0)" + ";\n";
+
+        auto drivers = cell.getDrivers(PORT_ID_IN);
+
+        string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" + to_string(drivers.signals.size()) + ", 0)");
+
+        for (int offset = 0; offset < drivers.signals.size(); offset++) {
+          //SignalBit driverBit = drivers.signals[offset];
+          cppCode += ln(argName + ".set(" + to_string(offset) + ", 1)");
+        }
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n";
+
       } else {
         cppCode += "\t// Insert code for unsupported node " + def.cellName(cid) + "\n";
       }
