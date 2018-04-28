@@ -538,6 +538,17 @@ namespace FlatCircuit {
       }
       return outputs;
     }
+
+    std::set<PortId> inputPorts() const {
+      std::set<PortId> inputs;
+      for (auto ctp : getPorts()) {
+        if (getPortType(ctp.first) == PORT_TYPE_IN) {
+          inputs.insert(ctp.first);
+        }
+      }
+      return inputs;
+    }
+
     const std::vector<std::set<SignalBit> >&
     getPortReceivers(const PortId pid) const {
       assert(contains_key(pid, receivers));
@@ -561,7 +572,15 @@ namespace FlatCircuit {
       return map_find(port, portWidths).type;
     }
 
+    bool hasParameter(const Parameter p) const {
+      return contains_key(p, parameters);
+    }
+
     bool isInputPortCell() const {
+      if (!hasParameter(PARAM_PORT_TYPE)) {
+        return false;
+      }
+
       int pt = bvToInt(getParameterValue(PARAM_PORT_TYPE));
       return pt == PORT_CELL_FOR_INPUT;
     }

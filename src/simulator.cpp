@@ -16,8 +16,12 @@ namespace FlatCircuit {
     std::set<T> alreadyAdded;
   public:
 
+    bool elem(const T& t) const {
+      return dbhc::elem(t, alreadyAdded);
+    }
+
     void push_back(const T& t) {
-      if (!elem(t, alreadyAdded)) {
+      if (!dbhc::elem(t, alreadyAdded)) {
         vec.push_back(t);
         alreadyAdded.insert(t);
       }
@@ -177,9 +181,61 @@ namespace FlatCircuit {
     return trace;
   }
 
-  maybe<std::vector<CellId> > levelizeCircuit(const CellDefinition& def) {
-    std::vector<CellId> cells;
-    return cells;
+  std::set<CellId> levelZeroCells(const CellDefinition& def) {
+    set<CellId> levelZero;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.getCellType() == CELL_TYPE_PORT) {
+        if (cell.isInputPortCell()) {
+          levelZero.insert(cid);
+        }
+      } else if ((cell.getCellType() == CELL_TYPE_CONST) ||
+                 isRegister(cell.getCellType())) {
+        levelZero.insert(cid);
+      }
+    }
+
+    return levelZero;
+  }
+
+  maybe<std::vector<CellId> >
+  levelizeCircuit(const CellDefinition& def) {
+    UniqueVector<CellId> levelized;
+    for (auto cid : levelZeroCells(def)) {
+      levelized.push_back(cid);
+    }
+
+    bool addedNew = true;
+    while (addedNew) {
+      addedNew = false;
+      for (auto ctp : def.getCellMap()) {
+        CellId cid = ctp.first;
+        if (levelized.elem(cid)) {
+          continue;
+        }
+
+        const Cell& cell = def.getCellRefConst(cid);
+
+        bool allDriversInEarlierLevels = true;
+        for (auto port : cell.inputPorts()) {
+          for (auto driverBit : cell.getDrivers(port).signals) {
+            if (notEmpty(driverBit) && !levelized.elem(driverBit.cell)) {
+              allDriversInEarlierLevels = false;
+              break;
+            }
+          }
+        }
+
+        if (allDriversInEarlierLevels) {
+          addedNew = true;
+          levelized.push_back(cid);
+          break;
+        }
+      }
+    }
+
+    return levelized.getVec();
   }
 
   void compileCppLib(const std::string& cppName,
@@ -189,24 +245,6 @@ namespace FlatCircuit {
 
     assert(ret == 0);
   }
-
-  // JITInfo buildSimLib(CoreIR::Module* m,
-  //                     CoreIR::NGraph& gr,
-  //                     const std::string& libName) {
-  //   MemLayout layout = buildLayout(gr);
-
-  //   string cppCode = libCode(m, gr, layout);
-
-  //   string targetBinary = "./lib" + libName + ".dylib";
-  //   string cppName = "./" + libName + ".cpp";
-  //   ofstream out(cppName);
-  //   out << cppCode << endl;
-  //   compileCppLib(cppName, targetBinary);
-
-  //   DylibInfo dlib = loadLibWithFunc(targetBinary);
-
-  //   return {layout, dlib};
-  // }
 
   struct DylibInfo {
     void* libHandle;
@@ -237,7 +275,18 @@ namespace FlatCircuit {
   }
   
   void Simulator::compileLevelizedCircuit(const std::vector<CellId>& levelized) {
-    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {}";
+    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
+
+    for (auto cid : levelized) {
+      const Cell& cell = def.getCellRefConst(cid);
+      if (!cell.isInputPortCell()) {
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = bsim::quad_value_bit_vector(16, 0)" + ";\n";
+      } else {
+        cppCode += "\t// Insert code for unsupported node " + def.cellName(cid) + "\n";
+      }
+    }
+    
+    cppCode += "}";
 
     string libName = "circuit_jit";
     string targetBinary = "./lib" + libName + ".dylib";
