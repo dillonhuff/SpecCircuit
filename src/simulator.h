@@ -28,6 +28,7 @@ namespace FlatCircuit {
     std::map<SigPort, BitVector> portValues;
     std::map<CellId, BitVector> registerValues;
     std::map<SigPort, BitVector> pastValues;
+    std::map<CellId, SimMemory> memories;
 
   public:
 
@@ -38,8 +39,6 @@ namespace FlatCircuit {
     std::set<SigPort> seqChanges;
 
     // Use this to save clock / reset port past values to detect edges
-
-    std::map<CellId, SimMemory> memories;
 
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
@@ -309,15 +308,6 @@ namespace FlatCircuit {
       return true;
     }
 
-    void setMemoryValue(const CellId cid,
-                        const int addr,
-                        const BitVector& writeData) {
-      assert(contains_key(cid, memories));
-
-      auto& mem = memories[cid].mem;
-      mem[addr] = writeData;
-    }
-
     bool registerStateChange(const CellId id,
                              const BitVector& newVal) {
       BitVector oldVal = getRegisterValue(id);
@@ -502,7 +492,7 @@ namespace FlatCircuit {
         BitVector rdata(def.getCellRefConst(sigPort.cell).getMemWidth(), 21);
 
         if (raddr.is_binary()) {
-          rdata = map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
+          rdata = getMemoryValue(sigPort.cell, raddr.to_type<int>()); //map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
         }
 
         //std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
@@ -753,6 +743,15 @@ namespace FlatCircuit {
 
       SimMemory defaultMem(memDepth, memWidth);
       memories[cid] = defaultMem;
+    }
+
+    void setMemoryValue(const CellId cid,
+                        const int addr,
+                        const BitVector& writeData) {
+      assert(contains_key(cid, memories));
+
+      auto& mem = memories[cid].mem;
+      mem[addr] = writeData;
     }
 
     void setPortValue(const CellId cid,
