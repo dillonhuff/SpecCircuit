@@ -1,5 +1,9 @@
 #include "simulator.h"
 
+#include <fstream>
+
+#include <dlfcn.h>
+
 using namespace std;
 
 namespace FlatCircuit {
@@ -181,7 +185,7 @@ namespace FlatCircuit {
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
     int ret =
-      system(("clang++ -std=c++11 -fPIC -dynamiclib " + cppName + " -o " + targetBinary).c_str());
+      system(("clang++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
     assert(ret == 0);
   }
@@ -203,11 +207,56 @@ namespace FlatCircuit {
 
   //   return {layout, dlib};
   // }
+
+  struct DylibInfo {
+    void* libHandle;
+    void* simFuncHandle;
+  };
+  
+  DylibInfo loadLibWithFunc(const std::string& targetBinary) {
+    void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_LOCAL);
+
+    if (myLibHandle == nullptr) {
+      printf("dlsym failed: %s\n", dlerror());
+      assert(false);
+    }
+
+    cout << "lib handle = " << myLibHandle << endl;
+
+    void* myFuncFunV;
+    // Must remove the first underscore from the symbol name to find it?
+    myFuncFunV = dlsym(myLibHandle, "_Z8simulateRNSt3__16vectorIN4bsim21quad_value_bit_vectorENS_9allocatorIS2_EEEE");
+    if (myFuncFunV == nullptr) {
+      printf("dlsym failed: %s\n", dlerror());
+      assert(false);
+    } else {
+      printf("FOUND\n");
+    }
+
+    return {myLibHandle, myFuncFunV};
+  }
+  
+  void Simulator::compileLevelizedCircuit(const std::vector<CellId>& levelized) {
+    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {}";
+
+    string libName = "circuit_jit";
+    string targetBinary = "./lib" + libName + ".dylib";
+    string cppName = "./" + libName + ".cpp";
+    ofstream out(cppName);
+    out << cppCode << endl;
+
+    compileCppLib(cppName, targetBinary);
+
+    DylibInfo dlib = loadLibWithFunc(targetBinary);
+    libHandle = dlib.libHandle;
+    simulateFuncHandle = dlib.simFuncHandle;
+  }
   
   bool Simulator::compileCircuit() {
     maybe<std::vector<CellId> > levelized =
       levelizeCircuit(def);
 
+    compileLevelizedCircuit(levelized.get_value());
     
     return levelized.has_value();
   }

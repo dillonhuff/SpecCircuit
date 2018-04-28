@@ -861,6 +861,8 @@ namespace FlatCircuit {
     bool hasSimulateFunction() const {
       return (libHandle != nullptr) && (simulateFuncHandle != nullptr);
     }
+
+    void compileLevelizedCircuit(const std::vector<CellId>& levelized);
   };
 
 }
