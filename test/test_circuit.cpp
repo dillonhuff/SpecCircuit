@@ -106,20 +106,12 @@ namespace FlatCircuit {
 
         REQUIRE(sim.hasSimulateFunction());
 
-        
-        // What is the compilation procedure going to look like?
+        sim.setFreshValue("in1", BitVector(4, 12));
 
-        // - Call compile function
-        // - Build code for compilation
-        // - Dynamically compile the code
-        // - In the simulator call the compiled code in update
+        sim.update();
 
-        // NOTE: How does this interact with specialization? Which version is
-        // executed depends on what values were specialized away. How to save
-        // values outside of the original table? Maybe have a specialized table
-        // and an unspecialized one? For now just have one massive table? Or
-        // have one massive table, and rearrange it so that the in use values
-        // are all in one chunk at the top
+        REQUIRE(sim.getBitVec("out") == BitVec(4, 12));
+
       }
     }
 
