@@ -25,8 +25,14 @@ namespace FlatCircuit {
 
   class Simulator {
 
-    std::map<SigPort, BitVector> portValues;
-    std::map<CellId, BitVector> registerValues;
+    std::vector<BitVector> simValueTable;
+    std::map<SigPort, unsigned long> portOffsets;
+    std::map<CellId, unsigned long> registerOffsets;
+    std::map<SigPort, unsigned long> pastValueOffsets;
+
+    //std::map<SigPort, BitVector> portValues;
+    //std::map<CellId, BitVector> registerValues;
+
     std::map<SigPort, BitVector> pastValues;
     std::map<CellId, SimMemory> memories;
 
@@ -37,8 +43,6 @@ namespace FlatCircuit {
     std::set<std::pair<SigPort, BitVector> > userInputs;
     std::set<SigPort> combChanges;
     std::set<SigPort> seqChanges;
-
-    // Use this to save clock / reset port past values to detect edges
 
     Simulator(Env& e_, CellDefinition& def_) : def(def_) {
 
@@ -53,7 +57,6 @@ namespace FlatCircuit {
 
         if (tp == CELL_TYPE_CONST) {
           BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
-          //portValues[{cid, PORT_ID_OUT}] = initVal;
           setPortValue(cid, PORT_ID_OUT, initVal);
 
           const Cell& c = def.getCellRef(cid);
@@ -65,19 +68,12 @@ namespace FlatCircuit {
         } else if (tp == CELL_TYPE_MEM) {
           initMemory(cid);
           int memWidth = cl.getMemWidth();
-          //int memDepth = cl.getMemDepth();
-
-          // SimMemory defaultMem(memDepth, memWidth);
-
-          // memories[cid] = defaultMem;
 
           BitVector initVal(memWidth, 0);
-          //portValues[{cid, PORT_ID_RDATA}] = initVal;
           setPortValue(cid, PORT_ID_RDATA, initVal);
 
           BitVector clkVal(1, 0);
           SigPort clkPort = {cid, PORT_ID_CLK};
-          //pastValues[clkPort] = clkVal;
           setPastValue(clkPort.cell, clkPort.port, clkVal);
           
           const Cell& c = def.getCellRef(cid);
@@ -91,7 +87,6 @@ namespace FlatCircuit {
           if (cl.hasPort(PORT_ID_OUT)) {
             int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
             BitVector initVal = bsim::unknown_bv(width);
-            //portValues[{cid, PORT_ID_OUT}] = initVal;
             setPortValue(cid, PORT_ID_OUT, initVal);
 
             const Cell& c = def.getCellRef(cid);
@@ -107,7 +102,6 @@ namespace FlatCircuit {
           int hi = cl.getParameterValue(PARAM_HIGH).to_type<int>();
           int lo = cl.getParameterValue(PARAM_LOW).to_type<int>();
           BitVector initVal = bsim::unknown_bv(hi - lo);
-          //portValues[{cid, PORT_ID_OUT}] = initVal;
           setPortValue(cid, PORT_ID_OUT, initVal);
 
           // TODO: Ignore empty sigbits
@@ -121,7 +115,6 @@ namespace FlatCircuit {
         } else if (tp == CELL_TYPE_ZEXT) {
           int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
           BitVector initVal = bsim::unknown_bv(width);
-          //portValues[{cid, PORT_ID_OUT}] = initVal;
           setPortValue(cid, PORT_ID_OUT, initVal);
 
           const Cell& c = def.getCellRef(cid);
@@ -145,7 +138,6 @@ namespace FlatCircuit {
             setRegisterValue(cid, initVal);
           } else {
             BitVector initVal = bsim::unknown_bv(width);
-            //portValues[{cid, PORT_ID_OUT}] = initVal;
             setPortValue(cid, PORT_ID_OUT, initVal);
           }
 
@@ -157,24 +149,18 @@ namespace FlatCircuit {
           }
 
           if (tp == CELL_TYPE_REG_ARST) {
-            BitVector initVal(1, 0); // = //bsim::unknown_bv(1);
+            BitVector initVal(1, 0);
             SigPort clkPort = {cid, PORT_ID_CLK};
             SigPort rstPort = {cid, PORT_ID_ARST};
-
-            // pastValues[clkPort] = initVal;
-            // pastValues[rstPort] = initVal;
 
             setPastValue(clkPort.cell, clkPort.port, initVal);
             setPastValue(rstPort.cell, rstPort.port, initVal);
           }
 
           if (tp == CELL_TYPE_REG) {
-            //std::cout << "making reg" << std::endl;
             BitVector initVal(1, 0);
             SigPort clkPort = {cid, PORT_ID_CLK};
-            //pastValues[clkPort] = initVal;
             setPastValue(clkPort.cell, clkPort.port, initVal);
-            //std::cout << "done reg" << std::endl;
           }
           
         } else {
@@ -757,36 +743,65 @@ namespace FlatCircuit {
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-      portValues[{cid, pid}] = bv;
+      if (!contains_key({cid, pid}, portOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        portOffsets[{cid, pid}] = nextInd;
+        simValueTable.push_back(bv);
+      }
+      simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+
+      //portValues[{cid, pid}] = bv;
     }
 
     BitVector getPortValue(const CellId cid,
-                           const PortId pid) {
-      return map_find({cid, pid}, portValues);
+                           const PortId pid) const {
+      //return map_find({cid, pid}, portValues);
+      return simValueTable[map_find({cid, pid}, portOffsets)];
     }
 
     void setRegisterValue(const CellId cid,
                           const BitVector& bv) {
-      registerValues[cid] = bv;
+      if (!contains_key(cid, registerOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        registerOffsets[cid] = nextInd;
+        simValueTable.push_back(bv);
+      }
+
+      simValueTable[map_find(cid, registerOffsets)] = bv;
     }
 
-    BitVector getRegisterValue(const CellId cid) {
-      return map_find(cid, registerValues);
+    BitVector getRegisterValue(const CellId cid) const {
+      return simValueTable[map_find(cid, registerOffsets)];
+
+      //return map_find(cid, registerValues);
     }
     
     void setPastValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-      pastValues[{cid, pid}] = bv;
+
+      if (!contains_key({cid, pid}, pastValueOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        pastValueOffsets[{cid, pid}] = nextInd;
+        simValueTable.push_back(bv);
+      }
+      simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
+
+      //pastValues[{cid, pid}] = bv;
     }
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
-      return map_find({cid, pid}, pastValues);
+      return simValueTable[map_find({cid, pid}, pastValueOffsets)];
+      //return map_find({cid, pid}, pastValues);
     }
     
     std::map<CellId, BitVector> allRegisterValues() const {
-      return registerValues;
+      std::map<CellId, BitVector> regValues;
+      for (auto roff : registerOffsets) {
+        regValues.insert({roff.first, getRegisterValue(roff.first)});
+      }
+      return regValues;
     }
     
     // This is the user facing funtion. getPortValue is for internal use
