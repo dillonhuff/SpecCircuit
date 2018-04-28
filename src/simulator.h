@@ -4,25 +4,6 @@
 
 namespace FlatCircuit {
 
-  class SimMemory {
-  public:
-    int depth;
-    int width;
-    std::vector<BitVector> mem;
-
-    SimMemory() {
-      depth = 0;
-      width = 0;
-    }
-
-    SimMemory(const int depth, const int width) {
-      mem.resize(depth);
-      for (int i = 0; i < depth; i++) {
-        mem[i] = BitVector(width, 0);
-      }
-    }
-  };
-
   class Simulator {
 
     std::vector<BitVector> simValueTable;
@@ -31,11 +12,8 @@ namespace FlatCircuit {
     std::map<SigPort, unsigned long> pastValueOffsets;
     std::map<CellId, unsigned long> memoryOffsets;
 
-    //std::map<SigPort, BitVector> portValues;
-    //std::map<CellId, BitVector> registerValues;
-
-    //std::map<SigPort, BitVector> pastValues;
-    //std::map<CellId, SimMemory> memories;
+    void* libHandle;
+    void* simulateFuncHandle;
 
   public:
 
@@ -45,7 +23,8 @@ namespace FlatCircuit {
     std::set<SigPort> combChanges;
     std::set<SigPort> seqChanges;
 
-    Simulator(Env& e_, CellDefinition& def_) : def(def_) {
+    Simulator(Env& e_, CellDefinition& def_) :
+      libHandle(nullptr), simulateFuncHandle(nullptr), def(def_) {
 
       std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
@@ -175,6 +154,7 @@ namespace FlatCircuit {
     }
 
     void update() {
+
       //std::cout << "Starting with update" << std::endl;
       
       // Add user inputs to combChanges
@@ -186,6 +166,15 @@ namespace FlatCircuit {
 
       userInputs = {};
 
+      if (hasSimulateFunction()) {
+        void (*simFunc)(std::vector<BitVector>&) =
+          reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
+
+        simFunc(simValueTable);
+        return;
+      }
+
+      // If there is no simulate function use the interpreter
       do {
 
         while (combChanges.size() > 0) {
@@ -319,26 +308,20 @@ namespace FlatCircuit {
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
         BitVector newRst = materializeInput({sigPort.cell, PORT_ID_ARST});
 
-        BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
+        BitVector oldOut = getRegisterValue(sigPort.cell);
 
-        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //pastValues.at({sigPort.cell, PORT_ID_CLK});
-        BitVector oldRst = getPastValue(sigPort.cell, PORT_ID_ARST); //pastValues.at({sigPort.cell, PORT_ID_ARST});
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK);
+        BitVector oldRst = getPastValue(sigPort.cell, PORT_ID_ARST);
 
         bool clkPos = c.clkPosedge();
         bool rstPos = c.rstPosedge();
 
         BitVector newOut = oldOut;
 
-        //std::cout << "Updating reg arst " << def.cellName(sigPort.cell) << ", currently input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
-        //std::cout << "\told clock = " << oldClk << std::endl;
-        //std::cout << "\tnew clock = " << newClk << std::endl;
-
         if (clkPos &&
             newClk.is_binary() &&
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 0) && (bvToInt(newClk) == 1)) {
-
-          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
 
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
@@ -348,7 +331,6 @@ namespace FlatCircuit {
             oldClk.is_binary() &&
             (bvToInt(oldClk) == 1) && (bvToInt(newClk) == 0)) {
 
-          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = materializeInput({sigPort.cell, PORT_ID_IN});
         }
 
@@ -357,7 +339,6 @@ namespace FlatCircuit {
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 0) && (bvToInt(newRst) == 1)) {
 
-          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
@@ -366,7 +347,6 @@ namespace FlatCircuit {
             oldRst.is_binary() &&
             (bvToInt(oldRst) == 1) && (bvToInt(newRst) == 0)) {
 
-          //std::cout << "\tSet reg arst " << def.cellName(sigPort.cell) << ", to input = " << materializeInput({sigPort.cell, PORT_ID_IN}) << std::endl;
           newOut = c.initValue();
         }
 
@@ -376,8 +356,8 @@ namespace FlatCircuit {
 
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
 
-        BitVector oldOut = getRegisterValue(sigPort.cell); //map_find(sigPort.cell, registerValues);
-        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //pastValues.at({sigPort.cell, PORT_ID_CLK});
+        BitVector oldOut = getRegisterValue(sigPort.cell);
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK);
 
         bool clkPos = c.clkPosedge();
 
@@ -735,8 +715,6 @@ namespace FlatCircuit {
 
       BitVector defaultValue(memWidth, 0);
 
-      //SimMemory defaultMem(memDepth, memWidth);
-      //memories[cid] = defaultMem;
       unsigned long nextInd = simValueTable.size();
       memoryOffsets[cid] = nextInd;
       for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
@@ -877,7 +855,12 @@ namespace FlatCircuit {
 
     std::vector<SigPort> dataSources(const SigPort sp);
     std::vector<SigPort> getDataPorts(const CellId sp);
-    
+
+    bool compileCircuit();
+
+    bool hasSimulateFunction() const {
+      return (libHandle != nullptr) && (simulateFuncHandle != nullptr);
+    }
   };
 
 }

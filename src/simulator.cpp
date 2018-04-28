@@ -173,4 +173,43 @@ namespace FlatCircuit {
     return trace;
   }
 
+  maybe<std::vector<CellId> > levelizeCircuit(const CellDefinition& def) {
+    std::vector<CellId> cells;
+    return cells;
+  }
+
+  void compileCppLib(const std::string& cppName,
+                     const std::string& targetBinary) {
+    int ret =
+      system(("clang++ -std=c++11 -fPIC -dynamiclib " + cppName + " -o " + targetBinary).c_str());
+
+    assert(ret == 0);
+  }
+
+  // JITInfo buildSimLib(CoreIR::Module* m,
+  //                     CoreIR::NGraph& gr,
+  //                     const std::string& libName) {
+  //   MemLayout layout = buildLayout(gr);
+
+  //   string cppCode = libCode(m, gr, layout);
+
+  //   string targetBinary = "./lib" + libName + ".dylib";
+  //   string cppName = "./" + libName + ".cpp";
+  //   ofstream out(cppName);
+  //   out << cppCode << endl;
+  //   compileCppLib(cppName, targetBinary);
+
+  //   DylibInfo dlib = loadLibWithFunc(targetBinary);
+
+  //   return {layout, dlib};
+  // }
+  
+  bool Simulator::compileCircuit() {
+    maybe<std::vector<CellId> > levelized =
+      levelizeCircuit(def);
+
+    
+    return levelized.has_value();
+  }
+
 }
