@@ -241,13 +241,10 @@ namespace FlatCircuit {
 
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
-    int d0 =
-      system(("rm -f " + targetBinary).c_str());
-
-    assert(d0 == 0);
-
     int ret =
       system(("clang++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
+
+    sleep(2);
 
     assert(ret == 0);
   }
@@ -380,4 +377,10 @@ namespace FlatCircuit {
     return levelized.has_value();
   }
 
+  Simulator::~Simulator() {
+      if (libHandle != nullptr) {
+        dlclose(libHandle);
+      }
+    }
+  
 }

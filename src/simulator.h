@@ -876,6 +876,8 @@ namespace FlatCircuit {
     std::string codeToMaterialize(const CellId cid,
                                   const PortId pid,
                                   const std::string& argName);
+
+    ~Simulator();
     
   };
 
