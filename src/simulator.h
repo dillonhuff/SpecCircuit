@@ -171,7 +171,6 @@ namespace FlatCircuit {
           reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
         simFunc(simValueTable);
-
         return;
       }
 

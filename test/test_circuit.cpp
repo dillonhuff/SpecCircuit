@@ -29,6 +29,46 @@ namespace FlatCircuit {
     return strs;
   }
 
+  void setCGRAInput(const BitVector& input, Simulator& sim) {
+    for (int side = 0; side < 4; side++) {
+
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+      }
+    }
+  }
+
+  void printCGRAInputs(Simulator& sim) {
+    cout << "Inputs" << endl;
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+      }
+    }
+  }
+
+  void printCGRAOutputs(Simulator& sim) {
+
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
+      }
+    }
+  }
+
+  BitVector getCGRAOutput(const int sideNo, Simulator& sim) {
+    BitVector outputS0(16, 0);
+    for (int i = 0; i < 16; i++) {
+      outputS0.set(i, sim.getBitVec("pad_S" + to_string(sideNo) + "_T" + to_string(15 - i) + "_out").get(0));
+    }
+    return outputS0;
+  }
+
   TEST_CASE("Specialization of inputs") {
     Env e;
     CellType modType = e.addCellType("one_mux");
@@ -678,7 +718,6 @@ namespace FlatCircuit {
 
     CellDefinition& def = circuitEnv.getDef("top");
 
-    //BitVector input("16'hf0ff");
     BitVector input(16, 23);
     BitVector correctOutput(16, 2*23);
 
@@ -738,24 +777,27 @@ namespace FlatCircuit {
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
 
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
-      }
-    }
+    setCGRAInput(input, sim);
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+    //     sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+    //   }
+    // }
     
     sim.update();
 
-    cout << "Inputs" << endl;
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-      }
-    }
+    cout << "Inputs" << endl;    
+    printCGRAInputs(sim);
+
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+    //   }
+    // }
 
     int nCycles = 4;
     cout << "Computing " << nCycles << " cycles of data" << endl;
@@ -791,8 +833,6 @@ namespace FlatCircuit {
     sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
     sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
     sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
-
-    //sim.def.replacePortWithConstant("clk_in", BitVec(1, 0));
 
     sim.def.replacePortWithConstant("tck", BitVec(1, 0));
     sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
@@ -863,29 +903,32 @@ namespace FlatCircuit {
     sim.update();
 
     cout << "Inputs" << endl;
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-      }
-    }
+    printCGRAInputs(sim);
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+    //   }
+    // }
 
     cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
 
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-      }
-    }
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+    //     cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
+    //   }
+    // }
+
+    outputS0 = getCGRAOutput(0, sim);
+    // for (int i = 0; i < 16; i++) {
+    //   outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
+    // }
     
-    for (int i = 0; i < 16; i++) {
-      outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    }
-    
-    cout << "outputS0 = " << outputS0 << endl;;
+    cout << "outputS0 = " << outputS0 << endl;
 
     REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
 
@@ -906,27 +949,31 @@ namespace FlatCircuit {
     sim.update();
 
     cout << "Inputs" << endl;
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-      }
-    }
+    printCGRAInputs(sim);
+
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
+    //   }
+    // }
 
     cout << "Outputs after compiling" << endl;
+    printCGRAOutputs(sim);
 
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-      }
-    }
-    
-    for (int i = 0; i < 16; i++) {
-      outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    }
+    // for (int side = 0; side < 4; side++) {
+    //   cout << "Side " << side << endl;
+    //   for (int track = 0; track < 16; track++) {
+    //     string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
+    //     cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
+    //   }
+    // }
+
+    outputS0 = getCGRAOutput(0, sim);    
+    // for (int i = 0; i < 16; i++) {
+    //   outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
+    // }
     
     cout << "outputS0 = " << outputS0 << endl;;
 
@@ -936,25 +983,29 @@ namespace FlatCircuit {
     cout << "Running cgra for " << nCycles << endl;
 
     auto start = high_resolution_clock::now();
- 
+
+    input = BitVector(16, 0);
     for (int i = 0; i < nCycles; i++) {
       sim.setFreshValue("clk_in", BitVec(1, 0));
       sim.update();
+
+      input = BitVector(16, i);
+      setCGRAInput(input, sim);
 
       sim.setFreshValue("clk_in", BitVec(1, 1));
       sim.update();
     }
 
-   // Get ending timepoint
     auto stop = high_resolution_clock::now();
- 
-    // Get duration. Substart timepoints to 
-    // get durarion. To cast it to proper unit
-    // use duration cast method
-    auto duration = duration_cast<microseconds>(stop - start);
+
+    auto duration = duration_cast<milliseconds>(stop - start);
 
     cout << "Time taken for " << nCycles << ": "
-         << duration.count() << " microseconds" << endl;
+         << duration.count() << " milliseconds" << endl;
+
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "Input  = " << input << endl;
+    cout << "Output = " << outputS0 << endl;
     cout << "Done" << endl;
   }
 

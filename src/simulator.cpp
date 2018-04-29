@@ -356,6 +356,24 @@ namespace FlatCircuit {
 
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = zero_extend(" + to_string(outWidth) + ", " + argName + ");\n";
 
+      } else if (cell.getCellType() == CELL_TYPE_SUB) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = sub_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_ADD) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = add_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
+
       } else if (cell.getCellType() == CELL_TYPE_MUL) {
 
         string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
