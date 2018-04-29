@@ -6,7 +6,10 @@
 #include "simulator.h"
 #include "transformations.h"
 
+#include <chrono>
+
 using namespace std;
+using namespace std::chrono;
 using namespace CoreIR;
 
 namespace FlatCircuit {
@@ -928,7 +931,31 @@ namespace FlatCircuit {
     cout << "outputS0 = " << outputS0 << endl;;
 
     REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
-    
+
+    nCycles = 10000;
+    cout << "Running cgra for " << nCycles << endl;
+
+    auto start = high_resolution_clock::now();
+ 
+    for (int i = 0; i < nCycles; i++) {
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
+   // Get ending timepoint
+    auto stop = high_resolution_clock::now();
+ 
+    // Get duration. Substart timepoints to 
+    // get durarion. To cast it to proper unit
+    // use duration cast method
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    cout << "Time taken for " << nCycles << ": "
+         << duration.count() << " microseconds" << endl;
+    cout << "Done" << endl;
   }
 
 }

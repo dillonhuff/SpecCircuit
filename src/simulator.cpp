@@ -290,10 +290,43 @@ namespace FlatCircuit {
     cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
                   to_string(drivers.signals.size()) + ", 0)");
 
+    bool canDirectCopy = true;
+    CellId singleDriverCell;
+    PortId singleDriverPort;
+    set<CellId> driverCells;
+
     for (int offset = 0; offset < drivers.signals.size(); offset++) {
       SignalBit driverBit = drivers.signals[offset];
-      string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
-      cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+      driverCells.insert(driverBit.cell);
+
+      singleDriverCell = driverBit.cell;
+      singleDriverPort = driverBit.port;
+
+      if (driverCells.size() > 1) {
+        canDirectCopy = false;
+        break;
+      }
+
+      if (driverBit.offset != offset) {
+        canDirectCopy = false;
+        break;
+      }
+    }
+
+    if (def.getCellRefConst(singleDriverCell).getPortWidth(singleDriverPort) !=
+        cell.getPortWidth(pid)) {
+      canDirectCopy = false;
+    }
+
+    if (canDirectCopy) {
+      cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, portOffsets)) + "]");
+    } else {
+
+      for (int offset = 0; offset < drivers.signals.size(); offset++) {
+        SignalBit driverBit = drivers.signals[offset];
+        string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
+        cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+      }
     }
 
     return cppCode;
@@ -376,9 +409,9 @@ namespace FlatCircuit {
   }
 
   Simulator::~Simulator() {
-      if (libHandle != nullptr) {
-        dlclose(libHandle);
-      }
+    if (libHandle != nullptr) {
+      dlclose(libHandle);
     }
+  }
   
 }
