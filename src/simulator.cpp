@@ -307,8 +307,6 @@ namespace FlatCircuit {
       cppCode += ln("// ----- Code for cell " + def.cellName(cid));
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
-        //auto drivers = cell.getDrivers(PORT_ID_IN);
-
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName + ";\n"; //"bsim::quad_value_bit_vector(16, 0);\n"; //argName + ";\n";
