@@ -10,4 +10,6 @@ namespace FlatCircuit {
   void deleteDeadInstances(CellDefinition& def);
 
   void cullZexts(CellDefinition& def);
+
+  void removeConstDuplicates(CellDefinition& def);
 }

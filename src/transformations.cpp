@@ -566,6 +566,60 @@ namespace FlatCircuit {
     return innerCells;
   }
 
+  void removeConstDuplicates(CellDefinition& def) {
+
+    vector<CellId> zeroConstants;
+    vector<CellId> oneConstants;
+
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
+        BitVector initVal = def.getCellRef(cid).getParameterValue(PARAM_INIT_VALUE);
+
+        if (initVal.is_binary()) {
+          if (initVal.bitLength() == 1) {
+            if (bvToInt(initVal) == 0) {
+              zeroConstants.push_back(cid);
+            } else if (bvToInt(initVal) == 1) {
+              oneConstants.push_back(cid);
+            }
+          }
+        }
+      }
+    }
+
+    cout << "# of zero constants = " << zeroConstants.size() << endl;
+    cout << "# of one constants  = " << oneConstants.size() << endl;
+
+    if (zeroConstants.size() > 1) {
+      CellId zc = zeroConstants.back();
+      Cell& zeroCell = def.getCellRef(zc);
+      zeroConstants.pop_back();
+
+      for (auto toReplaceId : zeroConstants) {
+        Cell& toReplace = def.getCellRef(toReplaceId);
+
+        assert(toReplace.getCellType() == CELL_TYPE_CONST);
+
+        auto receivers = toReplace.getPortReceivers(PORT_ID_OUT);
+
+        for (int offset = 0; offset < receivers.size(); offset++) {
+          SignalBit newDriver{zc, PORT_ID_OUT, offset};
+          for (auto receiverBit : receivers[offset]) {
+            zeroCell.addReceiver(PORT_ID_OUT, offset, receiverBit);
+
+            def.setDriver(receiverBit, newDriver);
+          }
+        }
+
+        toReplace.clearReceivers(PORT_ID_OUT);
+      }
+    }
+
+    cout << "Done removing bitconsts" << endl;
+    
+  }
+
   void elidePort(const CellId cid,
                  const PortId in,
                  const PortId out,

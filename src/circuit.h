@@ -316,7 +316,7 @@ namespace FlatCircuit {
     CellType cellType;
     std::map<PortId, Port> portWidths;
     std::map<PortId, SignalBus> drivers;
-    //std::map<PortId, std::vector<std::vector<SignalBit> > > receivers;
+
     std::map<PortId, std::vector<std::set<SignalBit> > > receivers;
 
   public:

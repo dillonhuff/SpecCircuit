@@ -490,16 +490,22 @@ namespace FlatCircuit {
       c->die();
     }
 
-    top = c->getModule(topName); //("global.cb_unq1");
+    top = c->getModule(topName);
 
     assert(top != nullptr);
 
-    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "removeconstduplicates"});
+    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
+          "deletedeadinstances","add-dummy-inputs", "packconnections",
+          "removeconstduplicates", "flatten"});
 
     Env circuitEnv = convertFromCoreIR(c, top);
     for (auto cellDefP : circuitEnv.getCellDefs()) {
       CellType tp = cellDefP.first;
+
+      cout << "Removing constants and zero extends" << endl;
+      removeConstDuplicates(circuitEnv.getDef(tp));
       cullZexts(circuitEnv.getDef(tp));
+      cout << "Done constants and zero extends" << endl;
     }
 
     deleteContext(c);
