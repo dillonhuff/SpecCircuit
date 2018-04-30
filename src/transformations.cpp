@@ -570,6 +570,20 @@ namespace FlatCircuit {
                  const PortId in,
                  const PortId out,
                  CellDefinition& def) {
+    Cell& cell = def.getCellRef(cid);
+    auto inDrivers = cell.getDrivers(in);
+
+    auto& receivers = cell.getPortReceivers(out);
+    for (int offset = 0; offset < receivers.size(); offset++) {
+      SignalBit newDriver = inDrivers.signals[offset];
+      auto offsetReceivers = receivers[offset];
+
+      for (auto receiverBit : offsetReceivers) {
+        def.setDriver(receiverBit, newDriver);
+      }
+    }
+
+    cell.clearReceivers(out);
   }
 
   void cullZexts(CellDefinition& def) {
@@ -587,10 +601,11 @@ namespace FlatCircuit {
       }
     }
 
+    cout << "Deleting " << idZexts.size() << " cells" << endl;
     for (auto cid : idZexts) {
       elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
     }
-    
+
   }
   
   void deleteDeadInstances(CellDefinition& def) {

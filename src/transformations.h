@@ -9,5 +9,5 @@ namespace FlatCircuit {
 
   void deleteDeadInstances(CellDefinition& def);
 
-
+  void cullZexts(CellDefinition& def);
 }

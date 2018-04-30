@@ -29,6 +29,13 @@ namespace FlatCircuit {
     return strs;
   }
 
+  void setCGRAInput(const int side, const BitVector& input, Simulator& sim) {
+    for (int track = 0; track < 16; track++) {
+      string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+      sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+    }
+  }
+  
   void setCGRAInput(const BitVector& input, Simulator& sim) {
     for (int side = 0; side < 4; side++) {
 
@@ -222,14 +229,6 @@ namespace FlatCircuit {
     state.setFreshValue("read_addr", BitVec(index, 0));
     state.update();
 
-    // cout << "Memory contents" << endl;
-    // for (auto mem : state.memories) {
-    //   cout << "\tMemory for " << state.def.cellName(mem.first) << endl;
-    //   for (auto mm : mem.second.mem) {
-    //     cout << "\t\t" << mm << endl;
-    //   }
-    // }
-    
     REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
 
     state.setFreshValue("clk", BitVec(1, 0));
@@ -238,14 +237,6 @@ namespace FlatCircuit {
 
     state.setFreshValue("clk", BitVec(1, 1));
     state.update();
-
-    // cout << "Memory contents" << endl;
-    // for (auto mem : state.memories) {
-    //   cout << "\tMemory for " << state.def.cellName(mem.first) << endl;
-    //   for (auto mm : mem.second.mem) {
-    //     cout << "\t\t" << mm << endl;
-    //   }
-    // }
 
     REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
 
@@ -470,14 +461,6 @@ namespace FlatCircuit {
       sim.setFreshValue("clk", BitVec(1, 0));
       sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 9));
       sim.update();
-
-      // cout << "Port values" << endl;
-      // for (auto pv : sim.portValues) {
-      //   if (def.hasCell(pv.first.cell)) {
-      //     cout << "\t" << sigPortString(def, pv.first) << " --> " <<
-      //       pv.second << endl;
-      //   }
-      // }
 
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
 
@@ -777,27 +760,11 @@ namespace FlatCircuit {
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
 
-    setCGRAInput(input, sim);
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-    //     sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
-    //   }
-    // }
-    
+    setCGRAInput(2, input, sim);
     sim.update();
 
     cout << "Inputs" << endl;    
     printCGRAInputs(sim);
-
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-    //   }
-    // }
 
     int nCycles = 4;
     cout << "Computing " << nCycles << " cycles of data" << endl;
@@ -812,20 +779,9 @@ namespace FlatCircuit {
     }
 
     cout << "Outputs" << endl;
-
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-        cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-      }
-    }
-
-    BitVector outputS0(16, 0);
-    for (int i = 0; i < 16; i++) {
-      outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    }
-
+    printCGRAOutputs(sim);
+    
+    BitVector outputS0 = getCGRAOutput(0, sim);
     cout << "outputS0 = " << outputS0 << endl;
 
     REQUIRE(outputS0 == correctOutput);
@@ -850,7 +806,7 @@ namespace FlatCircuit {
         }
       }
     }
-    
+
     cout << "# of cells before constant folding = " << def.numCells() << endl;
     
     foldConstants(def, sim.allRegisterValues());
@@ -874,66 +830,23 @@ namespace FlatCircuit {
 
     sim.refreshConstants();
 
-    cout << "Cell list" << endl;
-    for (auto& ctp : def.getCellMap()) {
-      cout << "\t" << def.cellName(ctp.first) << endl;
-      const Cell& cell = def.getCellRefConst(ctp.first);
-      for (auto portId : cell.outputPorts()) {
-        cout << "\tRecievers for " << portIdString(portId) << endl;
-        for (auto sigBus : cell.getPortReceivers(portId)) {
-          for (auto sigBit : sigBus) {
-            cout << "\t\t" << toString(def, sigBit) << endl;
-          }
-        }
-      }
-    }
-
     REQUIRE(definitionIsConsistent(def));
 
     input = BitVector(16, 18);
-
-    for (int side = 0; side < 4; side++) {
-      cout << "Side " << side << endl;
-      for (int track = 0; track < 16; track++) {
-        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
-      }
-    }
-    
+    setCGRAInput(2, input, sim);
     sim.update();
 
     cout << "Inputs" << endl;
     printCGRAInputs(sim);
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-    //   }
-    // }
 
     cout << "Outputs" << endl;
     printCGRAOutputs(sim);
 
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-    //     cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-    //   }
-    // }
-
     outputS0 = getCGRAOutput(0, sim);
-    // for (int i = 0; i < 16; i++) {
-    //   outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    // }
-    
     cout << "outputS0 = " << outputS0 << endl;
 
     REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
-
     REQUIRE(sim.compileCircuit());
-
     REQUIRE(sim.hasSimulateFunction());
 
     input = BitVector(16, 23);
@@ -951,29 +864,10 @@ namespace FlatCircuit {
     cout << "Inputs" << endl;
     printCGRAInputs(sim);
 
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-    //     cout << "\t" << inName << " = " << sim.getBitVec(inName, PORT_ID_OUT) << endl;
-    //   }
-    // }
-
     cout << "Outputs after compiling" << endl;
     printCGRAOutputs(sim);
 
-    // for (int side = 0; side < 4; side++) {
-    //   cout << "Side " << side << endl;
-    //   for (int track = 0; track < 16; track++) {
-    //     string outName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_out";
-    //     cout << "\t" << outName << " = " << sim.getBitVec(outName) << endl;
-    //   }
-    // }
-
     outputS0 = getCGRAOutput(0, sim);    
-    // for (int i = 0; i < 16; i++) {
-    //   outputS0.set(i, sim.getBitVec("pad_S0_T" + to_string(15 - i) + "_out").get(0));
-    // }
     
     cout << "outputS0 = " << outputS0 << endl;;
 
@@ -990,7 +884,7 @@ namespace FlatCircuit {
       sim.update();
 
       input = BitVector(16, i);
-      setCGRAInput(input, sim);
+      setCGRAInput(2, input, sim);
 
       sim.setFreshValue("clk_in", BitVec(1, 1));
       sim.update();

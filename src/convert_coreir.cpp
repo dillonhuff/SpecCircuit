@@ -1,5 +1,7 @@
 #include "convert_coreir.h"
 
+#include "transformations.h"
+
 using namespace std;
 using namespace CoreIR;
 
@@ -492,9 +494,13 @@ namespace FlatCircuit {
 
     assert(top != nullptr);
 
-    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "removeconstduplicates"});
 
     Env circuitEnv = convertFromCoreIR(c, top);
+    for (auto cellDefP : circuitEnv.getCellDefs()) {
+      CellType tp = cellDefP.first;
+      cullZexts(circuitEnv.getDef(tp));
+    }
 
     deleteContext(c);
     
