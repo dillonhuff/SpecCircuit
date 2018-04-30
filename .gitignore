@@ -10,3 +10,4 @@ test/flat_pe_tile_new_unq1.json
 circuit_jit.cpp
 libcircuit_jit.dylib
 pe_cells.txt
+libcircuit_jit.dylib.dSYM/
