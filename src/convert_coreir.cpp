@@ -479,12 +479,11 @@ namespace FlatCircuit {
   Env loadFromCoreIR(const std::string& topName,
                      const std::string& fileName) {
     Context* c = newContext();
-    //Namespace* g = c->getGlobal();
 
     CoreIRLoadLibrary_rtlil(c);
 
     Module* top;
-    //if (!loadFromFile(c,"./test/cb_unq1.json", &top)) {
+
     if (!loadFromFile(c, fileName, &top)) {
       cout << "Could not Load from json!!" << endl;
       c->die();
