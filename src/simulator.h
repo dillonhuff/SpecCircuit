@@ -868,6 +868,8 @@ namespace FlatCircuit {
                                   const PortId pid,
                                   const std::string& argName);
 
+    void debugPrintMemories() const;
+
     ~Simulator();
     
   };
