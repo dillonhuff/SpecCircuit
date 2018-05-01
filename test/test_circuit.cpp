@@ -14,6 +14,13 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  void highClock(const std::string& clkName, Simulator& sim) {
+    sim.setFreshValue(clkName, BitVec(1, 0));
+    sim.update();
+    sim.setFreshValue(clkName, BitVec(1, 1));
+    sim.update();
+  }
+
   std::vector<std::string> splitString(const std::string& str,
                                        const std::string& delimiter) {
     string s = str;
@@ -258,53 +265,22 @@ namespace FlatCircuit {
     sim.setFreshValue("wen", BitVector(1, 1));
     sim.setFreshValue("data_in", BitVector(16, 562));
 
-    sim.setFreshValue("clk", BitVector(1, 0));
-    sim.update();
-    
-    sim.setFreshValue("clk", BitVector(1, 1));
-    sim.update();
+    highClock("clk", sim);
 
     sim.setFreshValue("wen", BitVector(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk", BitVector(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk", BitVector(1, 1));
-    sim.update();
+    highClock("clk", sim);
     
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
     sim.setFreshValue("addr", BitVector(9, 0));
     sim.setFreshValue("data_in", BitVector(16, 4965));
-
-    sim.setFreshValue("clk", BitVector(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk", BitVector(1, 1));
-    sim.update();
+    highClock("clk", sim);
 
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
     sim.setFreshValue("wen", BitVector(1, 1));
-    sim.update();
-    
-    sim.setFreshValue("clk", BitVector(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk", BitVector(1, 1));
-    sim.update();
-
-    // sim.setFreshValue("wen", BitVector(1, 0));
-    // sim.update();
-    
-    sim.debugPrintMemories();
-
-    sim.setFreshValue("clk", BitVector(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk", BitVector(1, 1));
-    sim.update();
+    highClock("clk", sim);
+    highClock("clk", sim);
 
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
 
@@ -410,11 +386,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-      sim.update();
-    
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-      sim.update();
+      highClock("clk", sim);
 
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
@@ -429,11 +401,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 6));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-      sim.update();
-    
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-      sim.update();
+      highClock("clk", sim);
 
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
@@ -448,13 +416,8 @@ namespace FlatCircuit {
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
       sim.setFreshValue("in_2", PORT_ID_OUT, BitVec(16, 0));
       sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
-      sim.update();
 
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-      sim.update();
-    
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-      sim.update();
+      highClock("clk", sim);
 
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
     }
@@ -473,12 +436,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-      sim.update();
-    
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 1));
-      sim.update();
-
+      highClock("clk", sim);
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
 
@@ -535,34 +493,40 @@ namespace FlatCircuit {
   }
 
   TEST_CASE("CGRA PE tile") {
-    Context* c = newContext();
-    Namespace* g = c->getGlobal();
+    // Context* c = newContext();
+    // Namespace* g = c->getGlobal();
 
-    CoreIRLoadLibrary_rtlil(c);
+    // CoreIRLoadLibrary_rtlil(c);
 
-    Module* top;
-    if (!loadFromFile(c,"./test/pe_tile_new_unq1.json", &top)) {
-      cout << "Could not Load from json!!" << endl;
-      c->die();
-    }
+    // Module* top;
+    // if (!loadFromFile(c,"./test/pe_tile_new_unq1.json", &top)) {
+    //   cout << "Could not Load from json!!" << endl;
+    //   c->die();
+    // }
 
-    top = c->getModule("global.pe_tile_new_unq1");
+    // top = c->getModule("global.pe_tile_new_unq1");
 
-    assert(top != nullptr);
+    // assert(top != nullptr);
 
-    c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
+    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
 
-    if (!saveToFile(g, "./test/flat_pe_tile_new_unq1.json")) {
-      cout << "Could not Load from json!!" << endl;
-      c->die();
-    }
+    // if (!saveToFile(g, "./test/flat_pe_tile_new_unq1.json")) {
+    //   cout << "Could not Load from json!!" << endl;
+    //   c->die();
+    // }
 
     
-    Env circuitEnv = convertFromCoreIR(c, top);
+    // Env circuitEnv = convertFromCoreIR(c, top);
 
+    Env circuitEnv =
+      loadFromCoreIR("global.pe_tile_new_unq1",
+                     "./test/pe_tile_new_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("pe_tile_new_unq1");
+    
     REQUIRE(circuitEnv.getCellDefs().size() == 1);
 
-    CellDefinition& def = circuitEnv.getDef(top->getName());
+    //CellDefinition& def = circuitEnv.getDef(top->getName());
 
     auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
 
@@ -600,25 +564,15 @@ namespace FlatCircuit {
       sim.setFreshValue("config_addr", BitVec(32, configAddr));
       sim.setFreshValue("config_data", BitVec(32, configData));
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
-
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
-
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
+      highClock("clk_in", sim);
       
     }
 
     cout << "Done configuring PE tile" << endl;
 
     sim.setFreshValue("config_addr", BitVec(32, 0));
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+    highClock("clk_in", sim);
 
     int top_val = 5;
 
@@ -647,17 +601,8 @@ namespace FlatCircuit {
 
     cout << "Done setting inputs" << endl;
 
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.update();
-
-    sim.setFreshValue("clk_in", BitVec(1, 1));
-    sim.update();
+    highClock("clk_in", sim);
+    highClock("clk_in", sim);
     
     cout << "Outputs" << endl;
     cout << sim.getBitVec("out_BUS16_S0_T0") << endl;
@@ -752,7 +697,7 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
 
-    deleteContext(c);
+    //deleteContext(c);
   }
 
   // TEST_CASE("CGRA multiply by 2") {
