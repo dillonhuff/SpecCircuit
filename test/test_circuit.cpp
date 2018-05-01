@@ -285,6 +285,16 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
 
   }
+
+  TEST_CASE("Testing memory tile") {
+    Env circuitEnv =
+      loadFromCoreIR("global.memory_tile_unq1",
+                     "./test/memory_tile_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("memory_tile_unq1");
+    
+    REQUIRE(circuitEnv.getCellDefs().size() == 1);
+  }
     
   TEST_CASE("Simulating a mux loop") {
 
@@ -493,31 +503,6 @@ namespace FlatCircuit {
   }
 
   TEST_CASE("CGRA PE tile") {
-    // Context* c = newContext();
-    // Namespace* g = c->getGlobal();
-
-    // CoreIRLoadLibrary_rtlil(c);
-
-    // Module* top;
-    // if (!loadFromFile(c,"./test/pe_tile_new_unq1.json", &top)) {
-    //   cout << "Could not Load from json!!" << endl;
-    //   c->die();
-    // }
-
-    // top = c->getModule("global.pe_tile_new_unq1");
-
-    // assert(top != nullptr);
-
-    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts","deletedeadinstances","add-dummy-inputs", "packconnections", "removeconstduplicates", "flatten", "cullzexts", "removeconstduplicates"});
-
-    // if (!saveToFile(g, "./test/flat_pe_tile_new_unq1.json")) {
-    //   cout << "Could not Load from json!!" << endl;
-    //   c->die();
-    // }
-
-    
-    // Env circuitEnv = convertFromCoreIR(c, top);
-
     Env circuitEnv =
       loadFromCoreIR("global.pe_tile_new_unq1",
                      "./test/pe_tile_new_unq1.json");
@@ -525,8 +510,6 @@ namespace FlatCircuit {
     CellDefinition& def = circuitEnv.getDef("pe_tile_new_unq1");
     
     REQUIRE(circuitEnv.getCellDefs().size() == 1);
-
-    //CellDefinition& def = circuitEnv.getDef(top->getName());
 
     auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
 
@@ -683,7 +666,6 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
 
     // Compiling specialized code
-
     REQUIRE(sim.compileCircuit());
 
     REQUIRE(sim.hasSimulateFunction());
@@ -696,8 +678,6 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
-
-    //deleteContext(c);
   }
 
   // TEST_CASE("CGRA multiply by 2") {
