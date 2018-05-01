@@ -439,8 +439,14 @@ namespace FlatCircuit {
       if (cell.getCellType() == CELL_TYPE_MEM) {
         int depth = cell.getMemDepth();
         cout << "Memory " << def.getCellName(cid) << " values" << endl;
+        cout << "\tRADDR = " << materializeInput({cid, PORT_ID_RADDR}) << endl;
+        cout << "\tRDATA = " << getPortValue(cid, PORT_ID_RDATA) << endl;
+        cout << "\tWADDR = " << materializeInput({cid, PORT_ID_WADDR}) << endl;
+        cout << "\tWDATA = " << materializeInput({cid, PORT_ID_WDATA}) << endl;
+        cout << "\tWEN   = " << materializeInput({cid, PORT_ID_WEN}) << endl;
+        cout << "\tCLK   = " << materializeInput({cid, PORT_ID_CLK}) << endl;
         for (int i = 0; i < depth; i++) {
-          cout << "\t" << i << " --> " << getMemoryValue(cid, i) << endl;
+          cout << "\t" << i << " --> " << getMemoryValue(cid, i) << ", " << getMemoryValue(cid, i).to_type<int>() << endl;
         }
       }
     }

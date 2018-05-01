@@ -295,9 +295,21 @@ namespace FlatCircuit {
     sim.setFreshValue("clk", BitVector(1, 1));
     sim.update();
 
+    sim.setFreshValue("wen", BitVector(1, 0));
+    sim.update();
+    
     sim.debugPrintMemories();
 
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4695));
+    //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+
+    sim.setFreshValue("clk", BitVector(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk", BitVector(1, 1));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+
   }
     
   TEST_CASE("Simulating a mux loop") {

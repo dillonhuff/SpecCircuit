@@ -655,7 +655,7 @@ namespace FlatCircuit {
 
     }
 
-    BitVector materializeInput(const SigPort sigPort) {
+    BitVector materializeInput(const SigPort sigPort) const {
       int width = def.getCellRef(sigPort.cell).getPortWidth(sigPort.port);
 
       BitVector val(width, 0);
@@ -802,7 +802,7 @@ namespace FlatCircuit {
     
     // This is the user facing funtion. getPortValue is for internal use
     BitVector getBitVec(const CellId cid,
-                        const PortId pid) {
+                        const PortId pid) const {
 
       // if (!contains_key({cid, pid}, portValues)) {
       //   std::cout << "No value for " << def.getCellName(cid) << ", " << portIdString(pid) << std::endl;
