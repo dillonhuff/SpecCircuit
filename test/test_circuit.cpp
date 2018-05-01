@@ -267,6 +267,12 @@ namespace FlatCircuit {
     sim.setFreshValue("wen", BitVector(1, 0));
     sim.update();
 
+    sim.setFreshValue("clk", BitVector(1, 0));
+    sim.update();
+
+    sim.setFreshValue("clk", BitVector(1, 1));
+    sim.update();
+    
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
   }
     
