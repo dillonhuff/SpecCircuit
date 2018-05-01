@@ -247,6 +247,14 @@ namespace FlatCircuit {
     
     deleteContext(c);
   }
+
+  TEST_CASE("Mem unq1") {
+    Env circuitEnv = loadFromCoreIR("global.mem_unq1", "./test/mem_unq1.json");
+    CellDefinition& def = circuitEnv.getDef("mem_unq1");
+
+    Simulator sim(circuitEnv, def);
+    
+  }
     
   TEST_CASE("Simulating a mux loop") {
 
