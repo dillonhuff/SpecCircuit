@@ -297,16 +297,40 @@ namespace FlatCircuit {
 
   TEST_CASE("Testing memory tile") {
     Env circuitEnv =
-      loadFromCoreIR("global.memory_tile_unq1",
+      loadFromCoreIR("global.memory_core_unq1",
                      "./test/memory_tile_unq1.json");
 
-    CellDefinition& def = circuitEnv.getDef("memory_tile_unq1");
+    CellDefinition& def = circuitEnv.getDef("memory_core_unq1");
     
     REQUIRE(circuitEnv.getCellDefs().size() == 1);
 
     Simulator sim(circuitEnv, def);
     reset("reset", sim);
 
+    sim.setFreshValue("config_en", BitVec(1, 1));
+    sim.update();
+    
+    BitVector configAddr(32, 0);
+    sim.setFreshValue("config_addr", configAddr);
+    sim.update();
+
+    int mode = 0; // LINE_BUFFER;
+    bool tile_enable = true;
+    int depth = 8;
+    uint32_t configDataInt = 0;
+    configDataInt |= ((uint32_t) 0) << 0; // Linebuffer mode
+    configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
+    configDataInt |= ((uint32_t) 8) << 2; // Depth 8
+    
+    BitVector configData(32, configDataInt);
+    sim.setFreshValue("config_data", configData);
+
+    highClock("clk_in", sim);
+
+    sim.setFreshValue("config_en", BitVec(1, 0));
+    sim.update();
+
+    
     
   }
     
