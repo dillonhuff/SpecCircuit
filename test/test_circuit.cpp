@@ -14,6 +14,15 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  void reset(const std::string& rstName, Simulator& sim) {
+    sim.setFreshValue("reset", BitVec(1, 0));
+    sim.update();
+    sim.setFreshValue("reset", BitVec(1, 1));
+    sim.update();
+    sim.setFreshValue("reset", BitVec(1, 0));
+    sim.update();
+  }
+  
   void highClock(const std::string& clkName, Simulator& sim) {
     sim.setFreshValue(clkName, BitVec(1, 0));
     sim.update();
@@ -294,6 +303,11 @@ namespace FlatCircuit {
     CellDefinition& def = circuitEnv.getDef("memory_tile_unq1");
     
     REQUIRE(circuitEnv.getCellDefs().size() == 1);
+
+    Simulator sim(circuitEnv, def);
+    reset("reset", sim);
+
+    
   }
     
   TEST_CASE("Simulating a mux loop") {
