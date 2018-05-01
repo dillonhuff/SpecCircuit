@@ -265,7 +265,9 @@ namespace FlatCircuit {
   }
 
   TEST_CASE("Mem unq1") {
-    Env circuitEnv = loadFromCoreIR("global.mem_unq1", "./test/mem_unq1.json");
+    //Env circuitEnv = loadFromCoreIR("global.mem_unq1", "./test/mem_unq1.json");
+    Env circuitEnv = loadFromCoreIR("global.mem_unq1",
+                                    "./test/memory_tile_unq1.json");
     CellDefinition& def = circuitEnv.getDef("mem_unq1");
 
     Simulator sim(circuitEnv, def);
@@ -304,6 +306,16 @@ namespace FlatCircuit {
     
     REQUIRE(circuitEnv.getCellDefs().size() == 1);
 
+    bool foundMem = false;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_MEM) {
+        foundMem = true;
+      }
+    }
+
+    REQUIRE(foundMem);
+
     Simulator sim(circuitEnv, def);
     reset("reset", sim);
 
@@ -318,7 +330,7 @@ namespace FlatCircuit {
     bool tile_enable = true;
     int depth = 8;
     uint32_t configDataInt = 0;
-    configDataInt |= ((uint32_t) 0) << 0; // Linebuffer mode
+    configDataInt |= ((uint32_t) 2) << 0; // Linebuffer mode
     configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
     configDataInt |= ((uint32_t) 8) << 2; // Depth 8
     
@@ -330,8 +342,27 @@ namespace FlatCircuit {
     sim.setFreshValue("config_en", BitVec(1, 0));
     sim.update();
 
+    sim.setFreshValue("wen_in", BitVec(1, 1));
+    sim.setFreshValue("addr_in", BitVec(16, 4));
+    sim.setFreshValue("data_in", BitVec(16, 72));
+    highClock("clk_in", sim);
+
+    sim.setFreshValue("wen_in", BitVec(1, 1));
+    sim.setFreshValue("addr_in", BitVec(16, 2));
+    sim.setFreshValue("data_in", BitVec(16, 45));
+    highClock("clk_in", sim);
     
-    
+    sim.setFreshValue("wen_in", BitVec(1, 0));
+    sim.setFreshValue("addr_in", BitVec(16, 4));
+    sim.setFreshValue("ren_in", BitVec(1, 1));
+    highClock("clk_in", sim);
+
+    highClock("clk_in", sim);
+    highClock("clk_in", sim);
+
+    sim.debugPrintMemories();
+
+    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
   }
     
   TEST_CASE("Simulating a mux loop") {
