@@ -323,6 +323,10 @@ namespace FlatCircuit {
     sim.setFreshValue("config_en", BitVec(1, 1));
     sim.update();
 
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.setFreshValue("config_en_sram", BitVec(4, 0));
+    sim.update();
+
     BitVector configAddr(32, 0);
     sim.setFreshValue("config_addr", configAddr);
     sim.update();
