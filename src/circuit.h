@@ -103,6 +103,8 @@ namespace FlatCircuit {
       return "CELL_TYPE_UGE";
     } else if (cellTp == CELL_TYPE_ULE) {
       return "CELL_TYPE_ULE";
+    } else if (cellTp == CELL_TYPE_UGT) {
+      return "CELL_TYPE_UGT";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;

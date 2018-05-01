@@ -490,6 +490,14 @@ namespace FlatCircuit {
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
+      } else if (tp == CELL_TYPE_UGT) {
+        BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
+        BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});
+
+        BitVector newOut = BitVector(1, in0 > in1);
+
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
+
       } else if (tp == CELL_TYPE_ULT) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
         BitVector in1 = materializeInput({sigPort.cell, PORT_ID_IN1});

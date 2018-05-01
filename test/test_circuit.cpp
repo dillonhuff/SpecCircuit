@@ -319,22 +319,22 @@ namespace FlatCircuit {
     Simulator sim(circuitEnv, def);
     reset("reset", sim);
 
+    sim.setFreshValue("clk_en", BitVec(1, 1));
     sim.setFreshValue("config_en", BitVec(1, 1));
     sim.update();
-    
+
     BitVector configAddr(32, 0);
     sim.setFreshValue("config_addr", configAddr);
     sim.update();
 
-    int mode = 0; // LINE_BUFFER;
-    bool tile_enable = true;
-    int depth = 8;
     uint32_t configDataInt = 0;
-    configDataInt |= ((uint32_t) 2) << 0; // Linebuffer mode
+    configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
     configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
-    configDataInt |= ((uint32_t) 8) << 2; // Depth 8
+    configDataInt |= ((uint32_t) 8) << 3; // Depth 8
     
     BitVector configData(32, configDataInt);
+
+    cout << "Memory tile config data = " << configData << endl;
     sim.setFreshValue("config_data", configData);
 
     highClock("clk_in", sim);
@@ -346,6 +346,9 @@ namespace FlatCircuit {
     sim.setFreshValue("addr_in", BitVec(16, 4));
     sim.setFreshValue("data_in", BitVec(16, 72));
     highClock("clk_in", sim);
+
+    cout << "Debug immediately after write call " << endl;
+    sim.debugPrintMemories();
 
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 2));
