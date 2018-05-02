@@ -762,6 +762,7 @@ namespace FlatCircuit {
     Env circuitEnv =
       loadFromCoreIR("global.top",
                      "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+                     //"/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     CellDefinition& def = circuitEnv.getDef("top");
 
