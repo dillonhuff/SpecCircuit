@@ -15,11 +15,11 @@ using namespace CoreIR;
 namespace FlatCircuit {
 
   void reset(const std::string& rstName, Simulator& sim) {
-    sim.setFreshValue("reset", BitVec(1, 0));
+    sim.setFreshValue(rstName, BitVec(1, 0));
     sim.update();
-    sim.setFreshValue("reset", BitVec(1, 1));
+    sim.setFreshValue(rstName, BitVec(1, 1));
     sim.update();
-    sim.setFreshValue("reset", BitVec(1, 0));
+    sim.setFreshValue(rstName, BitVec(1, 0));
     sim.update();
   }
   
