@@ -200,6 +200,47 @@ namespace FlatCircuit {
     return levelZero;
   }
 
+  std::vector<std::vector<SigPort> >
+  staticSimulationEvents(const CellDefinition& def) {
+    vector<SigPort> combChanges;
+    vector<SigPort> seqChanges;
+    vector<vector<SigPort> > staticEvents;
+
+    do {
+
+      set<SigPort> freshChanges;
+      while (freshChanges.size() > 0) {
+        SigPort sigPort = *std::begin(freshChanges);
+        freshChanges.erase(sigPort);
+
+        combChanges.push_back(sigPort);
+
+        const Cell& c = def.getCellRefConst(sigPort.cell);
+
+        for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
+          for (auto& sigBit : receiverBus) {
+            if (notEmpty(sigBit)) {
+              if ((sigBit.port != PORT_ID_ARST) &&
+                  (sigBit.port != PORT_ID_CLK)) {
+                freshChanges.insert({sigBit.cell, sigBit.port});
+              } else {
+                seqChanges.push_back({sigBit.cell, sigBit.port});
+              }
+            }
+
+          }
+        }
+        
+      }
+
+      staticEvents.push_back(combChanges);
+      staticEvents.push_back(seqChanges);
+      seqChanges = {};
+    } while (combChanges.size() > 0);
+
+    return staticEvents;
+  }
+
   maybe<std::vector<CellId> >
   levelizeCircuit(const CellDefinition& def) {
     UniqueVector<CellId> levelized;
