@@ -244,7 +244,7 @@ namespace FlatCircuit {
     int ret =
       system(("clang++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
-    sleep(2);
+    //    sleep(2);
 
     assert(ret == 0);
   }
