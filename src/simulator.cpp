@@ -208,6 +208,7 @@ namespace FlatCircuit {
 
     do {
 
+      combChanges = {};
       set<SigPort> freshChanges;
       while (freshChanges.size() > 0) {
         SigPort sigPort = *std::begin(freshChanges);
