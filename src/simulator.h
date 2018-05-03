@@ -108,7 +108,7 @@ namespace FlatCircuit {
                    (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST) ||
                    (tp == CELL_TYPE_REG)) {
 
-          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>();       
+          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>(); 
           if ((tp == CELL_TYPE_REG) ||
               (tp == CELL_TYPE_REG_ARST)) {
             BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
@@ -225,9 +225,8 @@ namespace FlatCircuit {
                                    const BitVector& bv) {
       //std::cout << "Combinational signal change for " << sigPortString(def, sigPort) << " to " << bv << std::endl;
 
-      BitVector oldVal = getPortValue(sigPort.cell, sigPort.port); //portValues.at(sigPort);
-      //portValues[{sigPort.cell, PORT_ID_OUT}] = bv;
-      //portValues[{sigPort.cell, sigPort.port}] = bv;
+      BitVector oldVal = getPortValue(sigPort.cell, sigPort.port);
+
       setPortValue(sigPort.cell, sigPort.port, bv);
 
       const Cell& c = def.getCellRef(sigPort.cell);
@@ -247,7 +246,6 @@ namespace FlatCircuit {
                   (sigBit.port != PORT_ID_CLK)) {
                 combChanges.insert({sigBit.cell, sigBit.port});
               } else {
-                //pastValues[sigPort] = oldVal;
                 setPastValue(sigPort.cell, sigPort.port, oldVal);
                 seqChanges.insert({sigBit.cell, sigBit.port});
               }
@@ -264,7 +262,7 @@ namespace FlatCircuit {
                            const BitVector& writeAddr,
                            const BitVector& writeData) {
       int addr = writeAddr.to_type<int>();
-      BitVector oldVal = getMemoryValue(cid, addr); //map_find(cid, memories).mem.at(addr);
+      BitVector oldVal = getMemoryValue(cid, addr);
 
       if (same_representation(oldVal, writeData)) {
         return false;
@@ -272,13 +270,6 @@ namespace FlatCircuit {
 
       setMemoryValue(cid, addr, writeData);
 
-      
-      // assert(contains_key(cid, memories));
-
-      // auto& mem = memories[cid].mem;
-      // mem[addr] = writeData;
-
-      //assert(same_representation(map_find(cid, memories).mem[addr], writeData));
       assert(same_representation(getMemoryValue(cid, addr), writeData));
 
       return true;
@@ -382,7 +373,7 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_MEM) {
 
         BitVector newClk = materializeInput({sigPort.cell, PORT_ID_CLK});
-        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK); //map_find({sigPort.cell, PORT_ID_CLK}, pastValues);
+        BitVector oldClk = getPastValue(sigPort.cell, PORT_ID_CLK);
 
         BitVector writeEnable = materializeInput({sigPort.cell, PORT_ID_WEN});
 
@@ -425,7 +416,6 @@ namespace FlatCircuit {
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
 
-            //portValues[sigPort] = materializeInput(sigPort);
             setPortValue(sigPort.cell, sigPort.port, materializeInput(sigPort));
 
           }
@@ -459,7 +449,7 @@ namespace FlatCircuit {
         BitVector rdata(def.getCellRefConst(sigPort.cell).getMemWidth(), 21);
 
         if (raddr.is_binary()) {
-          rdata = getMemoryValue(sigPort.cell, raddr.to_type<int>()); //map_find(sigPort.cell, memories).mem[raddr.to_type<int>()];
+          rdata = getMemoryValue(sigPort.cell, raddr.to_type<int>());
         }
 
         //std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
@@ -705,10 +695,8 @@ namespace FlatCircuit {
     }
 
     // Internal setters / getters
-
     BitVector getMemoryValue(const CellId cid,
                              const int offset) const {
-      //return map_find(cid, memories).mem.at(offset);
       assert(offset >= 0);
 
       return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
@@ -733,15 +721,13 @@ namespace FlatCircuit {
     void setMemoryValue(const CellId cid,
                         const int addr,
                         const BitVector& writeData) {
-      //assert(contains_key(cid, memories));
+
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
       simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
         writeData;
 
-      // auto& mem = memories[cid].mem;
-      // mem[addr] = writeData;
     }
 
     void setPortValue(const CellId cid,
@@ -752,14 +738,12 @@ namespace FlatCircuit {
         portOffsets[{cid, pid}] = nextInd;
         simValueTable.push_back(bv);
       }
-      simValueTable[map_find({cid, pid}, portOffsets)] = bv;
 
-      //portValues[{cid, pid}] = bv;
+      simValueTable[map_find({cid, pid}, portOffsets)] = bv;
     }
 
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
-      //return map_find({cid, pid}, portValues);
       return simValueTable[map_find({cid, pid}, portOffsets)];
     }
 
@@ -776,8 +760,6 @@ namespace FlatCircuit {
 
     BitVector getRegisterValue(const CellId cid) const {
       return simValueTable[map_find(cid, registerOffsets)];
-
-      //return map_find(cid, registerValues);
     }
     
     void setPastValue(const CellId cid,
@@ -790,14 +772,11 @@ namespace FlatCircuit {
         simValueTable.push_back(bv);
       }
       simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
-
-      //pastValues[{cid, pid}] = bv;
     }
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
       return simValueTable[map_find({cid, pid}, pastValueOffsets)];
-      //return map_find({cid, pid}, pastValues);
     }
     
     std::map<CellId, BitVector> allRegisterValues() const {
@@ -812,12 +791,7 @@ namespace FlatCircuit {
     BitVector getBitVec(const CellId cid,
                         const PortId pid) const {
 
-      // if (!contains_key({cid, pid}, portValues)) {
-      //   std::cout << "No value for " << def.getCellName(cid) << ", " << portIdString(pid) << std::endl;
-      // }
-
-      // assert(contains_key({cid, pid}, portValues));
-      return getPortValue(cid, pid); //portValues.at({cid, pid});
+      return getPortValue(cid, pid);
     }    
 
     BitVector getBitVec(const std::string& cellName,
