@@ -124,7 +124,26 @@ namespace FlatCircuit {
 
     def.connect(reg, PORT_ID_OUT,
                 out, PORT_ID_IN);
+
+    Simulator sim(e, def);
+    sim.setFreshValue("in", BitVec(8, 0));
+    sim.setFreshValue("clk", BitVec(1, 0));
+    sim.setFreshValue("arst", BitVec(1, 0));
+    sim.update();
     
+    sim.compileCircuit();
+
+    sim.setFreshValue("arst", BitVec(1, 1));
+    sim.update();
+    sim.setFreshValue("arst", BitVec(1, 0));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+
+    sim.setFreshValue("in", BitVec(8, 29));
+    highClock("clk", sim);
+
+    REQUIRE(sim.getBitVec("out") == BitVec(8, 29));
   }
 
   TEST_CASE("Specialization of inputs") {

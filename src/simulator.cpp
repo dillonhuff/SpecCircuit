@@ -396,6 +396,8 @@ namespace FlatCircuit {
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = ~(" + argName + ");\n";
 
+      } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
+        
       } else {
         cout << "Insert code for unsupported node " + def.cellName(cid) << endl;
         assert(false);
