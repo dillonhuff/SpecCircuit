@@ -519,6 +519,8 @@ namespace FlatCircuit {
       CellId cid = sigPort.cell;
       const Cell& cell = def.getCellRefConst(cid);
       cppCode += ln("// ----- Code for cell " + def.cellName(cid));
+
+      cppCode += "\t{\n";
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
@@ -583,6 +585,8 @@ namespace FlatCircuit {
         cout << "Insert code for unsupported node " + def.cellName(cid) << endl;
         assert(false);
       }
+
+      cppCode += "\t}\n";
     }
 
     return cppCode;
