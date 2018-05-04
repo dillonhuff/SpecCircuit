@@ -858,6 +858,12 @@ namespace FlatCircuit {
     
     std::string
     combinationalBlockCode(const std::vector<SigPort>& levelized);
+
+    std::string
+    codeToMaterializeOffset(const CellId cid,
+                            const PortId pid,
+                            const std::string& argName,
+                            const std::map<SigPort, unsigned long>& offsets);
     
     ~Simulator();
     

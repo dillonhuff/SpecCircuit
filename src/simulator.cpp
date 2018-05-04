@@ -264,8 +264,23 @@ namespace FlatCircuit {
       vector<SigPort> seqChangesVec(begin(seqChanges), end(seqChanges));
       staticEvents.push_back(seqChangesVec);
 
+      for (auto seqPort : seqChanges) {
+        for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
+          for (auto rPort : def.getCellRefConst(seqPort.cell).receiverSigPorts(outPort)) {
+            if ((rPort.port != PORT_ID_ARST) &&
+                (rPort.port != PORT_ID_CLK)) {
+              freshChanges.insert(rPort);
+              combChanges.push_back(rPort);
+            } else {
+              // TODO: Improve this update
+              seqChanges.insert(rPort);
+            }
+          }
+        }
+      }
+
       // // NOTE: This needs to change in order for simulation semantics to be correct
-      // seqChanges = {};
+      seqChanges = {};
     } while (combChanges.size() > 0);
 
     cout << "Done collecting events" << endl;
@@ -354,9 +369,11 @@ namespace FlatCircuit {
     return "\t" + s + ";\n";
   }
 
-  std::string Simulator::codeToMaterialize(const CellId cid,
-                                           const PortId pid,
-                                           const std::string& argName) {
+  std::string
+  Simulator::codeToMaterializeOffset(const CellId cid,
+                                     const PortId pid,
+                                     const std::string& argName,
+                                     const std::map<SigPort, unsigned long>& offsets) {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
     string cppCode = "";
@@ -392,17 +409,70 @@ namespace FlatCircuit {
     }
 
     if (canDirectCopy) {
-      cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, portOffsets)) + "]");
+      cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, offsets)) + "]");
     } else {
 
       for (int offset = 0; offset < drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
-        string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
+        string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
         cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
       }
     }
 
     return cppCode;
+    
+  }
+  
+  std::string Simulator::codeToMaterialize(const CellId cid,
+                                           const PortId pid,
+                                           const std::string& argName) {
+    return codeToMaterializeOffset(cid, pid, argName, portOffsets);
+    // const Cell& cell = def.getCellRefConst(cid);
+    // auto drivers = cell.getDrivers(pid);
+    // string cppCode = "";
+    // cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
+    //               to_string(drivers.signals.size()) + ", 0)");
+
+    // bool canDirectCopy = true;
+    // CellId singleDriverCell;
+    // PortId singleDriverPort;
+    // set<CellId> driverCells;
+
+    // for (int offset = 0; offset < drivers.signals.size(); offset++) {
+    //   SignalBit driverBit = drivers.signals[offset];
+    //   driverCells.insert(driverBit.cell);
+
+    //   singleDriverCell = driverBit.cell;
+    //   singleDriverPort = driverBit.port;
+
+    //   if (driverCells.size() > 1) {
+    //     canDirectCopy = false;
+    //     break;
+    //   }
+
+    //   if (driverBit.offset != offset) {
+    //     canDirectCopy = false;
+    //     break;
+    //   }
+    // }
+
+    // if (def.getCellRefConst(singleDriverCell).getPortWidth(singleDriverPort) !=
+    //     cell.getPortWidth(pid)) {
+    //   canDirectCopy = false;
+    // }
+
+    // if (canDirectCopy) {
+    //   cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, portOffsets)) + "]");
+    // } else {
+
+    //   for (int offset = 0; offset < drivers.signals.size(); offset++) {
+    //     SignalBit driverBit = drivers.signals[offset];
+    //     string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
+    //     cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+    //   }
+    // }
+
+    // return cppCode;
   }
 
   std::string
@@ -411,9 +481,30 @@ namespace FlatCircuit {
     
     for (auto sigPort : levelized) {
       CellId cid = sigPort.cell;
-      //const Cell& cell = def.getCellRefConst(cid);
+      const Cell& cell = def.getCellRefConst(cid);
 
       cppCode += ln("// ----- Sequential update for cell " + def.cellName(cid));
+
+      CellType tp = cell.getCellType();
+      if (tp == CELL_TYPE_REG_ARST) {
+        cppCode += "\t{\n";
+        string inVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, inVar);
+
+        string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
+        cppCode += codeToMaterialize(cid, PORT_ID_CLK, clkVar);
+        string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
+        cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
+
+        string rstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST);
+        cppCode += codeToMaterialize(cid, PORT_ID_ARST, rstVar);
+
+        cppCode += "\t}\n";
+        
+      } else {
+        cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;
+        assert(false);
+      }
     }
 
     return cppCode;
@@ -501,8 +592,12 @@ namespace FlatCircuit {
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
-    cppCode += combinationalBlockCode(updates[0]);
-    cppCode += sequentialBlockCode(updates[1]);
+    assert((updates.size() % 2) == 0);
+    
+    for (int i = 0; i < updates.size(); i += 2) {
+      cppCode += combinationalBlockCode(updates[i + 0]);
+      cppCode += sequentialBlockCode(updates[i + 1]);
+    }
     
     cppCode += "}";
 
