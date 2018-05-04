@@ -498,6 +498,8 @@ namespace FlatCircuit {
 
         string rstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST);
         cppCode += codeToMaterialize(cid, PORT_ID_ARST, rstVar);
+        string lastRstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST) + "_last";
+        cppCode += codeToMaterialize(cid, PORT_ID_ARST, lastRstVar);
 
         cppCode += "\t}\n";
         
