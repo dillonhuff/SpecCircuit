@@ -23,13 +23,20 @@ namespace FlatCircuit {
     sim.update();
   }
   
-  void highClock(const std::string& clkName, Simulator& sim) {
+  void posedge(const std::string& clkName, Simulator& sim) {
     sim.setFreshValue(clkName, BitVec(1, 0));
     sim.update();
     sim.setFreshValue(clkName, BitVec(1, 1));
     sim.update();
   }
 
+  void negedge(const std::string& clkName, Simulator& sim) {
+    sim.setFreshValue(clkName, BitVec(1, 1));
+    sim.update();
+    sim.setFreshValue(clkName, BitVec(1, 0));
+    sim.update();
+  }
+  
   std::vector<std::string> splitString(const std::string& str,
                                        const std::string& delimiter) {
     string s = str;
@@ -141,9 +148,14 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
 
     sim.setFreshValue("in", BitVec(8, 29));
-    highClock("clk", sim);
+    posedge("clk", sim);
 
     REQUIRE(sim.getBitVec("out") == BitVec(8, 29));
+
+    posedge("arst", sim);
+    negedge("arst", sim);
+
+    REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
   }
 
   TEST_CASE("Specialization of inputs") {
@@ -330,22 +342,22 @@ namespace FlatCircuit {
     sim.setFreshValue("wen", BitVector(1, 1));
     sim.setFreshValue("data_in", BitVector(16, 562));
 
-    highClock("clk", sim);
+    posedge("clk", sim);
 
     sim.setFreshValue("wen", BitVector(1, 0));
-    highClock("clk", sim);
+    posedge("clk", sim);
     
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
     sim.setFreshValue("addr", BitVector(9, 0));
     sim.setFreshValue("data_in", BitVector(16, 4965));
-    highClock("clk", sim);
+    posedge("clk", sim);
 
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
     sim.setFreshValue("wen", BitVector(1, 1));
-    highClock("clk", sim);
-    highClock("clk", sim);
+    posedge("clk", sim);
+    posedge("clk", sim);
 
     REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
 
@@ -395,7 +407,7 @@ namespace FlatCircuit {
     cout << "Memory tile config data = " << configData << endl;
     sim.setFreshValue("config_data", configData);
 
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
 
     sim.setFreshValue("config_en", BitVec(1, 0));
     sim.update();
@@ -403,7 +415,7 @@ namespace FlatCircuit {
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 4));
     sim.setFreshValue("data_in", BitVec(16, 72));
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
 
     // cout << "Debug immediately after write call " << endl;
     // sim.debugPrintMemories();
@@ -411,15 +423,15 @@ namespace FlatCircuit {
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 2));
     sim.setFreshValue("data_in", BitVec(16, 45));
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
     
     sim.setFreshValue("wen_in", BitVec(1, 0));
     sim.setFreshValue("addr_in", BitVec(16, 4));
     sim.setFreshValue("ren_in", BitVec(1, 1));
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
 
-    highClock("clk_in", sim);
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
+    posedge("clk_in", sim);
 
     // sim.debugPrintMemories();
 
@@ -526,7 +538,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      highClock("clk", sim);
+      posedge("clk", sim);
 
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
@@ -541,7 +553,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 6));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      highClock("clk", sim);
+      posedge("clk", sim);
 
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
@@ -557,7 +569,7 @@ namespace FlatCircuit {
       sim.setFreshValue("in_2", PORT_ID_OUT, BitVec(16, 0));
       sim.setFreshValue("in_6", PORT_ID_OUT, BitVec(16, 9));
 
-      highClock("clk", sim);
+      posedge("clk", sim);
 
       REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 9));
     }
@@ -576,7 +588,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
       sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      highClock("clk", sim);
+      posedge("clk", sim);
       sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
       sim.update();
 
@@ -677,7 +689,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_addr", BitVec(32, configAddr));
       sim.setFreshValue("config_data", BitVec(32, configData));
 
-      highClock("clk_in", sim);
+      posedge("clk_in", sim);
       
     }
 
@@ -685,7 +697,7 @@ namespace FlatCircuit {
 
     sim.setFreshValue("config_addr", BitVec(32, 0));
 
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
 
     int top_val = 5;
 
@@ -714,8 +726,8 @@ namespace FlatCircuit {
 
     cout << "Done setting inputs" << endl;
 
-    highClock("clk_in", sim);
-    highClock("clk_in", sim);
+    posedge("clk_in", sim);
+    posedge("clk_in", sim);
     
     cout << "Outputs" << endl;
     cout << sim.getBitVec("out_BUS16_S0_T0") << endl;
@@ -843,7 +855,7 @@ namespace FlatCircuit {
   //     // sim.setFreshValue("clk_in", BitVec(1, 1));
   //     // sim.update();
 
-  //     highClock("clk_in", sim);
+  //     posedge("clk_in", sim);
   //     // sim.setFreshValue("clk_in", BitVec(1, 0));
   //     // sim.update();
 
@@ -863,14 +875,14 @@ namespace FlatCircuit {
 
   //   cout << "Done setting inputs" << endl;
 
-  //   highClock("clk_in", sim);
+  //   posedge("clk_in", sim);
   //   // sim.setFreshValue("clk_in", BitVec(1, 0));
   //   // sim.update();
 
   //   // sim.setFreshValue("clk_in", BitVec(1, 1));
   //   // sim.update();
 
-  //   highClock("clk_in", sim);    
+  //   posedge("clk_in", sim);    
   //   // sim.setFreshValue("clk_in", BitVec(1, 0));
   //   // sim.update();
 
@@ -888,7 +900,7 @@ namespace FlatCircuit {
   //   for (int i = 0; i < nCycles; i++) {
   //     cout << "Cycle " << i << endl;
 
-  //     highClock("clk_in", sim);
+  //     posedge("clk_in", sim);
 
   //     // sim.setFreshValue("clk_in", BitVec(1, 0));
   //     // sim.update();
