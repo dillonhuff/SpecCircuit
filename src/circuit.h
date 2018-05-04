@@ -301,6 +301,12 @@ namespace FlatCircuit {
     return !(bit.cell == 0);
   }
 
+  class SigPort {
+  public:
+    CellId cell;
+    PortId port;
+  };
+
   class SignalBus {
   public:
     std::vector<SignalBit> signals;
@@ -556,6 +562,20 @@ namespace FlatCircuit {
       assert(contains_key(pid, receivers));
 
       return receivers.at(pid);
+    }
+
+    std::set<SigPort> receiverSigPorts(const PortId pid) const {
+      std::set<SigPort> rcps;
+      
+      for (auto& receiverBus : getPortReceivers(pid)) {
+        for (auto& sigBit : receiverBus) {
+          if (notEmpty(sigBit)) {
+            rcps.insert({sigBit.cell, sigBit.port});
+          }
+        }
+      }
+
+      return rcps;
     }
 
     const std::map<PortId, Port>& getPorts() const {
@@ -1059,12 +1079,6 @@ namespace FlatCircuit {
   }
 
   bool definitionIsConsistent(const CellDefinition& def);
-
-  class SigPort {
-  public:
-    CellId cell;
-    PortId port;
-  };
 
   static inline std::string sigPortString(const CellDefinition& def,
                                           const SigPort port) {

@@ -844,14 +844,21 @@ namespace FlatCircuit {
       return (libHandle != nullptr) && (simulateFuncHandle != nullptr);
     }
 
-    void compileLevelizedCircuit(const std::vector<CellId>& levelized);
-
+    void
+    compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates);
+    
     std::string codeToMaterialize(const CellId cid,
                                   const PortId pid,
                                   const std::string& argName);
 
     void debugPrintMemories() const;
 
+    std::string
+    sequentialBlockCode(const std::vector<SigPort>& levelized);
+    
+    std::string
+    combinationalBlockCode(const std::vector<SigPort>& levelized);
+    
     ~Simulator();
     
   };

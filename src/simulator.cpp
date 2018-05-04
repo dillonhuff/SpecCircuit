@@ -21,6 +21,12 @@ namespace FlatCircuit {
       return dbhc::elem(t, alreadyAdded);
     }
 
+    size_t size() const {
+      assert(alreadyAdded.size() == vec.size());
+
+      return vec.size();
+    }
+
     void push_back(const T& t) {
       if (!dbhc::elem(t, alreadyAdded)) {
         vec.push_back(t);
@@ -202,42 +208,67 @@ namespace FlatCircuit {
 
   std::vector<std::vector<SigPort> >
   staticSimulationEvents(const CellDefinition& def) {
-    vector<SigPort> combChanges;
-    vector<SigPort> seqChanges;
     vector<vector<SigPort> > staticEvents;
+    UniqueVector<SigPort> combChanges;
+    set<SigPort> seqChanges;
 
+    set<SigPort> freshChanges;
+
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+
+      CellType tp = cell.getCellType();
+      if ((tp == CELL_TYPE_REG) ||
+          (tp == CELL_TYPE_CONST) ||
+          (tp == CELL_TYPE_REG_ARST) ||
+          cell.isInputPortCell()) {
+        for (auto sigPort : cell.receiverSigPorts(PORT_ID_OUT)) {
+          if ((sigPort.port != PORT_ID_ARST) &&
+              (sigPort.port != PORT_ID_CLK)) {
+            freshChanges.insert(sigPort);
+            combChanges.push_back(sigPort);
+          } else {
+            seqChanges.insert(sigPort);
+          }
+        }
+      }
+    }
+
+    cout << "Starting to collect events" << endl;
     do {
 
-      combChanges = {};
-      set<SigPort> freshChanges;
       while (freshChanges.size() > 0) {
         SigPort sigPort = *std::begin(freshChanges);
         freshChanges.erase(sigPort);
 
-        combChanges.push_back(sigPort);
-
         const Cell& c = def.getCellRefConst(sigPort.cell);
 
-        for (auto& receiverBus : c.getPortReceivers(sigPort.port)) {
-          for (auto& sigBit : receiverBus) {
-            if (notEmpty(sigBit)) {
-              if ((sigBit.port != PORT_ID_ARST) &&
-                  (sigBit.port != PORT_ID_CLK)) {
-                freshChanges.insert({sigBit.cell, sigBit.port});
-              } else {
-                seqChanges.push_back({sigBit.cell, sigBit.port});
-              }
+        for (auto outPort : c.outputPorts()) {
+          for (auto rPort : c.receiverSigPorts(outPort)) {
+            if ((rPort.port != PORT_ID_ARST) &&
+                (rPort.port != PORT_ID_CLK)) {
+              freshChanges.insert(rPort);
+              combChanges.push_back(rPort);
+            } else {
+              seqChanges.insert(rPort);
             }
-
           }
         }
         
       }
 
-      staticEvents.push_back(combChanges);
-      staticEvents.push_back(seqChanges);
-      seqChanges = {};
+      staticEvents.push_back(combChanges.getVec());
+      combChanges = {};
+
+      vector<SigPort> seqChangesVec(begin(seqChanges), end(seqChanges));
+      staticEvents.push_back(seqChangesVec);
+
+      // // NOTE: This needs to change in order for simulation semantics to be correct
+      // seqChanges = {};
     } while (combChanges.size() > 0);
+
+    cout << "Done collecting events" << endl;
 
     return staticEvents;
   }
@@ -374,10 +405,27 @@ namespace FlatCircuit {
     return cppCode;
   }
 
-  void Simulator::compileLevelizedCircuit(const std::vector<CellId>& levelized) {
-    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
+  std::string
+  Simulator::sequentialBlockCode(const std::vector<SigPort>& levelized) {
+    string cppCode = "";
+    
+    for (auto sigPort : levelized) {
+      CellId cid = sigPort.cell;
+      //const Cell& cell = def.getCellRefConst(cid);
 
-    for (auto cid : levelized) {
+      cppCode += ln("// ----- Sequential update for cell " + def.cellName(cid));
+    }
+
+    return cppCode;
+  }
+  
+  std::string
+  Simulator::combinationalBlockCode(const std::vector<SigPort>& levelized) {
+
+    string cppCode = "";
+    
+    for (auto sigPort : levelized) {
+      CellId cid = sigPort.cell;
       const Cell& cell = def.getCellRefConst(cid);
       cppCode += ln("// ----- Code for cell " + def.cellName(cid));
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
@@ -445,6 +493,16 @@ namespace FlatCircuit {
         assert(false);
       }
     }
+
+    return cppCode;
+  }
+
+  void
+  Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
+    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
+
+    cppCode += combinationalBlockCode(updates[0]);
+    cppCode += sequentialBlockCode(updates[1]);
     
     cppCode += "}";
 
@@ -462,12 +520,20 @@ namespace FlatCircuit {
   }
   
   bool Simulator::compileCircuit() {
-    maybe<std::vector<CellId> > levelized =
-      levelizeCircuit(def);
+    // maybe<std::vector<CellId> > levelized =
+    //   levelizeCircuit(def);
 
-    compileLevelizedCircuit(levelized.get_value());
-    
-    return levelized.has_value();
+    vector<vector<SigPort> > updates = staticSimulationEvents(def);
+
+    assert(updates.size() > 1);
+
+    // vector<CellId> combUpdates;
+    // for (auto sigPort : updates[0]) {
+    //   combUpdates.push_back(sigPort.cell);
+    // }
+    compileLevelizedCircuit(updates); //staticSimulationEvents); //combUpdates);
+    return updates.size() > 1;
+    //return levelized.has_value();
   }
 
   Simulator::~Simulator() {
