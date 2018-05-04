@@ -501,6 +501,19 @@ namespace FlatCircuit {
         string lastRstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST) + "_last";
         cppCode += codeToMaterialize(cid, PORT_ID_ARST, lastRstVar);
 
+        string updateValueClk = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + inVar + ";";
+        if (cell.clkPosedge()) {
+          cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+        } else {
+          cppCode += "\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+        }
+
+        if (cell.rstPosedge()) {
+          cppCode += "\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { assert(false); }\n";
+        } else {
+          cppCode += "\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { assert(false); }\n";
+        }
+        
         cppCode += "\t}\n";
         
       } else {
@@ -596,7 +609,12 @@ namespace FlatCircuit {
 
   void
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
-    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\nvoid simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
+    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
+      "using namespace bsim;\n\n"
+      "typedef bsim::quad_value_bit_vector BitVector;\n\n"
+      "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
+      "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
+      "void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     assert((updates.size() % 2) == 0);
     
