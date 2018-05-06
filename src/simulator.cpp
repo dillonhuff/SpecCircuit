@@ -606,7 +606,7 @@ namespace FlatCircuit {
       cppCode += combinationalBlockCode(updates[i + 0]);
       cppCode += sequentialBlockCode(updates[i + 1]);
     }
-    
+
     cppCode += "}";
 
     string libName = "circuit_jit";
