@@ -765,7 +765,9 @@ namespace FlatCircuit {
     void setPastValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-
+      assert(bv.bitLength() == 1);
+      const Cell& cell = def.getCellRefConst(cid);
+      
       if (!contains_key({cid, pid}, pastValueOffsets)) {
         unsigned long nextInd = simValueTable.size();
         pastValueOffsets[{cid, pid}] = nextInd;
