@@ -492,6 +492,11 @@ namespace FlatCircuit {
       cppCode += ln("// ----- Code for cell " + def.cellName(cid));
 
       cppCode += "\t{\n";
+
+      
+      // string oldOutName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_OUT) + "_old_value";
+      // cppCode += codeToMaterialize(cid, PORT_ID_OUT, oldOutName);
+      
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
