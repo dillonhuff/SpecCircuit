@@ -494,6 +494,10 @@ namespace FlatCircuit {
       posedge("clk", state);
 
       REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+      posedge("clk", state);
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
     
     deleteContext(c);

@@ -265,6 +265,13 @@ namespace FlatCircuit {
       staticEvents.push_back(seqChangesVec);
 
       for (auto seqPort : seqChanges) {
+        const Cell& cell = def.getCellRefConst(seqPort.cell);
+
+        if (cell.getCellType() == CELL_TYPE_MEM) {
+          combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
+          freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
+        }
+
         for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
           for (auto rPort : def.getCellRefConst(seqPort.cell).receiverSigPorts(outPort)) {
             if ((rPort.port != PORT_ID_ARST) &&
@@ -277,6 +284,7 @@ namespace FlatCircuit {
             }
           }
         }
+
       }
 
       // // NOTE: This needs to change in order for simulation semantics to be correct
@@ -487,12 +495,17 @@ namespace FlatCircuit {
         string wdataName =
           "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_WDATA);
         cppCode += codeToMaterialize(cid, PORT_ID_WDATA, wdataName);
+
+        string wenName =
+          "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_WEN);
+        cppCode += codeToMaterialize(cid, PORT_ID_WEN, wenName);
         
         string updateValueClk = "values[" +
           to_string(map_find(cid, memoryOffsets)) + " + " +
           "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
 
-        cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+        cppCode += "\tif ((" + wenName + " == BitVector(1, 1))";
+        cppCode += " && posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
 
       } else {
         cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;
