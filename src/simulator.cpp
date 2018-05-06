@@ -477,7 +477,7 @@ namespace FlatCircuit {
         assert(false);
       }
     }
-r
+
     return cppCode;
   }
   
