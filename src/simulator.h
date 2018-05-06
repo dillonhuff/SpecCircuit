@@ -776,6 +776,9 @@ namespace FlatCircuit {
         }
         simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
       } else {
+
+        assert(cell.getPortType(pid) == PORT_TYPE_IN);
+        
         auto drivers = cell.getDrivers(pid);
         assert(drivers.signals.size() == 1);
 
@@ -795,6 +798,8 @@ namespace FlatCircuit {
       if (cell.getPortType(pid) == PORT_TYPE_OUT) {
         return simValueTable[map_find({cid, pid}, pastValueOffsets)];
       } else {
+        assert(cell.getPortType(pid) == PORT_TYPE_IN);
+        
         auto drivers = cell.getDrivers(pid);
         assert(drivers.signals.size() == 1);
 
