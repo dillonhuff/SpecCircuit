@@ -654,7 +654,29 @@ namespace FlatCircuit {
 
     assert(updates.size() > 1);
 
-    compileLevelizedCircuit(updates);
+    vector<vector<SigPort> > filteredUpdates;
+    for (auto updateGroup : updates) {
+      vector<SigPort> filtered;
+
+      auto reversedUpdateGroup = updateGroup;
+      reverse(reversedUpdateGroup);
+
+      vector<SigPort> filteredReversed;
+      set<CellId> usedCells;
+      for (auto sigPort : reversedUpdateGroup) {
+        CellId cell = sigPort.cell;
+
+        if (!elem(cell, usedCells)) {
+          usedCells.insert(cell);
+          filteredReversed.push_back(sigPort);
+        }
+      }
+
+      reverse(filteredReversed);
+
+      filteredUpdates.push_back(filteredReversed);
+    }
+    compileLevelizedCircuit(filteredUpdates);
 
     return updates.size() > 1;
   }
