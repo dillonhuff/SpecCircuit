@@ -751,6 +751,19 @@ namespace FlatCircuit {
 
     }
 
+    unsigned long portValueOffset(const CellId cid,
+                                  const PortId pid) {
+      if (!contains_key({cid, pid}, portOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        simValueTable.push_back(BitVector(1, 0));
+        portOffsets[{cid, pid}] = nextInd;
+
+        return nextInd;
+      }
+
+      return map_find({cid, pid}, portOffsets);
+    }
+
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {

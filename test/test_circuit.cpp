@@ -415,37 +415,75 @@ namespace FlatCircuit {
 
     c->runPasses({"rungenerators","flattentypes","flatten"});      
 
-    Env circuitEnv = convertFromCoreIR(c, memory);
-    CellDefinition cDef = circuitEnv.getDef("memory0");
+    SECTION("Simulating memory") {
+      Env circuitEnv = convertFromCoreIR(c, memory);
+      CellDefinition cDef = circuitEnv.getDef("memory0");
 
-    Simulator state(circuitEnv, cDef);
+      Simulator state(circuitEnv, cDef);
 
-    state.setFreshValue("clk", BitVec(1, 0));
-    state.update();
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.update();
 
-    // Do not write when write_en == 0
-    state.setFreshValue("clk", BitVec(1, 1));
-    state.setFreshValue("write_en", BitVec(1, 0));
-    state.setFreshValue("write_addr", BitVec(index, 0));
-    state.setFreshValue("write_data", BitVec(width, 23));
-    state.setFreshValue("read_addr", BitVec(index, 0));
-    state.update();
+      // Do not write when write_en == 0
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.setFreshValue("write_en", BitVec(1, 0));
+      state.setFreshValue("write_addr", BitVec(index, 0));
+      state.setFreshValue("write_data", BitVec(width, 23));
+      state.setFreshValue("read_addr", BitVec(index, 0));
+      state.update();
 
-    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
 
-    state.setFreshValue("clk", BitVec(1, 0));
-    state.setFreshValue("write_en", BitVec(1, 1));
-    state.update();
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.setFreshValue("write_en", BitVec(1, 1));
+      state.update();
 
-    state.setFreshValue("clk", BitVec(1, 1));
-    state.update();
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.update();
 
-    REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
 
-    state.setFreshValue("read_addr", BitVec(index, 2));
-    state.update();
+      state.setFreshValue("read_addr", BitVec(index, 2));
+      state.update();
 
-    REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    }
+
+    SECTION("Simulating memory with compiled code") {
+      Env circuitEnv = convertFromCoreIR(c, memory);
+      CellDefinition cDef = circuitEnv.getDef("memory0");
+
+      Simulator state(circuitEnv, cDef);
+
+      REQUIRE(state.compileCircuit());
+
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.update();
+
+      // Do not write when write_en == 0
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.setFreshValue("write_en", BitVec(1, 0));
+      state.setFreshValue("write_addr", BitVec(index, 0));
+      state.setFreshValue("write_data", BitVec(width, 23));
+      state.setFreshValue("read_addr", BitVec(index, 0));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.setFreshValue("write_en", BitVec(1, 1));
+      state.update();
+
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
+
+      state.setFreshValue("read_addr", BitVec(index, 2));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    }
     
     deleteContext(c);
   }

@@ -493,6 +493,7 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       cppCode += ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port));
 
+      cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
       cppCode += "\t{\n";
 
       bool sentToSeqPort = false;
@@ -524,7 +525,8 @@ namespace FlatCircuit {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
-        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName);// + ";\n";
+        cppCode += ln("values[" + to_string(portValueOffset(cid, PORT_ID_IN)) + "] = " + argName);
+        //map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName);// + ";\n";
 
       } else if (cell.isInputPortCell()) {
         cppCode += ln("// No code for input port " + def.cellName(cid));
@@ -596,10 +598,19 @@ namespace FlatCircuit {
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = ~(" + argName + ")");
 
+      } else if (cell.getCellType() == CELL_TYPE_MEM) {
+        string raddrName =
+          "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_RADDR);
+        cppCode += codeToMaterialize(cid, PORT_ID_RADDR, raddrName);
+
+        cppCode += ln("values[" + to_string(map_find(cid, memoryOffsets)) + " + " +
+                      raddrName + ".to_type<int>()]");
+        
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
         
       } else {
-        cout << "Insert code for unsupported node " + def.cellName(cid) << endl;
+        cout << "Insert code for unsupported node " + def.cellName(cid)
+             << " : " << toString(def.getCellRefConst(cid).getCellType()) << endl;
         assert(false);
       }
 
@@ -610,9 +621,12 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "] = " + oldOutName);
 
       }
-      
+      cout << "Done" << endl;
+
       cppCode += "\t}\n";
     }
+
+
 
     return cppCode;
   }
