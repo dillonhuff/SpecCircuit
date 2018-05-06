@@ -316,6 +316,10 @@ namespace FlatCircuit {
     SignalBus(const int width) : signals() {
       signals.resize(width);
     }
+
+    size_t size() const {
+      return signals.size();
+    }
   };
 
   class Cell {

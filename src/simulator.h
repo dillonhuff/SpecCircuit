@@ -767,18 +767,44 @@ namespace FlatCircuit {
                       const BitVector& bv) {
       assert(bv.bitLength() == 1);
       const Cell& cell = def.getCellRefConst(cid);
-      
-      if (!contains_key({cid, pid}, pastValueOffsets)) {
-        unsigned long nextInd = simValueTable.size();
-        pastValueOffsets[{cid, pid}] = nextInd;
-        simValueTable.push_back(bv);
+
+      if (cell.getPortType(pid) == PORT_TYPE_OUT) {
+        if (!contains_key({cid, pid}, pastValueOffsets)) {
+          unsigned long nextInd = simValueTable.size();
+          pastValueOffsets[{cid, pid}] = nextInd;
+          simValueTable.push_back(bv);
+        }
+        simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
+      } else {
+        auto drivers = cell.getDrivers(pid);
+        assert(drivers.signals.size() == 1);
+
+        SignalBit driverBit = drivers.signals[0];
+
+        assert(notEmpty(driverBit));
+        assert(driverBit.offset == 0);
+
+        setPastValue(driverBit.cell, driverBit.port, bv);
       }
-      simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
     }
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
-      return simValueTable[map_find({cid, pid}, pastValueOffsets)];
+      const Cell& cell = def.getCellRefConst(cid);
+
+      if (cell.getPortType(pid) == PORT_TYPE_OUT) {
+        return simValueTable[map_find({cid, pid}, pastValueOffsets)];
+      } else {
+        auto drivers = cell.getDrivers(pid);
+        assert(drivers.signals.size() == 1);
+
+        SignalBit driverBit = drivers.signals[0];
+
+        assert(notEmpty(driverBit));
+        assert(driverBit.offset == 0);
+
+        return getPastValue(driverBit.cell, driverBit.port);
+      }
     }
     
     std::map<CellId, BitVector> allRegisterValues() const {
