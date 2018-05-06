@@ -488,14 +488,18 @@ namespace FlatCircuit {
     
     for (auto sigPort : levelized) {
       CellId cid = sigPort.cell;
+      PortId port = sigPort.port;
+      
       const Cell& cell = def.getCellRefConst(cid);
-      cppCode += ln("// ----- Code for cell " + def.cellName(cid));
+      cppCode += ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port));
 
       cppCode += "\t{\n";
 
-      
-      // string oldOutName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_OUT) + "_old_value";
-      // cppCode += codeToMaterialize(cid, PORT_ID_OUT, oldOutName);
+
+      if (port == PORT_ID_OUT) {
+        string oldOutName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_OUT) + "_old_value";
+        cppCode += codeToMaterialize(cid, PORT_ID_OUT, oldOutName);
+      }
       
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
@@ -542,6 +546,24 @@ namespace FlatCircuit {
         cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
         cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = mul_general_width_bv(" + argName0 + ", " + argName1 + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_AND) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " & " + argName1 + ");\n";
+
+      } else if (cell.getCellType() == CELL_TYPE_OR) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += "\tvalues[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " | " + argName1 + ");\n";
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 

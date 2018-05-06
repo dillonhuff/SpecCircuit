@@ -197,6 +197,9 @@ namespace FlatCircuit {
       def.connect(clk_en, PORT_ID_OUT,
                   clkAnd, PORT_ID_IN1);
 
+      def.connect(clkAnd, PORT_ID_OUT,
+                  reg, PORT_ID_CLK);
+
       def.connect(arst, PORT_ID_OUT,
                   reg, PORT_ID_ARST);
 
@@ -230,6 +233,34 @@ namespace FlatCircuit {
 
       REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
 
+      sim.setFreshValue("in", BitVec(8, 57));
+      posedge("clk", sim);
+      negedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+
+      sim.setFreshValue("clk_en", BitVec(1, 0));
+      sim.setFreshValue("in", BitVec(8, 18));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+
+      // This should generate a new rising clock edge as and.out goes 0 -> 1
+      sim.setFreshValue("clk_en", BitVec(1, 1));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
+
+      negedge("clk", sim);
+
+      sim.setFreshValue("clk", BitVec(1, 1));
+      sim.update();
+
+      sim.setFreshValue("clk_en", BitVec(1, 1));
+      sim.setFreshValue("in", BitVec(8, 33));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
     }
 
   }
