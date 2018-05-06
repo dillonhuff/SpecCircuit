@@ -483,6 +483,17 @@ namespace FlatCircuit {
       state.update();
 
       REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+      state.setFreshValue("write_en", BitVec(1, 0));
+      state.update();
+
+      state.setFreshValue("write_addr", BitVec(index, 2));
+      state.setFreshValue("write_data", BitVec(width, 14));
+      state.update();
+
+      posedge("clk", state);
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
     
     deleteContext(c);
