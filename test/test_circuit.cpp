@@ -449,91 +449,76 @@ namespace FlatCircuit {
       REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
 
-    SECTION("Simulating memory with compiled code") {
-      Env circuitEnv = convertFromCoreIR(c, memory);
-      CellDefinition cDef = circuitEnv.getDef("memory0");
-
-      Simulator state(circuitEnv, cDef);
-
-      REQUIRE(state.compileCircuit());
-
-      state.setFreshValue("clk", BitVec(1, 0));
-      state.update();
-
-      // Do not write when write_en == 0
-      state.setFreshValue("clk", BitVec(1, 1));
-      state.setFreshValue("write_en", BitVec(1, 0));
-      state.setFreshValue("write_addr", BitVec(index, 0));
-      state.setFreshValue("write_data", BitVec(width, 23));
-      state.setFreshValue("read_addr", BitVec(index, 0));
-      state.update();
-
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
-
-      state.setFreshValue("clk", BitVec(1, 0));
-      state.setFreshValue("write_en", BitVec(1, 1));
-      state.update();
-
-      state.setFreshValue("clk", BitVec(1, 1));
-      state.update();
-
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
-
-      state.setFreshValue("read_addr", BitVec(index, 2));
-      state.update();
-
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
-
-      state.setFreshValue("write_en", BitVec(1, 0));
-      state.update();
-
-      state.setFreshValue("write_addr", BitVec(index, 2));
-      state.setFreshValue("write_data", BitVec(width, 14));
-      state.update();
-
-      posedge("clk", state);
-
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
-
-      posedge("clk", state);
-
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
-    }
-    
     deleteContext(c);
   }
 
   TEST_CASE("Mem unq1") {
-    //Env circuitEnv = loadFromCoreIR("global.mem_unq1", "./test/mem_unq1.json");
     Env circuitEnv = loadFromCoreIR("global.mem_unq1",
                                     "./test/memory_tile_unq1.json");
     CellDefinition& def = circuitEnv.getDef("mem_unq1");
 
-    Simulator sim(circuitEnv, def);
-    sim.setFreshValue("addr", BitVector(9, 13));
-    sim.setFreshValue("cen", BitVector(1, 1));
-    sim.setFreshValue("wen", BitVector(1, 1));
-    sim.setFreshValue("data_in", BitVector(16, 562));
+    SECTION("Interpreted simulation") {
+      Simulator sim(circuitEnv, def);
+      sim.setFreshValue("addr", BitVector(9, 13));
+      sim.setFreshValue("cen", BitVector(1, 1));
+      sim.setFreshValue("wen", BitVector(1, 1));
+      sim.setFreshValue("data_in", BitVector(16, 562));
 
-    posedge("clk", sim);
+      posedge("clk", sim);
 
-    sim.setFreshValue("wen", BitVector(1, 0));
-    posedge("clk", sim);
+      sim.setFreshValue("wen", BitVector(1, 0));
+      posedge("clk", sim);
     
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
-    sim.setFreshValue("addr", BitVector(9, 0));
-    sim.setFreshValue("data_in", BitVector(16, 4965));
-    posedge("clk", sim);
+      sim.setFreshValue("addr", BitVector(9, 0));
+      sim.setFreshValue("data_in", BitVector(16, 4965));
+      posedge("clk", sim);
 
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
-    sim.setFreshValue("wen", BitVector(1, 1));
-    posedge("clk", sim);
-    posedge("clk", sim);
+      sim.setFreshValue("wen", BitVector(1, 1));
+      posedge("clk", sim);
 
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+    }
+
+    SECTION("Compiled simulation") {
+      Simulator sim(circuitEnv, def);
+      sim.compileCircuit();
+
+      sim.setFreshValue("addr", BitVector(9, 13));
+      sim.setFreshValue("cen", BitVector(1, 1));
+      sim.setFreshValue("wen", BitVector(1, 1));
+      sim.setFreshValue("data_in", BitVector(16, 562));
+
+      posedge("clk", sim);
+
+      sim.setFreshValue("wen", BitVector(1, 0));
+      posedge("clk", sim);
+    
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
+
+      sim.setFreshValue("addr", BitVector(9, 0));
+      sim.setFreshValue("data_in", BitVector(16, 4965));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+      sim.setFreshValue("wen", BitVector(1, 1));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+    }
+    
   }
 
   TEST_CASE("Testing memory tile") {
@@ -555,60 +540,124 @@ namespace FlatCircuit {
 
     REQUIRE(foundMem);
 
-    Simulator sim(circuitEnv, def);
-    reset("reset", sim);
+    SECTION("Memory tile without compilation") {
+      Simulator sim(circuitEnv, def);
+      reset("reset", sim);
 
-    sim.setFreshValue("clk_en", BitVec(1, 1));
-    sim.setFreshValue("config_en", BitVec(1, 1));
-    sim.update();
+      sim.setFreshValue("clk_en", BitVec(1, 1));
+      sim.setFreshValue("config_en", BitVec(1, 1));
+      sim.update();
 
-    sim.setFreshValue("clk_in", BitVec(1, 0));
-    sim.setFreshValue("config_en_sram", BitVec(4, 0));
-    sim.update();
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.setFreshValue("config_en_sram", BitVec(4, 0));
+      sim.update();
 
-    BitVector configAddr(32, 0);
-    sim.setFreshValue("config_addr", configAddr);
-    sim.update();
+      BitVector configAddr(32, 0);
+      sim.setFreshValue("config_addr", configAddr);
+      sim.update();
 
-    uint32_t configDataInt = 0;
-    configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
-    configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
-    configDataInt |= ((uint32_t) 8) << 3; // Depth 8
+      uint32_t configDataInt = 0;
+      configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
+      configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
+      configDataInt |= ((uint32_t) 8) << 3; // Depth 8
     
-    BitVector configData(32, configDataInt);
+      BitVector configData(32, configDataInt);
 
-    cout << "Memory tile config data = " << configData << endl;
-    sim.setFreshValue("config_data", configData);
+      cout << "Memory tile config data = " << configData << endl;
+      sim.setFreshValue("config_data", configData);
 
-    posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-    sim.setFreshValue("config_en", BitVec(1, 0));
-    sim.update();
+      sim.setFreshValue("config_en", BitVec(1, 0));
+      sim.update();
 
-    sim.setFreshValue("wen_in", BitVec(1, 1));
-    sim.setFreshValue("addr_in", BitVec(16, 4));
-    sim.setFreshValue("data_in", BitVec(16, 72));
-    posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("data_in", BitVec(16, 72));
+      posedge("clk_in", sim);
 
-    // cout << "Debug immediately after write call " << endl;
-    // sim.debugPrintMemories();
+      // cout << "Debug immediately after write call " << endl;
+      // sim.debugPrintMemories();
 
-    sim.setFreshValue("wen_in", BitVec(1, 1));
-    sim.setFreshValue("addr_in", BitVec(16, 2));
-    sim.setFreshValue("data_in", BitVec(16, 45));
-    posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 2));
+      sim.setFreshValue("data_in", BitVec(16, 45));
+      posedge("clk_in", sim);
     
-    sim.setFreshValue("wen_in", BitVec(1, 0));
-    sim.setFreshValue("addr_in", BitVec(16, 4));
-    sim.setFreshValue("ren_in", BitVec(1, 1));
-    posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 0));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("ren_in", BitVec(1, 1));
+      posedge("clk_in", sim);
 
-    posedge("clk_in", sim);
-    posedge("clk_in", sim);
+      posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-    // sim.debugPrintMemories();
+      // sim.debugPrintMemories();
 
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
+
+    }
+
+    SECTION("Memory tile using compiled code") {
+      Simulator sim(circuitEnv, def);
+      REQUIRE(sim.compileCircuit());
+
+      reset("reset", sim);
+
+      sim.setFreshValue("clk_en", BitVec(1, 1));
+      sim.setFreshValue("config_en", BitVec(1, 1));
+      sim.update();
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.setFreshValue("config_en_sram", BitVec(4, 0));
+      sim.update();
+
+      BitVector configAddr(32, 0);
+      sim.setFreshValue("config_addr", configAddr);
+      sim.update();
+
+      uint32_t configDataInt = 0;
+      configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
+      configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
+      configDataInt |= ((uint32_t) 8) << 3; // Depth 8
+    
+      BitVector configData(32, configDataInt);
+
+      cout << "Memory tile config data = " << configData << endl;
+      sim.setFreshValue("config_data", configData);
+
+      posedge("clk_in", sim);
+
+      sim.setFreshValue("config_en", BitVec(1, 0));
+      sim.update();
+
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("data_in", BitVec(16, 72));
+      posedge("clk_in", sim);
+
+      // cout << "Debug immediately after write call " << endl;
+      // sim.debugPrintMemories();
+
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 2));
+      sim.setFreshValue("data_in", BitVec(16, 45));
+      posedge("clk_in", sim);
+    
+      sim.setFreshValue("wen_in", BitVec(1, 0));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("ren_in", BitVec(1, 1));
+      posedge("clk_in", sim);
+
+      posedge("clk_in", sim);
+      posedge("clk_in", sim);
+
+      // sim.debugPrintMemories();
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
+
+    }
+
   }
     
   TEST_CASE("Simulating a mux loop") {

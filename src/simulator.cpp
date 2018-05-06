@@ -31,6 +31,8 @@ namespace FlatCircuit {
       if (!dbhc::elem(t, alreadyAdded)) {
         vec.push_back(t);
         alreadyAdded.insert(t);
+      } else {
+        assert(false);
       }
     }
 
@@ -238,6 +240,7 @@ namespace FlatCircuit {
     cout << "Starting to collect events" << endl;
     do {
 
+      cout << "In getting comb changes" << endl;
       while (freshChanges.size() > 0) {
         SigPort sigPort = *std::begin(freshChanges);
         freshChanges.erase(sigPort);
@@ -248,8 +251,11 @@ namespace FlatCircuit {
           for (auto rPort : c.receiverSigPorts(outPort)) {
             if ((rPort.port != PORT_ID_ARST) &&
                 (rPort.port != PORT_ID_CLK)) {
-              freshChanges.insert(rPort);
-              combChanges.push_back(rPort);
+
+              if (!combChanges.elem(rPort)) {
+                freshChanges.insert(rPort);
+                combChanges.push_back(rPort);
+              }
             } else {
               seqChanges.insert(rPort);
             }
@@ -257,6 +263,8 @@ namespace FlatCircuit {
         }
         
       }
+
+      cout << "In got " << combChanges.size() << " comb changes" << endl;
 
       staticEvents.push_back(combChanges.getVec());
       combChanges = {};
@@ -268,16 +276,20 @@ namespace FlatCircuit {
         const Cell& cell = def.getCellRefConst(seqPort.cell);
 
         if (cell.getCellType() == CELL_TYPE_MEM) {
-          combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
-          freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
+          if (!combChanges.elem({seqPort.cell, PORT_ID_RADDR})) {
+            combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
+            freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
+          }
         }
 
         for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
           for (auto rPort : def.getCellRefConst(seqPort.cell).receiverSigPorts(outPort)) {
             if ((rPort.port != PORT_ID_ARST) &&
                 (rPort.port != PORT_ID_CLK)) {
-              freshChanges.insert(rPort);
-              combChanges.push_back(rPort);
+              if (!combChanges.elem(rPort)) {
+                freshChanges.insert(rPort);
+                combChanges.push_back(rPort);
+              }
             } else {
               // TODO: Improve this update
               seqChanges.insert(rPort);
