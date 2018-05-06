@@ -439,9 +439,11 @@ namespace FlatCircuit {
 
       cppCode += ln("// ----- Sequential update for cell " + def.cellName(cid));
 
+      cppCode += "\t{\n";      
+
       CellType tp = cell.getCellType();
       if (tp == CELL_TYPE_REG_ARST) {
-        cppCode += "\t{\n";
+
         string inVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, inVar);
 
@@ -470,13 +472,37 @@ namespace FlatCircuit {
           cppCode += "\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n";
         }
         
-        cppCode += "\t}\n";
+      } else if (tp == CELL_TYPE_MEM) {
+
+        string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
+        cppCode += codeToMaterialize(cid, PORT_ID_CLK, clkVar);
+
+        string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
+        cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
+
+        string waddrName =
+          "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_WADDR);
+        cppCode += codeToMaterialize(cid, PORT_ID_WADDR, waddrName);
+
+        string wdataName =
+          "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_WDATA);
+        cppCode += codeToMaterialize(cid, PORT_ID_WDATA, wdataName);
         
+        string updateValueClk = "values[" +
+          to_string(map_find(cid, memoryOffsets)) + " + " +
+          "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
+
+        cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+
       } else {
         cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;
         assert(false);
       }
+
+      cppCode += "\t}\n";
+
     }
+
 
     return cppCode;
   }
@@ -526,7 +552,6 @@ namespace FlatCircuit {
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += ln("values[" + to_string(portValueOffset(cid, PORT_ID_IN)) + "] = " + argName);
-        //map_find({cid, PORT_ID_IN}, portOffsets)) + "] = " + argName);// + ";\n";
 
       } else if (cell.isInputPortCell()) {
         cppCode += ln("// No code for input port " + def.cellName(cid));
@@ -603,8 +628,9 @@ namespace FlatCircuit {
           "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_RADDR);
         cppCode += codeToMaterialize(cid, PORT_ID_RADDR, raddrName);
 
-        cppCode += ln("values[" + to_string(map_find(cid, memoryOffsets)) + " + " +
-                      raddrName + ".to_type<int>()]");
+        
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, portOffsets)) + "] = values[" + to_string(map_find(cid, memoryOffsets)) + " + " +
+                      "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]");
         
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
         
