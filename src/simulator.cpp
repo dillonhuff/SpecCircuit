@@ -495,10 +495,29 @@ namespace FlatCircuit {
 
       cppCode += "\t{\n";
 
+      bool sentToSeqPort = false;
+      PortId outPort = PORT_ID_OUT;
+      if (elem(outPort, cell.outputPorts())) {
+        for (auto& receiverBus : cell.getPortReceivers(PORT_ID_OUT)) {
+          for (auto& sigBit : receiverBus) {
 
-      if (port == PORT_ID_OUT) {
-        string oldOutName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_OUT) + "_old_value";
-        cppCode += codeToMaterialize(cid, PORT_ID_OUT, oldOutName);
+            if (notEmpty(sigBit)) {
+              if ((sigBit.port != PORT_ID_ARST) &&
+                  (sigBit.port != PORT_ID_CLK)) {
+              } else {
+                sentToSeqPort = true;
+                break;
+              }
+            }
+
+          }
+        }
+
+        if (sentToSeqPort) {
+          string oldOutName = "cell_" + to_string(cid) + "_" +
+            portIdString(PORT_ID_OUT) + "_old_value";
+          cppCode += ln("BitVector " + oldOutName + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]");
+        }
       }
       
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
@@ -584,6 +603,14 @@ namespace FlatCircuit {
         assert(false);
       }
 
+      if (sentToSeqPort) {
+        string oldOutName = "cell_" + to_string(cid) + "_" +
+          portIdString(PORT_ID_OUT) + "_old_value";
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "] = " + oldOutName);
+
+      }
+      
       cppCode += "\t}\n";
     }
 

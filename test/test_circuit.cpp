@@ -220,36 +220,47 @@ namespace FlatCircuit {
       sim.setFreshValue("arst", BitVec(1, 0));
       sim.update();
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      SECTION("First reset") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      }
 
       sim.setFreshValue("clk_en", BitVec(1, 1));
       sim.setFreshValue("in", BitVec(8, 29));
       posedge("clk", sim);
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 29));
+      SECTION("Setting value after one clock cycle and clk_en = 1") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 29));
+      }
 
       posedge("arst", sim);
       negedge("arst", sim);
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      SECTION("Resetting again") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      }
 
       sim.setFreshValue("in", BitVec(8, 57));
       posedge("clk", sim);
       negedge("clk", sim);
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+      SECTION("Running the clock again") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+      }
 
       sim.setFreshValue("clk_en", BitVec(1, 0));
       sim.setFreshValue("in", BitVec(8, 18));
       posedge("clk", sim);
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+      SECTION("clk rises, but clk_en = 0") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
+      }
 
-      // This should generate a new rising clock edge as and.out goes 0 -> 1
       sim.setFreshValue("clk_en", BitVec(1, 1));
       sim.update();
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
+      SECTION("Generate a new rising clock edge as and.out goes 0 -> 1") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
+      }
 
       negedge("clk", sim);
 
@@ -260,7 +271,9 @@ namespace FlatCircuit {
       sim.setFreshValue("in", BitVec(8, 33));
       sim.update();
 
-      REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
+      SECTION("Clock enable on but no rising edge") {
+        REQUIRE(sim.getBitVec("out") == BitVec(8, 18));
+      }
     }
 
   }
