@@ -369,6 +369,34 @@ namespace FlatCircuit {
     return "\t" + s + ";\n";
   }
 
+  // std::string
+  // Simulator::codeToMaterializePastValue(const CellId cid,
+  //                                       const PortId pid,
+  //                                       const std::string& argName) {
+  //   const Cell& cell = def.getCellRefConst(cid);
+  //   auto drivers = cell.getDrivers(pid);
+
+  //   assert(drivers.size() == 1);
+  //   assert(notEmpty(drivers[0]));
+    
+  //   string cppCode = "";
+  //   cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
+  //                 to_string(drivers.signals.size()) + ", 0)");
+
+  //   bool canDirectCopy = true;
+  //   CellId singleDriverCell;
+  //   PortId singleDriverPort;
+  //   set<CellId> driverCells;
+
+  //   for (int offset = 0; offset < drivers.signals.size(); offset++) {
+  //     SignalBit driverBit = drivers.signals[offset];
+  //     string valString = "values[" + to_string(pastValueOffset(driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
+  //     cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+  //   }
+
+  //   return cppCode;
+  // }
+  
   std::string
   Simulator::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
@@ -427,52 +455,6 @@ namespace FlatCircuit {
                                            const PortId pid,
                                            const std::string& argName) {
     return codeToMaterializeOffset(cid, pid, argName, portOffsets);
-    // const Cell& cell = def.getCellRefConst(cid);
-    // auto drivers = cell.getDrivers(pid);
-    // string cppCode = "";
-    // cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
-    //               to_string(drivers.signals.size()) + ", 0)");
-
-    // bool canDirectCopy = true;
-    // CellId singleDriverCell;
-    // PortId singleDriverPort;
-    // set<CellId> driverCells;
-
-    // for (int offset = 0; offset < drivers.signals.size(); offset++) {
-    //   SignalBit driverBit = drivers.signals[offset];
-    //   driverCells.insert(driverBit.cell);
-
-    //   singleDriverCell = driverBit.cell;
-    //   singleDriverPort = driverBit.port;
-
-    //   if (driverCells.size() > 1) {
-    //     canDirectCopy = false;
-    //     break;
-    //   }
-
-    //   if (driverBit.offset != offset) {
-    //     canDirectCopy = false;
-    //     break;
-    //   }
-    // }
-
-    // if (def.getCellRefConst(singleDriverCell).getPortWidth(singleDriverPort) !=
-    //     cell.getPortWidth(pid)) {
-    //   canDirectCopy = false;
-    // }
-
-    // if (canDirectCopy) {
-    //   cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, portOffsets)) + "]");
-    // } else {
-
-    //   for (int offset = 0; offset < drivers.signals.size(); offset++) {
-    //     SignalBit driverBit = drivers.signals[offset];
-    //     string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, portOffsets)) + "].get(" + to_string(driverBit.offset) + ")";
-    //     cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
-    //   }
-    // }
-
-    // return cppCode;
   }
 
   std::string
@@ -499,7 +481,7 @@ namespace FlatCircuit {
         string rstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST);
         cppCode += codeToMaterialize(cid, PORT_ID_ARST, rstVar);
         string lastRstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST) + "_last";
-        cppCode += codeToMaterialize(cid, PORT_ID_ARST, lastRstVar);
+        cppCode += codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, pastValueOffsets);
 
         string updateValueClk = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
@@ -508,10 +490,12 @@ namespace FlatCircuit {
           cppCode += "\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
         }
 
+        BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
+        string updateValueRst = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
         if (cell.rstPosedge()) {
-          cppCode += "\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { assert(false); }\n";
+          cppCode += "\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n";
         } else {
-          cppCode += "\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { assert(false); }\n";
+          cppCode += "\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n";
         }
         
         cppCode += "\t}\n";
