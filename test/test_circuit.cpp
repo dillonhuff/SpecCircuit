@@ -468,7 +468,7 @@ namespace FlatCircuit {
 
       sim.setFreshValue("wen", BitVector(1, 0));
       posedge("clk", sim);
-    
+
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
       sim.setFreshValue("addr", BitVector(9, 0));
@@ -500,6 +500,8 @@ namespace FlatCircuit {
 
       sim.setFreshValue("wen", BitVector(1, 0));
       posedge("clk", sim);
+
+      sim.debugPrintMemories();
     
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 

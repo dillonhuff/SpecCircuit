@@ -228,8 +228,12 @@ namespace FlatCircuit {
         for (auto sigPort : cell.receiverSigPorts(PORT_ID_OUT)) {
           if ((sigPort.port != PORT_ID_ARST) &&
               (sigPort.port != PORT_ID_CLK)) {
-            freshChanges.insert(sigPort);
-            combChanges.push_back(sigPort);
+
+            if (!combChanges.elem(sigPort)) {
+              freshChanges.insert(sigPort);
+              combChanges.push_back(sigPort);
+            }
+
           } else {
             seqChanges.insert(sigPort);
           }
@@ -492,6 +496,23 @@ namespace FlatCircuit {
           cppCode += "\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n";
         }
         
+      } else if (tp == CELL_TYPE_REG) {
+
+        string inVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, inVar);
+
+        string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
+        cppCode += codeToMaterialize(cid, PORT_ID_CLK, clkVar);
+        string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
+        cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
+
+        string updateValueClk = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + inVar + ";";
+        if (cell.clkPosedge()) {
+          cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+        } else {
+          cppCode += "\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
+        }
+
       } else if (tp == CELL_TYPE_MEM) {
 
         string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
@@ -636,6 +657,25 @@ namespace FlatCircuit {
 
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " | " + argName1 + ")");
 
+      } else if (cell.getCellType() == CELL_TYPE_EQ) {
+
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " == " + argName1 + ")");
+
+      } else if (cell.getCellType() == CELL_TYPE_NEQ) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " != " + argName1 + ")");
+
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
         string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
@@ -657,7 +697,29 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, portOffsets)) + "] = values[" + to_string(map_find(cid, memoryOffsets)) + " + " +
                       "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]");
         
+      } else if (cell.getCellType() == CELL_TYPE_MUX) {
+
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        string sel = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_SEL);
+        cppCode += codeToMaterialize(cid, PORT_ID_SEL, sel);
+        
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")");
+        
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
+        
+      } else if (cell.getCellType() == CELL_TYPE_REG) {
+        
+      } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
+
+        string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + argName);
         
       } else {
         cout << "Insert code for unsupported node " + def.cellName(cid)
