@@ -1046,27 +1046,12 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
   }
 
-  TEST_CASE("CGRA multiply by 2") {
-    auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
-    auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
-    Env circuitEnv =
-      loadFromCoreIR("global.top",
-                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
-                     //"/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
-
-    CellDefinition& def = circuitEnv.getDef("top");
-
-    BitVector input(16, 23);
-    BitVector correctOutput(16, 2*23);
-
-    Simulator sim(circuitEnv, def);
+  void loadCGRAConfig(const std::vector<std::pair<unsigned int, unsigned int> >& configValues,
+                      Simulator& sim) {
     reset("reset_in", sim);
 
     cout << "Reset chip" << endl;
     for (int i = 0; i < configValues.size(); i++) {
-
-      // sim.setFreshValue("clk_in", BitVec(1, 0));
-      // sim.update();
 
       cout << "Evaluating " << i << endl;
 
@@ -1076,16 +1061,7 @@ namespace FlatCircuit {
       sim.setFreshValue("config_addr_in", BitVec(32, configAddr));
       sim.setFreshValue("config_data_in", BitVec(32, configData));
 
-      // sim.setFreshValue("clk_in", BitVec(1, 1));
-      // sim.update();
-
       posedge("clk_in", sim);
-      // sim.setFreshValue("clk_in", BitVec(1, 0));
-      // sim.update();
-
-      // sim.setFreshValue("clk_in", BitVec(1, 1));
-      // sim.update();
-      
     }
 
     cout << "Done configuring PE tile" << endl;
@@ -1096,22 +1072,52 @@ namespace FlatCircuit {
 
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
+  }
 
-    cout << "Done setting inputs" << endl;
+  TEST_CASE("CGRA multiply by 2") {
+    auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
+    auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
-    posedge("clk_in", sim);
+    CellDefinition& def = circuitEnv.getDef("top");
+
+    BitVector input(16, 23);
+    BitVector correctOutput(16, 2*23);
+
+    Simulator sim(circuitEnv, def);
+    loadCGRAConfig(configValues, sim);
+    // reset("reset_in", sim);
+
+    // cout << "Reset chip" << endl;
+    // for (int i = 0; i < configValues.size(); i++) {
+
+    //   cout << "Evaluating " << i << endl;
+
+    //   unsigned int configAddr = configValues[i].first;
+    //   unsigned int configData = configValues[i].second;
+
+    //   sim.setFreshValue("config_addr_in", BitVec(32, configAddr));
+    //   sim.setFreshValue("config_data_in", BitVec(32, configData));
+
+    //   posedge("clk_in", sim);
+    // }
+
+    // cout << "Done configuring PE tile" << endl;
+
+    // sim.setFreshValue("config_addr_in", BitVec(32, 0));
     // sim.setFreshValue("clk_in", BitVec(1, 0));
     // sim.update();
 
     // sim.setFreshValue("clk_in", BitVec(1, 1));
     // sim.update();
 
-    posedge("clk_in", sim);    
-    // sim.setFreshValue("clk_in", BitVec(1, 0));
-    // sim.update();
+    // cout << "Done setting inputs" << endl;
 
-    // sim.setFreshValue("clk_in", BitVec(1, 1));
-    // sim.update();
+    // posedge("clk_in", sim);
+
+    // posedge("clk_in", sim);    
 
     setCGRAInput(2, input, sim);
     sim.update();
@@ -1126,11 +1132,6 @@ namespace FlatCircuit {
 
       posedge("clk_in", sim);
 
-      // sim.setFreshValue("clk_in", BitVec(1, 0));
-      // sim.update();
-
-      // sim.setFreshValue("clk_in", BitVec(1, 1));
-      // sim.update();
     }
 
     cout << "Outputs" << endl;
