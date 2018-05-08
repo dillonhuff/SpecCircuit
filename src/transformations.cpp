@@ -41,6 +41,9 @@ namespace FlatCircuit {
     case CELL_TYPE_ULT:
       return BitVector(1, in0 < in1);
 
+    case CELL_TYPE_UGT:
+      return BitVector(1, in0 > in1);
+      
     case CELL_TYPE_UGE:
       return BitVector(1, (in0 > in1) || (in0 == in1));
 
