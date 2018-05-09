@@ -490,6 +490,7 @@ namespace FlatCircuit {
     }
 
     top = c->getModule(topName);
+    c->setTop(top);
 
     assert(top != nullptr);
 

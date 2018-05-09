@@ -1165,7 +1165,7 @@ namespace FlatCircuit {
       posedge("clk_in", sim);
     }
 
-    cout << "Done configuring PE tile" << endl;
+    cout << "Done configuring CGRA tile" << endl;
 
     sim.setFreshValue("config_addr_in", BitVec(32, 0));
     sim.setFreshValue("clk_in", BitVec(1, 0));
@@ -1173,6 +1173,118 @@ namespace FlatCircuit {
 
     sim.setFreshValue("clk_in", BitVec(1, 1));
     sim.update();
+  }
+
+  typedef std::vector<std::pair<unsigned int, unsigned int> > CGRABitStream;
+  
+  void loadMemoryTileConfig(const CGRABitStream& configValues,
+                            Simulator& sim) {
+    reset("reset", sim);
+
+    sim.setFreshValue("config_write", BitVec(1, 1));
+    sim.setFreshValue("tile_id", BitVec("16'h18"));
+    posedge("clk_in", sim);
+    
+    cout << "Reset chip" << endl;
+    for (int i = 0; i < configValues.size(); i++) {
+
+      cout << "Evaluating " << i << endl;
+
+      unsigned int configAddr = configValues[i].first;
+      unsigned int configData = configValues[i].second;
+
+      sim.setFreshValue("config_addr", BitVec(32, configAddr));
+      sim.setFreshValue("config_data", BitVec(32, configData));
+
+      posedge("clk_in", sim);
+    }
+
+    cout << "Done configuring Memory tile" << endl;
+
+    sim.setFreshValue("config_addr", BitVec(32, 0));
+    sim.setFreshValue("clk_in", BitVec(1, 0));
+    sim.setFreshValue("config_write", BitVec(1, 0));
+    sim.update();
+
+    
+    sim.setFreshValue("clk_in", BitVec(1, 1));
+    sim.update();
+
+  }
+  
+  TEST_CASE("Memory tile convolution") {
+    auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
+    Env circuitEnv =
+      loadFromCoreIR("global.memory_tile_unq1",
+                     "./test/memory_tile_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("memory_tile_unq1");
+
+    Simulator sim(circuitEnv, def);
+    loadMemoryTileConfig(convConfigValues, sim);
+    
+
+    sim.debugPrintRegisters();
+
+
+    // One of these will be the write enable!
+    for (int s = 0; s < 4; s++) {
+      for (int t = 0; t < 5; t++) {
+        if (s != 1) {
+          sim.setFreshValue("in_0_BUS1_" + to_string(s) + "_" + to_string(t),
+                            BitVector(1, 1));
+        }
+
+        if (s != 3) {
+          sim.setFreshValue("in_1_BUS1_" + to_string(s) + "_" + to_string(t),
+                            BitVector(1, 1));
+
+        }
+      }
+    }
+
+    sim.setFreshValue("gin_0", BitVec(1, 0));
+    sim.setFreshValue("gin_1", BitVec(1, 0));
+    sim.setFreshValue("gin_2", BitVec(1, 0));
+
+    // This is the clock gate signal!
+    sim.setFreshValue("gin_3", BitVec(1, 0));
+    
+    posedge("clk_in", sim);
+
+    
+    for (int i = 0; i < 50; i++) {
+      BitVector input(16, i);
+      for (int s = 0; s < 4; s++) {
+        for (int t = 0; t < 5; t++) {
+          if (s != 1) {
+            sim.setFreshValue("in_0_BUS16_" + to_string(s) + "_" + to_string(t),
+                              input);
+            // sim.setFreshValue("in_1_BUS16_" + to_string(s) + "_" + to_string(t),
+            //                   input);
+          }
+
+          if (s != 3) {
+            sim.setFreshValue("in_1_BUS16_" + to_string(s) + "_" + to_string(t),
+                              input);
+          }
+          
+        }
+      }
+
+      posedge("clk_in", sim);
+
+      sim.debugPrintMemories();
+    }
+
+    cout << "Port values" << endl;
+    for (auto cid : def.getPortCells()) {
+      if (def.getCellRefConst(cid).isInputPortCell()) {
+        cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_OUT) << endl;
+      } else {
+        cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_IN) << endl;
+      }
+    }
   }
 
   TEST_CASE("CGRA convolution") {

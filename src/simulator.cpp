@@ -814,6 +814,19 @@ namespace FlatCircuit {
     }
   }
 
+  void Simulator::debugPrintRegisters() const {
+    cout << "Register values" << endl;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if (isRegister(cell.getCellType())) {
+        cout << "\t" << def.getCellName(cid) << " state = " <<
+          getRegisterValue(cid) << endl;
+      }
+    }
+
+  }
+
   void Simulator::debugPrintMemories() const {
     for (auto ctp : def.getCellMap()) {
       CellId cid = ctp.first;

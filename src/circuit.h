@@ -940,6 +940,9 @@ namespace FlatCircuit {
     }
 
     CellId getPortCellId(const std::string& name) const {
+      if (!contains_key(name, portNames)) {
+        std::cout << "Error: " << name << " is not a port" << std::endl;
+      }
       assert(contains_key(name, portNames));
       auto pid = portNames.at(name);
 
