@@ -1221,6 +1221,30 @@ namespace FlatCircuit {
     CellDefinition& def = circuitEnv.getDef("memory_tile_unq1");
 
     Simulator sim(circuitEnv, def);
+
+    // One of these will be the write enable!
+    for (int s = 0; s < 4; s++) {
+      for (int t = 0; t < 5; t++) {
+        if (s != 1) {
+          sim.setFreshValue("in_0_BUS1_" + to_string(s) + "_" + to_string(t),
+                            BitVector(1, 1));
+
+          sim.setFreshValue("in_0_BUS16_" + to_string(s) + "_" + to_string(t),
+                            BitVector(16, 0));
+
+        }
+
+        if (s != 3) {
+          sim.setFreshValue("in_1_BUS1_" + to_string(s) + "_" + to_string(t),
+                            BitVector(1, 1));
+
+          sim.setFreshValue("in_1_BUS16_" + to_string(s) + "_" + to_string(t),
+                            BitVector(16, 0));
+          
+        }
+      }
+    }
+
     loadMemoryTileConfig(convConfigValues, sim);
     
 
@@ -1260,8 +1284,6 @@ namespace FlatCircuit {
           if (s != 1) {
             sim.setFreshValue("in_0_BUS16_" + to_string(s) + "_" + to_string(t),
                               input);
-            // sim.setFreshValue("in_1_BUS16_" + to_string(s) + "_" + to_string(t),
-            //                   input);
           }
 
           if (s != 3) {
