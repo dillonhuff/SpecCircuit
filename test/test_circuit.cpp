@@ -99,6 +99,12 @@ namespace FlatCircuit {
     return outputS0;
   }
 
+  TEST_CASE("Prefix matching") {
+
+    REQUIRE(matchesAnyPrefix("mem_0x18$memory_core$mem_inst1$mem_inst$data_array$mem",
+                             {"mem_0x18"}));
+  }
+
   TEST_CASE("Compiled code generation for circuit with register") {
 
     SECTION("One register") {
@@ -1317,8 +1323,8 @@ namespace FlatCircuit {
 
     CellDefinition& def = circuitEnv.getDef("top");
 
-    BitVector input(16, 23);
-    BitVector correctOutput(16, 2*23);
+    BitVector input(16, 0);
+    BitVector correctOutput(16, 2*0);
 
     Simulator sim(circuitEnv, def);
     setCGRAInput(0, BitVector("16'h0"), sim);
@@ -1354,7 +1360,7 @@ namespace FlatCircuit {
 
       posedge("clk_in", sim);
 
-      //sim.debugPrintMemories({"mem_0x18"});
+      sim.debugPrintMemories({"mem_0x18"});
 
       BitVector outputS0 = getCGRAOutput(0, sim);
       cout << "input    = " << input << ", " << input.to_type<int>() << endl;

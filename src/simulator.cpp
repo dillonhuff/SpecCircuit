@@ -853,7 +853,7 @@ namespace FlatCircuit {
       return false;
     }
 
-    if (str.substr(0, prefix.size()) == str) {
+    if (str.substr(0, prefix.size()) == prefix) {
       return true;
     }
 
