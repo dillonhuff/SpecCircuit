@@ -846,5 +846,52 @@ namespace FlatCircuit {
       }
     }
   }
+
+  bool matchesPrefix(const std::string& str,
+                     const std::string& prefix) {
+    if (str.size() < prefix.size()) {
+      return false;
+    }
+
+    if (str.substr(0, prefix.size()) == str) {
+      return true;
+    }
+
+    return false;
+  }
+  
+  bool matchesAnyPrefix(const std::string& str,
+                        const std::vector<std::string>& prefixes) {
+    for (auto prefix : prefixes) {
+      if (matchesPrefix(str, prefix)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void
+  Simulator::debugPrintMemories(const std::vector<std::string>& prefixes) const {
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.getCellType() == CELL_TYPE_MEM) {
+
+        if (matchesAnyPrefix(def.getCellName(cid), prefixes)) {
+          int depth = cell.getMemDepth();
+          cout << "Memory " << def.getCellName(cid) << " values" << endl;
+          cout << "\tRADDR = " << materializeInput({cid, PORT_ID_RADDR}) << endl;
+          cout << "\tRDATA = " << getPortValue(cid, PORT_ID_RDATA) << endl;
+          cout << "\tWADDR = " << materializeInput({cid, PORT_ID_WADDR}) << endl;
+          cout << "\tWDATA = " << materializeInput({cid, PORT_ID_WDATA}) << endl;
+          cout << "\tWEN   = " << materializeInput({cid, PORT_ID_WEN}) << endl;
+          cout << "\tCLK   = " << materializeInput({cid, PORT_ID_CLK}) << endl;
+          for (int i = 0; i < depth; i++) {
+            cout << "\t" << i << " --> " << getMemoryValue(cid, i) << ", " << getMemoryValue(cid, i).to_type<int>() << endl;
+          }
+        }
+      }
+    }
+  }
   
 }

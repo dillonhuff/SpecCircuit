@@ -1321,6 +1321,16 @@ namespace FlatCircuit {
     BitVector correctOutput(16, 2*23);
 
     Simulator sim(circuitEnv, def);
+    setCGRAInput(0, BitVector("16'h0"), sim);
+    setCGRAInput(1, BitVector("16'h0"), sim);
+    setCGRAInput(2, BitVector("16'h0"), sim);
+    setCGRAInput(3, BitVector("16'h0"), sim);
+
+    // setCGRAInput(0, BitVector("16'hffff"), sim);
+    // setCGRAInput(1, BitVector("16'hffff"), sim);
+    // setCGRAInput(2, BitVector("16'hffff"), sim);
+    // setCGRAInput(3, BitVector("16'hffff"), sim);
+
     loadCGRAConfig(convConfigValues, sim);
 
     setCGRAInput(2, input, sim);
@@ -1332,24 +1342,19 @@ namespace FlatCircuit {
     int nCycles = 1000;
     cout << "Computing " << nCycles << " cycles of data" << endl;
     
-    setCGRAInput(0, BitVector("16'hffff"), sim);
-    setCGRAInput(1, BitVector("16'hffff"), sim);
-    setCGRAInput(2, BitVector("16'hffff"), sim);
-    setCGRAInput(3, BitVector("16'hffff"), sim);
-
     setCGRAInput(2, input, sim);
 
     for (int i = 0; i < nCycles; i++) {
 
-      //input = BitVector(16, i | (1));
-      input = BitVector("16'h80ff");
+      input = BitVector(16, i);
+      //      input = BitVector("16'h80ff");
       setCGRAInput(2, input, sim);
 
       cout << "Cycle " << i << endl;
 
       posedge("clk_in", sim);
 
-      sim.debugPrintMemories();
+      //sim.debugPrintMemories({"mem_0x18"});
 
       BitVector outputS0 = getCGRAOutput(0, sim);
       cout << "input    = " << input << ", " << input.to_type<int>() << endl;

@@ -915,6 +915,7 @@ namespace FlatCircuit {
                                   const std::string& argName);
 
     void debugPrintMemories() const;
+    void debugPrintMemories(const std::vector<std::string>& prefixes) const;
     void debugPrintRegisters() const;
 
     std::string
