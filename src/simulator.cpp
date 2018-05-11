@@ -397,7 +397,7 @@ namespace FlatCircuit {
   Simulator::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
                                      const std::string& argName,
-                                     const std::map<SigPort, unsigned long>& offsets) {
+                                     const std::map<SigPort, unsigned long>& offsets) const {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
     string cppCode = "";
@@ -432,13 +432,21 @@ namespace FlatCircuit {
       canDirectCopy = false;
     }
 
+    SigPort sp = {singleDriverCell, singleDriverPort};
+    if (canDirectCopy && !contains_key(sp, offsets)) {
+      cout << "Error: " << sigPortString(def, sp) << endl;
+      assert(contains_key(sp, offsets));
+    }
+
     if (canDirectCopy) {
-      cppCode += ln(argName + " = " + "values[" + to_string(map_find({singleDriverCell, singleDriverPort}, offsets)) + "]");
+      cppCode += ln(argName + " = " + "values[" + to_string(map_find(sp, offsets)) + "]");
     } else {
 
       for (int offset = 0; offset < drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
         string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
+        // string valString = "values[" + to_string(map_find(sp, offsets)) +
+        //   "].get(" + to_string(driverBit.offset) + ")";
         cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
       }
     }
@@ -449,7 +457,7 @@ namespace FlatCircuit {
   
   std::string Simulator::codeToMaterialize(const CellId cid,
                                            const PortId pid,
-                                           const std::string& argName) {
+                                           const std::string& argName) const {
     return codeToMaterializeOffset(cid, pid, argName, portOffsets);
   }
 
@@ -552,6 +560,21 @@ namespace FlatCircuit {
 
     return cppCode;
   }
+
+  BinopCode Simulator::addBinop(const std::string& allCode,
+                                const CellId cid) const {
+    string cppCode = "";
+    string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+    cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+    string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+    cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+    cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " < " + argName1 + ") || (" +
+                  argName0 + " == " + argName1 + "))");
+
+    return {argName0, argName1, allCode + cppCode};
+  }
   
   std::string
   Simulator::combinationalBlockCode(const std::vector<SigPort>& levelized) {
@@ -565,7 +588,6 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       cppCode += ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port));
 
-      cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
       cppCode += "\t{\n";
 
       bool sentToSeqPort = false;
@@ -610,6 +632,44 @@ namespace FlatCircuit {
         int outWidth = cell.getPortWidth(PORT_ID_OUT);
 
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = zero_extend(" + to_string(outWidth) + ", " + argName + ")");
+
+      } else if (cell.getCellType() == CELL_TYPE_UGE) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " > " + argName1 + ") || (" +
+                      argName0 + " == " + argName1 + "))");
+
+      } else if (cell.getCellType() == CELL_TYPE_ULE) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " < " + argName1 + ") || (" +
+                      argName0 + " == " + argName1 + "))");
+
+      } else if (cell.getCellType() == CELL_TYPE_UGT) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " > " + argName1 + "))");
+
+      } else if (cell.getCellType() == CELL_TYPE_ULT) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " < " + argName1 + "))");
 
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
         string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
@@ -722,6 +782,7 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + argName);
         
       } else {
+        cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
         cout << "Insert code for unsupported node " + def.cellName(cid)
              << " : " << toString(def.getCellRefConst(cid).getCellType()) << endl;
         assert(false);
@@ -734,7 +795,7 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "] = " + oldOutName);
 
       }
-      cout << "Done" << endl;
+      //cout << "Done" << endl;
 
       cppCode += "\t}\n";
     }

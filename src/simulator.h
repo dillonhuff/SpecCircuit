@@ -4,6 +4,12 @@
 
 namespace FlatCircuit {
 
+  struct BinopCode {
+    std::string in0;
+    std::string in1;
+    std::string cppCode;
+  };
+
   class Simulator {
 
     std::vector<BitVector> simValueTable;
@@ -694,6 +700,8 @@ namespace FlatCircuit {
       return val;
     }
 
+    BinopCode addBinop(const std::string& allCode, const CellId cid) const;
+    
     void setFreshValue(const std::string& cellName,
                        const PortId id,
                        const BitVector& bv) {
@@ -912,7 +920,7 @@ namespace FlatCircuit {
     
     std::string codeToMaterialize(const CellId cid,
                                   const PortId pid,
-                                  const std::string& argName);
+                                  const std::string& argName) const;
 
     void debugPrintMemories() const;
     void debugPrintMemories(const std::vector<std::string>& prefixes) const;
@@ -928,7 +936,7 @@ namespace FlatCircuit {
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
                             const std::string& argName,
-                            const std::map<SigPort, unsigned long>& offsets);
+                            const std::map<SigPort, unsigned long>& offsets) const;
 
     ~Simulator();
     

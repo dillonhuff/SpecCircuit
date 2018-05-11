@@ -77,6 +77,8 @@ namespace FlatCircuit {
       return "CELL_TYPE_REG";
     } else if (cellTp == CELL_TYPE_ADD) {
       return "CELL_TYPE_ADD";
+    } else if (cellTp == CELL_TYPE_SUB) {
+      return "CELL_TYPE_SUB";
     } else if (cellTp == CELL_TYPE_ULT) {
       return "CELL_TYPE_ULT";
     } else if (cellTp == CELL_TYPE_XOR) {
