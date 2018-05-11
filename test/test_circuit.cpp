@@ -747,7 +747,7 @@ namespace FlatCircuit {
       cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
     }
     
-    sim.debugPrintMemories();
+    //sim.debugPrintMemories();
 
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 2));
@@ -1302,7 +1302,7 @@ namespace FlatCircuit {
 
       posedge("clk_in", sim);
 
-      sim.debugPrintMemories();
+      //sim.debugPrintMemories();
     }
 
     cout << "Port values" << endl;
