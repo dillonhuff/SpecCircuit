@@ -1172,6 +1172,20 @@ namespace FlatCircuit {
     }
 
     sim.debugPrintPorts();
+
+    cout << "Cell 1266 = " << sim.def.getCellName(1266) << endl;
+    sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
+    sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
+    sim.def.replacePortWithConstant("tile_id", BitVec("16'h18"));
+    sim.def.replacePortWithConstant("reset", BitVec(1, 0));
+    sim.def.replacePortWithConstant("config_write", BitVec(1, 0));
+
+    foldConstants(def, sim.allRegisterValues());
+    deleteDeadInstances(def);
+
+    sim.refreshConstants();
+
+    sim.compileCircuit();
   }
 
   // TEST_CASE("CGRA convolution") {

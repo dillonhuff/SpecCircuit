@@ -10,6 +10,15 @@ namespace FlatCircuit {
     std::string cppCode;
   };
 
+  std::vector<SigPort>
+  sequentialDependencies(const Cell& cell,
+                         const PortId pid);
+
+  std::vector<SigPort>
+  combinationalDependencies(const Cell& cell,
+                            const PortId pid,
+                            const CellDefinition& def);
+  
   class Simulator {
 
     std::vector<BitVector> simValueTable;
@@ -890,6 +899,10 @@ namespace FlatCircuit {
           BitVector initVal = c.getParameterValue(PARAM_INIT_VALUE);
 
           setPortValue(cid, PORT_ID_OUT, initVal);
+
+          if (sequentialDependencies(c, PORT_ID_OUT).size() > 0) {
+            setPastValue(cid, PORT_ID_OUT, initVal);
+          }
 
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
             for (auto& sigBit : receiverBus) {
