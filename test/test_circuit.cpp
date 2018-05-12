@@ -466,6 +466,10 @@ namespace FlatCircuit {
 
       cout << "WEN should be 0" << endl;
       sim.debugPrintMemories();
+
+      posedge("clk", sim);
+      posedge("clk", sim);
+      posedge("clk", sim);
     
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 

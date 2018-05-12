@@ -826,6 +826,9 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + state);
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
+        string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + state);
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
@@ -861,7 +864,18 @@ namespace FlatCircuit {
   void
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
-      "using namespace bsim;\n\n"
+      "using namespace bsim;\n\n";
+
+    cppCode += ln("// Input layout");
+    for (auto cid : def.getPortCells()) {
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.isInputPortCell()) {
+        cppCode += ln("// " + def.getCellName(cid) + " ---> " +
+                      to_string(map_find({cid, PORT_ID_OUT}, portOffsets)));
+      }
+    }
+
+    cppCode +=
       "typedef bsim::quad_value_bit_vector BitVector;\n\n"
       "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
       "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
