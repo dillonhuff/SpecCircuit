@@ -56,11 +56,6 @@ namespace FlatCircuit {
                   out, PORT_ID_IN);
 
       Simulator sim(e, def);
-      sim.setFreshValue("in", BitVec(8, 0));
-      sim.setFreshValue("clk", BitVec(1, 0));
-      sim.setFreshValue("arst", BitVec(1, 0));
-      sim.update();
-    
       sim.compileCircuit();
 
       sim.setFreshValue("arst", BitVec(1, 1));
@@ -128,12 +123,6 @@ namespace FlatCircuit {
                   out, PORT_ID_IN);
 
       Simulator sim(e, def);
-      sim.setFreshValue("in", BitVec(8, 0));
-      sim.setFreshValue("clk", BitVec(1, 0));
-      sim.setFreshValue("clk_en", BitVec(1, 0));
-      sim.setFreshValue("arst", BitVec(1, 0));
-      sim.update();
-    
       sim.compileCircuit();
 
       sim.setFreshValue("arst", BitVec(1, 1));
@@ -410,6 +399,7 @@ namespace FlatCircuit {
 
     SECTION("Compiled simulation") {
       Simulator sim(circuitEnv, def);
+      sim.refreshConstants();
 
       cout << "Compiling mem unq" << endl;
       sim.compileCircuit();
@@ -422,14 +412,14 @@ namespace FlatCircuit {
 
       posedge("clk", sim);
 
-      // cout << "WEN should be 1" << endl;
-      // sim.debugPrintMemories();
+      cout << "WEN should be 1" << endl;
+      sim.debugPrintMemories();
       
       sim.setFreshValue("wen", BitVector(1, 0));
       posedge("clk", sim);
 
-      // cout << "WEN should be 0" << endl;
-      // sim.debugPrintMemories();
+      cout << "WEN should be 0" << endl;
+      sim.debugPrintMemories();
     
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 

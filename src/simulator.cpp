@@ -215,7 +215,16 @@ namespace FlatCircuit {
     vector<SigPort> deps;
     
     for (auto sigPort : cell.receiverSigPorts(pid)) {
-      if (!isRegister(def.getCellRefConst(sigPort.cell).getCellType()) &&
+      const Cell& receiverCell = def.getCellRefConst(sigPort.cell);
+
+      if ((receiverCell.getCellType() == CELL_TYPE_MEM) &&
+          (sigPort.port != PORT_ID_RADDR)) {
+        continue;
+      }
+
+      if (!isRegister(receiverCell.getCellType()) &&
+          !((receiverCell.getCellType() == CELL_TYPE_MEM) &&
+            (sigPort.port == PORT_ID_RADDR)) &&
           (sigPort.port != PORT_ID_ARST) &&
           (sigPort.port != PORT_ID_CLK)) {
 
