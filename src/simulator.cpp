@@ -774,7 +774,7 @@ namespace FlatCircuit {
         string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
         cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
-        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " == " + argName1 + ")");
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, " + argName0 + " == " + argName1 + ")");
 
       } else if (cell.getCellType() == CELL_TYPE_NEQ) {
         string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
@@ -783,7 +783,7 @@ namespace FlatCircuit {
         string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
         cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
-        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + argName0 + " != " + argName1 + ")");
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, " + argName0 + " != " + argName1 + ")");
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
@@ -937,6 +937,13 @@ namespace FlatCircuit {
   Simulator::~Simulator() {
     if (libHandle != nullptr) {
       dlclose(libHandle);
+    }
+  }
+
+  void Simulator::debugPrintTableValues() const {
+    cout << "Table values" << endl;
+    for (int i = 0; i < (int) simValueTable.size(); i++) {
+      cout << "\t" << i << " = " << simValueTable.at(i) << endl;
     }
   }
 

@@ -458,19 +458,23 @@ namespace FlatCircuit {
       posedge("clk", sim);
 
       sim.debugPrintPorts();
-      cout << "WEN should be 1" << endl;
-      sim.debugPrintMemories();
+
+      cout << "All values in mem unq" << endl;
+      sim.debugPrintTableValues();
+    
+      // cout << "WEN should be 1" << endl;
+      // sim.debugPrintMemories();
       
       sim.setFreshValue("wen", BitVector(1, 0));
       posedge("clk", sim);
 
-      cout << "WEN should be 0" << endl;
-      sim.debugPrintMemories();
+      //      cout << "WEN should be 0" << endl;
+      //      sim.debugPrintMemories();
 
       posedge("clk", sim);
       posedge("clk", sim);
       posedge("clk", sim);
-    
+
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
       sim.setFreshValue("addr", BitVector(9, 0));

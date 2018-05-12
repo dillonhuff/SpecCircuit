@@ -922,6 +922,7 @@ namespace FlatCircuit {
                                   const PortId pid,
                                   const std::string& argName) const;
 
+    void debugPrintTableValues() const;
     void debugPrintMemories() const;
     void debugPrintMemories(const std::vector<std::string>& prefixes) const;
     void debugPrintRegisters() const;
