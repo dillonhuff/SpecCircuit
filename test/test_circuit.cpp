@@ -572,65 +572,65 @@ namespace FlatCircuit {
 
     }
 
-    // SECTION("Memory tile using compiled code") {
-    //   Simulator sim(circuitEnv, def);
-    //   REQUIRE(sim.compileCircuit());
+    SECTION("Memory tile using compiled code") {
+      Simulator sim(circuitEnv, def);
+      REQUIRE(sim.compileCircuit());
 
-    //   reset("reset", sim);
+      reset("reset", sim);
 
-    //   sim.setFreshValue("clk_en", BitVec(1, 1));
-    //   sim.setFreshValue("config_en", BitVec(1, 1));
-    //   sim.update();
+      sim.setFreshValue("clk_en", BitVec(1, 1));
+      sim.setFreshValue("config_en", BitVec(1, 1));
+      sim.update();
 
-    //   sim.setFreshValue("clk_in", BitVec(1, 0));
-    //   sim.setFreshValue("config_en_sram", BitVec(4, 0));
-    //   sim.update();
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.setFreshValue("config_en_sram", BitVec(4, 0));
+      sim.update();
 
-    //   BitVector configAddr(32, 0);
-    //   sim.setFreshValue("config_addr", configAddr);
-    //   sim.update();
+      BitVector configAddr(32, 0);
+      sim.setFreshValue("config_addr", configAddr);
+      sim.update();
 
-    //   uint32_t configDataInt = 0;
-    //   configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
-    //   configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
-    //   configDataInt |= ((uint32_t) 8) << 3; // Depth 8
+      uint32_t configDataInt = 0;
+      configDataInt |= ((uint32_t) 2) << 0; // SRAM mode
+      configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
+      configDataInt |= ((uint32_t) 8) << 3; // Depth 8
     
-    //   BitVector configData(32, configDataInt);
+      BitVector configData(32, configDataInt);
 
-    //   cout << "Memory tile config data = " << configData << endl;
-    //   sim.setFreshValue("config_data", configData);
+      cout << "Memory tile config data = " << configData << endl;
+      sim.setFreshValue("config_data", configData);
 
-    //   posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-    //   sim.setFreshValue("config_en", BitVec(1, 0));
-    //   sim.update();
+      sim.setFreshValue("config_en", BitVec(1, 0));
+      sim.update();
 
-    //   sim.setFreshValue("wen_in", BitVec(1, 1));
-    //   sim.setFreshValue("addr_in", BitVec(16, 4));
-    //   sim.setFreshValue("data_in", BitVec(16, 72));
-    //   posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("data_in", BitVec(16, 72));
+      posedge("clk_in", sim);
 
-    //   // cout << "Debug immediately after write call " << endl;
-    //   // sim.debugPrintMemories();
+      // cout << "Debug immediately after write call " << endl;
+      // sim.debugPrintMemories();
 
-    //   sim.setFreshValue("wen_in", BitVec(1, 1));
-    //   sim.setFreshValue("addr_in", BitVec(16, 2));
-    //   sim.setFreshValue("data_in", BitVec(16, 45));
-    //   posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 1));
+      sim.setFreshValue("addr_in", BitVec(16, 2));
+      sim.setFreshValue("data_in", BitVec(16, 45));
+      posedge("clk_in", sim);
     
-    //   sim.setFreshValue("wen_in", BitVec(1, 0));
-    //   sim.setFreshValue("addr_in", BitVec(16, 4));
-    //   sim.setFreshValue("ren_in", BitVec(1, 1));
-    //   posedge("clk_in", sim);
+      sim.setFreshValue("wen_in", BitVec(1, 0));
+      sim.setFreshValue("addr_in", BitVec(16, 4));
+      sim.setFreshValue("ren_in", BitVec(1, 1));
+      posedge("clk_in", sim);
 
-    //   posedge("clk_in", sim);
-    //   posedge("clk_in", sim);
+      posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-    //   // sim.debugPrintMemories();
+      // sim.debugPrintMemories();
 
-    //   REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
 
-    // }
+    }
 
   }    
 

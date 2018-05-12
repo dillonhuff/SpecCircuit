@@ -317,7 +317,7 @@ namespace FlatCircuit {
 
         const Cell& c = def.getCellRefConst(sigPort.cell);
 
-        cout << "\tUpdating cell " << sigPortString(def, sigPort) << endl;
+        //cout << "\tUpdating cell " << sigPortString(def, sigPort) << endl;
 
         for (auto outPort : c.outputPorts()) {
           updateDependencies(c, outPort, freshChanges, combChanges, seqChanges, def);
@@ -720,6 +720,42 @@ namespace FlatCircuit {
 
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(1, (" + argName0 + " < " + argName1 + "))");
 
+      } else if (cell.getCellType() == CELL_TYPE_LSHR) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = lshr(" + argName0 + ", " + argName1 + ")");
+
+      } else if (cell.getCellType() == CELL_TYPE_ASHR) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = ashr(" + argName0 + ", " + argName1 + ")");
+
+      } else if (cell.getCellType() == CELL_TYPE_SHL) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+        string argName1 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN1);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = shl(" + argName0 + ", " + argName1 + ")");
+
+      } else if (cell.getCellType() == CELL_TYPE_SLICE) {
+        string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        cppCode += codeToMaterialize(cid, PORT_ID_IN, argName0);
+
+        int start = bvToInt(cell.getParameterValue(PARAM_LOW));
+        int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = slice(" + argName0 + ", " + to_string(start) + ", " + to_string(end) + ")");
+        
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
         string argName0 = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN0);
         cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
