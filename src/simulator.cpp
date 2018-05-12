@@ -338,10 +338,11 @@ namespace FlatCircuit {
         const Cell& cell = def.getCellRefConst(seqPort.cell);
 
         if (cell.getCellType() == CELL_TYPE_MEM) {
-          //          if (!combChanges.elem({seqPort.cell, PORT_ID_RADDR})) {
           combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
           freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
-            //          }
+        } else if (isRegister(cell.getCellType())) {
+          combChanges.push_back({seqPort.cell, PORT_ID_OUT});
+          freshChanges.insert({seqPort.cell, PORT_ID_OUT});
         }
 
         for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
@@ -537,7 +538,7 @@ namespace FlatCircuit {
         string lastRstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST) + "_last";
         cppCode += codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, pastValueOffsets);
 
-        string updateValueClk = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + inVar + ";";
+        string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
           cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
         } else {
@@ -545,7 +546,7 @@ namespace FlatCircuit {
         }
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
-        string updateValueRst = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
+        string updateValueRst = "values[" + to_string(map_find(cid, registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
         if (cell.rstPosedge()) {
           cppCode += "\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n";
         } else {
@@ -562,7 +563,7 @@ namespace FlatCircuit {
         string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
         cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
 
-        string updateValueClk = "values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + inVar + ";";
+        string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
           cppCode += "\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n";
         } else {
@@ -819,6 +820,10 @@ namespace FlatCircuit {
         cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")");
         
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
+
+        string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
+
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + state);
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         
