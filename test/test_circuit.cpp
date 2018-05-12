@@ -459,8 +459,8 @@ namespace FlatCircuit {
 
       sim.debugPrintPorts();
 
-      cout << "All values in mem unq" << endl;
-      sim.debugPrintTableValues();
+      // cout << "All values in mem unq" << endl;
+      // sim.debugPrintTableValues();
     
       // cout << "WEN should be 1" << endl;
       // sim.debugPrintMemories();
