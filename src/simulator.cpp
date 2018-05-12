@@ -208,10 +208,67 @@ namespace FlatCircuit {
     return levelZero;
   }
 
+  std::vector<SigPort>
+  combinationalDependencies(const Cell& cell,
+                            const PortId pid) {
+    vector<SigPort> deps;
+    
+    for (auto sigPort : cell.receiverSigPorts(pid)) {
+      if ((sigPort.port != PORT_ID_ARST) &&
+          (sigPort.port != PORT_ID_CLK)) {
+
+        deps.push_back(sigPort);
+
+      }
+    }
+
+    return deps;
+  }
+
+  std::vector<SigPort>
+  sequentialDependencies(const Cell& cell,
+                         const PortId pid) {
+    vector<SigPort> deps;
+    
+    for (auto sigPort : cell.receiverSigPorts(pid)) {
+      if ((sigPort.port == PORT_ID_ARST) ||
+          (sigPort.port == PORT_ID_CLK)) {
+
+        deps.push_back(sigPort);
+
+      }
+    }
+
+    return deps;
+  }
+
+  void updateDependencies(const Cell& cell,
+                          const PortId pid,
+                          set<SigPort>& freshChanges,
+                          //                          UniqueVector<SigPort>& combChanges,
+                          std::vector<SigPort>& combChanges,                          
+                          std::set<SigPort>& seqChanges) {
+    for (auto sigPort : combinationalDependencies(cell, pid)) {
+      //      if (!combChanges.elem(sigPort)) {
+      freshChanges.insert(sigPort);
+      combChanges.push_back(sigPort);
+      //      } else {
+      //        assert(false);
+      //      }
+    }
+
+    for (auto sigPort : sequentialDependencies(cell, pid)) {
+      seqChanges.insert(sigPort);
+    }
+    
+  }
+  
   std::vector<std::vector<SigPort> >
   staticSimulationEvents(const CellDefinition& def) {
+
     vector<vector<SigPort> > staticEvents;
-    UniqueVector<SigPort> combChanges;
+    //    UniqueVector<SigPort> combChanges;
+    std::vector<SigPort> combChanges;
     set<SigPort> seqChanges;
 
     set<SigPort> freshChanges;
@@ -225,19 +282,14 @@ namespace FlatCircuit {
           (tp == CELL_TYPE_CONST) ||
           (tp == CELL_TYPE_REG_ARST) ||
           cell.isInputPortCell()) {
-        for (auto sigPort : cell.receiverSigPorts(PORT_ID_OUT)) {
-          if ((sigPort.port != PORT_ID_ARST) &&
-              (sigPort.port != PORT_ID_CLK)) {
 
-            if (!combChanges.elem(sigPort)) {
-              freshChanges.insert(sigPort);
-              combChanges.push_back(sigPort);
-            }
+        updateDependencies(cell, PORT_ID_OUT, freshChanges, combChanges, seqChanges);
 
-          } else {
-            seqChanges.insert(sigPort);
-          }
-        }
+      } else if (tp == CELL_TYPE_MEM) {
+
+        updateDependencies(cell, PORT_ID_RDATA,
+                           freshChanges, combChanges, seqChanges);
+        
       }
     }
 
@@ -251,26 +303,18 @@ namespace FlatCircuit {
 
         const Cell& c = def.getCellRefConst(sigPort.cell);
 
-        for (auto outPort : c.outputPorts()) {
-          for (auto rPort : c.receiverSigPorts(outPort)) {
-            if ((rPort.port != PORT_ID_ARST) &&
-                (rPort.port != PORT_ID_CLK)) {
+        cout << "\tUpdating cell " << sigPortString(def, sigPort) << endl;
 
-              if (!combChanges.elem(rPort)) {
-                freshChanges.insert(rPort);
-                combChanges.push_back(rPort);
-              }
-            } else {
-              seqChanges.insert(rPort);
-            }
-          }
+        for (auto outPort : c.outputPorts()) {
+          updateDependencies(c, outPort, freshChanges, combChanges, seqChanges);
         }
         
       }
 
       cout << "In got " << combChanges.size() << " comb changes" << endl;
 
-      staticEvents.push_back(combChanges.getVec());
+      //staticEvents.push_back(combChanges.getVec());
+      staticEvents.push_back(combChanges);
       combChanges = {};
 
       vector<SigPort> seqChangesVec(begin(seqChanges), end(seqChanges));
@@ -280,30 +324,20 @@ namespace FlatCircuit {
         const Cell& cell = def.getCellRefConst(seqPort.cell);
 
         if (cell.getCellType() == CELL_TYPE_MEM) {
-          if (!combChanges.elem({seqPort.cell, PORT_ID_RADDR})) {
-            combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
-            freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
-          }
+          //          if (!combChanges.elem({seqPort.cell, PORT_ID_RADDR})) {
+          combChanges.push_back({seqPort.cell, PORT_ID_RADDR});
+          freshChanges.insert({seqPort.cell, PORT_ID_RADDR});
+            //          }
         }
 
         for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
-          for (auto rPort : def.getCellRefConst(seqPort.cell).receiverSigPorts(outPort)) {
-            if ((rPort.port != PORT_ID_ARST) &&
-                (rPort.port != PORT_ID_CLK)) {
-              if (!combChanges.elem(rPort)) {
-                freshChanges.insert(rPort);
-                combChanges.push_back(rPort);
-              }
-            } else {
-              // TODO: Improve this update
-              seqChanges.insert(rPort);
-            }
-          }
+          updateDependencies(def.getCellRefConst(seqPort.cell), outPort,
+                             freshChanges, combChanges, seqChanges);
         }
 
       }
 
-      // // NOTE: This needs to change in order for simulation semantics to be correct
+      // NOTE: This needs to change in order for simulation semantics to be correct
       seqChanges = {};
     } while (combChanges.size() > 0);
 
@@ -839,8 +873,6 @@ namespace FlatCircuit {
   bool Simulator::compileCircuit() {
 
     vector<vector<SigPort> > updates = staticSimulationEvents(def);
-
-    assert(updates.size() > 1);
 
     vector<vector<SigPort> > filteredUpdates;
     for (auto updateGroup : updates) {

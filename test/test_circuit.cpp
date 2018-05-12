@@ -410,7 +410,10 @@ namespace FlatCircuit {
 
     SECTION("Compiled simulation") {
       Simulator sim(circuitEnv, def);
+
+      cout << "Compiling mem unq" << endl;
       sim.compileCircuit();
+      cout << "Done compiling mem unq" << endl;
 
       sim.setFreshValue("addr", BitVector(9, 13));
       sim.setFreshValue("cen", BitVector(1, 1));
@@ -419,14 +422,14 @@ namespace FlatCircuit {
 
       posedge("clk", sim);
 
-      cout << "WEN should be 1" << endl;
-      sim.debugPrintMemories();
+      // cout << "WEN should be 1" << endl;
+      // sim.debugPrintMemories();
       
       sim.setFreshValue("wen", BitVector(1, 0));
       posedge("clk", sim);
 
-      cout << "WEN should be 0" << endl;
-      sim.debugPrintMemories();
+      // cout << "WEN should be 0" << endl;
+      // sim.debugPrintMemories();
     
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
