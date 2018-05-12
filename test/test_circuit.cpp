@@ -1172,14 +1172,6 @@ namespace FlatCircuit {
     }
 
     sim.debugPrintPorts();
-    // cout << "Port values" << endl;
-    // for (auto cid : def.getPortCells()) {
-    //   if (def.getCellRefConst(cid).isInputPortCell()) {
-    //     cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_OUT) << endl;
-    //   } else {
-    //     cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_IN) << endl;
-    //   }
-    // }
   }
 
   // TEST_CASE("CGRA convolution") {
@@ -1359,19 +1351,20 @@ namespace FlatCircuit {
   //   cout << "# of cells before constant folding = " << def.numCells() << endl;
     
   //   foldConstants(def, sim.allRegisterValues());
-  //   cout << "# of cells after constant deleting instances = " << def.numCells() << endl;
+  //   cout << "# of cells after constant deleting instances = "
+  //        << def.numCells() << endl;
 
-  //   set<CellId> memCells;
-  //   for (auto ctp : def.getCellMap()) {
-  //     CellId cid = ctp.first;
-  //     string name = def.cellName(cid);
+  //   // set<CellId> memCells;
+  //   // for (auto ctp : def.getCellMap()) {
+  //   //   CellId cid = ctp.first;
+  //   //   string name = def.cellName(cid);
 
-  //     if (name.substr(0, 3) == "mem") {
-  //       memCells.insert(cid);
-  //     }
-  //   }
+  //   //   if (name.substr(0, 3) == "mem") {
+  //   //     memCells.insert(cid);
+  //   //   }
+  //   // }
 
-  //   def.bulkDelete(memCells);
+  //   // def.bulkDelete(memCells);
 
   //   deleteDeadInstances(def);
 
