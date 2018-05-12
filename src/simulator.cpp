@@ -210,11 +210,13 @@ namespace FlatCircuit {
 
   std::vector<SigPort>
   combinationalDependencies(const Cell& cell,
-                            const PortId pid) {
+                            const PortId pid,
+                            const CellDefinition& def) {
     vector<SigPort> deps;
     
     for (auto sigPort : cell.receiverSigPorts(pid)) {
-      if ((sigPort.port != PORT_ID_ARST) &&
+      if (!isRegister(def.getCellRefConst(sigPort.cell).getCellType()) &&
+          (sigPort.port != PORT_ID_ARST) &&
           (sigPort.port != PORT_ID_CLK)) {
 
         deps.push_back(sigPort);
@@ -246,9 +248,10 @@ namespace FlatCircuit {
                           const PortId pid,
                           set<SigPort>& freshChanges,
                           //                          UniqueVector<SigPort>& combChanges,
-                          std::vector<SigPort>& combChanges,                          
-                          std::set<SigPort>& seqChanges) {
-    for (auto sigPort : combinationalDependencies(cell, pid)) {
+                          std::vector<SigPort>& combChanges,
+                          std::set<SigPort>& seqChanges,
+                          const CellDefinition& def) {
+    for (auto sigPort : combinationalDependencies(cell, pid, def)) {
       //      if (!combChanges.elem(sigPort)) {
       freshChanges.insert(sigPort);
       combChanges.push_back(sigPort);
@@ -283,12 +286,14 @@ namespace FlatCircuit {
           (tp == CELL_TYPE_REG_ARST) ||
           cell.isInputPortCell()) {
 
-        updateDependencies(cell, PORT_ID_OUT, freshChanges, combChanges, seqChanges);
+        updateDependencies(cell, PORT_ID_OUT, freshChanges,
+                           combChanges, seqChanges, def);
 
       } else if (tp == CELL_TYPE_MEM) {
 
         updateDependencies(cell, PORT_ID_RDATA,
-                           freshChanges, combChanges, seqChanges);
+                           freshChanges, combChanges, seqChanges,
+                           def);
         
       }
     }
@@ -306,7 +311,7 @@ namespace FlatCircuit {
         cout << "\tUpdating cell " << sigPortString(def, sigPort) << endl;
 
         for (auto outPort : c.outputPorts()) {
-          updateDependencies(c, outPort, freshChanges, combChanges, seqChanges);
+          updateDependencies(c, outPort, freshChanges, combChanges, seqChanges, def);
         }
         
       }
@@ -332,7 +337,7 @@ namespace FlatCircuit {
 
         for (auto outPort : def.getCellRefConst(seqPort.cell).outputPorts()) {
           updateDependencies(def.getCellRefConst(seqPort.cell), outPort,
-                             freshChanges, combChanges, seqChanges);
+                             freshChanges, combChanges, seqChanges, def);
         }
 
       }
