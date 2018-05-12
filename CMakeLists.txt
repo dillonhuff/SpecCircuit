@@ -16,6 +16,7 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/circuit.cpp
               ./src/transformations.cpp)
 
-SET(TEST_FILES ./test/test_circuit.cpp)
+SET(TEST_FILES ./test/test_circuit.cpp
+               ./test/utils.cpp)
 
 add_executable(all-tests ${TEST_FILES} ${CPP_FILES})
