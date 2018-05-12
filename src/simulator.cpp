@@ -934,6 +934,18 @@ namespace FlatCircuit {
 
   }
 
+  void Simulator::debugPrintPorts() const {
+    cout << "Port values" << endl;
+    for (auto cid : def.getPortCells()) {
+      if (def.getCellRefConst(cid).isInputPortCell()) {
+        cout << "\t" << def.getCellName(cid) << " = " << getBitVec(cid, PORT_ID_OUT) << endl;
+      } else {
+        cout << "\t" << def.getCellName(cid) << " = " << getBitVec(cid, PORT_ID_IN) << endl;
+      }
+    }
+
+  }
+  
   void Simulator::debugPrintMemories() const {
     for (auto ctp : def.getCellMap()) {
       CellId cid = ctp.first;

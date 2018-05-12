@@ -925,6 +925,7 @@ namespace FlatCircuit {
     void debugPrintMemories() const;
     void debugPrintMemories(const std::vector<std::string>& prefixes) const;
     void debugPrintRegisters() const;
+    void debugPrintPorts() const;
 
     std::string
     sequentialBlockCode(const std::vector<SigPort>& levelized);

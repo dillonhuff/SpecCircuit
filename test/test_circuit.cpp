@@ -149,6 +149,11 @@ namespace FlatCircuit {
         REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
       }
 
+      cout << "Single register values" << endl;
+      sim.debugPrintRegisters();
+
+      REQUIRE(sim.getRegisterValue(reg) == sim.getBitVec("out"));
+      
       sim.setFreshValue("in", BitVec(8, 57));
       posedge("clk", sim);
       negedge("clk", sim);
@@ -164,6 +169,11 @@ namespace FlatCircuit {
       SECTION("clk rises, but clk_en = 0") {
         REQUIRE(sim.getBitVec("out") == BitVec(8, 57));
       }
+
+      cout << "Single register values" << endl;
+      sim.debugPrintRegisters();
+
+      REQUIRE(sim.getRegisterValue(reg) == sim.getBitVec("out"));
 
       sim.setFreshValue("clk_en", BitVec(1, 1));
       sim.update();
@@ -359,6 +369,41 @@ namespace FlatCircuit {
       REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
 
+    SECTION("Simulating with compiled code") {
+      Env circuitEnv = convertFromCoreIR(c, memory);
+      CellDefinition cDef = circuitEnv.getDef("memory0");
+
+      Simulator state(circuitEnv, cDef);
+      state.compileCircuit();
+
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.update();
+
+      // Do not write when write_en == 0
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.setFreshValue("write_en", BitVec(1, 0));
+      state.setFreshValue("write_addr", BitVec(index, 0));
+      state.setFreshValue("write_data", BitVec(width, 23));
+      state.setFreshValue("read_addr", BitVec(index, 0));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.setFreshValue("write_en", BitVec(1, 1));
+      state.update();
+
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
+
+      state.setFreshValue("read_addr", BitVec(index, 2));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    }
+
     deleteContext(c);
   }
 
@@ -412,6 +457,7 @@ namespace FlatCircuit {
 
       posedge("clk", sim);
 
+      sim.debugPrintPorts();
       cout << "WEN should be 1" << endl;
       sim.debugPrintMemories();
       
@@ -1117,14 +1163,15 @@ namespace FlatCircuit {
       //sim.debugPrintMemories();
     }
 
-    cout << "Port values" << endl;
-    for (auto cid : def.getPortCells()) {
-      if (def.getCellRefConst(cid).isInputPortCell()) {
-        cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_OUT) << endl;
-      } else {
-        cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_IN) << endl;
-      }
-    }
+    sim.debugPrintPorts();
+    // cout << "Port values" << endl;
+    // for (auto cid : def.getPortCells()) {
+    //   if (def.getCellRefConst(cid).isInputPortCell()) {
+    //     cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_OUT) << endl;
+    //   } else {
+    //     cout << "\t" << def.getCellName(cid) << " = " << sim.getBitVec(cid, PORT_ID_IN) << endl;
+    //   }
+    // }
   }
 
   // TEST_CASE("CGRA convolution") {
