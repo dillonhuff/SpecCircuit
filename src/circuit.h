@@ -773,6 +773,8 @@ namespace FlatCircuit {
 
     void bulkDelete(const std::set<CellId>& toDelete) {
       for (auto cid : toDelete) {
+        assert(!isPortCell(cid));
+
         cellIdsToNames.erase(cid);
         cells.erase(cid);
       }

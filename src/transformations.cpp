@@ -742,7 +742,7 @@ namespace FlatCircuit {
     toDelete = {};
     for (auto ctp : def.getCellMap()) {
       const CellId cid = ctp.first;
-      if (!elem(cid, connectedToOutputs)) {
+      if (!elem(cid, connectedToOutputs) && !def.isPortCell(cid)) {
         toDelete.insert(cid);
       }
     }
