@@ -1340,7 +1340,7 @@ namespace FlatCircuit {
     cout << "Clearing linebuffer" << endl;
     for (int i = 0; i < 30; i++) {
       cout << "Clearing cycle " << i << endl;
-      setCGRAInput(2, input, BitVector(16, 0));
+      setCGRAInput(2, BitVector(16, 0), sim);
 
       cout << "Cycle " << i << endl;
 
