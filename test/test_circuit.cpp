@@ -1478,7 +1478,9 @@ namespace FlatCircuit {
 
     input = BitVector(16, 0);
     for (int i = 0; i < nCycles; i++) {
-      cout << "i = " << i << endl;
+      if ((i % 100) == 0) {
+        cout << "i = " << i << endl;
+      }
 
       sim.setFreshValue("clk_in", BitVec(1, 0));
       sim.update();
