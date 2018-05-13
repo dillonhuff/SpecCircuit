@@ -957,6 +957,9 @@ namespace FlatCircuit {
     
   };
 
+  bool matchesPrefix(const std::string& str,
+                     const std::string& prefix);
+  
   bool matchesAnyPrefix(const std::string& str,
                         const std::vector<std::string>& prefixes);
   

@@ -613,6 +613,15 @@ namespace FlatCircuit {
       return pt == PORT_CELL_FOR_INPUT;
     }
 
+    bool isOutputPortCell() const {
+      if (!hasParameter(PARAM_PORT_TYPE)) {
+        return false;
+      }
+
+      int pt = bvToInt(getParameterValue(PARAM_PORT_TYPE));
+      return pt == PORT_CELL_FOR_OUTPUT;
+    }
+    
     bool hasPort(const PortId port) const {
       return contains_key(port, portWidths);
     }
