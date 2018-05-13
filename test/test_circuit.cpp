@@ -1174,37 +1174,38 @@ namespace FlatCircuit {
     sim.debugPrintPorts();
 
     cout << "Cell 1266 = " << sim.def.getCellName(1266) << endl;
-    sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
-    sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
-    sim.def.replacePortWithConstant("tile_id", BitVec("16'h18"));
-    sim.def.replacePortWithConstant("reset", BitVec(1, 0));
-    sim.def.replacePortWithConstant("config_write", BitVec(1, 0));
+    allInputsToConstants(sim.def);
+    // sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
+    // sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
+    // sim.def.replacePortWithConstant("tile_id", BitVec("16'h18"));
+    // sim.def.replacePortWithConstant("reset", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("config_write", BitVec(1, 0));
 
-    sim.def.replacePortWithConstant("chain_in", BitVec(16, 0));
-    sim.def.replacePortWithConstant("chain_wen_in", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("chain_in", BitVec(16, 0));
+    // sim.def.replacePortWithConstant("chain_wen_in", BitVec(1, 0));
 
-    sim.def.replacePortWithConstant("config_read", BitVec(1, 0));
-    sim.def.replacePortWithConstant("gin_0", BitVec(1, 0));
-    sim.def.replacePortWithConstant("gin_1", BitVec(1, 0));
-    sim.def.replacePortWithConstant("gin_2", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("config_read", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("gin_0", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("gin_1", BitVec(1, 0));
+    // sim.def.replacePortWithConstant("gin_2", BitVec(1, 0));
 
-    // This is the clock gate signal!
-    sim.def.replacePortWithConstant("gin_3", BitVec(1, 0));
+    // // This is the clock gate signal!
+    // sim.def.replacePortWithConstant("gin_3", BitVec(1, 0));
 
-    for (int s = 0; s < 4; s++) {
-      for (int t = 0; t < 5; t++) {
-        if (s != 1) {
-          sim.def.replacePortWithConstant("in_0_BUS1_" + to_string(s) + "_" + to_string(t),
-                            BitVector(1, 1));
-        }
+    // for (int s = 0; s < 4; s++) {
+    //   for (int t = 0; t < 5; t++) {
+    //     if (s != 1) {
+    //       sim.def.replacePortWithConstant("in_0_BUS1_" + to_string(s) + "_" + to_string(t),
+    //                         BitVector(1, 1));
+    //     }
 
-        if (s != 3) {
-          sim.def.replacePortWithConstant("in_1_BUS1_" + to_string(s) + "_" + to_string(t),
-                            BitVector(1, 1));
+    //     if (s != 3) {
+    //       sim.def.replacePortWithConstant("in_1_BUS1_" + to_string(s) + "_" + to_string(t),
+    //                         BitVector(1, 1));
 
-        }
-      }
-    }
+    //     }
+    //   }
+    // }
     
     foldConstants(def, sim.allRegisterValues());
     deleteDeadInstances(def);

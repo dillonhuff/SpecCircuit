@@ -12,4 +12,6 @@ namespace FlatCircuit {
   void cullZexts(CellDefinition& def);
 
   void removeConstDuplicates(CellDefinition& def);
+
+  void allInputsToConstants(CellDefinition& def);
 }

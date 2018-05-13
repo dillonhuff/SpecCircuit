@@ -701,4 +701,16 @@ namespace FlatCircuit {
 
   }
 
+  void allInputsToConstants(CellDefinition& def) {
+    for (auto cid : def.getPortCells()) {
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.isInputPortCell()) {
+        int width = cell.getPortWidth(PORT_ID_OUT);
+        cout << "Replacing " << def.getCellName(cid) << ", width = " << width << endl;
+        def.replaceCellPortWithConstant(cid, PORT_ID_OUT, BitVector(width, 0));
+        cout << "Done with replacement" << endl;
+      }
+    }
+  }
+
 }
