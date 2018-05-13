@@ -1179,7 +1179,11 @@ namespace FlatCircuit {
     foldConstants(def, sim.allRegisterValues());
     deleteDeadInstances(def);
 
+    cout << "Refreshing constants" << endl;
+
     sim.refreshConstants();
+
+    cout << "Compiling circuit" << endl;
 
     sim.compileCircuit();
 
@@ -1206,49 +1210,6 @@ namespace FlatCircuit {
 
     cout << "# of cells from the fifo controller = " << cellsInFifoController << endl;
 
-
-    // Checking that the there are no inputs unconnected to outputs
-    set<CellId> connectedToOutputs;
-    for (auto cid : def.getPortCells()) {
-      const Cell& cell = def.getCellRefConst(cid);
-      if (cell.isOutputPortCell()) {
-        connectedToOutputs.insert(cid);
-      }
-    }
-
-    bool foundCell = true;
-    while (foundCell) {
-      foundCell = false;
-
-      cout << "# of cells connected to outputs = " << connectedToOutputs.size()
-           << endl;
-      
-      for (auto ctp : def.getCellMap()) {
-        CellId cid = ctp.first;
-        const Cell& cell = def.getCellRefConst(cid);
-
-        for (auto outPort : cell.outputPorts()) {
-          for (auto rSp : cell.receiverSigPorts(outPort)) {
-            if (dbhc::elem(rSp.cell, connectedToOutputs) &&
-                !dbhc::elem(cid, connectedToOutputs)) {
-
-              connectedToOutputs.insert(cid);
-              foundCell = true;
-
-            }
-          }
-        }
-      }
-    }
-
-    cout << "# of cells connected to outputs = " << connectedToOutputs.size()
-         << endl;
-
-    cout << "# of cells                      = " << def.numCells()
-         << endl;
-    
-    assert(connectedToOutputs.size() == def.numCells());
-    
     REQUIRE(sim.def.numCells() < 2*sim.def.getPortCells().size());
   }
 
