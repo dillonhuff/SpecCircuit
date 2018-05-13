@@ -752,9 +752,6 @@ namespace FlatCircuit {
     def.bulkDelete(toDelete);
 
     cout << "Done deleting dead instances" << endl;
-    
-    //    assert(connectedToOutputs.size() == def.numCells());
-    
   }
 
   void allInputsToConstants(CellDefinition& def) {
