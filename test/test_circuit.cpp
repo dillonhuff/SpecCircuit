@@ -1273,6 +1273,9 @@ namespace FlatCircuit {
       cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
     }
 
+    BitVector interpOutputS0 = getCGRAOutput(0, sim);
+    cout << "interpOutputS0 = " << interpOutputS0 << endl;
+    
     cout << "Outputs" << endl;
     printCGRAOutputs(sim);
     
@@ -1338,7 +1341,7 @@ namespace FlatCircuit {
     cout << "outputS0 = " << outputS0 << endl;;
 
     cout << "Clearing linebuffer" << endl;
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 100; i++) {
       cout << "Clearing cycle " << i << endl;
       setCGRAInput(2, BitVector(16, 0), sim);
 
@@ -1353,7 +1356,6 @@ namespace FlatCircuit {
     
     cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
     setCGRAInput(2, input, sim);
-    
     for (int i = 0; i < nCycles; i++) {
 
       input = BitVector(16, i);
@@ -1370,9 +1372,8 @@ namespace FlatCircuit {
 
     cout << "Outputs" << endl;
     printCGRAOutputs(sim);
-    
-    //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
 
+    REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
   }
 
   TEST_CASE("CGRA multiply by 2") {
