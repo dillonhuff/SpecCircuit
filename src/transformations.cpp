@@ -402,14 +402,28 @@ namespace FlatCircuit {
           candidates.erase(next);
         }
       } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
-        cout << "Warning: Cannot fold constant memory right now" << endl;
-        //        cout << "Warning: assuming we can constant fold memory!" << endl;
+        //cout << "Warning: Cannot fold constant memory right now" << endl;
 
-        // int width = nextCell.getMemWidth();
-        // def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
+        maybe<BitVector> wen = materializeConstPort({next, PORT_ID_WEN}, def);
+        maybe<BitVector> clk = materializeConstPort({next, PORT_ID_CLK}, def);
+        maybe<BitVector> raddr = materializeConstPort({next, PORT_ID_RADDR}, def);
+        maybe<BitVector> waddr = materializeConstPort({next, PORT_ID_WADDR}, def);
+        maybe<BitVector> wdata = materializeConstPort({next, PORT_ID_WDATA}, def);
 
-        // def.deleteCell(next);
-        // candidates.erase(next);
+        if (wen.has_value() &&
+            clk.has_value() && 
+            raddr.has_value() &&
+            waddr.has_value() &&
+            wdata.has_value()) {
+          cout << "Warning: Constant folding memory does not use memory state!"
+               << endl;
+
+          int width = nextCell.getMemWidth();
+          def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
+
+          def.deleteCell(next);
+          candidates.erase(next);
+        }
         
       } else {
         maybe<BitVector> bv = getOutput(next, def, registerValues);

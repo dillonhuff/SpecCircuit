@@ -1230,121 +1230,121 @@ namespace FlatCircuit {
     REQUIRE(sim.def.numCells() < 2*sim.def.getPortCells().size());
   }
 
-  // TEST_CASE("CGRA convolution") {
-  //   auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
-  //   Env circuitEnv =
-  //     loadFromCoreIR("global.top",
-  //                    "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+  TEST_CASE("CGRA convolution") {
+    auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
-  //   CellDefinition& def = circuitEnv.getDef("top");
+    CellDefinition& def = circuitEnv.getDef("top");
 
-  //   BitVector input(16, 0);
-  //   BitVector correctOutput(16, 2*0);
+    BitVector input(16, 0);
+    BitVector correctOutput(16, 2*0);
 
-  //   Simulator sim(circuitEnv, def);
-  //   setCGRAInput(0, BitVector("16'h0"), sim);
-  //   setCGRAInput(1, BitVector("16'h0"), sim);
-  //   setCGRAInput(2, BitVector("16'h0"), sim);
-  //   setCGRAInput(3, BitVector("16'h0"), sim);
+    Simulator sim(circuitEnv, def);
+    setCGRAInput(0, BitVector("16'h0"), sim);
+    setCGRAInput(1, BitVector("16'h0"), sim);
+    setCGRAInput(2, BitVector("16'h0"), sim);
+    setCGRAInput(3, BitVector("16'h0"), sim);
 
-  //   loadCGRAConfig(convConfigValues, sim);
+    loadCGRAConfig(convConfigValues, sim);
 
-  //   setCGRAInput(2, input, sim);
-  //   sim.update();
+    setCGRAInput(2, input, sim);
+    sim.update();
 
-  //   cout << "Inputs" << endl;
-  //   printCGRAInputs(sim);
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
 
-  //   int nCycles = 20;
-  //   cout << "Computing " << nCycles << " cycles of data" << endl;
-  //   setCGRAInput(2, input, sim);
+    int nCycles = 20;
+    cout << "Computing " << nCycles << " cycles of data" << endl;
+    setCGRAInput(2, input, sim);
 
-  //   for (int i = 0; i < nCycles; i++) {
+    for (int i = 0; i < nCycles; i++) {
 
-  //     input = BitVector(16, i);
-  //     //      input = BitVector("16'h80ff");
-  //     setCGRAInput(2, input, sim);
+      input = BitVector(16, i);
+      //      input = BitVector("16'h80ff");
+      setCGRAInput(2, input, sim);
 
-  //     cout << "Cycle " << i << endl;
+      cout << "Cycle " << i << endl;
 
-  //     posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-  //     //      sim.debugPrintMemories({"mem_0x18"});
+      //      sim.debugPrintMemories({"mem_0x18"});
 
-  //     BitVector outputS0 = getCGRAOutput(0, sim);
-  //     cout << "input    = " << input << ", " << input.to_type<int>() << endl;
-  //     cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
-  //   }
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
 
-  //   cout << "Outputs" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
     
-  //   BitVector outputS0 = getCGRAOutput(0, sim);
-  //   cout << "outputS0 = " << outputS0 << endl;
+    BitVector outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
 
-  //   //    REQUIRE(outputS0 == correctOutput);
+    //    REQUIRE(outputS0 == correctOutput);
 
-  //   // SPECIALIZE
-  //   sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
-  //   sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
+    // SPECIALIZE
+    sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
+    sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
+    sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
 
-  //   sim.def.replacePortWithConstant("tck", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("tms", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tck", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tms", BitVec(1, 0));
+    sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
 
-  //   setCGRAInput(0, BitVector(16, 0), sim);
-  //   setCGRAInput(1, BitVector(16, 0), sim);
-  //   setCGRAInput(3, BitVector(16, 0), sim);
+    setCGRAInput(0, BitVector(16, 0), sim);
+    setCGRAInput(1, BitVector(16, 0), sim);
+    setCGRAInput(3, BitVector(16, 0), sim);
 
-  //   cout << "# of cells before constant folding = " << def.numCells() << endl;
-  //   foldConstants(def, sim.allRegisterValues());
-  //   cout << "# of cells after constant deleting instances = " <<
-  //     def.numCells() << endl;
+    cout << "# of cells before constant folding = " << def.numCells() << endl;
+    foldConstants(def, sim.allRegisterValues());
+    cout << "# of cells after constant deleting instances = " <<
+      def.numCells() << endl;
 
-  //   deleteDeadInstances(def);
+    deleteDeadInstances(def);
 
-  //   cout << "# of cells after constant folding = " << def.numCells() << endl;
+    cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-  //   sim.refreshConstants();
+    sim.refreshConstants();
 
-  //   REQUIRE(definitionIsConsistent(def));
+    REQUIRE(definitionIsConsistent(def));
 
-  //   input = BitVector(16, 18);
-  //   setCGRAInput(2, input, sim);
-  //   sim.update();
+    input = BitVector(16, 18);
+    setCGRAInput(2, input, sim);
+    sim.update();
 
-  //   cout << "Inputs after specializing" << endl;
-  //   printCGRAInputs(sim);
+    cout << "Inputs after specializing" << endl;
+    printCGRAInputs(sim);
 
-  //   cout << "Outputs" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
 
-  //   outputS0 = getCGRAOutput(0, sim);
-  //   cout << "outputS0 = " << outputS0 << endl;
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
 
-  //   //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
-  //   REQUIRE(sim.compileCircuit());
-  //   REQUIRE(sim.hasSimulateFunction());
+    //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
+    REQUIRE(sim.compileCircuit());
+    REQUIRE(sim.hasSimulateFunction());
 
-  //   input = BitVector(16, 23);
-  //   setCGRAInput(input, sim);
-  //   sim.update();
+    input = BitVector(16, 23);
+    setCGRAInput(input, sim);
+    sim.update();
 
-  //   cout << "Inputs" << endl;
-  //   printCGRAInputs(sim);
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
 
-  //   cout << "Outputs after compiling" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs after compiling" << endl;
+    printCGRAOutputs(sim);
 
-  //   outputS0 = getCGRAOutput(0, sim);    
+    outputS0 = getCGRAOutput(0, sim);    
     
-  //   cout << "outputS0 = " << outputS0 << endl;;
+    cout << "outputS0 = " << outputS0 << endl;;
 
-  //   //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
+    //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
 
-  // }
+  }
 
   TEST_CASE("CGRA multiply by 2") {
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
