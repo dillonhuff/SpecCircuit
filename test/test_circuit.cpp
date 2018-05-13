@@ -1439,18 +1439,6 @@ namespace FlatCircuit {
     cout << "# of cells after constant deleting instances = "
          << def.numCells() << endl;
 
-    // set<CellId> memCells;
-    // for (auto ctp : def.getCellMap()) {
-    //   CellId cid = ctp.first;
-    //   string name = def.cellName(cid);
-
-    //   if (name.substr(0, 3) == "mem") {
-    //     memCells.insert(cid);
-    //   }
-    // }
-
-    // def.bulkDelete(memCells);
-
     deleteDeadInstances(def);
 
     cout << "# of cells after constant folding = " << def.numCells() << endl;
