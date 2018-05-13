@@ -1256,20 +1256,17 @@ namespace FlatCircuit {
     printCGRAInputs(sim);
 
     int nCycles = 20;
-    cout << "Computing " << nCycles << " cycles of data" << endl;
+    cout << "Computing " << nCycles << " cycles of data in interpreted mode" << endl;
     setCGRAInput(2, input, sim);
 
     for (int i = 0; i < nCycles; i++) {
 
       input = BitVector(16, i);
-      //      input = BitVector("16'h80ff");
       setCGRAInput(2, input, sim);
 
       cout << "Cycle " << i << endl;
 
       posedge("clk_in", sim);
-
-      //      sim.debugPrintMemories({"mem_0x18"});
 
       BitVector outputS0 = getCGRAOutput(0, sim);
       cout << "input    = " << input << ", " << input.to_type<int>() << endl;
@@ -1281,8 +1278,6 @@ namespace FlatCircuit {
     
     BitVector outputS0 = getCGRAOutput(0, sim);
     cout << "outputS0 = " << outputS0 << endl;
-
-    //    REQUIRE(outputS0 == correctOutput);
 
     // SPECIALIZE
     sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
@@ -1342,6 +1337,40 @@ namespace FlatCircuit {
     
     cout << "outputS0 = " << outputS0 << endl;;
 
+    cout << "Clearing linebuffer" << endl;
+    for (int i = 0; i < 30; i++) {
+      cout << "Clearing cycle " << i << endl;
+      setCGRAInput(2, input, BitVector(16, 0));
+
+      cout << "Cycle " << i << endl;
+
+      posedge("clk_in", sim);
+
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
+    
+    cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
+    setCGRAInput(2, input, sim);
+    
+    for (int i = 0; i < nCycles; i++) {
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      cout << "Cycle " << i << endl;
+
+      posedge("clk_in", sim);
+
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
+
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
+    
     //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
 
   }
