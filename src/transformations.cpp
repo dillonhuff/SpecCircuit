@@ -402,14 +402,14 @@ namespace FlatCircuit {
           candidates.erase(next);
         }
       } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
-        //TODO: Add real memory constant folding
-        cout << "Warning: assuming we can constant fold memory!" << endl;
+        cout << "Warning: Cannot fold constant memory right now" << endl;
+        //        cout << "Warning: assuming we can constant fold memory!" << endl;
 
-        int width = nextCell.getMemWidth();
-        def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
+        // int width = nextCell.getMemWidth();
+        // def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
 
-        def.deleteCell(next);
-        candidates.erase(next);
+        // def.deleteCell(next);
+        // candidates.erase(next);
         
       } else {
         maybe<BitVector> bv = getOutput(next, def, registerValues);

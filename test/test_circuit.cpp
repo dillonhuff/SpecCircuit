@@ -574,8 +574,6 @@ namespace FlatCircuit {
 
     SECTION("Memory tile using compiled code") {
       Simulator sim(circuitEnv, def);
-      REQUIRE(sim.compileCircuit());
-
       reset("reset", sim);
 
       sim.setFreshValue("clk_en", BitVec(1, 1));
@@ -604,6 +602,25 @@ namespace FlatCircuit {
 
       sim.setFreshValue("config_en", BitVec(1, 0));
       sim.update();
+
+      sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
+      sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
+      sim.def.replacePortWithConstant("config_en_sram", BitVec(4, 0));
+      sim.def.replacePortWithConstant("clk_en", BitVec(1, 1));
+      sim.def.replacePortWithConstant("config_en_linebuf", BitVec(1, 0));
+      sim.def.replacePortWithConstant("config_read", BitVec(1, 0));
+      sim.def.replacePortWithConstant("config_write", BitVec(1, 0));
+      sim.def.replacePortWithConstant("config_en", BitVec(1, 0));
+      sim.def.replacePortWithConstant("reset", BitVec(1, 0));
+      sim.def.replacePortWithConstant("chain_wen_in", BitVec(1, 0));
+      sim.def.replacePortWithConstant("chain_in", BitVec(16, 0));
+
+      foldConstants(sim.def, sim.allRegisterValues());
+      deleteDeadInstances(sim.def);
+
+      sim.refreshConstants();
+
+      REQUIRE(sim.compileCircuit());
 
       sim.setFreshValue("wen_in", BitVec(1, 1));
       sim.setFreshValue("addr_in", BitVec(16, 4));
@@ -1329,161 +1346,161 @@ namespace FlatCircuit {
 
   // }
 
-  // TEST_CASE("CGRA multiply by 2") {
-  //   auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
-  //   Env circuitEnv =
-  //     loadFromCoreIR("global.top",
-  //                    "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+  TEST_CASE("CGRA multiply by 2") {
+    auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
-  //   CellDefinition& def = circuitEnv.getDef("top");
+    CellDefinition& def = circuitEnv.getDef("top");
 
-  //   BitVector input(16, 23);
-  //   BitVector correctOutput(16, 2*23);
+    BitVector input(16, 23);
+    BitVector correctOutput(16, 2*23);
 
-  //   Simulator sim(circuitEnv, def);
-  //   loadCGRAConfig(configValues, sim);
+    Simulator sim(circuitEnv, def);
+    loadCGRAConfig(configValues, sim);
 
-  //   setCGRAInput(2, input, sim);
-  //   sim.update();
+    setCGRAInput(2, input, sim);
+    sim.update();
 
-  //   cout << "Inputs" << endl;    
-  //   printCGRAInputs(sim);
+    cout << "Inputs" << endl;    
+    printCGRAInputs(sim);
 
-  //   int nCycles = 4;
-  //   cout << "Computing " << nCycles << " cycles of data" << endl;
-  //   for (int i = 0; i < nCycles; i++) {
-  //     cout << "Cycle " << i << endl;
+    int nCycles = 4;
+    cout << "Computing " << nCycles << " cycles of data" << endl;
+    for (int i = 0; i < nCycles; i++) {
+      cout << "Cycle " << i << endl;
 
-  //     posedge("clk_in", sim);
+      posedge("clk_in", sim);
 
-  //   }
+    }
 
-  //   cout << "Outputs" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
     
-  //   BitVector outputS0 = getCGRAOutput(0, sim);
-  //   cout << "outputS0 = " << outputS0 << endl;
+    BitVector outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
 
-  //   REQUIRE(outputS0 == correctOutput);
+    REQUIRE(outputS0 == correctOutput);
 
-  //   sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
-  //   sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
+    sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
+    sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
+    sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
 
-  //   sim.def.replacePortWithConstant("tck", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("tms", BitVec(1, 0));
-  //   sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tck", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
+    sim.def.replacePortWithConstant("tms", BitVec(1, 0));
+    sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
 
-  //   for (int side = 0; side < 4; side++) {
+    for (int side = 0; side < 4; side++) {
 
-  //     if (side != 2) {
-  //       for (int track = 0; track < 16; track++) {
-  //         string outName =
-  //           "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-  //         cout << "Setting " << outName << " to a constant" << endl;
-  //         sim.def.replacePortWithConstant(outName, BitVec(1, 0));
-  //       }
-  //     }
-  //   }
+      if (side != 2) {
+        for (int track = 0; track < 16; track++) {
+          string outName =
+            "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+          cout << "Setting " << outName << " to a constant" << endl;
+          sim.def.replacePortWithConstant(outName, BitVec(1, 0));
+        }
+      }
+    }
 
-  //   cout << "# of cells before constant folding = " << def.numCells() << endl;
+    cout << "# of cells before constant folding = " << def.numCells() << endl;
     
-  //   foldConstants(def, sim.allRegisterValues());
-  //   cout << "# of cells after constant deleting instances = "
-  //        << def.numCells() << endl;
+    foldConstants(def, sim.allRegisterValues());
+    cout << "# of cells after constant deleting instances = "
+         << def.numCells() << endl;
 
-  //   // set<CellId> memCells;
-  //   // for (auto ctp : def.getCellMap()) {
-  //   //   CellId cid = ctp.first;
-  //   //   string name = def.cellName(cid);
+    // set<CellId> memCells;
+    // for (auto ctp : def.getCellMap()) {
+    //   CellId cid = ctp.first;
+    //   string name = def.cellName(cid);
 
-  //   //   if (name.substr(0, 3) == "mem") {
-  //   //     memCells.insert(cid);
-  //   //   }
-  //   // }
+    //   if (name.substr(0, 3) == "mem") {
+    //     memCells.insert(cid);
+    //   }
+    // }
 
-  //   // def.bulkDelete(memCells);
+    // def.bulkDelete(memCells);
 
-  //   deleteDeadInstances(def);
+    deleteDeadInstances(def);
 
-  //   cout << "# of cells after constant folding = " << def.numCells() << endl;
+    cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-  //   sim.refreshConstants();
+    sim.refreshConstants();
 
-  //   REQUIRE(definitionIsConsistent(def));
+    REQUIRE(definitionIsConsistent(def));
 
-  //   input = BitVector(16, 18);
-  //   setCGRAInput(2, input, sim);
-  //   sim.update();
+    input = BitVector(16, 18);
+    setCGRAInput(2, input, sim);
+    sim.update();
 
-  //   cout << "Inputs" << endl;
-  //   printCGRAInputs(sim);
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
 
-  //   cout << "Outputs" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
 
-  //   outputS0 = getCGRAOutput(0, sim);
-  //   cout << "outputS0 = " << outputS0 << endl;
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
 
-  //   REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
-  //   REQUIRE(sim.compileCircuit());
-  //   REQUIRE(sim.hasSimulateFunction());
+    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
+    REQUIRE(sim.compileCircuit());
+    REQUIRE(sim.hasSimulateFunction());
 
-  //   input = BitVector(16, 23);
+    input = BitVector(16, 23);
 
-  //   for (int side = 0; side < 4; side++) {
-  //     cout << "Side " << side << endl;
-  //     for (int track = 0; track < 16; track++) {
-  //       string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-  //       sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
-  //     }
-  //   }
+    for (int side = 0; side < 4; side++) {
+      cout << "Side " << side << endl;
+      for (int track = 0; track < 16; track++) {
+        string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+        sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+      }
+    }
     
-  //   sim.update();
+    sim.update();
 
-  //   cout << "Inputs" << endl;
-  //   printCGRAInputs(sim);
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
 
-  //   cout << "Outputs after compiling" << endl;
-  //   printCGRAOutputs(sim);
+    cout << "Outputs after compiling" << endl;
+    printCGRAOutputs(sim);
 
-  //   outputS0 = getCGRAOutput(0, sim);    
+    outputS0 = getCGRAOutput(0, sim);    
     
-  //   cout << "outputS0 = " << outputS0 << endl;;
+    cout << "outputS0 = " << outputS0 << endl;;
 
-  //   REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
+    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
 
-  //   nCycles = 10000;
-  //   cout << "Running cgra for " << nCycles << endl;
+    nCycles = 10000;
+    cout << "Running cgra for " << nCycles << endl;
 
-  //   auto start = high_resolution_clock::now();
+    auto start = high_resolution_clock::now();
 
-  //   input = BitVector(16, 0);
-  //   for (int i = 0; i < nCycles; i++) {
-  //     cout << "i = " << i << endl;
+    input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+      cout << "i = " << i << endl;
 
-  //     sim.setFreshValue("clk_in", BitVec(1, 0));
-  //     sim.update();
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
 
-  //     input = BitVector(16, i);
-  //     setCGRAInput(2, input, sim);
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
 
-  //     sim.setFreshValue("clk_in", BitVec(1, 1));
-  //     sim.update();
-  //   }
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
 
-  //   auto stop = high_resolution_clock::now();
+    auto stop = high_resolution_clock::now();
 
-  //   auto duration = duration_cast<milliseconds>(stop - start);
+    auto duration = duration_cast<milliseconds>(stop - start);
 
-  //   cout << "Time taken for " << nCycles << ": "
-  //        << duration.count() << " milliseconds" << endl;
+    cout << "Time taken for " << nCycles << ": "
+         << duration.count() << " milliseconds" << endl;
 
-  //   outputS0 = getCGRAOutput(0, sim);
-  //   cout << "Input  = " << input << endl;
-  //   cout << "Output = " << outputS0 << endl;
-  //   cout << "Done" << endl;
-  // }
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "Input  = " << input << endl;
+    cout << "Output = " << outputS0 << endl;
+    cout << "Done" << endl;
+  }
 
 }
