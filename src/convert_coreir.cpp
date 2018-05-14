@@ -382,9 +382,6 @@ namespace FlatCircuit {
       assert(dbhc::contains_key(fstSrc, elemsToCells));
       assert(dbhc::contains_key(sndSrc, elemsToCells));
 
-      //Cell& fstCell = cDef.getCellRef(elemsToCells.at(fstSrc));
-      //Cell& sndCell = cDef.getCellRef(elemsToCells.at(sndSrc));
-
       CellId driverId;
       CellId receiverId;
 

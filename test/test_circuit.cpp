@@ -1374,6 +1374,42 @@ namespace FlatCircuit {
     printCGRAOutputs(sim);
 
     REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
+
+
+    // PERFORMANCE TEST
+    nCycles = 10000;
+    cout << "Running cgra for " << nCycles << endl;
+
+    auto start = high_resolution_clock::now();
+
+    input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+      if ((i % 100) == 0) {
+        cout << "i = " << i << endl;
+      }
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<milliseconds>(stop - start);
+
+    cout << "Time taken for " << nCycles << " of conv_2_1: "
+         << duration.count() << " milliseconds" << endl;
+
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "Input  = " << input << endl;
+    cout << "Output = " << outputS0 << endl;
+    cout << "Done" << endl;
+    
   }
 
   TEST_CASE("CGRA multiply by 2") {

@@ -403,7 +403,7 @@ namespace FlatCircuit {
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
     int ret =
-      system(("clang++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
+      system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
     //    sleep(2);
 
