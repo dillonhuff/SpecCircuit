@@ -798,4 +798,75 @@ namespace FlatCircuit {
     }
   }
 
+  bool driversMatch(const SignalBus& repIn1Drivers,
+                    const SignalBus& otherIn1Drivers) {
+    auto& rep = repIn1Drivers.signals;
+    auto& other = otherIn1Drivers.signals;
+
+    if (rep.size() != other.size()) {
+      return false;
+    }
+
+    for (int i = 0; i < (int) rep.size(); i++) {
+      if (rep[i] != other[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  void deDuplicate(CellDefinition& def) {
+    cout << "Starting to remove duplicate circuit elements, num cells = " << def.numCells() << endl;
+
+    bool removedOne = true;
+    while (removedOne) {
+      removedOne = false;
+
+      set<CellId> toReplace;
+      CellId replacementCell = 0;
+
+      for (auto clp : def.getCellMap()) {
+        const CellId cid = clp.first;
+        const Cell& cell = def.getCellRefConst(cid);
+
+        for (auto ctp : def.getCellMap()) {
+
+          if (cell.getCellType() == CELL_TYPE_EQ) {
+            if (replacementCell == 0) {
+              replacementCell = cid;
+            } else {
+              //            cout << "Possible replacement" << endl;
+              auto otherIn0Drivers = cell.getDrivers(PORT_ID_IN0);
+              auto otherIn1Drivers = cell.getDrivers(PORT_ID_IN1);
+
+              const Cell& replaceCell = def.getCellRefConst(replacementCell);
+              auto repIn0Drivers = replaceCell.getDrivers(PORT_ID_IN0);
+              auto repIn1Drivers = replaceCell.getDrivers(PORT_ID_IN1);
+
+              if ((repIn0Drivers.size() == otherIn0Drivers.size()) &&
+                  (repIn1Drivers.size() == otherIn1Drivers.size())) {
+                cout << "\tSame size equals" << endl;
+
+                bool in0Same = driversMatch(repIn0Drivers, otherIn0Drivers);
+                bool in1Same = driversMatch(repIn1Drivers, otherIn1Drivers);
+
+                if (in0Same && in1Same) {
+                  cout << "\tInputs are the same to " << def.getCellName(cid) << "\nand\n\t" << def.getCellName(replacementCell) << endl;
+                }
+              
+              }
+            }
+          }
+        }
+
+        if (replacementCell == 0) {
+          assert(false);
+        }
+      }
+    }
+
+    cout << "Done removing duplicates, num cells = " << def.numCells() << endl;
+  }
+
 }

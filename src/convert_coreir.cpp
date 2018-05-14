@@ -504,6 +504,7 @@ namespace FlatCircuit {
       cullZexts(circuitEnv.getDef(tp));
       cullPassthroughs(circuitEnv.getDef(tp));
       cout << "Done removing constants, zero extends, and passthroughs" << endl;
+      deDuplicate(circuitEnv.getDef(tp));
     }
 
     deleteContext(c);

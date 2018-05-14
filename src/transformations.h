@@ -17,4 +17,6 @@ namespace FlatCircuit {
 
   void cullPassthroughs(CellDefinition& def);
 
+  void deDuplicate(CellDefinition& def);
+
 }
