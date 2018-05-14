@@ -848,7 +848,10 @@ namespace FlatCircuit {
     void setPastValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-      assert(bv.bitLength() == 1);
+      // if (bv.bitLength() != 1) {
+      //   std::cout << "Error: Setting past value of " << sigPortString(def, {cid, pid})<< " to " << bv << std::endl;
+      // }
+      // assert(bv.bitLength() == 1);
 
       unsigned long offset = pastValueOffset(cid, pid);
       simValueTable[offset] = bv;

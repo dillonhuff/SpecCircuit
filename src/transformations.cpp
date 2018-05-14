@@ -644,6 +644,8 @@ namespace FlatCircuit {
     Cell& cell = def.getCellRef(cid);
     auto inDrivers = cell.getDrivers(in);
 
+    assert(cell.getPortWidth(in) == cell.getPortWidth(out));
+
     auto& receivers = cell.getPortReceivers(out);
     for (int offset = 0; offset < receivers.size(); offset++) {
       SignalBit newDriver = inDrivers.signals[offset];
@@ -655,6 +657,22 @@ namespace FlatCircuit {
     }
 
     cell.clearReceivers(out);
+  }
+
+  void cullPassthroughs(CellDefinition& def) {
+    std::set<CellId> passthroughs;
+    for (auto& ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if ((cell.getCellType() == CELL_TYPE_PASSTHROUGH)) {
+        passthroughs.insert(cid);
+      }
+    }
+
+    cout << "Deleting " << passthroughs.size() << " passthroughs" << endl;
+    for (auto cid : passthroughs) {
+      elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
+    }
   }
 
   void cullZexts(CellDefinition& def) {

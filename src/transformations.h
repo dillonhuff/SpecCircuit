@@ -14,4 +14,7 @@ namespace FlatCircuit {
   void removeConstDuplicates(CellDefinition& def);
 
   void allInputsToConstants(CellDefinition& def);
+
+  void cullPassthroughs(CellDefinition& def);
+
 }
