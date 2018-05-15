@@ -1026,8 +1026,6 @@ namespace FlatCircuit {
 
       std::string cppCode = code;
       std::string argName = codeState.getPortTemp(cid, PORT_ID_IN);
-      //        "cell_" + std::to_string(cid) + "_" + portIdString(PORT_ID_IN);
-
       cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
 
       cppCode += ln("values[" + std::to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + f(argName));
