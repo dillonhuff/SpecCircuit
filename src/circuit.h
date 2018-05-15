@@ -759,6 +759,15 @@ namespace FlatCircuit {
     // Cell 0 is reserved to indicated a non-existant cell
     CellDefinition() : next(1), nextPort(0) {}
 
+    std::vector<CellId> getCellList() const {
+      std::vector<CellId> cellList;
+      for (auto ctp : cells) {
+        cellList.push_back(ctp.first);
+      }
+
+      return cellList;
+    }
+
     const std::map<CellId, Cell>& getCellMap() const {
       return cells;
     }
