@@ -1,3 +1,4 @@
+#include "analysis.h"
 #include "simulator.h"
 
 #include <fstream>
@@ -918,10 +919,33 @@ namespace FlatCircuit {
       "void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     assert((updates.size() % 2) == 0);
-    
-    for (int i = 0; i < updates.size(); i += 2) {
-      cppCode += combinationalBlockCode(updates[i + 0]);
-      cppCode += sequentialBlockCode(updates[i + 1]);
+
+    dbhc::maybe<PortId> clkPortM = getTrueClockPort(def);
+    if (allPosedge(def) && clkPortM.has_value()) {
+      cout << "All posedge elements with a single clock" << endl;
+      assert(updates.size() == 4);
+      assert(updates[3].size() == 0);
+
+      CellId cid = def.getPortCellId(def.getPortName(clkPortM.get_value()));
+
+      string clkVar = "values[" +
+        to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]";
+      string lastClkVar = "values[" +
+        to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "]";
+
+      cppCode += "if (posedge(" + lastClkVar + ", " + clkVar + ")) {\n";
+
+      cppCode += combinationalBlockCode(updates[0]);
+      cppCode += sequentialBlockCode(updates[1]);
+
+      cppCode += "\n}\n";
+
+      cppCode += combinationalBlockCode(updates[2]);
+    } else {
+      for (int i = 0; i < updates.size(); i += 2) {
+        cppCode += combinationalBlockCode(updates[i + 0]);
+        cppCode += sequentialBlockCode(updates[i + 1]);
+      }
     }
 
     cppCode += "}";
@@ -945,20 +969,21 @@ namespace FlatCircuit {
   std::vector<std::vector<SigPort> >
   deleteDeadUpdates(const std::vector<std::vector<SigPort> >& filteredUpdates,
                     const CellDefinition& def) {
-    assert((filteredUpdates.size() % 2) == 0);
+    // assert((filteredUpdates.size() % 2) == 0);
 
-    std::vector<std::vector<SigPort> > updates;
-    for (int i = 0; i < (int) filteredUpdates.size(); i += 2) {
-      vector<SigPort> combUpdates = updates[i];
-      bool updateLater = false;
-      bool anyUseBeforeUpdate = false;
+    // std::vector<std::vector<SigPort> > updates;
+    // for (int i = 0; i < (int) filteredUpdates.size(); i += 2) {
+    //   vector<SigPort> combUpdates = updates[i];
+    //   bool updateLater = false;
+    //   bool anyUseBeforeUpdate = false;
       
-      for (int j = i + 1; j < (int) filteredUpdates.size(); j++) {
+    //   for (int j = i + 1; j < (int) filteredUpdates.size(); j++) {
         
-      }
-    }
+    //   }
+    // }
     
-    return updates;
+    // return updates;
+    return filteredUpdates;
   }
 
   bool Simulator::compileCircuit() {

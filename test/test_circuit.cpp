@@ -15,6 +15,21 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  void specializeCircuit(Simulator& sim) {
+    cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
+    foldConstants(sim.def, sim.allRegisterValues());
+    cout << "# of cells after constant deleting instances = " <<
+      sim.def.numCells() << endl;
+
+    deleteDeadInstances(sim.def);
+
+    cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
+
+    deDuplicate(sim.def);
+
+    sim.refreshConstants();
+  }
+
   TEST_CASE("Prefix matching") {
 
     REQUIRE(matchesAnyPrefix("mem_0x18$memory_core$mem_inst1$mem_inst$data_array$mem",
@@ -1303,18 +1318,19 @@ namespace FlatCircuit {
     setCGRAInput(1, BitVector(16, 0), sim);
     setCGRAInput(3, BitVector(16, 0), sim);
 
-    cout << "# of cells before constant folding = " << def.numCells() << endl;
-    foldConstants(def, sim.allRegisterValues());
-    cout << "# of cells after constant deleting instances = " <<
-      def.numCells() << endl;
+    specializeCircuit(sim);
+    // cout << "# of cells before constant folding = " << def.numCells() << endl;
+    // foldConstants(def, sim.allRegisterValues());
+    // cout << "# of cells after constant deleting instances = " <<
+    //   def.numCells() << endl;
 
-    deleteDeadInstances(def);
+    // deleteDeadInstances(def);
 
-    cout << "# of cells after constant folding = " << def.numCells() << endl;
+    // cout << "# of cells after constant folding = " << def.numCells() << endl;
 
-    deDuplicate(def);
+    // deDuplicate(def);
 
-    sim.refreshConstants();
+    // sim.refreshConstants();
 
     REQUIRE(definitionIsConsistent(def));
 
@@ -1480,18 +1496,20 @@ namespace FlatCircuit {
     }
 
     cout << "# of cells before constant folding = " << def.numCells() << endl;
+
+    specializeCircuit(sim);
+
+    // foldConstants(def, sim.allRegisterValues());
+    // cout << "# of cells after constant deleting instances = "
+    //      << def.numCells() << endl;
+
+    // deleteDeadInstances(def);
+
+    // cout << "# of cells after constant folding = " << def.numCells() << endl;
+
+    // deDuplicate(def);
     
-    foldConstants(def, sim.allRegisterValues());
-    cout << "# of cells after constant deleting instances = "
-         << def.numCells() << endl;
-
-    deleteDeadInstances(def);
-
-    cout << "# of cells after constant folding = " << def.numCells() << endl;
-
-    deDuplicate(def);
-    
-    sim.refreshConstants();
+    // sim.refreshConstants();
 
     REQUIRE(definitionIsConsistent(def));
 
