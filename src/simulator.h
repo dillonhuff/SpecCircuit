@@ -4,6 +4,39 @@
 
 namespace FlatCircuit {
 
+  struct CodeGenState {
+    unsigned long long uniqueNum;
+    std::vector<std::string> codeLines;
+
+  public:
+
+    CodeGenState() : uniqueNum(0) {}
+
+    std::string getPortTemp(const CellId cid, const PortId pid) {
+      std::string argName =
+        "cell_" + std::to_string(cid) + "_" +
+        portIdString(PORT_ID_IN) + "_" +
+        std::to_string(uniqueNum);
+
+      uniqueNum++;
+
+      return argName;
+    }
+
+    void addLine(const std::string& str) {
+      codeLines.push_back(str);
+    }
+
+    std::string getCode() const {
+      std::string cppCode = "";
+      for (auto line : codeLines) {
+        cppCode += line;
+      }
+
+      return cppCode;
+    }
+  };
+
   static inline std::string ln(const std::string& s) {
     return "\t" + s + ";\n";
   }
@@ -955,15 +988,16 @@ namespace FlatCircuit {
 
     template<typename F>
     std::string binopCode(const std::string& code,
-                     const CellId cid,
-                     F f) const {
+                          CodeGenState& codeState,
+                          const CellId cid,
+                          F f) const {
       std::string cppCode = code;
-      std::string argName0 = "cell_" + std::to_string(cid) + "_" +
-        portIdString(PORT_ID_IN0);
+      std::string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0); //"cell_" + std::to_string(cid) + "_" +
+        //        portIdString(PORT_ID_IN0);
       cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
 
-      std::string argName1 = "cell_" + std::to_string(cid) + "_" +
-        portIdString(PORT_ID_IN1);
+      std::string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1); //"cell_" + std::to_string(cid) + "_" +
+        //        portIdString(PORT_ID_IN1);
 
       cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
@@ -977,12 +1011,13 @@ namespace FlatCircuit {
 
     template<typename F>
     std::string unopCode(const std::string& code,
+                         CodeGenState& codeState,
                          const CellId cid,
                          F f) const {
 
       std::string cppCode = code;
-      std::string argName =
-        "cell_" + std::to_string(cid) + "_" + portIdString(PORT_ID_IN);
+      std::string argName = codeState.getPortTemp(cid, PORT_ID_IN);
+      //        "cell_" + std::to_string(cid) + "_" + portIdString(PORT_ID_IN);
 
       cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
 

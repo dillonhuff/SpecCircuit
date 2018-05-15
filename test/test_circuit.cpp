@@ -1036,7 +1036,7 @@ namespace FlatCircuit {
     reset("reset", sim);
 
     cout << "Reset chip" << endl;
-    for (int i = 0; i < configValues.size(); i++) {
+    for (int i = 0; i < (int) configValues.size(); i++) {
 
       sim.setFreshValue("clk_in", BitVec(1, 0));
       sim.update();
@@ -1276,9 +1276,10 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of cells from the fifo controller = " << cellsInFifoController << endl;
+    cout << "# of cells from the fifo controller = "
+         << cellsInFifoController << endl;
 
-    REQUIRE(sim.def.numCells() < 2*sim.def.getPortCells().size());
+    REQUIRE(sim.def.numCells() < (int) 2*sim.def.getPortCells().size());
   }
 
   TEST_CASE("CGRA convolution") {

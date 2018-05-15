@@ -610,6 +610,8 @@ namespace FlatCircuit {
   Simulator::combinationalBlockCode(const std::vector<SigPort>& levelized) {
 
     string cppCode = "";
+
+    CodeGenState codeState;
     
     for (auto sigPort : levelized) {
       CellId cid = sigPort.cell;
@@ -628,10 +630,13 @@ namespace FlatCircuit {
         }
       }
 
+      string pastValueTmp = "";
       if (sentToSeqPort) {
-        string oldOutName = "cell_" + to_string(cid) + "_" +
-          portIdString(PORT_ID_OUT) + "_old_value";
-        cppCode += ln("BitVector " + oldOutName + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]");
+        // string oldOutName = "cell_" + to_string(cid) + "_" +
+        //   portIdString(PORT_ID_OUT) + "_old_value";
+
+        pastValueTmp = codeState.getPortTemp(cid, PORT_ID_OUT);
+        cppCode += ln("BitVector " + pastValueTmp + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]");
       }
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
@@ -640,31 +645,21 @@ namespace FlatCircuit {
         cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
         cppCode += ln("values[" + to_string(portValueOffset(cid, PORT_ID_IN)) + "] = " + argName);
 
-        // cppCode = unopCode(cppCode, cid, [](const string& argName) {
-        //     return argName;
-        //   });
-        
       } else if (cell.isInputPortCell()) {
         cppCode += ln("// No code for input port " + def.cellName(cid));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
         cppCode += ln("// No code for const port " + def.cellName(cid));
       } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
-        // string argName = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
-        // cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
-        // int outWidth = cell.getPortWidth(PORT_ID_OUT);
-
-        // cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = zero_extend(" + to_string(outWidth) + ", " + argName + ")");
-
         int outWidth = cell.getPortWidth(PORT_ID_OUT);
-        cppCode = unopCode(cppCode, cid, [outWidth](const string& argName) {
+        cppCode = unopCode(cppCode, codeState, cid, [outWidth](const string& argName) {
             return "zero_extend(" + to_string(outWidth) + ", " + argName + ")";
           });
 
       } else if (cell.getCellType() == CELL_TYPE_UGE) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " > " + argName1 + ") || (" +
                       argName0 + " == " + argName1 + "))";
@@ -673,7 +668,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_ULE) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " < " + argName1 + ") || (" + argName0 + " == " + argName1 + "))";
                     });
@@ -681,7 +676,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_UGT) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " > " + argName1 + "))";
                     });
@@ -689,7 +684,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_ULT) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " < " + argName1 + "))";
                     });
@@ -697,7 +692,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_LSHR) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "lshr(" + argName0 + ", " + argName1 + ")";
                     });
@@ -705,7 +700,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_ASHR) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "ashr(" + argName0 + ", " + argName1 + ")";
                     });
@@ -713,7 +708,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_SHL) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "shl(" + argName0 + ", " + argName1 + ")";
                     });
@@ -723,14 +718,14 @@ namespace FlatCircuit {
         int start = bvToInt(cell.getParameterValue(PARAM_LOW));
         int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
 
-        cppCode = unopCode(cppCode, cid, [start, end](const string& argName) {
+        cppCode = unopCode(cppCode, codeState, cid, [start, end](const string& argName) {
             return "slice(" + argName + ", " + to_string(start) + ", " + to_string(end) + ")";
           });
         
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "sub_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
@@ -738,7 +733,7 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_ADD) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "add_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
@@ -746,48 +741,48 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_MUL) {
 
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "mul_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_AND) {
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "(" + argName0 + " & " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_OR) {
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "(" + argName0 + " | " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_EQ) {
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, " + argName0 + " == " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_NEQ) {
         cppCode =
-          binopCode(cppCode, cid, [](const string& argName0,
+          binopCode(cppCode, codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, " + argName0 + " != " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
-        cppCode = unopCode(cppCode, cid, [](const string& argName) {
+        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
             return "orr(" + argName + ")";
           });
         
       } else if (cell.getCellType() == CELL_TYPE_NOT) {
 
-        cppCode = unopCode(cppCode, cid, [](const string& argName) {
+        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
             return "~(" + argName + ")";
           });
         
@@ -826,7 +821,7 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
-        cppCode = unopCode(cppCode, cid, [](const string& argName) {
+        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
             return argName;
           });
       
@@ -838,10 +833,10 @@ namespace FlatCircuit {
       }
 
       if (sentToSeqPort) {
-        string oldOutName = "cell_" + to_string(cid) + "_" +
-          portIdString(PORT_ID_OUT) + "_old_value";
+        // string oldOutName = "cell_" + to_string(cid) + "_" +
+        //   portIdString(PORT_ID_OUT) + "_old_value";
 
-        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "] = " + oldOutName);
+        cppCode += ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "] = " + pastValueTmp);
 
       }
       //cout << "Done" << endl;
