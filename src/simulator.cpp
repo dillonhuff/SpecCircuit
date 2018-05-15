@@ -650,14 +650,13 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
         int outWidth = cell.getPortWidth(PORT_ID_OUT);
-        cppCode = unopCode(cppCode, codeState, cid, [outWidth](const string& argName) {
+        unopCode(codeState, cid, [outWidth](const string& argName) {
             return "zero_extend(" + to_string(outWidth) + ", " + argName + ")";
           });
 
       } else if (cell.getCellType() == CELL_TYPE_UGE) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " > " + argName1 + ") || (" +
                       argName0 + " == " + argName1 + "))";
@@ -665,48 +664,42 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_ULE) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " < " + argName1 + ") || (" + argName0 + " == " + argName1 + "))";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_UGT) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " > " + argName1 + "))";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_ULT) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, (" + argName0 + " < " + argName1 + "))";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_LSHR) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "lshr(" + argName0 + ", " + argName1 + ")";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_ASHR) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "ashr(" + argName0 + ", " + argName1 + ")";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_SHL) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "shl(" + argName0 + ", " + argName1 + ")";
                     });
@@ -716,71 +709,64 @@ namespace FlatCircuit {
         int start = bvToInt(cell.getParameterValue(PARAM_LOW));
         int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
 
-        cppCode = unopCode(cppCode, codeState, cid, [start, end](const string& argName) {
+        unopCode(codeState, cid, [start, end](const string& argName) {
             return "slice(" + argName + ", " + to_string(start) + ", " + to_string(end) + ")";
           });
         
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "sub_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_ADD) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "add_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_MUL) {
 
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "mul_general_width_bv(" + argName0 + ", " + argName1 + ")";
                     });
         
       } else if (cell.getCellType() == CELL_TYPE_AND) {
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "(" + argName0 + " & " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_OR) {
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "(" + argName0 + " | " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_EQ) {
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, " + argName0 + " == " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_NEQ) {
-        cppCode =
-          binopCode(cppCode, codeState, cid, [](const string& argName0,
+          binopCode(codeState, cid, [](const string& argName0,
                                      const string& argName1) {
                       return "BitVector(1, " + argName0 + " != " + argName1 + ")";
                     });
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
-        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
+        unopCode(codeState, cid, [](const string& argName) {
             return "orr(" + argName + ")";
           });
         
       } else if (cell.getCellType() == CELL_TYPE_NOT) {
 
-        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
+        unopCode(codeState, cid, [](const string& argName) {
             return "~(" + argName + ")";
           });
         
@@ -819,7 +805,7 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
-        cppCode = unopCode(cppCode, codeState, cid, [](const string& argName) {
+        unopCode(codeState, cid, [](const string& argName) {
             return argName;
           });
       
@@ -868,7 +854,7 @@ namespace FlatCircuit {
 
     CodeGenState codeState;
     for (int i = 0; i < updates.size(); i += 2) {
-      cppCode += combinationalBlockCode(updates[i + 0], codeState);
+      combinationalBlockCode(updates[i + 0], codeState);
       cppCode += sequentialBlockCode(updates[i + 1], codeState);
     }
 
