@@ -13,16 +13,23 @@ namespace FlatCircuit {
     CodeGenState() : uniqueNum(0) {}
 
     std::string getPortTemp(const CellId cid, const PortId pid) {
+      return getPortTemp(cid, pid, "");
+    }
+
+    std::string getPortTemp(const CellId cid,
+                            const PortId pid,
+                            const std::string& suffix) {
       std::string argName =
         "cell_" + std::to_string(cid) + "_" +
         portIdString(PORT_ID_IN) + "_" +
+        suffix + "_"
         std::to_string(uniqueNum);
 
       uniqueNum++;
 
       return argName;
     }
-
+    
     void addLine(const std::string& str) {
       codeLines.push_back(str);
     }
@@ -975,10 +982,12 @@ namespace FlatCircuit {
     void debugPrintPorts() const;
 
     std::string
-    sequentialBlockCode(const std::vector<SigPort>& levelized);
+    sequentialBlockCode(const std::vector<SigPort>& levelized,
+                        CodeGenState& state);
     
     std::string
-    combinationalBlockCode(const std::vector<SigPort>& levelized);
+    combinationalBlockCode(const std::vector<SigPort>& levelized,
+                           CodeGenState& state);
 
     std::string
     codeToMaterializeOffset(const CellId cid,
