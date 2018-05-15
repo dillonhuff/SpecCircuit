@@ -4,12 +4,11 @@
 
 namespace FlatCircuit {
 
-  struct BinopCode {
-    std::string in0;
-    std::string in1;
-    std::string cppCode;
-  };
-
+  static inline std::string ln(const std::string& s) {
+    return "\t" + s + ";\n";
+  }
+  
+  
   std::vector<SigPort>
   sequentialDependencies(const Cell& cell,
                          const PortId pid);
@@ -709,8 +708,6 @@ namespace FlatCircuit {
       return val;
     }
 
-    BinopCode addBinop(const std::string& allCode, const CellId cid) const;
-    
     void setFreshValue(const std::string& cellName,
                        const PortId id,
                        const BitVector& bv) {
@@ -956,6 +953,45 @@ namespace FlatCircuit {
                             const std::string& argName,
                             const std::map<SigPort, unsigned long>& offsets) const;
 
+    template<typename F>
+    std::string binopCode(const std::string& code,
+                     const CellId cid,
+                     F f) const {
+      std::string cppCode = code;
+      std::string argName0 = "cell_" + std::to_string(cid) + "_" +
+        portIdString(PORT_ID_IN0);
+      cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+
+      std::string argName1 = "cell_" + std::to_string(cid) + "_" +
+        portIdString(PORT_ID_IN1);
+
+      cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+
+      cppCode +=
+        ln("values[" +
+           std::to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " +
+           f(argName0, argName1));
+
+      return cppCode;
+    }
+
+    template<typename F>
+    std::string unopCode(const std::string& code,
+                         const CellId cid,
+                         F f) const {
+
+      std::string cppCode = code;
+      std::string argName =
+        "cell_" + std::to_string(cid) + "_" + portIdString(PORT_ID_IN);
+
+      cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+
+      cppCode += ln("values[" + std::to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + f(argName));
+
+      return cppCode;
+    }
+    
+    
     ~Simulator();
     
   };
