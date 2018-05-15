@@ -623,6 +623,8 @@ namespace FlatCircuit {
       REQUIRE(clkPort.has_value());
       REQUIRE(def.getPortName(clkPort.get_value()) == "clk_in");
 
+      REQUIRE(allPosedge(def));
+
       sim.refreshConstants();
 
       REQUIRE(sim.compileCircuit());

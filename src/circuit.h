@@ -769,6 +769,15 @@ namespace FlatCircuit {
       return cellList;
     }
 
+    PortId portIdForCell(const CellId cid) const {
+      for (auto pp : portsToCells) {
+        if (pp.second == cid) {
+          return pp.first;
+        }
+      }
+      assert(false);
+    }
+
     const std::map<CellId, Cell>& getCellMap() const {
       return cells;
     }
@@ -1009,7 +1018,7 @@ namespace FlatCircuit {
       return id;
     }
 
-    std::string getCellName(const CellId cellId) {
+    std::string getCellName(const CellId cellId) const {
       assert(contains_key(cellId, cellIdsToNames));
       return cellIdsToNames.at(cellId);
     }
