@@ -748,6 +748,7 @@ namespace FlatCircuit {
     std::set<CellId> portCells;
 
     std::map<std::string, PortId> portNames;
+    std::map<PortId, std::string> portIdsToNames;
     std::map<std::string, CellId> cellNames;
     std::map<CellId, std::string> cellIdsToNames;
 
@@ -928,6 +929,7 @@ namespace FlatCircuit {
       // TODO: Add cell ports
       ports[pid] = Port{portWidth, tp};
       portNames[name] = pid;
+      portIdsToNames[pid] = name;
 
       CellType cellTp = CELL_TYPE_PORT;
 
@@ -960,6 +962,12 @@ namespace FlatCircuit {
     
     std::string cellName(const CellId id) const {
       return map_find(id, cellIdsToNames);
+    }
+
+    std::string getPortName(const PortId pid) const {
+      assert(contains_key(pid, portIdsToNames));
+
+      return map_find(pid, portIdsToNames);
     }
 
     CellId getPortCellId(const std::string& name) const {

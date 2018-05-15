@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES(./src/)
 SET(CPP_FILES ./src/simulator.cpp
               ./src/convert_coreir.cpp
               ./src/circuit.cpp
+              ./src/analysis.cpp
               ./src/transformations.cpp)
 
 SET(TEST_FILES ./test/test_circuit.cpp

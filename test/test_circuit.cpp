@@ -2,6 +2,7 @@
 
 #include "catch.hpp"
 
+#include "analysis.h"
 #include "convert_coreir.h"
 #include "transformations.h"
 #include "utils.h"
@@ -617,6 +618,10 @@ namespace FlatCircuit {
 
       foldConstants(sim.def, sim.allRegisterValues());
       deleteDeadInstances(sim.def);
+
+      dbhc::maybe<PortId> clkPort = getTrueClockPort(sim.def);
+      REQUIRE(clkPort.has_value());
+      REQUIRE(def.getPortName(clkPort.get_value()) == "clk_in");
 
       sim.refreshConstants();
 
