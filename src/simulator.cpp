@@ -640,29 +640,37 @@ namespace FlatCircuit {
       cppCode += "\t{\n";
 
       bool sentToSeqPort = false;
-      PortId outPort = PORT_ID_OUT;
-      if (elem(outPort, cell.outputPorts())) {
-        for (auto& receiverBus : cell.getPortReceivers(PORT_ID_OUT)) {
-          for (auto& sigBit : receiverBus) {
-
-            if (notEmpty(sigBit)) {
-              if ((sigBit.port != PORT_ID_ARST) &&
-                  (sigBit.port != PORT_ID_CLK)) {
-              } else {
-                sentToSeqPort = true;
-                break;
-              }
-            }
-
-          }
-        }
-
-        if (sentToSeqPort) {
-          string oldOutName = "cell_" + to_string(cid) + "_" +
-            portIdString(PORT_ID_OUT) + "_old_value";
-          cppCode += ln("BitVector " + oldOutName + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]");
+      for (auto outPort : cell.outputPorts()) {
+        if (sequentialDependencies(cell, outPort).size() > 0) {
+          sentToSeqPort = true;
+          break;
         }
       }
+
+      // bool sentToSeqPort = false;
+      // PortId outPort = PORT_ID_OUT;
+      // if (elem(outPort, cell.outputPorts())) {
+      //   for (auto& receiverBus : cell.getPortReceivers(PORT_ID_OUT)) {
+      //     for (auto& sigBit : receiverBus) {
+
+      //       if (notEmpty(sigBit)) {
+      //         if ((sigBit.port != PORT_ID_ARST) &&
+      //             (sigBit.port != PORT_ID_CLK)) {
+      //         } else {
+      //           sentToSeqPort = true;
+      //           break;
+      //         }
+      //       }
+
+      //     }
+      //   }
+
+      if (sentToSeqPort) {
+        string oldOutName = "cell_" + to_string(cid) + "_" +
+          portIdString(PORT_ID_OUT) + "_old_value";
+        cppCode += ln("BitVector " + oldOutName + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]");
+      }
+        //    }
       
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
@@ -919,35 +927,10 @@ namespace FlatCircuit {
 
     assert((updates.size() % 2) == 0);
 
-    // dbhc::maybe<PortId> clkPortM = getTrueClockPort(def);
-    // if (allPosedge(def) && clkPortM.has_value()) {
-    //   cout << "All posedge elements with a single clock" << endl;
-      // assert(updates.size() == 4);
-      // assert(updates[3].size() == 0);
-
-      // CellId cid = def.getPortCellId(def.getPortName(clkPortM.get_value()));
-
-      // string clkVar = "values[" +
-      //   to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]";
-      // string lastClkVar = "values[" +
-      //   to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "]";
-
-      // cppCode += "if (posedge(" + lastClkVar + ", " + clkVar + ")) {\n";
-
-      // cppCode += combinationalBlockCode(updates[0]);
-      // cppCode += sequentialBlockCode(updates[1]);
-
-      // cppCode += "\n}\n";
-
-      // cppCode += combinationalBlockCode(updates[2]);
-    //    }
-
-    //else {
     for (int i = 0; i < updates.size(); i += 2) {
       cppCode += combinationalBlockCode(updates[i + 0]);
       cppCode += sequentialBlockCode(updates[i + 1]);
     }
-      //    }
 
     cppCode += "}";
 
