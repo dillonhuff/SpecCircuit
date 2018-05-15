@@ -669,6 +669,35 @@ namespace FlatCircuit {
 
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
 
+      int nCycles = 10000;
+      cout << "Running memory core for " << nCycles << endl;
+
+      auto start = high_resolution_clock::now();
+
+      BitVector input = BitVector(16, 0);
+      for (int i = 0; i < nCycles; i++) {
+        // if ((i % 100) == 0) {
+        //   cout << "i = " << i << endl;
+        // }
+
+        sim.setFreshValue("wen_in", BitVec(1, i % 2));
+        sim.setFreshValue("clk_in", BitVec(1, 0));
+        sim.update();
+
+        input = BitVector(16, i);
+        sim.setFreshValue("data_in", input);
+
+        sim.setFreshValue("clk_in", BitVec(1, 1));
+        sim.update();
+      }
+
+      auto stop = high_resolution_clock::now();
+
+      auto duration = duration_cast<milliseconds>(stop - start);
+
+      cout << "Time taken for " << nCycles << ": "
+           << duration.count() << " milliseconds" << endl;
+      
     }
 
   }    

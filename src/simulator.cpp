@@ -495,8 +495,7 @@ namespace FlatCircuit {
       for (int offset = 0; offset < drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
         string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
-        // string valString = "values[" + to_string(map_find(sp, offsets)) +
-        //   "].get(" + to_string(driverBit.offset) + ")";
+
         cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
       }
     }
@@ -920,33 +919,35 @@ namespace FlatCircuit {
 
     assert((updates.size() % 2) == 0);
 
-    dbhc::maybe<PortId> clkPortM = getTrueClockPort(def);
-    if (allPosedge(def) && clkPortM.has_value()) {
-      cout << "All posedge elements with a single clock" << endl;
-      assert(updates.size() == 4);
-      assert(updates[3].size() == 0);
+    // dbhc::maybe<PortId> clkPortM = getTrueClockPort(def);
+    // if (allPosedge(def) && clkPortM.has_value()) {
+    //   cout << "All posedge elements with a single clock" << endl;
+      // assert(updates.size() == 4);
+      // assert(updates[3].size() == 0);
 
-      CellId cid = def.getPortCellId(def.getPortName(clkPortM.get_value()));
+      // CellId cid = def.getPortCellId(def.getPortName(clkPortM.get_value()));
 
-      string clkVar = "values[" +
-        to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]";
-      string lastClkVar = "values[" +
-        to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "]";
+      // string clkVar = "values[" +
+      //   to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]";
+      // string lastClkVar = "values[" +
+      //   to_string(map_find({cid, PORT_ID_OUT}, pastValueOffsets)) + "]";
 
-      cppCode += "if (posedge(" + lastClkVar + ", " + clkVar + ")) {\n";
+      // cppCode += "if (posedge(" + lastClkVar + ", " + clkVar + ")) {\n";
 
-      cppCode += combinationalBlockCode(updates[0]);
-      cppCode += sequentialBlockCode(updates[1]);
+      // cppCode += combinationalBlockCode(updates[0]);
+      // cppCode += sequentialBlockCode(updates[1]);
 
-      cppCode += "\n}\n";
+      // cppCode += "\n}\n";
 
-      cppCode += combinationalBlockCode(updates[2]);
-    } else {
-      for (int i = 0; i < updates.size(); i += 2) {
-        cppCode += combinationalBlockCode(updates[i + 0]);
-        cppCode += sequentialBlockCode(updates[i + 1]);
-      }
+      // cppCode += combinationalBlockCode(updates[2]);
+    //    }
+
+    //else {
+    for (int i = 0; i < updates.size(); i += 2) {
+      cppCode += combinationalBlockCode(updates[i + 0]);
+      cppCode += sequentialBlockCode(updates[i + 1]);
     }
+      //    }
 
     cppCode += "}";
 
