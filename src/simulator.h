@@ -22,7 +22,7 @@ namespace FlatCircuit {
       std::string argName =
         "cell_" + std::to_string(cid) + "_" +
         portIdString(PORT_ID_IN) + "_" +
-        suffix + "_"
+        suffix + "_" +
         std::to_string(uniqueNum);
 
       uniqueNum++;

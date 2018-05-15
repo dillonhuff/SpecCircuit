@@ -517,29 +517,29 @@ namespace FlatCircuit {
 
       cppCode += ln("// ----- Sequential update for cell " + def.cellName(cid));
 
-      cppCode += "\t{\n";      
+      //      cppCode += "\t{\n";      
 
       CellType tp = cell.getCellType();
       if (tp == CELL_TYPE_REG_ARST) {
 
         //string inVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
-        string inVar = codeState.getTempPort(cid, PORT_ID_IN); //"cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
+        string inVar = codeState.getPortTemp(cid, PORT_ID_IN); //"cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, inVar);
 
         //string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
-        string clkVar = codeState.getTempPort(cid, PORT_ID_CLK);
+        string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
         cppCode += codeToMaterialize(cid, PORT_ID_CLK, clkVar);
 
         //string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
-        string lastClkVar = codeState.getTempPort(cid, PORT_ID_CLK, "last");
+        string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
 
         //string rstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST);
-        string rstVar = codeState.getTempPort(cid, PORT_ID_ARST);
+        string rstVar = codeState.getPortTemp(cid, PORT_ID_ARST);
         cppCode += codeToMaterialize(cid, PORT_ID_ARST, rstVar);
 
         //string lastRstVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_ARST) + "_last";
-        string lastRstVar = codeState.getTempPort(cid, PORT_ID_ARST, "last");
+        string lastRstVar = codeState.getPortTemp(cid, PORT_ID_ARST, "last");
         cppCode += codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, pastValueOffsets);
 
         string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
@@ -560,14 +560,14 @@ namespace FlatCircuit {
       } else if (tp == CELL_TYPE_REG) {
 
         //string inVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_IN);
-        string inVar = codeState.getTempPort(cid, PORT_ID_IN);
+        string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
         cppCode += codeToMaterialize(cid, PORT_ID_IN, inVar);
 
         //string clkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK);
-        string clkVar = codeState.getTempPort(cid, PORT_ID_CLK);
+        string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
         cppCode += codeToMaterialize(cid, PORT_ID_CLK, clkVar);
         //string lastClkVar = "cell_" + to_string(cid) + "_" + portIdString(PORT_ID_CLK) + "_last";
-        string lastClkVar = codeState.getTempPort(cid, PORT_ID_CLK, "last");
+        string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         cppCode += codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets);
 
         string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
@@ -616,7 +616,7 @@ namespace FlatCircuit {
         assert(false);
       }
 
-      cppCode += "\t}\n";
+      //cppCode += "\t}\n";
 
     }
 
@@ -626,7 +626,7 @@ namespace FlatCircuit {
 
   std::string
   Simulator::combinationalBlockCode(const std::vector<SigPort>& levelized,
-                                    const CodeGenState& codeState) {
+                                    CodeGenState& codeState) {
 
     string cppCode = "";
 
@@ -637,7 +637,7 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       cppCode += ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port));
 
-      cppCode += "\t{\n";
+      //      cppCode += "\t{\n";
 
       bool sentToSeqPort = false;
       for (auto outPort : cell.outputPorts()) {
@@ -863,7 +863,7 @@ namespace FlatCircuit {
       }
       //cout << "Done" << endl;
 
-      cppCode += "\t}\n";
+      //      cppCode += "\t}\n";
     }
 
 
