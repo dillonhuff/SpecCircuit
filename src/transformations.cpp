@@ -820,12 +820,23 @@ namespace FlatCircuit {
     cout << "Starting to remove duplicate circuit elements, num cells = " << def.numCells() << endl;
 
     vector<CellId> cellList = def.getCellList();
+    set<CellId> deleted;
     for (int i = 0; i < (int) cellList.size(); i++) {
       const CellId replacerId = cellList[i];
+
+      if (elem(replacerId, deleted)) {
+        continue;
+      }
+
       const Cell& replacer = def.getCellRefConst(replacerId);
-      
+
       for (int j = i + 1; j < (int) cellList.size(); j++) {
         const CellId toReplaceId = cellList[j];
+
+        if (elem(toReplaceId, deleted)) {
+          continue;
+        }
+
         const Cell& toReplace = def.getCellRefConst(toReplaceId);
 
         assert(toReplaceId != replacerId);
@@ -843,48 +854,31 @@ namespace FlatCircuit {
           bool in1Same = driversMatch(repIn1Drivers, otherIn1Drivers);
 
           if (in0Same && in1Same) {
-            cout << "Can replace\n\t" << def.getCellName(toReplaceId) << "\n\twith\n\t" << def.getCellName(replacerId) << endl;
+            //            cout << "Can replace\n\t" << def.getCellName(toReplaceId) << "\n\twith\n\t" << def.getCellName(replacerId) << endl;
+
+            vector<set<SignalBit> > receivers =
+              toReplace.getPortReceivers(PORT_ID_OUT);
+
+            for (int i = 0; i < (int) receivers.size(); i++) {
+              SignalBit freshDriver{replacerId, PORT_ID_OUT, i};
+              for (auto rcv : receivers[i]) {
+                def.setDriver(rcv, freshDriver);
+              }
+            }
+
+            //            cout << "Deleting cell" << endl;
+            def.deleteCell(toReplaceId);
+            deleted.insert(toReplaceId);
+
+            //            cout << "Done deleting" << endl;
+            
           } else {
-            cout << "CANT REPLACE" << endl;
+            //cout << "CANT REPLACE" << endl;
           }
           
         }
       }
     }
-
-    // bool removedOne = true;
-    //     const CellId cid = ctp.first;
-    //     const Cell& cell = def.getCellRefConst(cid);
-
-    //     if (cell.getCellType() == CELL_TYPE_EQ) {
-    //       //            cout << "Possible replacement" << endl;
-    //       auto otherIn0Drivers = cell.getDrivers(PORT_ID_IN0);
-    //       auto otherIn1Drivers = cell.getDrivers(PORT_ID_IN1);
-
-    //       const Cell& replaceCell = def.getCellRefConst(replacementCell);
-    //       auto repIn0Drivers = replaceCell.getDrivers(PORT_ID_IN0);
-    //       auto repIn1Drivers = replaceCell.getDrivers(PORT_ID_IN1);
-
-    //       if ((repIn0Drivers.size() == otherIn0Drivers.size()) &&
-    //           (repIn1Drivers.size() == otherIn1Drivers.size())) {
-    //         cout << "\tSame size equals" << endl;
-
-    //         bool in0Same = driversMatch(repIn0Drivers, otherIn0Drivers);
-    //         bool in1Same = driversMatch(repIn1Drivers, otherIn1Drivers);
-
-    //         if (in0Same && in1Same) {
-    //           cout << "\tInputs are the same to " << def.getCellName(cid)
-    //                << "\nand\n\t" << def.getCellName(replacementCell) << endl;
-    //         }
-
-    //       }
-    //     }
-    //   }
-
-    //   if (replacementCell == 0) {
-    //     assert(false);
-    //   }
-    // }
 
     cout << "Done removing duplicates, num cells = " << def.numCells() << endl;
   }
