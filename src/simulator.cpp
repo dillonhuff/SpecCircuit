@@ -938,7 +938,29 @@ namespace FlatCircuit {
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
   }
-  
+
+  // An update to a node is dead if:
+  // 1. There is another update to the same node later
+  // 2. Nothing the node drives is updated between the current and next update
+  std::vector<std::vector<SigPort> >
+  deleteDeadUpdates(const std::vector<std::vector<SigPort> >& filteredUpdates,
+                    const CellDefinition& def) {
+    assert((filteredUpdates.size() % 2) == 0);
+
+    std::vector<std::vector<SigPort> > updates;
+    for (int i = 0; i < (int) filteredUpdates.size(); i += 2) {
+      vector<SigPort> combUpdates = updates[i];
+      bool updateLater = false;
+      bool anyUseBeforeUpdate = false;
+      
+      for (int j = i + 1; j < (int) filteredUpdates.size(); j++) {
+        
+      }
+    }
+    
+    return updates;
+  }
+
   bool Simulator::compileCircuit() {
 
     vector<vector<SigPort> > updates = staticSimulationEvents(def);
@@ -965,7 +987,8 @@ namespace FlatCircuit {
 
       filteredUpdates.push_back(filteredReversed);
     }
-    compileLevelizedCircuit(filteredUpdates);
+
+    compileLevelizedCircuit(deleteDeadUpdates(filteredUpdates, def));
 
     return updates.size() > 1;
   }

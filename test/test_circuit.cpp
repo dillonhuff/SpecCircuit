@@ -1489,6 +1489,8 @@ namespace FlatCircuit {
 
     cout << "# of cells after constant folding = " << def.numCells() << endl;
 
+    deDuplicate(def);
+    
     sim.refreshConstants();
 
     REQUIRE(definitionIsConsistent(def));
