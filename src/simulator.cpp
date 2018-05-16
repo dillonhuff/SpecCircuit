@@ -257,7 +257,6 @@ namespace FlatCircuit {
   void updateDependencies(const Cell& cell,
                           const PortId pid,
                           set<SigPort>& freshChanges,
-                          //                          UniqueVector<SigPort>& combChanges,
                           std::vector<SigPort>& combChanges,
                           std::set<SigPort>& seqChanges,
                           const CellDefinition& def) {
@@ -404,7 +403,8 @@ namespace FlatCircuit {
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
     int ret =
-      system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
+      //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
+      system(("g++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
     //    sleep(2);
 
@@ -575,8 +575,9 @@ namespace FlatCircuit {
         string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets));
 
-        string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
+        string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, *this);
+        // string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
 
         string wdataName = codeState.getPortTemp(cid, PORT_ID_WDATA);
         codeState.addLine(codeToMaterialize(cid, PORT_ID_WDATA, wdataName));

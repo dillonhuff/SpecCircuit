@@ -4,6 +4,8 @@
 
 namespace FlatCircuit {
 
+  class Simulator;
+  
   struct CodeGenState {
     unsigned long long uniqueNum;
     std::vector<std::string> codeLines;
@@ -26,6 +28,15 @@ namespace FlatCircuit {
         std::to_string(uniqueNum);
 
       uniqueNum++;
+
+      return argName;
+    }
+
+    std::string getVariableName(const CellId cid,
+                                const PortId pid,
+                                Simulator& sim) {
+      std::string argName = getPortTemp(cid, pid);
+      addLine(sim.codeToMaterialize(cid, pid, argName));
 
       return argName;
     }
