@@ -443,7 +443,7 @@ namespace FlatCircuit {
   Simulator::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
                                      const std::string& argName,
-                                     const std::map<SigPort, unsigned long>& offsets) {
+                                     const std::map<SigPort, unsigned long>& offsets) const {
     return valueStore.codeToMaterializeOffset(cid, pid, argName, offsets);
   }
 
@@ -533,14 +533,17 @@ namespace FlatCircuit {
       CellType tp = cell.getCellType();
       if (tp == CELL_TYPE_REG_ARST) {
 
-        string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
+        string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
+        // string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
 
-        string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
 
-        string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
+        string lastClkVar = codeState.getLastValueVariableOffset(cid, PORT_ID_CLK);
+        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
+        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
 
         string rstVar = codeState.getPortTemp(cid, PORT_ID_ARST);
         codeState.addLine(codeToMaterialize(cid, PORT_ID_ARST, rstVar));

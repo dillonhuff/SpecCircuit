@@ -150,14 +150,23 @@ namespace FlatCircuit {
       return argName;
     }
 
-    // std::string getVariableName(const CellId cid,
-    //                             const PortId pid,
-    //                             Simulator& sim) {
-    //   std::string argName = getPortTemp(cid, pid);
-    //   addLine(sim.codeToMaterialize(cid, pid, argName));
+    std::string getVariableName(const CellId cid,
+                                const PortId pid,
+                                ValueStore& store) {
+      std::string argName = getPortTemp(cid, pid);
+      addLine(store.codeToMaterialize(cid, pid, argName));
 
-    //   return argName;
-    // }
+      return argName;
+    }
+
+    std::string getLastValueVariableName(const CellId cid,
+                                         const PortId pid,
+                                         ValueStore& store) {
+      std::string argName = getPortTemp(cid, pid, "last");
+      addLine(store.codeToMaterializeOffset(cid, pid, argName, store.pastValueOffsets));
+
+      return argName;
+    }
     
     void addLine(const std::string& str) {
       codeLines.push_back(str);
