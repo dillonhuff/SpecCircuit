@@ -404,7 +404,7 @@ namespace FlatCircuit {
                      const std::string& targetBinary) {
     int ret =
       //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      system(("g++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
+      system(("g++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
 
     //    sleep(2);
 
@@ -575,9 +575,9 @@ namespace FlatCircuit {
         string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets));
 
-        string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, *this);
-        // string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
+        //string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, *this);
+        string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
+        codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
 
         string wdataName = codeState.getPortTemp(cid, PORT_ID_WDATA);
         codeState.addLine(codeToMaterialize(cid, PORT_ID_WDATA, wdataName));
@@ -586,7 +586,7 @@ namespace FlatCircuit {
         codeState.addLine(codeToMaterialize(cid, PORT_ID_WEN, wenName));
         
         string updateValueClk = "values[" +
-          to_string(map_find(cid, memoryOffsets)) + " + " +
+          to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
           "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
 
         codeState.addLine("\tif ((" + wenName + " == BitVector(1, 1))");
@@ -773,7 +773,7 @@ namespace FlatCircuit {
         codeState.addLine(codeToMaterialize(cid, PORT_ID_RADDR, raddrName));
 
         
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, portOffsets)) + "] = values[" + to_string(map_find(cid, memoryOffsets)) + " + " +
+        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
                              "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
         
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
@@ -936,8 +936,8 @@ namespace FlatCircuit {
 
   void Simulator::debugPrintTableValues() const {
     cout << "Table values" << endl;
-    for (int i = 0; i < (int) simValueTable.size(); i++) {
-      cout << "\t" << i << " = " << simValueTable.at(i) << endl;
+    for (int i = 0; i < (int) valueStore.simValueTable.size(); i++) {
+      cout << "\t" << i << " = " << valueStore.simValueTable.at(i) << endl;
     }
   }
 
