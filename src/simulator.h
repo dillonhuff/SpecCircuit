@@ -111,7 +111,17 @@ namespace FlatCircuit {
         return pastValueOffset(driverBit.cell, driverBit.port);
       }
     }
-    
+
+    std::string
+    codeToMaterializeOffset(const CellId cid,
+                            const PortId pid,
+                            const std::string& argName,
+                            const std::map<SigPort, unsigned long>& offsets) const;
+
+    std::string codeToMaterialize(const CellId cid,
+                                  const PortId pid,
+                                  const std::string& argName) const;
+
   };
 
   struct CodeGenState {

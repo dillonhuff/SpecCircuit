@@ -443,6 +443,14 @@ namespace FlatCircuit {
   Simulator::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
                                      const std::string& argName,
+                                     const std::map<SigPort, unsigned long>& offsets) {
+    return valueStore.codeToMaterializeOffset(cid, pid, argName, offsets);
+  }
+
+  std::string
+  ValueStore::codeToMaterializeOffset(const CellId cid,
+                                     const PortId pid,
+                                     const std::string& argName,
                                      const std::map<SigPort, unsigned long>& offsets) const {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
@@ -499,11 +507,17 @@ namespace FlatCircuit {
     return cppCode;
     
   }
+
+  std::string ValueStore::codeToMaterialize(const CellId cid,
+                                            const PortId pid,
+                                            const std::string& argName) const {
+    return codeToMaterializeOffset(cid, pid, argName, portOffsets);
+  }
   
   std::string Simulator::codeToMaterialize(const CellId cid,
                                            const PortId pid,
                                            const std::string& argName) const {
-    return codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
+    return valueStore.codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
   }
 
   std::string
