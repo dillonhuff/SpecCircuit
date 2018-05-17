@@ -541,15 +541,17 @@ namespace FlatCircuit {
         // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
         // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
 
-        string lastClkVar = codeState.getLastValueVariableOffset(cid, PORT_ID_CLK);
+        string lastClkVar = codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
 
-        string rstVar = codeState.getPortTemp(cid, PORT_ID_ARST);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_ARST, rstVar));
+        string rstVar = codeState.getVariableName(cid, PORT_ID_ARST, valueStore);
+        // string rstVar = codeState.getPortTemp(cid, PORT_ID_ARST);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_ARST, rstVar));
 
-        string lastRstVar = codeState.getPortTemp(cid, PORT_ID_ARST, "last");
-        codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, valueStore.pastValueOffsets));
+        string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
+        // string lastRstVar = codeState.getPortTemp(cid, PORT_ID_ARST, "last");
+        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, valueStore.pastValueOffsets));
 
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
