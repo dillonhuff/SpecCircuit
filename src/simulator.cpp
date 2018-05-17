@@ -570,14 +570,20 @@ namespace FlatCircuit {
         
       } else if (tp == CELL_TYPE_REG) {
 
-        string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
 
-        string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
+        string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+        
+        // string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
 
-        string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
+        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
+
+        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
+        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
 
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
