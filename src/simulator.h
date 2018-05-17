@@ -4,8 +4,15 @@
 
 namespace FlatCircuit {
 
-  class Simulator;
-  
+  class ValueStore {
+  public:
+    std::vector<BitVector> simValueTable;
+    std::map<SigPort, unsigned long> portOffsets;
+    std::map<CellId, unsigned long> registerOffsets;
+    std::map<SigPort, unsigned long> pastValueOffsets;
+    std::map<CellId, unsigned long> memoryOffsets;
+  };
+
   struct CodeGenState {
     unsigned long long uniqueNum;
     std::vector<std::string> codeLines;
@@ -32,14 +39,14 @@ namespace FlatCircuit {
       return argName;
     }
 
-    std::string getVariableName(const CellId cid,
-                                const PortId pid,
-                                Simulator& sim) {
-      std::string argName = getPortTemp(cid, pid);
-      addLine(sim.codeToMaterialize(cid, pid, argName));
+    // std::string getVariableName(const CellId cid,
+    //                             const PortId pid,
+    //                             Simulator& sim) {
+    //   std::string argName = getPortTemp(cid, pid);
+    //   addLine(sim.codeToMaterialize(cid, pid, argName));
 
-      return argName;
-    }
+    //   return argName;
+    // }
     
     void addLine(const std::string& str) {
       codeLines.push_back(str);
@@ -71,11 +78,7 @@ namespace FlatCircuit {
   
   class Simulator {
 
-    std::vector<BitVector> simValueTable;
-    std::map<SigPort, unsigned long> portOffsets;
-    std::map<CellId, unsigned long> registerOffsets;
-    std::map<SigPort, unsigned long> pastValueOffsets;
-    std::map<CellId, unsigned long> memoryOffsets;
+    ValueStore valueStore;
 
     void* libHandle;
     void* simulateFuncHandle;
@@ -242,7 +245,7 @@ namespace FlatCircuit {
         void (*simFunc)(std::vector<BitVector>&) =
           reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
-        simFunc(simValueTable);
+        simFunc(valueStore.simValueTable);
         return;
       }
 
@@ -785,7 +788,7 @@ namespace FlatCircuit {
                              const int offset) const {
       assert(offset >= 0);
 
-      return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
+      return valueStore.simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
     }
 
     void initMemory(const CellId cid) {
@@ -797,10 +800,10 @@ namespace FlatCircuit {
 
       BitVector defaultValue(memWidth, 0);
 
-      unsigned long nextInd = simValueTable.size();
+      unsigned long nextInd = valueStore.simValueTable.size();
       memoryOffsets[cid] = nextInd;
       for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
-        simValueTable.push_back(defaultValue);
+        valueStore.simValueTable.push_back(defaultValue);
       }
     }
 
@@ -811,7 +814,7 @@ namespace FlatCircuit {
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
-      simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
+      valueStore.simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
         writeData;
 
     }
@@ -819,8 +822,8 @@ namespace FlatCircuit {
     unsigned long portValueOffset(const CellId cid,
                                   const PortId pid) {
       if (!contains_key({cid, pid}, portOffsets)) {
-        unsigned long nextInd = simValueTable.size();
-        simValueTable.push_back(BitVector(1, 0));
+        unsigned long nextInd = valueStore.simValueTable.size();
+        valueStore.simValueTable.push_back(BitVector(1, 0));
         portOffsets[{cid, pid}] = nextInd;
 
         return nextInd;
@@ -833,32 +836,32 @@ namespace FlatCircuit {
                       const PortId pid,
                       const BitVector& bv) {
       if (!contains_key({cid, pid}, portOffsets)) {
-        unsigned long nextInd = simValueTable.size();
+        unsigned long nextInd = valueStore.simValueTable.size();
         portOffsets[{cid, pid}] = nextInd;
-        simValueTable.push_back(bv);
+        valueStore.simValueTable.push_back(bv);
       }
 
-      simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+      valueStore.simValueTable[map_find({cid, pid}, portOffsets)] = bv;
     }
 
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
-      return simValueTable[map_find({cid, pid}, portOffsets)];
+      return valueStore.simValueTable[map_find({cid, pid}, portOffsets)];
     }
 
     void setRegisterValue(const CellId cid,
                           const BitVector& bv) {
       if (!contains_key(cid, registerOffsets)) {
-        unsigned long nextInd = simValueTable.size();
+        unsigned long nextInd = valueStore.simValueTable.size();
         registerOffsets[cid] = nextInd;
-        simValueTable.push_back(bv);
+        valueStore.simValueTable.push_back(bv);
       }
 
-      simValueTable[map_find(cid, registerOffsets)] = bv;
+      valueStore.simValueTable[map_find(cid, registerOffsets)] = bv;
     }
 
     BitVector getRegisterValue(const CellId cid) const {
-      return simValueTable[map_find(cid, registerOffsets)];
+      return valueStore.simValueTable[map_find(cid, registerOffsets)];
     }
 
     unsigned long pastValueOffset(const CellId cid,
@@ -868,8 +871,8 @@ namespace FlatCircuit {
       if (cell.getPortType(pid) == PORT_TYPE_OUT) {
 
         if (!contains_key({cid, pid}, pastValueOffsets)) {
-          unsigned long nextInd = simValueTable.size();
-          simValueTable.push_back(BitVector(1, 0));
+          unsigned long nextInd = valueStore.simValueTable.size();
+          valueStore.simValueTable.push_back(BitVector(1, 0));
           
           pastValueOffsets[{cid, pid}] = nextInd;
 
@@ -902,12 +905,12 @@ namespace FlatCircuit {
       // assert(bv.bitLength() == 1);
 
       unsigned long offset = pastValueOffset(cid, pid);
-      simValueTable[offset] = bv;
+      valueStore.simValueTable[offset] = bv;
     }
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
-      return simValueTable[pastValueOffset(cid, pid)];
+      return valueStore.simValueTable[pastValueOffset(cid, pid)];
     }
     
     std::map<CellId, BitVector> allRegisterValues() const {
