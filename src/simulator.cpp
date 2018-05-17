@@ -594,21 +594,27 @@ namespace FlatCircuit {
 
       } else if (tp == CELL_TYPE_MEM) {
 
-        string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+        
+        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
 
-        string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
+        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
+        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
 
-        //string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, *this);
-        string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
+        string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, valueStore);
+        // string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
 
-        string wdataName = codeState.getPortTemp(cid, PORT_ID_WDATA);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_WDATA, wdataName));
+        string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
+        // string wdataName = codeState.getPortTemp(cid, PORT_ID_WDATA);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WDATA, wdataName));
 
-        string wenName = codeState.getPortTemp(cid, PORT_ID_WEN);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_WEN, wenName));
+        string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
+        // string wenName = codeState.getPortTemp(cid, PORT_ID_WEN);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WEN, wenName));
         
         string updateValueClk = "values[" +
           to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +

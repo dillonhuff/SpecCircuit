@@ -1161,11 +1161,14 @@ namespace FlatCircuit {
     unopCode(//const std::string& code,
              CodeGenState& codeState,
              const CellId cid,
-             F f) const {
+             F f) {
 
       std::string cppCode = ""; //code;
-      std::string argName = codeState.getPortTemp(cid, PORT_ID_IN);
-      cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+
+      // std::string argName = codeState.getPortTemp(cid, PORT_ID_IN);
+      // cppCode += codeToMaterialize(cid, PORT_ID_IN, argName);
+
+      std::string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
 
       cppCode += ln("values[" + std::to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + f(argName));
 
