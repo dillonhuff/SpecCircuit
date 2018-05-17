@@ -870,16 +870,16 @@ namespace FlatCircuit {
 
       if (cell.getPortType(pid) == PORT_TYPE_OUT) {
 
-        if (!contains_key({cid, pid}, pastValueOffsets)) {
+        if (!contains_key({cid, pid}, valueStore.pastValueOffsets)) {
           unsigned long nextInd = valueStore.simValueTable.size();
           valueStore.simValueTable.push_back(BitVector(1, 0));
           
-          pastValueOffsets[{cid, pid}] = nextInd;
+          valueStore.pastValueOffsets[{cid, pid}] = nextInd;
 
           return nextInd;
         }
 
-        return map_find({cid, pid}, pastValueOffsets);
+        return map_find({cid, pid}, valueStore.pastValueOffsets);
 
       } else {
         assert(cell.getPortType(pid) == PORT_TYPE_IN);
