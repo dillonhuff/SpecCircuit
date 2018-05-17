@@ -1129,21 +1129,22 @@ namespace FlatCircuit {
                             const std::map<SigPort, unsigned long>& offsets) const;
 
     template<typename F>
-    //    std::string
     void
-    binopCode(//const std::string& code,
-                   CodeGenState& codeState,
-                   const CellId cid,
-                   F f) const {
+    binopCode(CodeGenState& codeState,
+              const CellId cid,
+              F f) {
       std::string cppCode = "";
-      std::string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0); //"cell_" + std::to_string(cid) + "_" +
-        //        portIdString(PORT_ID_IN0);
-      cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
+      // std::string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0); //"cell_" + std::to_string(cid) + "_" +
+      //   //        portIdString(PORT_ID_IN0);
+      // cppCode += codeToMaterialize(cid, PORT_ID_IN0, argName0);
 
-      std::string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1); //"cell_" + std::to_string(cid) + "_" +
-        //        portIdString(PORT_ID_IN1);
+      std::string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
+      std::string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
 
-      cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
+      // std::string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1); //"cell_" + std::to_string(cid) + "_" +
+      //   //        portIdString(PORT_ID_IN1);
+
+      // cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
       cppCode +=
         ln("values[" +
