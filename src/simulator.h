@@ -9,6 +9,7 @@ namespace FlatCircuit {
     std::vector<BitVector> simValueTable;
     std::map<SigPort, unsigned long> portOffsets;
     std::map<CellId, unsigned long> memoryOffsets;
+    std::map<CellId, unsigned long> registerOffsets;
 
     // Internal setters / getters
     BitVector getMemoryValue(const CellId cid,
@@ -45,6 +46,21 @@ namespace FlatCircuit {
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       return simValueTable[map_find({cid, pid}, portOffsets)];
+    }
+
+    void setRegisterValue(const CellId cid,
+                          const BitVector& bv) {
+      if (!contains_key(cid, registerOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        registerOffsets[cid] = nextInd;
+        simValueTable.push_back(bv);
+      }
+
+      simValueTable[map_find(cid, registerOffsets)] = bv;
+    }
+
+    BitVector getRegisterValue(const CellId cid) const {
+      return simValueTable[map_find(cid, registerOffsets)];
     }
     
   };
@@ -116,7 +132,6 @@ namespace FlatCircuit {
 
     ValueStore valueStore;
 
-    std::map<CellId, unsigned long> registerOffsets;
     std::map<SigPort, unsigned long> pastValueOffsets;
     
     void* libHandle;
@@ -872,17 +887,19 @@ namespace FlatCircuit {
 
     void setRegisterValue(const CellId cid,
                           const BitVector& bv) {
-      if (!contains_key(cid, registerOffsets)) {
-        unsigned long nextInd = valueStore.simValueTable.size();
-        registerOffsets[cid] = nextInd;
-        valueStore.simValueTable.push_back(bv);
-      }
+      valueStore.setRegisterValue(cid, bv);
+      // if (!contains_key(cid, valueStore.registerOffsets)) {
+      //   unsigned long nextInd = valueStore.simValueTable.size();
+      //   valueStore.registerOffsets[cid] = nextInd;
+      //   valueStore.simValueTable.push_back(bv);
+      // }
 
-      valueStore.simValueTable[map_find(cid, registerOffsets)] = bv;
+      // valueStore.simValueTable[map_find(cid, valueStore.registerOffsets)] = bv;
     }
 
     BitVector getRegisterValue(const CellId cid) const {
-      return valueStore.simValueTable[map_find(cid, registerOffsets)];
+      return valueStore.getRegisterValue(cid);
+      //      return valueStore.simValueTable[map_find(cid, valueStore.registerOffsets)];
     }
 
     unsigned long pastValueOffset(const CellId cid,
@@ -936,7 +953,7 @@ namespace FlatCircuit {
     
     std::map<CellId, BitVector> allRegisterValues() const {
       std::map<CellId, BitVector> regValues;
-      for (auto roff : registerOffsets) {
+      for (auto roff : valueStore.registerOffsets) {
         regValues.insert({roff.first, getRegisterValue(roff.first)});
       }
       return regValues;

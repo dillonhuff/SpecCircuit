@@ -534,7 +534,7 @@ namespace FlatCircuit {
         string lastRstVar = codeState.getPortTemp(cid, PORT_ID_ARST, "last");
         codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, pastValueOffsets));
 
-        string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
+        string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
           codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         } else {
@@ -542,7 +542,7 @@ namespace FlatCircuit {
         }
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
-        string updateValueRst = "values[" + to_string(map_find(cid, registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
+        string updateValueRst = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
         if (cell.rstPosedge()) {
           codeState.addLine("\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n");
         } else {
@@ -560,7 +560,7 @@ namespace FlatCircuit {
         string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
         codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, pastValueOffsets));
 
-        string updateValueClk = "values[" + to_string(map_find(cid, registerOffsets)) + "] = " + inVar + ";";
+        string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
           codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         } else {
@@ -791,12 +791,12 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
-        string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
+        string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
         codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
-        string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
+        string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
         codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         
