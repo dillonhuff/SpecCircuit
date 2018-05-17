@@ -503,7 +503,7 @@ namespace FlatCircuit {
   std::string Simulator::codeToMaterialize(const CellId cid,
                                            const PortId pid,
                                            const std::string& argName) const {
-    return codeToMaterializeOffset(cid, pid, argName, portOffsets);
+    return codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
   }
 
   std::string
@@ -630,7 +630,7 @@ namespace FlatCircuit {
       if (sentToSeqPort) {
 
         pastValueTmp = codeState.getPortTemp(cid, PORT_ID_OUT);
-        codeState.addLine(ln("BitVector " + pastValueTmp + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "]"));
+        codeState.addLine(ln("BitVector " + pastValueTmp + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]"));
       }
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
@@ -773,7 +773,7 @@ namespace FlatCircuit {
         codeState.addLine(codeToMaterialize(cid, PORT_ID_RADDR, raddrName));
 
         
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
+        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, valueStore.portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
                              "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
         
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
@@ -787,18 +787,18 @@ namespace FlatCircuit {
         string sel = codeState.getPortTemp(cid, PORT_ID_SEL);
         codeState.addLine(codeToMaterialize(cid, PORT_ID_SEL, sel));
         
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")"));
+        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")"));
         
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
         string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
 
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + state));
+        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         string state = "values[" + to_string(map_find(cid, registerOffsets)) + "]";
 
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, portOffsets)) + "] = " + state));
+        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
@@ -838,7 +838,7 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       if (cell.isInputPortCell()) {
         cppCode += ln("// " + def.getCellName(cid) + " ---> " +
-                      to_string(map_find({cid, PORT_ID_OUT}, portOffsets)));
+                      to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)));
       }
     }
 
