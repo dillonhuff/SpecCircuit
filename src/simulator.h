@@ -135,6 +135,13 @@ namespace FlatCircuit {
                 assignCode);
     }
 
+    std::string codeToAssignPastValue(const CellId cid,
+                                      const PortId pid,
+                                      const std::string& assignCode) {
+      return ln("values[" + std::to_string(map_find({cid, pid}, pastValueOffsets)) + "] = " +
+                assignCode);
+    }
+    
     std::string
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
@@ -155,6 +162,13 @@ namespace FlatCircuit {
 
     CodeGenState() : uniqueNum(0) {}
 
+    void addAssign(const CellId cid,
+                   const PortId pid,
+                   const std::string& assignCode,
+                   ValueStore& valueStore) {
+      addLine(valueStore.codeToAssign(cid, pid, assignCode));
+    }
+    
     std::string getPortTemp(const CellId cid, const PortId pid) {
       return getPortTemp(cid, pid, "");
     }
@@ -1164,12 +1178,14 @@ namespace FlatCircuit {
 
       // cppCode += codeToMaterialize(cid, PORT_ID_IN1, argName1);
 
-      cppCode +=
-        ln("values[" +
-           std::to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " +
-           f(argName0, argName1));
+      codeState.addAssign(cid, PORT_ID_OUT, f(argName0, argName1), valueStore);
 
-      codeState.addLine(cppCode);
+      // cppCode +=
+      //   ln("values[" +
+      //      std::to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " +
+      //      f(argName0, argName1));
+
+      // codeState.addLine(cppCode);
       //      return cppCode;
     }
 
@@ -1187,9 +1203,11 @@ namespace FlatCircuit {
 
       std::string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
 
-      cppCode += ln("values[" + std::to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + f(argName));
+      codeState.addAssign(cid, PORT_ID_OUT, f(argName), valueStore);
 
-      codeState.addLine(cppCode);
+      //cppCode += ln("values[" + std::to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + f(argName));
+
+        //      codeState.addLine(cppCode);
 
       //      return cppCode;
     }

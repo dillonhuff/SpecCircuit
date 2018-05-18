@@ -534,24 +534,14 @@ namespace FlatCircuit {
       if (tp == CELL_TYPE_REG_ARST) {
 
         string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
-        // string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
 
         string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
-        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
 
         string lastClkVar = codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
-        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
 
         string rstVar = codeState.getVariableName(cid, PORT_ID_ARST, valueStore);
-        // string rstVar = codeState.getPortTemp(cid, PORT_ID_ARST);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_ARST, rstVar));
 
         string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
-        // string lastRstVar = codeState.getPortTemp(cid, PORT_ID_ARST, "last");
-        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_ARST, lastRstVar, valueStore.pastValueOffsets));
 
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
@@ -576,15 +566,6 @@ namespace FlatCircuit {
         string lastClkVar =
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
-        // string inVar = codeState.getPortTemp(cid, PORT_ID_IN);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, inVar));
-
-        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
-
-        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
-
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
         if (cell.clkPosedge()) {
           codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
@@ -598,23 +579,11 @@ namespace FlatCircuit {
         string lastClkVar =
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
-        // string clkVar = codeState.getPortTemp(cid, PORT_ID_CLK);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_CLK, clkVar));
-
-        // string lastClkVar = codeState.getPortTemp(cid, PORT_ID_CLK, "last");
-        // codeState.addLine(codeToMaterializeOffset(cid, PORT_ID_CLK, lastClkVar, valueStore.pastValueOffsets));
-
         string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, valueStore);
-        // string waddrName = codeState.getPortTemp(cid, PORT_ID_WADDR);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WADDR, waddrName));
 
         string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
-        // string wdataName = codeState.getPortTemp(cid, PORT_ID_WDATA);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WDATA, wdataName));
 
         string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
-        // string wenName = codeState.getPortTemp(cid, PORT_ID_WEN);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_WEN, wenName));
         
         string updateValueClk = "values[" +
           to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
@@ -647,8 +616,6 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       codeState.addLine(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
 
-      //      cppCode += "\t{\n";
-
       bool sentToSeqPort = false;
       for (auto outPort : cell.outputPorts()) {
         if (sequentialDependencies(cell, outPort).size() > 0) {
@@ -667,10 +634,8 @@ namespace FlatCircuit {
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
         string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
-        // string argName = codeState.getPortTemp(cid, PORT_ID_IN);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, argName));
 
-        codeState.addLine(ln("values[" + to_string(portValueOffset(cid, PORT_ID_IN)) + "] = " + argName));
+        codeState.addAssign(cid, PORT_ID_IN, argName, valueStore);
 
       } else if (cell.isInputPortCell()) {
         codeState.addLine(ln("// No code for input port " + def.cellName(cid)));
@@ -802,28 +767,22 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
         string raddrName = codeState.getVariableName(cid, PORT_ID_RADDR, valueStore);
-        // string raddrName = codeState.getPortTemp(cid, PORT_ID_RADDR);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_RADDR, raddrName));
-        
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, valueStore.portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
-                             "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
+
+        codeState.addAssign(cid, PORT_ID_RDATA, "values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
+
+        //        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, valueStore.portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
         
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 
         string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
-        // string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN0, argName0));
-
         string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
-        // string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN1, argName1));
-
         string sel = codeState.getVariableName(cid, PORT_ID_SEL, valueStore);
-        // string sel = codeState.getPortTemp(cid, PORT_ID_SEL);
-        // codeState.addLine(codeToMaterialize(cid, PORT_ID_SEL, sel));
-        
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")"));
-        
+
+        codeState.addAssign(cid,
+                            PORT_ID_OUT,
+                            "(" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")",
+                            valueStore);
+
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
@@ -853,14 +812,12 @@ namespace FlatCircuit {
         codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "] = " + pastValueTmp));
 
       }
-      //cout << "Done" << endl;
 
     }
 
 
 
     return "";
-    //    return cppCode;
   }
 
   void
