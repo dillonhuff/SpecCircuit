@@ -1104,9 +1104,9 @@ namespace FlatCircuit {
     void
     compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates);
     
-    std::string codeToMaterialize(const CellId cid,
-                                  const PortId pid,
-                                  const std::string& argName) const;
+    // std::string codeToMaterialize(const CellId cid,
+    //                               const PortId pid,
+    //                               const std::string& argName) const;
 
     void debugPrintTableValues() const;
     void debugPrintMemories() const;
@@ -1122,11 +1122,11 @@ namespace FlatCircuit {
     combinationalBlockCode(const std::vector<SigPort>& levelized,
                            CodeGenState& state);
 
-    std::string
-    codeToMaterializeOffset(const CellId cid,
-                            const PortId pid,
-                            const std::string& argName,
-                            const std::map<SigPort, unsigned long>& offsets) const;
+    // std::string
+    // codeToMaterializeOffset(const CellId cid,
+    //                         const PortId pid,
+    //                         const std::string& argName,
+    //                         const std::map<SigPort, unsigned long>& offsets) const;
 
     template<typename F>
     void
@@ -1158,8 +1158,7 @@ namespace FlatCircuit {
     template<typename F>
     //std::string
     void
-    unopCode(//const std::string& code,
-             CodeGenState& codeState,
+    unopCode(CodeGenState& codeState,
              const CellId cid,
              F f) {
 

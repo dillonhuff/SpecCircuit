@@ -439,13 +439,13 @@ namespace FlatCircuit {
     return {myLibHandle, myFuncFunV};
   }
 
-  std::string
-  Simulator::codeToMaterializeOffset(const CellId cid,
-                                     const PortId pid,
-                                     const std::string& argName,
-                                     const std::map<SigPort, unsigned long>& offsets) const {
-    return valueStore.codeToMaterializeOffset(cid, pid, argName, offsets);
-  }
+  // std::string
+  // Simulator::codeToMaterializeOffset(const CellId cid,
+  //                                    const PortId pid,
+  //                                    const std::string& argName,
+  //                                    const std::map<SigPort, unsigned long>& offsets) const {
+  //   return valueStore.codeToMaterializeOffset(cid, pid, argName, offsets);
+  // }
 
   std::string
   ValueStore::codeToMaterializeOffset(const CellId cid,
@@ -514,11 +514,11 @@ namespace FlatCircuit {
     return codeToMaterializeOffset(cid, pid, argName, portOffsets);
   }
   
-  std::string Simulator::codeToMaterialize(const CellId cid,
-                                           const PortId pid,
-                                           const std::string& argName) const {
-    return valueStore.codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
-  }
+  // std::string Simulator::codeToMaterialize(const CellId cid,
+  //                                          const PortId pid,
+  //                                          const std::string& argName) const {
+  //   return valueStore.codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
+  // }
 
   std::string
   Simulator::sequentialBlockCode(const std::vector<SigPort>& levelized,
@@ -666,8 +666,9 @@ namespace FlatCircuit {
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
 
-        string argName = codeState.getPortTemp(cid, PORT_ID_IN);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, argName));
+        string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
+        // string argName = codeState.getPortTemp(cid, PORT_ID_IN);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN, argName));
 
         codeState.addLine(ln("values[" + to_string(portValueOffset(cid, PORT_ID_IN)) + "] = " + argName));
 
@@ -800,23 +801,26 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
-        string raddrName = codeState.getPortTemp(cid, PORT_ID_RADDR);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_RADDR, raddrName));
-
+        string raddrName = codeState.getVariableName(cid, PORT_ID_RADDR, valueStore);
+        // string raddrName = codeState.getPortTemp(cid, PORT_ID_RADDR);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_RADDR, raddrName));
         
         codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, valueStore.portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
                              "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
         
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 
-        string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_IN0, argName0));
+        string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
+        // string argName0 = codeState.getPortTemp(cid, PORT_ID_IN0);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN0, argName0));
 
-        string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_IN1, argName1));
+        string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
+        // string argName1 = codeState.getPortTemp(cid, PORT_ID_IN1);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_IN1, argName1));
 
-        string sel = codeState.getPortTemp(cid, PORT_ID_SEL);
-        codeState.addLine(codeToMaterialize(cid, PORT_ID_SEL, sel));
+        string sel = codeState.getVariableName(cid, PORT_ID_SEL, valueStore);
+        // string sel = codeState.getPortTemp(cid, PORT_ID_SEL);
+        // codeState.addLine(codeToMaterialize(cid, PORT_ID_SEL, sel));
         
         codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = (" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")"));
         
