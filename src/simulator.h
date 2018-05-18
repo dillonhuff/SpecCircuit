@@ -4,6 +4,10 @@
 
 namespace FlatCircuit {
 
+  static inline std::string ln(const std::string& s) {
+    return "\t" + s + ";\n";
+  }
+  
   class ValueStore {
   public:
     CellDefinition& def;
@@ -15,8 +19,20 @@ namespace FlatCircuit {
     std::map<SigPort, unsigned long> pastValueOffsets;
 
     ValueStore(CellDefinition& def_) : def(def_) {}
-    
-    // Internal setters / getters
+
+    unsigned long portValueOffset(const CellId cid,
+                                  const PortId pid) {
+      if (!contains_key({cid, pid}, portOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        simValueTable.push_back(BitVector(1, 0));
+        portOffsets[{cid, pid}] = nextInd;
+
+        return nextInd;
+      }
+
+      return map_find({cid, pid}, portOffsets);
+    }
+
     BitVector getMemoryValue(const CellId cid,
                              const int offset) const {
       assert(offset >= 0);
@@ -112,6 +128,13 @@ namespace FlatCircuit {
       }
     }
 
+    std::string codeToAssign(const CellId cid,
+                             const PortId pid,
+                             const std::string& assignCode) {
+      return ln("values[" + std::to_string(portValueOffset(cid, pid)) + "] = " +
+                assignCode);
+    }
+
     std::string
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
@@ -182,11 +205,6 @@ namespace FlatCircuit {
     }
   };
 
-  static inline std::string ln(const std::string& s) {
-    return "\t" + s + ";\n";
-  }
-  
-  
   std::vector<SigPort>
   sequentialDependencies(const Cell& cell,
                          const PortId pid);
