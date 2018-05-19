@@ -4,6 +4,7 @@
 
 #include "analysis.h"
 #include "convert_coreir.h"
+#include "output_verilog.h"
 #include "transformations.h"
 #include "utils.h"
 
@@ -1150,6 +1151,8 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
+
+    outputVerilog(sim.def, "mul_2_pe.v");
   }
 
   TEST_CASE("Memory tile convolution") {
