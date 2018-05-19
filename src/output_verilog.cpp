@@ -6,6 +6,15 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  std::string verilogCellName(const CellId cid, const CellDefinition& def) {
+    string str = def.getCellName(cid);
+    if (!def.isPortCell(cid)) {
+      return str;
+    }
+
+    return str + "_port_cell";
+  }
+  
   std::string verilogName(const CellType tp) {
     return toString(tp);
   }
@@ -135,16 +144,16 @@ namespace FlatCircuit {
       wires.push_back(VerilogWire(name, width));
 
       CellType tp = def.getCellRefConst(cid).getCellType();
-      instances.insert({def.getCellName(cid),
-            VerilogInstance(verilogName(tp), def.getCellName(cid))});
+      instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     }
 
     void addInput(const std::string& name, const int width, const CellId cid, const CellDefinition& def) {
       wires.push_back(VerilogWire(name, width));
 
       CellType tp = def.getCellRefConst(cid).getCellType();
-      instances.insert({def.getCellName(cid),
-            VerilogInstance(verilogName(tp), def.getCellName(cid))});
+      instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
       
     }
 
@@ -182,15 +191,15 @@ namespace FlatCircuit {
     void addUnop(const CellId cid,
                  const CellDefinition& def) {
       CellType tp = def.getCellRefConst(cid).getCellType();
-      instances.insert({def.getCellName(cid),
-            VerilogInstance(verilogName(tp), def.getCellName(cid))});
+      instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     }
 
     void addBinop(const CellId cid,
                   const CellDefinition& def) {
       CellType tp = def.getCellRefConst(cid).getCellType();
-      instances.insert({def.getCellName(cid),
-            VerilogInstance(verilogName(tp), def.getCellName(cid))});
+      instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     }
 
   };
@@ -212,14 +221,14 @@ namespace FlatCircuit {
       vm.addBinop(cid, def);
     } else if (tp == CELL_TYPE_CONST) {
       CellType tp = def.getCellRefConst(cid).getCellType();
-      vm.instances.insert({def.getCellName(cid),
-            VerilogInstance(verilogName(tp), def.getCellName(cid))});
+      vm.instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     } else {
-      cout << "Unsupported cell type for cell " << def.getCellName(cid) << endl;
+      cout << "Unsupported cell type for cell " << verilogCellName(cid, def) << endl;
       assert(false);
     }
 
-    VerilogInstance& inst = vm.getInstance(def.getCellName(cid));
+    VerilogInstance& inst = vm.getInstance(verilogCellName(cid, def));
     for (auto pm : portMap) {
       inst.connect(portIdString(pm.first), pm.second.name);
     }
@@ -234,7 +243,7 @@ namespace FlatCircuit {
 
     for (auto ctp : def.getCellMap()) {
       CellId cid = ctp.first;
-      string cellName = def.getCellName(cid);
+      string cellName = verilogCellName(cid, def);
 
       map<PortId, VerilogWire> portWires;
 
@@ -248,7 +257,7 @@ namespace FlatCircuit {
 
       cellToVerilogInstance(cid, vm, def, portWires);
 
-      VerilogInstance& m = vm.getInstance(def.getCellName(cid));
+      VerilogInstance& m = vm.getInstance(verilogCellName(cid, def));
       for (auto pm : cell.getParameters()) {
         m.parameters.insert({parameterToString(pm.first),
               to_string(bvToInt(pm.second))});
@@ -267,8 +276,8 @@ namespace FlatCircuit {
           SignalBit driverBit = drivers.signals[i];
           SignalBit receiverBit = {cid, pid, i};
 
-          VerilogWire& driverWire = instancePortWires.at(def.getCellName(driverBit.cell)).at(driverBit.port);
-          VerilogWire& receiverWire = instancePortWires.at(def.getCellName(receiverBit.cell)).at(receiverBit.port);
+          VerilogWire& driverWire = instancePortWires.at(verilogCellName(driverBit.cell, def)).at(driverBit.port);
+          VerilogWire& receiverWire = instancePortWires.at(verilogCellName(receiverBit.cell, def)).at(receiverBit.port);
 
           vm.addBitAssign(receiverWire, receiverBit.offset, driverWire, driverBit.offset);
         }
