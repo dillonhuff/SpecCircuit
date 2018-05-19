@@ -10,11 +10,28 @@ namespace FlatCircuit {
     return toString(tp);
   }
 
+
+  class VerilogWire {
+  public:
+
+    std::string name;
+    int width;
+    bool isInput;
+    bool isOutput;
+    bool isRegister;
+
+    VerilogWire(const std::string& name_, const int width_) :
+      name(name_), width(width_) {}
+
+    
+  };
+
   class VerilogInstance {
   public:
     std::string modName;
     std::string instName;
 
+    std::map<string, string> parameters;
     std::map<string, string> portsToWires;
 
     VerilogInstance(const std::string& modName_,
@@ -22,7 +39,25 @@ namespace FlatCircuit {
       modName(modName_), instName(instName_) {}
 
     std::string toString() const {
-      string str = "\t" + modName + " " + instName + "(";
+      string str = "\t" + modName;
+
+      if (parameters.size() > 0) {
+        str += " #(";
+
+        int i = 0;
+        for (auto pm : parameters) {
+          str += "." + pm.first + "(" + pm.second + ")";
+          if (i != (int) (parameters.size() - 1)) {
+            str += ",\n";
+          }
+          i++;
+        }
+
+        str += ")";
+      }
+
+      str += + " " + instName;
+      str += "(";
 
       int i = 0;
       for (auto pw : portsToWires) {
@@ -45,23 +80,24 @@ namespace FlatCircuit {
 
   class VerilogConnection {
   };
-  
 
-  class VerilogWire {
+  class VerilogAssign {
   public:
+    VerilogWire receiverWire;
+    int receiverBit;
+    VerilogWire driverWire;
+    int driverBit;
 
-    std::string name;
-    int width;
-    bool isInput;
-    bool isOutput;
-    bool isRegister;
+    VerilogAssign(const VerilogWire receiverWire_,
+                  const int receiverBit_,
+                  const VerilogWire driverWire_,
+                  const int driverBit_) : receiverWire(receiverWire_),
+                                          receiverBit(receiverBit_),
+                                          driverWire(driverWire_),
+                                          driverBit(driverBit_) {}
 
-    VerilogWire(const std::string& name_, const int width_) :
-      name(name_), width(width_) {}
-
-    
   };
-
+  
   class VerilogModule {
     unsigned long long nextInt;
   public:
@@ -72,6 +108,7 @@ namespace FlatCircuit {
     std::vector<VerilogConnection> connections;
 
     std::vector<VerilogWire> wires;
+    std::vector<VerilogAssign> assigns;
 
     VerilogModule() : nextInt(0) {}
 
@@ -111,16 +148,33 @@ namespace FlatCircuit {
       
     }
 
+    void addBitAssign(const VerilogWire receiverWire,
+                      const int receiverBit,
+                      const VerilogWire driverWire,
+                      const int driverBit) {
+      assigns.push_back(VerilogAssign(receiverWire, receiverBit,
+                                      driverWire, driverBit));
+    }
+
     std::string toString() const {
       string str = "module " + name + "();\n";
 
       for (auto w : wires) {
         str += "\twire [" + to_string(w.width - 1) + " : 0] " + w.name + ";\n";
       }
+
       for (auto inst : instances) {
         str += inst.second.toString();
         str += "\n";
       }
+
+      for (auto assign : assigns) {
+        str += "\tassign " + assign.receiverWire.name +
+          "[ " + to_string(assign.receiverBit) + " ] = " +
+          assign.driverWire.name + "[ " + to_string(assign.driverBit) + " ];";
+        str += "\n";
+      }
+
       str += "endmodule\n";
       return str;
     }
@@ -193,20 +247,62 @@ namespace FlatCircuit {
       }
 
       cellToVerilogInstance(cid, vm, def, portWires);
+
+      VerilogInstance& m = vm.getInstance(def.getCellName(cid));
+      for (auto pm : cell.getParameters()) {
+        m.parameters.insert({parameterToString(pm.first),
+              to_string(bvToInt(pm.second))});
+      }
       
       instancePortWires[cellName] = portWires;
+    }
+
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      for (auto pid : cell.inputPorts()) {
+        auto drivers = cell.getDrivers(pid);
+
+        for (int i = 0; i < (int) drivers.size(); i++) {
+          SignalBit driverBit = drivers.signals[i];
+          SignalBit receiverBit = {cid, pid, i};
+
+          VerilogWire& driverWire = instancePortWires.at(def.getCellName(driverBit.cell)).at(driverBit.port);
+          VerilogWire& receiverWire = instancePortWires.at(def.getCellName(receiverBit.cell)).at(receiverBit.port);
+
+          vm.addBitAssign(receiverWire, receiverBit.offset, driverWire, driverBit.offset);
+        }
+      }
     }
 
     return vm;
   }
 
+  std::string verilogPrefix() {
+    string str = "";
+
+    str += "module CELL_TYPE_CONST #(parameter PARAM_WIDTH=1, parameter PARAM_INIT_VALUE=0) (output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PARAM_INIT_VALUE;\nendmodule\n\n";
+
+    str += "module CELL_TYPE_MUL #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); endmodule\n\n";
+
+    str += "module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); endmodule\n\n";
+
+    str += "module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); endmodule\n\n";
+
+    str += "module CELL_TYPE_PORT #(parameter PARAM_OUT_WIDTH=1) (input [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); endmodule\n\n";
+
+    str += "module CELL_TYPE_ZEXT #(parameter PARAM_IN_WIDTH=1, parameter PARAM_OUT_WIDTH=1) (input [PARAM_IN_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); endmodule\n\n";
+    return str;
+
+  }
   void outputVerilog(const CellDefinition& def,
                      const std::string& verilogFile) {
 
     VerilogModule mod = toVerilog(def);
 
-    string verilogString = "";
+    string verilogString = verilogPrefix();
     std::ofstream t(verilogFile);
+    t << verilogString << endl;
     t << mod.toString() << endl;
     t.close();
     

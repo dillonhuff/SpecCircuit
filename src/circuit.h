@@ -25,6 +25,28 @@ namespace FlatCircuit {
     PARAM_HAS_INIT
   };
 
+  static inline std::string parameterToString(const Parameter pm) {
+
+    if (pm == PARAM_PORT_TYPE) { return "PARAM_PORT_TYPE"; }
+    if (pm == PARAM_WIDTH) { return "PARAM_WIDTH"; }
+    if (pm == PARAM_HIGH) { return "PARAM_HIGH"; }
+    if (pm == PARAM_LOW) { return "PARAM_LOW"; }
+    if (pm == PARAM_IN_WIDTH) { return "PARAM_IN_WIDTH"; }
+    if (pm == PARAM_IN0_WIDTH) { return "PARAM_IN0_WIDTH"; }
+    if (pm == PARAM_IN1_WIDTH) { return "PARAM_IN1_WIDTH"; }
+    if (pm == PARAM_OUT_WIDTH) { return "PARAM_OUT_WIDTH"; }
+    // PARAM_SEL_WIDTH,
+    // PARAM_CLK_POSEDGE,
+    // PARAM_ARST_POSEDGE,
+    if (pm == PARAM_INIT_VALUE) { return "PARAM_INIT_VALUE"; }
+    // PARAM_MEM_WIDTH,
+    // PARAM_MEM_DEPTH,
+    // PARAM_HAS_INIT
+
+    std::cout << "No string for parameter " << pm << std::endl;
+    assert(false);
+  }
+
   typedef uint64_t CellType;
 
 #define CELL_TYPE_PORT 0
@@ -582,6 +604,10 @@ namespace FlatCircuit {
       }
 
       return rcps;
+    }
+
+    std::map<Parameter, BitVector> getParameters() const {
+      return parameters;
     }
 
     const std::map<PortId, Port>& getPorts() const {
