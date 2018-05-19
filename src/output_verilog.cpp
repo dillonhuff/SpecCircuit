@@ -30,8 +30,13 @@ namespace FlatCircuit {
     bool isRegister;
 
     VerilogWire(const std::string& name_, const int width_) :
-      name(name_), width(width_) {}
+      name(name_), width(width_),
+      isInput(false), isOutput(false), isRegister(false) {}
 
+    VerilogWire(const std::string& name_, const int width_,
+                const bool isIn_, const bool isOut_, const bool isReg_) :
+      name(name_), width(width_),
+      isInput(isIn_), isOutput(isOut_), isRegister(isReg_) {}
     
   };
 
@@ -141,7 +146,7 @@ namespace FlatCircuit {
     }
 
     void addOutput(const std::string& name, const int width, const CellId cid, const CellDefinition& def) {
-      wires.push_back(VerilogWire(name, width));
+      wires.push_back(VerilogWire(name, width, false, true, false));
 
       CellType tp = def.getCellRefConst(cid).getCellType();
       instances.insert({verilogCellName(cid, def),
@@ -149,7 +154,7 @@ namespace FlatCircuit {
     }
 
     void addInput(const std::string& name, const int width, const CellId cid, const CellDefinition& def) {
-      wires.push_back(VerilogWire(name, width));
+      wires.push_back(VerilogWire(name, width, true, false, false));
 
       CellType tp = def.getCellRefConst(cid).getCellType();
       instances.insert({verilogCellName(cid, def),
@@ -166,10 +171,38 @@ namespace FlatCircuit {
     }
 
     std::string toString() const {
-      string str = "module " + name + "();\n";
+      string str = "module " + name + "(";
+
+      vector<VerilogWire> ports;
+      for (auto w : wires) {
+        if (w.isInput || w.isOutput) {
+          ports.push_back(w);
+        }
+      }
+
+      int i = 0;
+      for (auto w : ports) {
+        if (w.isInput) {
+          str += "\tinput [" + to_string(w.width - 1) + " : 0] " + w.name;
+        } else if (w.isOutput) {
+          str += "\toutput [" + to_string(w.width - 1) + " : 0] " + w.name;
+        } else {
+          assert(false);
+        }
+
+        if (i != (int) (ports.size() - 1)) {
+          str += ",\n";
+        }
+
+        i++;
+      }
+      
+      str += ");\n\n";
 
       for (auto w : wires) {
-        str += "\twire [" + to_string(w.width - 1) + " : 0] " + w.name + ";\n";
+        if (!w.isInput && !w.isOutput) {
+          str += "\twire [" + to_string(w.width - 1) + " : 0] " + w.name + ";\n";
+        }
       }
 
       for (auto inst : instances) {
@@ -255,6 +288,20 @@ namespace FlatCircuit {
         portWires.insert({pid, w});
       }
 
+      if (def.isPortCell(cid)) {
+        if (cell.isInputPortCell()) {
+          //          cout << "Adding port wire" << endl;
+          portWires.insert({PORT_ID_IN,
+                VerilogWire(def.getCellName(cid),
+                            cell.getPortWidth(PORT_ID_OUT))});
+          //          cout << "Done adding port wire" << endl;
+        } else {
+          portWires.insert({PORT_ID_OUT,
+                VerilogWire(def.getCellName(cid),
+                            cell.getPortWidth(PORT_ID_IN))});
+        }
+      }
+
       cellToVerilogInstance(cid, vm, def, portWires);
 
       VerilogInstance& m = vm.getInstance(verilogCellName(cid, def));
@@ -266,6 +313,7 @@ namespace FlatCircuit {
       instancePortWires[cellName] = portWires;
     }
 
+    cout << "Adding connections" << endl;
     for (auto ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       const Cell& cell = def.getCellRefConst(cid);
