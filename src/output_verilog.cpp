@@ -30,10 +30,21 @@ namespace FlatCircuit {
 
   class VerilogWire {
   public:
-    VerilogWire(const std::string& name, const int width) {}
+
+    std::string name;
+    int width;
+    bool isInput;
+    bool isOutput;
+    bool isRegister;
+
+    VerilogWire(const std::string& name_, const int width_) :
+      name(name_), width(width_) {}
+
+    
   };
 
   class VerilogModule {
+    unsigned long long nextInt;
   public:
 
     std::string name;
@@ -43,6 +54,18 @@ namespace FlatCircuit {
 
     std::vector<VerilogWire> wires;
 
+    VerilogModule() : nextInt(0) {}
+
+    VerilogWire freshWire(const int width) {
+      std::string name = "fresh_wire_" + to_string(nextInt);
+      nextInt++;
+
+      VerilogWire w(name, width);
+      wires.push_back(w);
+
+      return w;
+    }
+
     void addOutput(const std::string& name, const int width) {
       wires.push_back(VerilogWire(name, width));
     }
@@ -50,10 +73,13 @@ namespace FlatCircuit {
     void addInput(const std::string& name, const int width) {
       wires.push_back(VerilogWire(name, width));
     }
-    
+
     std::string toString() const {
       string str = "module " + name + "();\n";
 
+      for (auto w : wires) {
+        str += "\twire [" + to_string(w.width - 1) + " : 0] " + w.name + ";\n";
+      }
       for (auto inst : instances) {
         str += inst.toString();
         str += "\n";
@@ -97,8 +123,7 @@ namespace FlatCircuit {
       assert(false);
     }
 
-    // For every output port of the cell:
-    // Add connections
+    
   }
 
   VerilogModule toVerilog(const CellDefinition& def) {
