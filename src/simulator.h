@@ -9,10 +9,11 @@ namespace FlatCircuit {
   }
   
   class ValueStore {
+    std::vector<BitVector> simValueTable;
+
   public:
     CellDefinition& def;
     
-    std::vector<BitVector> simValueTable;
     std::map<SigPort, unsigned long> portOffsets;
     std::map<CellId, unsigned long> memoryOffsets;
     std::map<CellId, unsigned long> registerOffsets;
@@ -21,6 +22,8 @@ namespace FlatCircuit {
     ValueStore(CellDefinition& def_) : def(def_) {}
 
     void debugPrintTableValues() const;
+
+    std::vector<BitVector>& getValueTable() { return simValueTable; }
 
     unsigned long portValueOffset(const CellId cid,
                                   const PortId pid) {
@@ -415,7 +418,8 @@ namespace FlatCircuit {
         void (*simFunc)(std::vector<BitVector>&) =
           reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
-        simFunc(valueStore.simValueTable);
+        //simFunc(valueStore.simValueTable);
+        simFunc(valueStore.getValueTable());
         return;
       }
 
