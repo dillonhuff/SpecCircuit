@@ -257,9 +257,14 @@ namespace FlatCircuit {
       vm.instances.insert({verilogCellName(cid, def),
             VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     } else {
-      cout << "Unsupported cell type for cell " << verilogCellName(cid, def) << endl;
-      assert(false);
+      CellType tp = def.getCellRefConst(cid).getCellType();
+      vm.instances.insert({verilogCellName(cid, def),
+            VerilogInstance(verilogName(tp), verilogCellName(cid, def))});
     }
+    // else {
+    //   cout << "Unsupported cell type for cell " << verilogCellName(cid, def) << endl;
+    //   assert(false);
+    // }
 
     VerilogInstance& inst = vm.getInstance(verilogCellName(cid, def));
     for (auto pm : portMap) {
@@ -290,11 +295,9 @@ namespace FlatCircuit {
 
       if (def.isPortCell(cid)) {
         if (cell.isInputPortCell()) {
-          //          cout << "Adding port wire" << endl;
           portWires.insert({PORT_ID_IN,
                 VerilogWire(def.getCellName(cid),
                             cell.getPortWidth(PORT_ID_OUT))});
-          //          cout << "Done adding port wire" << endl;
         } else {
           portWires.insert({PORT_ID_OUT,
                 VerilogWire(def.getCellName(cid),
@@ -307,7 +310,8 @@ namespace FlatCircuit {
       VerilogInstance& m = vm.getInstance(verilogCellName(cid, def));
       for (auto pm : cell.getParameters()) {
         m.parameters.insert({parameterToString(pm.first),
-              to_string(bvToInt(pm.second))});
+              pm.second.hex_string()});
+              //              to_string(bvToInt(pm.second))});
       }
       
       instancePortWires[cellName] = portWires;

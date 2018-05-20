@@ -1422,6 +1422,7 @@ namespace FlatCircuit {
 
     REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
 
+    outputVerilog(sim.def, "conv_2_1_cgra.v");
 
     // PERFORMANCE TEST
     nCycles = 10000;

@@ -35,13 +35,13 @@ namespace FlatCircuit {
     if (pm == PARAM_IN0_WIDTH) { return "PARAM_IN0_WIDTH"; }
     if (pm == PARAM_IN1_WIDTH) { return "PARAM_IN1_WIDTH"; }
     if (pm == PARAM_OUT_WIDTH) { return "PARAM_OUT_WIDTH"; }
-    // PARAM_SEL_WIDTH,
-    // PARAM_CLK_POSEDGE,
-    // PARAM_ARST_POSEDGE,
+    if (pm == PARAM_SEL_WIDTH) { return "PARAM_SEL_WIDTH"; }
+    if (pm == PARAM_CLK_POSEDGE) { return "PARAM_CLK_POSEDGE"; }
+    if (pm == PARAM_ARST_POSEDGE) { return "PARAM_ARST_POSEDGE"; }
     if (pm == PARAM_INIT_VALUE) { return "PARAM_INIT_VALUE"; }
-    // PARAM_MEM_WIDTH,
-    // PARAM_MEM_DEPTH,
-    // PARAM_HAS_INIT
+    if (pm == PARAM_MEM_WIDTH) { return "PARAM_MEM_WIDTH"; }
+    if (pm == PARAM_MEM_DEPTH) { return "PARAM_MEM_DEPTH"; }
+    if (pm == PARAM_HAS_INIT) { return "PARAM_HAS_INIT"; }
 
     std::cout << "No string for parameter " << pm << std::endl;
     assert(false);
