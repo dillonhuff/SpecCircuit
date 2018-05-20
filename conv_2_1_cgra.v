@@ -16,8 +16,23 @@ module CELL_TYPE_REG_ARST #(parameter PARAM_WIDTH=1,
                             parameter PARAM_ARST_POSEDGE=1)
    (output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT,
     input [PARAM_WIDTH - 1 : 0] PORT_ID_IN,
-    input [0 : 0] PORT_ID_CLK);
+    input [0 : 0] PORT_ID_CLK,
+    input [0 : 0] PORT_ID_ARST);
 
+   
+   //assign PORT_ID_OUT = PARAM_INIT_VALUE;
+endmodule
+
+module CELL_TYPE_MEM #(parameter PARAM_MEM_WIDTH=1,
+                       parameter PARAM_MEM_DEPTH=1,
+                       parameter PARAM_HAS_INIT=1)
+   (output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA,
+    input [PARAM_MEM_WIDTH - 1 : 0]         PORT_ID_WDATA,
+    input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR,
+    input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR,
+    input [0 : 0]                           PORT_ID_WEN,
+    input [0 : 0]                           PORT_ID_CLK);
+   
    
    //assign PORT_ID_OUT = PARAM_INIT_VALUE;
 endmodule
