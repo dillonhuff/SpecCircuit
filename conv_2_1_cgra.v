@@ -6,8 +6,22 @@ module CELL_TYPE_REG #(parameter PARAM_WIDTH=1,
     input [PARAM_WIDTH - 1 : 0] PORT_ID_IN,
     input [0 : 0] PORT_ID_CLK);
 
+   wire           true_clk;
+
+   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;
+
+   reg [PARAM_WIDTH - 1 : 0] stored_val;
+
+   initial begin
+      stored_val = PARAM_INIT_VALUE;
+   end
+
+   always @(posedge true_clk) begin
+      stored_val <= PORT_ID_IN;
+   end
+
+   assign PORT_ID_OUT = stored_val;
    
-   //assign PORT_ID_OUT = PARAM_INIT_VALUE;
 endmodule
 
 module CELL_TYPE_REG_ARST #(parameter PARAM_WIDTH=1,
@@ -19,8 +33,27 @@ module CELL_TYPE_REG_ARST #(parameter PARAM_WIDTH=1,
     input [0 : 0] PORT_ID_CLK,
     input [0 : 0] PORT_ID_ARST);
 
-   
-   //assign PORT_ID_OUT = PARAM_INIT_VALUE;
+   wire           true_clk;
+
+   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;
+   assign true_rst = PARAM_ARST_POSEDGE ? PORT_ID_ARST : ~PORT_ID_ARST;
+
+   reg [PARAM_WIDTH - 1 : 0] stored_val;
+
+   initial begin
+      stored_val = PARAM_INIT_VALUE;
+   end
+
+   always @(posedge true_clk or posedge true_rst) begin
+      if (true_rst) begin
+         stored_val <= PARAM_INIT_VALUE;
+      end else begin
+         stored_val <= PORT_ID_IN;
+      end
+   end
+
+   assign PORT_ID_OUT = stored_val;
+
 endmodule
 
 module CELL_TYPE_MEM #(parameter PARAM_MEM_WIDTH=1,
@@ -33,8 +66,17 @@ module CELL_TYPE_MEM #(parameter PARAM_MEM_WIDTH=1,
     input [0 : 0]                           PORT_ID_WEN,
     input [0 : 0]                           PORT_ID_CLK);
    
-   
-   //assign PORT_ID_OUT = PARAM_INIT_VALUE;
+
+   reg [PARAM_MEM_WIDTH - 1 : 0]            data_array [0 : PARAM_MEM_DEPTH - 1];
+
+   always @(posedge PORT_ID_CLK) begin
+      if (PORT_ID_WEN) begin
+         data_array[PORT_ID_WADDR] = PORT_ID_WDATA;
+      end
+   end
+
+   assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];
+
 endmodule
 
 module CELL_TYPE_CONST #(parameter PARAM_WIDTH=1, parameter PARAM_INIT_VALUE=0) (output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PARAM_INIT_VALUE;
