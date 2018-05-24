@@ -527,7 +527,6 @@ namespace FlatCircuit {
       CellId cid = sigPort.cell;
       const Cell& cell = def.getCellRefConst(cid);
 
-      //codeState.addLine(ln("// ----- Sequential update for cell " + def.cellName(cid)));
       codeState.addComment(ln("// ----- Sequential update for cell " + def.cellName(cid)));
 
 
@@ -545,8 +544,13 @@ namespace FlatCircuit {
         string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
 
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
+
+        string lbl = codeState.getNewLabel("reg_arst");
         if (cell.clkPosedge()) {
-          codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
+          codeState.addLine("if (posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+          codeState.addLine(updateValueClk);
+          codeState.addLine(lbl + ":");
+          //          codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         } else {
           codeState.addLine("\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         }
@@ -615,7 +619,6 @@ namespace FlatCircuit {
       PortId port = sigPort.port;
       
       const Cell& cell = def.getCellRefConst(cid);
-      //codeState.addLine(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
       codeState.addComment(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
 
       bool sentToSeqPort = false;
@@ -640,10 +643,8 @@ namespace FlatCircuit {
         codeState.addAssign(cid, PORT_ID_IN, argName, valueStore);
 
       } else if (cell.isInputPortCell()) {
-        //codeState.addLine(ln("// No code for input port " + def.cellName(cid)));
         codeState.addComment(ln("// No code for input port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
-        //codeState.addLine(ln("// No code for const port " + def.cellName(cid)));
         codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
@@ -774,8 +775,6 @@ namespace FlatCircuit {
 
         codeState.addAssign(cid, PORT_ID_RDATA, "values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
 
-        //        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_RDATA}, valueStore.portOffsets)) + "] = values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]"));
-        
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 
         string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
@@ -791,13 +790,11 @@ namespace FlatCircuit {
 
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
-        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
-        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
         codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
@@ -815,7 +812,6 @@ namespace FlatCircuit {
 
       if (sentToSeqPort) {
 
-        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "] = " + pastValueTmp));
         codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "]", pastValueTmp);
 
       }

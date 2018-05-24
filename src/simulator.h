@@ -189,6 +189,12 @@ namespace FlatCircuit {
                    ValueStore& valueStore) {
       addLine(valueStore.codeToAssign(cid, pid, assignCode));
     }
+
+    std::string getNewLabel(const std::string& prefix) {
+      unsigned long long next = uniqueNum;
+      uniqueNum++;
+      return prefix + "_label_" + std::to_string(next);
+    }
     
     std::string getPortTemp(const CellId cid, const PortId pid) {
       return getPortTemp(cid, pid, "");
