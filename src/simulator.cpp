@@ -547,12 +547,19 @@ namespace FlatCircuit {
 
         string lbl = codeState.getNewLabel("reg_arst");
         if (cell.clkPosedge()) {
-          codeState.addLine("if (posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+          codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
           codeState.addLine(updateValueClk);
-          codeState.addLine(lbl + ":");
+          //codeState.addLine(lbl + ":");
+          codeState.addLabel(lbl);
+
           //          codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         } else {
-          codeState.addLine("\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
+          codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+          codeState.addLine(updateValueClk);
+          codeState.addLabel(lbl);
+          //codeState.addLine(lbl + ":");
+
+          //          codeState.addLine("\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         }
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
@@ -572,10 +579,20 @@ namespace FlatCircuit {
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
         string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
+
+        string lbl = codeState.getNewLabel("reg_arst");
         if (cell.clkPosedge()) {
-          codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
+
+          codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+          codeState.addLine(updateValueClk);
+          codeState.addLabel(lbl);
+          
         } else {
-          codeState.addLine("\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
+          
+          codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+          codeState.addLine(updateValueClk);
+          codeState.addLabel(lbl);
+
         }
 
       } else if (tp == CELL_TYPE_MEM) {

@@ -190,6 +190,10 @@ namespace FlatCircuit {
       addLine(valueStore.codeToAssign(cid, pid, assignCode));
     }
 
+    void addLabel(const std::string& labelName) {
+      addLine(labelName + ":");
+    }
+
     std::string getNewLabel(const std::string& prefix) {
       unsigned long long next = uniqueNum;
       uniqueNum++;
