@@ -230,9 +230,14 @@ namespace FlatCircuit {
       codeLines.push_back(str);
     }
 
+    void addAssign(const std::string& receiver, const std::string& value) {
+      codeLines.push_back(ln(receiver + " = " + value));
+    }
+
     std::string getCode() const {
       std::string cppCode = "";
       for (auto line : codeLines) {
+        cppCode += "\t// NEW INSTRUCTION\n";
         cppCode += line;
       }
 

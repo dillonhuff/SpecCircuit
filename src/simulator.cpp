@@ -787,12 +787,14 @@ namespace FlatCircuit {
 
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
+        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
+        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
+        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
+        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
@@ -809,7 +811,8 @@ namespace FlatCircuit {
 
       if (sentToSeqPort) {
 
-        codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "] = " + pastValueTmp));
+        //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "] = " + pastValueTmp));
+        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "]", pastValueTmp);
 
       }
 
