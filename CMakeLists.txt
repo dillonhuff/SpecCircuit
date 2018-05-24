@@ -16,7 +16,8 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/circuit.cpp
               ./src/analysis.cpp
               ./src/output_verilog.cpp
-              ./src/transformations.cpp)
+              ./src/transformations.cpp
+              ./src/ir.cpp)
 
 SET(TEST_FILES ./test/test_circuit.cpp
                ./test/utils.cpp)

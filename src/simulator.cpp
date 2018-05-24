@@ -810,6 +810,13 @@ namespace FlatCircuit {
 
   void
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
+
+    CodeGenState codeState;
+    for (int i = 0; i < updates.size(); i += 2) {
+      combinationalBlockCode(updates[i + 0], codeState);
+      sequentialBlockCode(updates[i + 1], codeState);
+    }
+
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
       "using namespace bsim;\n\n";
 
@@ -829,12 +836,6 @@ namespace FlatCircuit {
       "void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     assert((updates.size() % 2) == 0);
-
-    CodeGenState codeState;
-    for (int i = 0; i < updates.size(); i += 2) {
-      combinationalBlockCode(updates[i + 0], codeState);
-      cppCode += sequentialBlockCode(updates[i + 1], codeState);
-    }
 
     cppCode += codeState.getCode();
 

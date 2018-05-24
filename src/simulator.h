@@ -300,7 +300,6 @@ namespace FlatCircuit {
     std::string getCode() const {
       std::string cppCode = "";
       for (auto line : codeLines) {
-        cppCode += "\t// NEW INSTRUCTION\n";
         cppCode += line;
       }
 

@@ -11,3 +11,6 @@ circuit_jit.cpp
 libcircuit_jit.dylib
 pe_cells.txt
 libcircuit_jit.dylib.dSYM/
+\#*
+.\#*
+a.out
