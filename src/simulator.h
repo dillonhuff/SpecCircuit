@@ -181,6 +181,11 @@ namespace FlatCircuit {
 
   };
 
+  enum EdgeType {
+    EDGE_TYPE_POSEDGE,
+    EDGE_TYPE_NEGEDGE
+  };
+
   struct CodeGenState {
     unsigned long long uniqueNum;
     std::vector<std::string> codeLines;
@@ -231,6 +236,16 @@ namespace FlatCircuit {
       addLine(store.codeToMaterialize(cid, pid, argName));
 
       return argName;
+    }
+
+    void addEdgeTestJNE(const EdgeType edgeType,
+                        const std::string& prev,
+                        const std::string& curr,
+                        const std::string& label) {
+      std::string edgeName =
+        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+      addLine(ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
+                 label + "; }"));
     }
 
     void addRegisterAssign(const CellId cid,

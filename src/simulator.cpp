@@ -513,12 +513,6 @@ namespace FlatCircuit {
                                             const std::string& argName) const {
     return codeToMaterializeOffset(cid, pid, argName, portOffsets);
   }
-  
-  // std::string Simulator::codeToMaterialize(const CellId cid,
-  //                                          const PortId pid,
-  //                                          const std::string& argName) const {
-  //   return valueStore.codeToMaterializeOffset(cid, pid, argName, valueStore.portOffsets);
-  // }
 
   std::string
   Simulator::sequentialBlockCode(const std::vector<SigPort>& levelized,
@@ -544,22 +538,30 @@ namespace FlatCircuit {
         string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
 
         string lbl = codeState.getNewLabel("reg_clk");
-        if (cell.clkPosedge()) {
-          codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        } else {
-          codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        }
+        EdgeType edgeType =
+          cell.clkPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
+        codeState.addEdgeTestJNE(edgeType, lastClkVar, clkVar, lbl);
+        // if (cell.clkPosedge()) {
+        //   codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+        // } else {
+        //   codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
+        // }
         codeState.addRegisterAssign(cid, inVar, valueStore);
         codeState.addLabel(lbl);
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
 
         string rlbl = codeState.getNewLabel("reg_arst");
-        if (cell.rstPosedge()) {
-          codeState.addLine("\tif (!posedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
-        } else {
-          codeState.addLine("\tif (!negedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
-        }
+
+        EdgeType rstEdge =
+          cell.rstPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
+        codeState.addEdgeTestJNE(rstEdge, lastRstVar, rstVar, rlbl);
+        
+        // if (cell.rstPosedge()) {
+        //   codeState.addLine("\tif (!posedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
+        // } else {
+        //   codeState.addLine("\tif (!negedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
+        // }
 
         string rstVal = "BitVector(\"" + init.hex_string() + "\")";
         codeState.addRegisterAssign(cid, rstVal, valueStore);
@@ -573,23 +575,19 @@ namespace FlatCircuit {
         string lastClkVar =
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
-        string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
-
         string lbl = codeState.getNewLabel("reg_arst");
         if (cell.clkPosedge()) {
 
           codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-          codeState.addLine(updateValueClk);
-          codeState.addLabel(lbl);
-          
         } else {
           
           codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-          codeState.addLine(updateValueClk);
-          codeState.addLabel(lbl);
-
         }
 
+        codeState.addRegisterAssign(cid, inVar, valueStore);
+        codeState.addLabel(lbl);
+
+        
       } else if (tp == CELL_TYPE_MEM) {
 
         string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
@@ -597,9 +595,7 @@ namespace FlatCircuit {
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
         string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, valueStore);
-
         string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
-
         string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
         
         string updateValueClk = "values[" +
