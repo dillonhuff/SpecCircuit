@@ -230,6 +230,10 @@ namespace FlatCircuit {
       codeLines.push_back(str);
     }
 
+    void addComment(const std::string& str) {
+      codeLines.push_back(str);
+    }
+    
     void addAssign(const std::string& receiver, const std::string& value) {
       codeLines.push_back(ln(receiver + " = " + value));
     }

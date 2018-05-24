@@ -527,7 +527,8 @@ namespace FlatCircuit {
       CellId cid = sigPort.cell;
       const Cell& cell = def.getCellRefConst(cid);
 
-      codeState.addLine(ln("// ----- Sequential update for cell " + def.cellName(cid)));
+      //codeState.addLine(ln("// ----- Sequential update for cell " + def.cellName(cid)));
+      codeState.addComment(ln("// ----- Sequential update for cell " + def.cellName(cid)));
 
 
       CellType tp = cell.getCellType();
@@ -614,7 +615,8 @@ namespace FlatCircuit {
       PortId port = sigPort.port;
       
       const Cell& cell = def.getCellRefConst(cid);
-      codeState.addLine(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
+      //codeState.addLine(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
+      codeState.addComment(ln("// ----- Code for cell " + def.cellName(cid) + ", " + portIdString(port)));
 
       bool sentToSeqPort = false;
       for (auto outPort : cell.outputPorts()) {
@@ -638,9 +640,11 @@ namespace FlatCircuit {
         codeState.addAssign(cid, PORT_ID_IN, argName, valueStore);
 
       } else if (cell.isInputPortCell()) {
-        codeState.addLine(ln("// No code for input port " + def.cellName(cid)));
+        //codeState.addLine(ln("// No code for input port " + def.cellName(cid)));
+        codeState.addComment(ln("// No code for input port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
-        codeState.addLine(ln("// No code for const port " + def.cellName(cid)));
+        //codeState.addLine(ln("// No code for const port " + def.cellName(cid)));
+        codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
         int outWidth = cell.getPortWidth(PORT_ID_OUT);
@@ -794,7 +798,7 @@ namespace FlatCircuit {
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
         //codeState.addLine(ln("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "] = " + state));
-        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
+        codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
