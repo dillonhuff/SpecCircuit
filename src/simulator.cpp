@@ -548,19 +548,15 @@ namespace FlatCircuit {
         string lbl = codeState.getNewLabel("reg_arst");
         if (cell.clkPosedge()) {
           codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-          codeState.addLine(updateValueClk);
-          //codeState.addLine(lbl + ":");
-          codeState.addLabel(lbl);
+          //codeState.addLine(updateValueClk);
+          // codeState.addRegisterAssign(cid, inVar, valueStore);
+          // codeState.addLabel(lbl);
 
-          //          codeState.addLine("\tif (posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         } else {
           codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-          codeState.addLine(updateValueClk);
-          codeState.addLabel(lbl);
-          //codeState.addLine(lbl + ":");
-
-          //          codeState.addLine("\tif (negedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
         }
+        codeState.addRegisterAssign(cid, inVar, valueStore);
+        codeState.addLabel(lbl);
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
         string updateValueRst = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";

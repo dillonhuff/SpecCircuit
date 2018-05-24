@@ -156,6 +156,12 @@ namespace FlatCircuit {
                 assignCode);
     }
 
+    std::string codeToAssignRegister(const CellId cid,
+                                     const std::string& assignCode) {
+      return ln("values[" + std::to_string(map_find(cid, registerOffsets)) + "] = " +
+                assignCode);
+    }
+    
     std::string codeToAssignPastValue(const CellId cid,
                                       const PortId pid,
                                       const std::string& assignCode) {
@@ -227,6 +233,12 @@ namespace FlatCircuit {
       return argName;
     }
 
+    void addRegisterAssign(const CellId cid,
+                           const std::string& value,
+                           ValueStore& valueStore) {
+      addLine(valueStore.codeToAssignRegister(cid, value));
+    }
+    
     std::string getLastValueVariableName(const CellId cid,
                                          const PortId pid,
                                          ValueStore& store) {
