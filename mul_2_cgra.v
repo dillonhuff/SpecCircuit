@@ -335,640 +335,640 @@ module flat_module(	output [0 : 0] aux_div_pad,
 	wire [0 : 0] fresh_wire_160;
 	wire [0 : 0] fresh_wire_161;
 	wire [33 : 0] fresh_wire_162;
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) aux_div_pad_port_cell(.PORT_ID_IN(fresh_wire_0),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) aux_div_pad_port_cell(.PORT_ID_IN(fresh_wire_0),
 .PORT_ID_OUT(aux_div_pad));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(0),
-.PARAM_WIDTH(1)) cell_261940_const_replacement(.PORT_ID_OUT(fresh_wire_161));
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
+.PARAM_WIDTH(32'h00000001)) cell_261940_const_replacement(.PORT_ID_OUT(fresh_wire_161));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(2),
-.PARAM_WIDTH(34)) cell_261945_const_replacement(.PORT_ID_OUT(fresh_wire_162));
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(34'h000000002),
+.PARAM_WIDTH(32'h00000022)) cell_261945_const_replacement(.PORT_ID_OUT(fresh_wire_162));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) clk_ext_in_port_cell(.PORT_ID_IN(clk_ext_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) clk_ext_in_port_cell(.PORT_ID_IN(clk_ext_in),
 .PORT_ID_OUT(fresh_wire_1));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) clk_in_port_cell(.PORT_ID_IN(clk_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) clk_in_port_cell(.PORT_ID_IN(clk_in),
 .PORT_ID_OUT(fresh_wire_2));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32),
-.PARAM_PORT_TYPE(0)) config_addr_in_port_cell(.PORT_ID_IN(config_addr_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000020),
+.PARAM_PORT_TYPE(2'h0)) config_addr_in_port_cell(.PORT_ID_IN(config_addr_in),
 .PORT_ID_OUT(fresh_wire_3));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32),
-.PARAM_PORT_TYPE(0)) config_data_in_port_cell(.PORT_ID_IN(config_data_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000020),
+.PARAM_PORT_TYPE(2'h0)) config_data_in_port_cell(.PORT_ID_IN(config_data_in),
 .PORT_ID_OUT(fresh_wire_4));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_cki_jm_port_cell(.PORT_ID_IN(ext_cki_jm),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_cki_jm_port_cell(.PORT_ID_IN(ext_cki_jm),
 .PORT_ID_OUT(fresh_wire_6));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_cki_port_cell(.PORT_ID_IN(ext_cki),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_cki_port_cell(.PORT_ID_IN(ext_cki),
 .PORT_ID_OUT(fresh_wire_5));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_ckib_jm_port_cell(.PORT_ID_IN(ext_ckib_jm),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_ckib_jm_port_cell(.PORT_ID_IN(ext_ckib_jm),
 .PORT_ID_OUT(fresh_wire_8));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_ckib_port_cell(.PORT_ID_IN(ext_ckib),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_ckib_port_cell(.PORT_ID_IN(ext_ckib),
 .PORT_ID_OUT(fresh_wire_7));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_frefn_jm_port_cell(.PORT_ID_IN(ext_frefn_jm),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_frefn_jm_port_cell(.PORT_ID_IN(ext_frefn_jm),
 .PORT_ID_OUT(fresh_wire_10));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_frefn_port_cell(.PORT_ID_IN(ext_frefn),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_frefn_port_cell(.PORT_ID_IN(ext_frefn),
 .PORT_ID_OUT(fresh_wire_9));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_frefp_jm_port_cell(.PORT_ID_IN(ext_frefp_jm),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_frefp_jm_port_cell(.PORT_ID_IN(ext_frefp_jm),
 .PORT_ID_OUT(fresh_wire_12));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) ext_frefp_port_cell(.PORT_ID_IN(ext_frefp),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) ext_frefp_port_cell(.PORT_ID_IN(ext_frefp),
 .PORT_ID_OUT(fresh_wire_11));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) ffeed_pad_port_cell(.PORT_ID_IN(fresh_wire_13),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) ffeed_pad_port_cell(.PORT_ID_IN(fresh_wire_13),
 .PORT_ID_OUT(ffeed_pad));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) fout_div_pad_port_cell(.PORT_ID_IN(fresh_wire_14),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) fout_div_pad_port_cell(.PORT_ID_IN(fresh_wire_14),
 .PORT_ID_OUT(fout_div_pad));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) fref_off_pad_port_cell(.PORT_ID_IN(fresh_wire_15),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) fref_off_pad_port_cell(.PORT_ID_IN(fresh_wire_15),
 .PORT_ID_OUT(fref_off_pad));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) frefn_out_jm_port_cell(.PORT_ID_IN(fresh_wire_16),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) frefn_out_jm_port_cell(.PORT_ID_IN(fresh_wire_16),
 .PORT_ID_OUT(frefn_out_jm));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) frefp_out_jm_port_cell(.PORT_ID_IN(fresh_wire_17),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) frefp_out_jm_port_cell(.PORT_ID_IN(fresh_wire_17),
 .PORT_ID_OUT(frefp_out_jm));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(13),
-.PARAM_PORT_TYPE(1)) lf_out_port_cell(.PORT_ID_IN(fresh_wire_18),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h0000000d),
+.PARAM_PORT_TYPE(2'h1)) lf_out_port_cell(.PORT_ID_IN(fresh_wire_18),
 .PORT_ID_OUT(lf_out));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(0),
-.PARAM_WIDTH(13)) mdll_top$self_lf_out(.PORT_ID_OUT(fresh_wire_154));
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(13'h0000),
+.PARAM_WIDTH(32'h0000000d)) mdll_top$self_lf_out(.PORT_ID_OUT(fresh_wire_154));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(4),
-.PARAM_PORT_TYPE(1)) mdllout_pad_port_cell(.PORT_ID_IN(fresh_wire_19),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000004),
+.PARAM_PORT_TYPE(2'h1)) mdllout_pad_port_cell(.PORT_ID_IN(fresh_wire_19),
 .PORT_ID_OUT(mdllout_pad));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T0_in_port_cell(.PORT_ID_IN(pad_S0_T0_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T0_in_port_cell(.PORT_ID_IN(pad_S0_T0_in),
 .PORT_ID_OUT(fresh_wire_20));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T0_out_port_cell(.PORT_ID_IN(fresh_wire_21),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T0_out_port_cell(.PORT_ID_IN(fresh_wire_21),
 .PORT_ID_OUT(pad_S0_T0_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T10_in_port_cell(.PORT_ID_IN(pad_S0_T10_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T10_in_port_cell(.PORT_ID_IN(pad_S0_T10_in),
 .PORT_ID_OUT(fresh_wire_22));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T10_out_port_cell(.PORT_ID_IN(fresh_wire_23),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T10_out_port_cell(.PORT_ID_IN(fresh_wire_23),
 .PORT_ID_OUT(pad_S0_T10_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T11_in_port_cell(.PORT_ID_IN(pad_S0_T11_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T11_in_port_cell(.PORT_ID_IN(pad_S0_T11_in),
 .PORT_ID_OUT(fresh_wire_24));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T11_out_port_cell(.PORT_ID_IN(fresh_wire_25),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T11_out_port_cell(.PORT_ID_IN(fresh_wire_25),
 .PORT_ID_OUT(pad_S0_T11_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T12_in_port_cell(.PORT_ID_IN(pad_S0_T12_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T12_in_port_cell(.PORT_ID_IN(pad_S0_T12_in),
 .PORT_ID_OUT(fresh_wire_26));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T12_out_port_cell(.PORT_ID_IN(fresh_wire_27),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T12_out_port_cell(.PORT_ID_IN(fresh_wire_27),
 .PORT_ID_OUT(pad_S0_T12_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T13_in_port_cell(.PORT_ID_IN(pad_S0_T13_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T13_in_port_cell(.PORT_ID_IN(pad_S0_T13_in),
 .PORT_ID_OUT(fresh_wire_28));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T13_out_port_cell(.PORT_ID_IN(fresh_wire_29),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T13_out_port_cell(.PORT_ID_IN(fresh_wire_29),
 .PORT_ID_OUT(pad_S0_T13_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T14_in_port_cell(.PORT_ID_IN(pad_S0_T14_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T14_in_port_cell(.PORT_ID_IN(pad_S0_T14_in),
 .PORT_ID_OUT(fresh_wire_30));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T14_out_port_cell(.PORT_ID_IN(fresh_wire_31),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T14_out_port_cell(.PORT_ID_IN(fresh_wire_31),
 .PORT_ID_OUT(pad_S0_T14_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T15_in_port_cell(.PORT_ID_IN(pad_S0_T15_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T15_in_port_cell(.PORT_ID_IN(pad_S0_T15_in),
 .PORT_ID_OUT(fresh_wire_32));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T15_out_port_cell(.PORT_ID_IN(fresh_wire_33),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T15_out_port_cell(.PORT_ID_IN(fresh_wire_33),
 .PORT_ID_OUT(pad_S0_T15_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T1_in_port_cell(.PORT_ID_IN(pad_S0_T1_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T1_in_port_cell(.PORT_ID_IN(pad_S0_T1_in),
 .PORT_ID_OUT(fresh_wire_34));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T1_out_port_cell(.PORT_ID_IN(fresh_wire_35),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T1_out_port_cell(.PORT_ID_IN(fresh_wire_35),
 .PORT_ID_OUT(pad_S0_T1_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T2_in_port_cell(.PORT_ID_IN(pad_S0_T2_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T2_in_port_cell(.PORT_ID_IN(pad_S0_T2_in),
 .PORT_ID_OUT(fresh_wire_36));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T2_out_port_cell(.PORT_ID_IN(fresh_wire_37),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T2_out_port_cell(.PORT_ID_IN(fresh_wire_37),
 .PORT_ID_OUT(pad_S0_T2_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T3_in_port_cell(.PORT_ID_IN(pad_S0_T3_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T3_in_port_cell(.PORT_ID_IN(pad_S0_T3_in),
 .PORT_ID_OUT(fresh_wire_38));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T3_out_port_cell(.PORT_ID_IN(fresh_wire_39),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T3_out_port_cell(.PORT_ID_IN(fresh_wire_39),
 .PORT_ID_OUT(pad_S0_T3_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T4_in_port_cell(.PORT_ID_IN(pad_S0_T4_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T4_in_port_cell(.PORT_ID_IN(pad_S0_T4_in),
 .PORT_ID_OUT(fresh_wire_40));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T4_out_port_cell(.PORT_ID_IN(fresh_wire_41),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T4_out_port_cell(.PORT_ID_IN(fresh_wire_41),
 .PORT_ID_OUT(pad_S0_T4_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T5_in_port_cell(.PORT_ID_IN(pad_S0_T5_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T5_in_port_cell(.PORT_ID_IN(pad_S0_T5_in),
 .PORT_ID_OUT(fresh_wire_42));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T5_out_port_cell(.PORT_ID_IN(fresh_wire_43),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T5_out_port_cell(.PORT_ID_IN(fresh_wire_43),
 .PORT_ID_OUT(pad_S0_T5_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T6_in_port_cell(.PORT_ID_IN(pad_S0_T6_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T6_in_port_cell(.PORT_ID_IN(pad_S0_T6_in),
 .PORT_ID_OUT(fresh_wire_44));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T6_out_port_cell(.PORT_ID_IN(fresh_wire_45),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T6_out_port_cell(.PORT_ID_IN(fresh_wire_45),
 .PORT_ID_OUT(pad_S0_T6_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T7_in_port_cell(.PORT_ID_IN(pad_S0_T7_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T7_in_port_cell(.PORT_ID_IN(pad_S0_T7_in),
 .PORT_ID_OUT(fresh_wire_46));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T7_out_port_cell(.PORT_ID_IN(fresh_wire_47),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T7_out_port_cell(.PORT_ID_IN(fresh_wire_47),
 .PORT_ID_OUT(pad_S0_T7_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T8_in_port_cell(.PORT_ID_IN(pad_S0_T8_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T8_in_port_cell(.PORT_ID_IN(pad_S0_T8_in),
 .PORT_ID_OUT(fresh_wire_48));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T8_out_port_cell(.PORT_ID_IN(fresh_wire_49),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T8_out_port_cell(.PORT_ID_IN(fresh_wire_49),
 .PORT_ID_OUT(pad_S0_T8_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S0_T9_in_port_cell(.PORT_ID_IN(pad_S0_T9_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S0_T9_in_port_cell(.PORT_ID_IN(pad_S0_T9_in),
 .PORT_ID_OUT(fresh_wire_50));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S0_T9_out_port_cell(.PORT_ID_IN(fresh_wire_51),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S0_T9_out_port_cell(.PORT_ID_IN(fresh_wire_51),
 .PORT_ID_OUT(pad_S0_T9_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T0_in_port_cell(.PORT_ID_IN(pad_S1_T0_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T0_in_port_cell(.PORT_ID_IN(pad_S1_T0_in),
 .PORT_ID_OUT(fresh_wire_52));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T0_out_port_cell(.PORT_ID_IN(fresh_wire_53),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T0_out_port_cell(.PORT_ID_IN(fresh_wire_53),
 .PORT_ID_OUT(pad_S1_T0_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T10_in_port_cell(.PORT_ID_IN(pad_S1_T10_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T10_in_port_cell(.PORT_ID_IN(pad_S1_T10_in),
 .PORT_ID_OUT(fresh_wire_54));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T10_out_port_cell(.PORT_ID_IN(fresh_wire_55),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T10_out_port_cell(.PORT_ID_IN(fresh_wire_55),
 .PORT_ID_OUT(pad_S1_T10_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T11_in_port_cell(.PORT_ID_IN(pad_S1_T11_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T11_in_port_cell(.PORT_ID_IN(pad_S1_T11_in),
 .PORT_ID_OUT(fresh_wire_56));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T11_out_port_cell(.PORT_ID_IN(fresh_wire_57),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T11_out_port_cell(.PORT_ID_IN(fresh_wire_57),
 .PORT_ID_OUT(pad_S1_T11_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T12_in_port_cell(.PORT_ID_IN(pad_S1_T12_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T12_in_port_cell(.PORT_ID_IN(pad_S1_T12_in),
 .PORT_ID_OUT(fresh_wire_58));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T12_out_port_cell(.PORT_ID_IN(fresh_wire_59),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T12_out_port_cell(.PORT_ID_IN(fresh_wire_59),
 .PORT_ID_OUT(pad_S1_T12_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T13_in_port_cell(.PORT_ID_IN(pad_S1_T13_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T13_in_port_cell(.PORT_ID_IN(pad_S1_T13_in),
 .PORT_ID_OUT(fresh_wire_60));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T13_out_port_cell(.PORT_ID_IN(fresh_wire_61),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T13_out_port_cell(.PORT_ID_IN(fresh_wire_61),
 .PORT_ID_OUT(pad_S1_T13_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T14_in_port_cell(.PORT_ID_IN(pad_S1_T14_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T14_in_port_cell(.PORT_ID_IN(pad_S1_T14_in),
 .PORT_ID_OUT(fresh_wire_62));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T14_out_port_cell(.PORT_ID_IN(fresh_wire_63),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T14_out_port_cell(.PORT_ID_IN(fresh_wire_63),
 .PORT_ID_OUT(pad_S1_T14_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T15_in_port_cell(.PORT_ID_IN(pad_S1_T15_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T15_in_port_cell(.PORT_ID_IN(pad_S1_T15_in),
 .PORT_ID_OUT(fresh_wire_64));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T15_out_port_cell(.PORT_ID_IN(fresh_wire_65),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T15_out_port_cell(.PORT_ID_IN(fresh_wire_65),
 .PORT_ID_OUT(pad_S1_T15_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T1_in_port_cell(.PORT_ID_IN(pad_S1_T1_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T1_in_port_cell(.PORT_ID_IN(pad_S1_T1_in),
 .PORT_ID_OUT(fresh_wire_66));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T1_out_port_cell(.PORT_ID_IN(fresh_wire_67),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T1_out_port_cell(.PORT_ID_IN(fresh_wire_67),
 .PORT_ID_OUT(pad_S1_T1_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T2_in_port_cell(.PORT_ID_IN(pad_S1_T2_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T2_in_port_cell(.PORT_ID_IN(pad_S1_T2_in),
 .PORT_ID_OUT(fresh_wire_68));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T2_out_port_cell(.PORT_ID_IN(fresh_wire_69),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T2_out_port_cell(.PORT_ID_IN(fresh_wire_69),
 .PORT_ID_OUT(pad_S1_T2_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T3_in_port_cell(.PORT_ID_IN(pad_S1_T3_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T3_in_port_cell(.PORT_ID_IN(pad_S1_T3_in),
 .PORT_ID_OUT(fresh_wire_70));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T3_out_port_cell(.PORT_ID_IN(fresh_wire_71),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T3_out_port_cell(.PORT_ID_IN(fresh_wire_71),
 .PORT_ID_OUT(pad_S1_T3_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T4_in_port_cell(.PORT_ID_IN(pad_S1_T4_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T4_in_port_cell(.PORT_ID_IN(pad_S1_T4_in),
 .PORT_ID_OUT(fresh_wire_72));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T4_out_port_cell(.PORT_ID_IN(fresh_wire_73),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T4_out_port_cell(.PORT_ID_IN(fresh_wire_73),
 .PORT_ID_OUT(pad_S1_T4_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T5_in_port_cell(.PORT_ID_IN(pad_S1_T5_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T5_in_port_cell(.PORT_ID_IN(pad_S1_T5_in),
 .PORT_ID_OUT(fresh_wire_74));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T5_out_port_cell(.PORT_ID_IN(fresh_wire_75),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T5_out_port_cell(.PORT_ID_IN(fresh_wire_75),
 .PORT_ID_OUT(pad_S1_T5_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T6_in_port_cell(.PORT_ID_IN(pad_S1_T6_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T6_in_port_cell(.PORT_ID_IN(pad_S1_T6_in),
 .PORT_ID_OUT(fresh_wire_76));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T6_out_port_cell(.PORT_ID_IN(fresh_wire_77),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T6_out_port_cell(.PORT_ID_IN(fresh_wire_77),
 .PORT_ID_OUT(pad_S1_T6_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T7_in_port_cell(.PORT_ID_IN(pad_S1_T7_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T7_in_port_cell(.PORT_ID_IN(pad_S1_T7_in),
 .PORT_ID_OUT(fresh_wire_78));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T7_out_port_cell(.PORT_ID_IN(fresh_wire_79),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T7_out_port_cell(.PORT_ID_IN(fresh_wire_79),
 .PORT_ID_OUT(pad_S1_T7_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T8_in_port_cell(.PORT_ID_IN(pad_S1_T8_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T8_in_port_cell(.PORT_ID_IN(pad_S1_T8_in),
 .PORT_ID_OUT(fresh_wire_80));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T8_out_port_cell(.PORT_ID_IN(fresh_wire_81),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T8_out_port_cell(.PORT_ID_IN(fresh_wire_81),
 .PORT_ID_OUT(pad_S1_T8_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S1_T9_in_port_cell(.PORT_ID_IN(pad_S1_T9_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S1_T9_in_port_cell(.PORT_ID_IN(pad_S1_T9_in),
 .PORT_ID_OUT(fresh_wire_82));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S1_T9_out_port_cell(.PORT_ID_IN(fresh_wire_83),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S1_T9_out_port_cell(.PORT_ID_IN(fresh_wire_83),
 .PORT_ID_OUT(pad_S1_T9_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T0_in_port_cell(.PORT_ID_IN(pad_S2_T0_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T0_in_port_cell(.PORT_ID_IN(pad_S2_T0_in),
 .PORT_ID_OUT(fresh_wire_84));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T0_out_port_cell(.PORT_ID_IN(fresh_wire_85),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T0_out_port_cell(.PORT_ID_IN(fresh_wire_85),
 .PORT_ID_OUT(pad_S2_T0_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T10_in_port_cell(.PORT_ID_IN(pad_S2_T10_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T10_in_port_cell(.PORT_ID_IN(pad_S2_T10_in),
 .PORT_ID_OUT(fresh_wire_86));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T10_out_port_cell(.PORT_ID_IN(fresh_wire_87),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T10_out_port_cell(.PORT_ID_IN(fresh_wire_87),
 .PORT_ID_OUT(pad_S2_T10_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T11_in_port_cell(.PORT_ID_IN(pad_S2_T11_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T11_in_port_cell(.PORT_ID_IN(pad_S2_T11_in),
 .PORT_ID_OUT(fresh_wire_88));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T11_out_port_cell(.PORT_ID_IN(fresh_wire_89),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T11_out_port_cell(.PORT_ID_IN(fresh_wire_89),
 .PORT_ID_OUT(pad_S2_T11_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T12_in_port_cell(.PORT_ID_IN(pad_S2_T12_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T12_in_port_cell(.PORT_ID_IN(pad_S2_T12_in),
 .PORT_ID_OUT(fresh_wire_90));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T12_out_port_cell(.PORT_ID_IN(fresh_wire_91),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T12_out_port_cell(.PORT_ID_IN(fresh_wire_91),
 .PORT_ID_OUT(pad_S2_T12_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T13_in_port_cell(.PORT_ID_IN(pad_S2_T13_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T13_in_port_cell(.PORT_ID_IN(pad_S2_T13_in),
 .PORT_ID_OUT(fresh_wire_92));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T13_out_port_cell(.PORT_ID_IN(fresh_wire_93),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T13_out_port_cell(.PORT_ID_IN(fresh_wire_93),
 .PORT_ID_OUT(pad_S2_T13_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T14_in_port_cell(.PORT_ID_IN(pad_S2_T14_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T14_in_port_cell(.PORT_ID_IN(pad_S2_T14_in),
 .PORT_ID_OUT(fresh_wire_94));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T14_out_port_cell(.PORT_ID_IN(fresh_wire_95),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T14_out_port_cell(.PORT_ID_IN(fresh_wire_95),
 .PORT_ID_OUT(pad_S2_T14_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T15_in_port_cell(.PORT_ID_IN(pad_S2_T15_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T15_in_port_cell(.PORT_ID_IN(pad_S2_T15_in),
 .PORT_ID_OUT(fresh_wire_96));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T15_out_port_cell(.PORT_ID_IN(fresh_wire_97),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T15_out_port_cell(.PORT_ID_IN(fresh_wire_97),
 .PORT_ID_OUT(pad_S2_T15_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T1_in_port_cell(.PORT_ID_IN(pad_S2_T1_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T1_in_port_cell(.PORT_ID_IN(pad_S2_T1_in),
 .PORT_ID_OUT(fresh_wire_98));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T1_out_port_cell(.PORT_ID_IN(fresh_wire_99),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T1_out_port_cell(.PORT_ID_IN(fresh_wire_99),
 .PORT_ID_OUT(pad_S2_T1_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T2_in_port_cell(.PORT_ID_IN(pad_S2_T2_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T2_in_port_cell(.PORT_ID_IN(pad_S2_T2_in),
 .PORT_ID_OUT(fresh_wire_100));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T2_out_port_cell(.PORT_ID_IN(fresh_wire_101),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T2_out_port_cell(.PORT_ID_IN(fresh_wire_101),
 .PORT_ID_OUT(pad_S2_T2_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T3_in_port_cell(.PORT_ID_IN(pad_S2_T3_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T3_in_port_cell(.PORT_ID_IN(pad_S2_T3_in),
 .PORT_ID_OUT(fresh_wire_102));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T3_out_port_cell(.PORT_ID_IN(fresh_wire_103),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T3_out_port_cell(.PORT_ID_IN(fresh_wire_103),
 .PORT_ID_OUT(pad_S2_T3_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T4_in_port_cell(.PORT_ID_IN(pad_S2_T4_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T4_in_port_cell(.PORT_ID_IN(pad_S2_T4_in),
 .PORT_ID_OUT(fresh_wire_104));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T4_out_port_cell(.PORT_ID_IN(fresh_wire_105),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T4_out_port_cell(.PORT_ID_IN(fresh_wire_105),
 .PORT_ID_OUT(pad_S2_T4_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T5_in_port_cell(.PORT_ID_IN(pad_S2_T5_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T5_in_port_cell(.PORT_ID_IN(pad_S2_T5_in),
 .PORT_ID_OUT(fresh_wire_106));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T5_out_port_cell(.PORT_ID_IN(fresh_wire_107),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T5_out_port_cell(.PORT_ID_IN(fresh_wire_107),
 .PORT_ID_OUT(pad_S2_T5_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T6_in_port_cell(.PORT_ID_IN(pad_S2_T6_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T6_in_port_cell(.PORT_ID_IN(pad_S2_T6_in),
 .PORT_ID_OUT(fresh_wire_108));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T6_out_port_cell(.PORT_ID_IN(fresh_wire_109),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T6_out_port_cell(.PORT_ID_IN(fresh_wire_109),
 .PORT_ID_OUT(pad_S2_T6_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T7_in_port_cell(.PORT_ID_IN(pad_S2_T7_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T7_in_port_cell(.PORT_ID_IN(pad_S2_T7_in),
 .PORT_ID_OUT(fresh_wire_110));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T7_out_port_cell(.PORT_ID_IN(fresh_wire_111),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T7_out_port_cell(.PORT_ID_IN(fresh_wire_111),
 .PORT_ID_OUT(pad_S2_T7_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T8_in_port_cell(.PORT_ID_IN(pad_S2_T8_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T8_in_port_cell(.PORT_ID_IN(pad_S2_T8_in),
 .PORT_ID_OUT(fresh_wire_112));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T8_out_port_cell(.PORT_ID_IN(fresh_wire_113),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T8_out_port_cell(.PORT_ID_IN(fresh_wire_113),
 .PORT_ID_OUT(pad_S2_T8_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S2_T9_in_port_cell(.PORT_ID_IN(pad_S2_T9_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S2_T9_in_port_cell(.PORT_ID_IN(pad_S2_T9_in),
 .PORT_ID_OUT(fresh_wire_114));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S2_T9_out_port_cell(.PORT_ID_IN(fresh_wire_115),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S2_T9_out_port_cell(.PORT_ID_IN(fresh_wire_115),
 .PORT_ID_OUT(pad_S2_T9_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T0_in_port_cell(.PORT_ID_IN(pad_S3_T0_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T0_in_port_cell(.PORT_ID_IN(pad_S3_T0_in),
 .PORT_ID_OUT(fresh_wire_116));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T0_out_port_cell(.PORT_ID_IN(fresh_wire_117),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T0_out_port_cell(.PORT_ID_IN(fresh_wire_117),
 .PORT_ID_OUT(pad_S3_T0_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T10_in_port_cell(.PORT_ID_IN(pad_S3_T10_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T10_in_port_cell(.PORT_ID_IN(pad_S3_T10_in),
 .PORT_ID_OUT(fresh_wire_118));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T10_out_port_cell(.PORT_ID_IN(fresh_wire_119),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T10_out_port_cell(.PORT_ID_IN(fresh_wire_119),
 .PORT_ID_OUT(pad_S3_T10_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T11_in_port_cell(.PORT_ID_IN(pad_S3_T11_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T11_in_port_cell(.PORT_ID_IN(pad_S3_T11_in),
 .PORT_ID_OUT(fresh_wire_120));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T11_out_port_cell(.PORT_ID_IN(fresh_wire_121),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T11_out_port_cell(.PORT_ID_IN(fresh_wire_121),
 .PORT_ID_OUT(pad_S3_T11_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T12_in_port_cell(.PORT_ID_IN(pad_S3_T12_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T12_in_port_cell(.PORT_ID_IN(pad_S3_T12_in),
 .PORT_ID_OUT(fresh_wire_122));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T12_out_port_cell(.PORT_ID_IN(fresh_wire_123),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T12_out_port_cell(.PORT_ID_IN(fresh_wire_123),
 .PORT_ID_OUT(pad_S3_T12_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T13_in_port_cell(.PORT_ID_IN(pad_S3_T13_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T13_in_port_cell(.PORT_ID_IN(pad_S3_T13_in),
 .PORT_ID_OUT(fresh_wire_124));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T13_out_port_cell(.PORT_ID_IN(fresh_wire_125),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T13_out_port_cell(.PORT_ID_IN(fresh_wire_125),
 .PORT_ID_OUT(pad_S3_T13_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T14_in_port_cell(.PORT_ID_IN(pad_S3_T14_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T14_in_port_cell(.PORT_ID_IN(pad_S3_T14_in),
 .PORT_ID_OUT(fresh_wire_126));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T14_out_port_cell(.PORT_ID_IN(fresh_wire_127),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T14_out_port_cell(.PORT_ID_IN(fresh_wire_127),
 .PORT_ID_OUT(pad_S3_T14_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T15_in_port_cell(.PORT_ID_IN(pad_S3_T15_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T15_in_port_cell(.PORT_ID_IN(pad_S3_T15_in),
 .PORT_ID_OUT(fresh_wire_128));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T15_out_port_cell(.PORT_ID_IN(fresh_wire_129),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T15_out_port_cell(.PORT_ID_IN(fresh_wire_129),
 .PORT_ID_OUT(pad_S3_T15_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T1_in_port_cell(.PORT_ID_IN(pad_S3_T1_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T1_in_port_cell(.PORT_ID_IN(pad_S3_T1_in),
 .PORT_ID_OUT(fresh_wire_130));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T1_out_port_cell(.PORT_ID_IN(fresh_wire_131),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T1_out_port_cell(.PORT_ID_IN(fresh_wire_131),
 .PORT_ID_OUT(pad_S3_T1_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T2_in_port_cell(.PORT_ID_IN(pad_S3_T2_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T2_in_port_cell(.PORT_ID_IN(pad_S3_T2_in),
 .PORT_ID_OUT(fresh_wire_132));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T2_out_port_cell(.PORT_ID_IN(fresh_wire_133),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T2_out_port_cell(.PORT_ID_IN(fresh_wire_133),
 .PORT_ID_OUT(pad_S3_T2_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T3_in_port_cell(.PORT_ID_IN(pad_S3_T3_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T3_in_port_cell(.PORT_ID_IN(pad_S3_T3_in),
 .PORT_ID_OUT(fresh_wire_134));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T3_out_port_cell(.PORT_ID_IN(fresh_wire_135),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T3_out_port_cell(.PORT_ID_IN(fresh_wire_135),
 .PORT_ID_OUT(pad_S3_T3_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T4_in_port_cell(.PORT_ID_IN(pad_S3_T4_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T4_in_port_cell(.PORT_ID_IN(pad_S3_T4_in),
 .PORT_ID_OUT(fresh_wire_136));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T4_out_port_cell(.PORT_ID_IN(fresh_wire_137),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T4_out_port_cell(.PORT_ID_IN(fresh_wire_137),
 .PORT_ID_OUT(pad_S3_T4_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T5_in_port_cell(.PORT_ID_IN(pad_S3_T5_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T5_in_port_cell(.PORT_ID_IN(pad_S3_T5_in),
 .PORT_ID_OUT(fresh_wire_138));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T5_out_port_cell(.PORT_ID_IN(fresh_wire_139),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T5_out_port_cell(.PORT_ID_IN(fresh_wire_139),
 .PORT_ID_OUT(pad_S3_T5_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T6_in_port_cell(.PORT_ID_IN(pad_S3_T6_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T6_in_port_cell(.PORT_ID_IN(pad_S3_T6_in),
 .PORT_ID_OUT(fresh_wire_140));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T6_out_port_cell(.PORT_ID_IN(fresh_wire_141),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T6_out_port_cell(.PORT_ID_IN(fresh_wire_141),
 .PORT_ID_OUT(pad_S3_T6_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T7_in_port_cell(.PORT_ID_IN(pad_S3_T7_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T7_in_port_cell(.PORT_ID_IN(pad_S3_T7_in),
 .PORT_ID_OUT(fresh_wire_142));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T7_out_port_cell(.PORT_ID_IN(fresh_wire_143),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T7_out_port_cell(.PORT_ID_IN(fresh_wire_143),
 .PORT_ID_OUT(pad_S3_T7_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T8_in_port_cell(.PORT_ID_IN(pad_S3_T8_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T8_in_port_cell(.PORT_ID_IN(pad_S3_T8_in),
 .PORT_ID_OUT(fresh_wire_144));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T8_out_port_cell(.PORT_ID_IN(fresh_wire_145),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T8_out_port_cell(.PORT_ID_IN(fresh_wire_145),
 .PORT_ID_OUT(pad_S3_T8_out));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) pad_S3_T9_in_port_cell(.PORT_ID_IN(pad_S3_T9_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) pad_S3_T9_in_port_cell(.PORT_ID_IN(pad_S3_T9_in),
 .PORT_ID_OUT(fresh_wire_146));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) pad_S3_T9_out_port_cell(.PORT_ID_IN(fresh_wire_147),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) pad_S3_T9_out_port_cell(.PORT_ID_IN(fresh_wire_147),
 .PORT_ID_OUT(pad_S3_T9_out));
 
-	CELL_TYPE_ZEXT #(.PARAM_IN_WIDTH(17),
-.PARAM_OUT_WIDTH(34)) pe_0x15$test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__1503$extendA(.PORT_ID_IN(fresh_wire_155),
+	CELL_TYPE_ZEXT #(.PARAM_IN_WIDTH(32'h00000011),
+.PARAM_OUT_WIDTH(32'h00000022)) pe_0x15$test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__1503$extendA(.PORT_ID_IN(fresh_wire_155),
 .PORT_ID_OUT(fresh_wire_156));
 
-	CELL_TYPE_MUL #(.PARAM_WIDTH(34)) pe_0x15$test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__1503$op0(.PORT_ID_IN0(fresh_wire_157),
+	CELL_TYPE_MUL #(.PARAM_WIDTH(32'h00000022)) pe_0x15$test_pe$test_pe_comp$test_mult_add$__DOLLAR__mul__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_mult_add__DOT__sv__COLON__64__DOLLAR__1503$op0(.PORT_ID_IN0(fresh_wire_157),
 .PORT_ID_IN1(fresh_wire_158),
 .PORT_ID_OUT(fresh_wire_159));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(0),
-.PARAM_WIDTH(1)) pe_0xFF__DOT__tile_id__LEFT_BRACKET__9__RIGHT_BRACKET___bit_const_9(.PORT_ID_OUT(fresh_wire_160));
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
+.PARAM_WIDTH(32'h00000001)) pe_0xFF__DOT__tile_id__LEFT_BRACKET__9__RIGHT_BRACKET___bit_const_9(.PORT_ID_OUT(fresh_wire_160));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) reset_in_port_cell(.PORT_ID_IN(reset_in),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) reset_in_port_cell(.PORT_ID_IN(reset_in),
 .PORT_ID_OUT(fresh_wire_148));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) tck_port_cell(.PORT_ID_IN(tck),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) tck_port_cell(.PORT_ID_IN(tck),
 .PORT_ID_OUT(fresh_wire_149));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) tdi_port_cell(.PORT_ID_IN(tdi),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) tdi_port_cell(.PORT_ID_IN(tdi),
 .PORT_ID_OUT(fresh_wire_150));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(1)) tdo_port_cell(.PORT_ID_IN(fresh_wire_151),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h1)) tdo_port_cell(.PORT_ID_IN(fresh_wire_151),
 .PORT_ID_OUT(tdo));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) tms_port_cell(.PORT_ID_IN(tms),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) tms_port_cell(.PORT_ID_IN(tms),
 .PORT_ID_OUT(fresh_wire_152));
 
-	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(1),
-.PARAM_PORT_TYPE(0)) trst_n_port_cell(.PORT_ID_IN(trst_n),
+	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
+.PARAM_PORT_TYPE(2'h0)) trst_n_port_cell(.PORT_ID_IN(trst_n),
 .PORT_ID_OUT(fresh_wire_153));
 
 	assign fresh_wire_0[ 0 ] = fresh_wire_160[ 0 ];
