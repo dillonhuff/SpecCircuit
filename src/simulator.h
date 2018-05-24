@@ -190,6 +190,10 @@ namespace FlatCircuit {
     unsigned long long uniqueNum;
     std::vector<std::string> codeLines;
 
+    void addLine(const std::string& str) {
+      codeLines.push_back(str);
+    }
+
   public:
 
     CodeGenState() : uniqueNum(0) {}
@@ -248,12 +252,26 @@ namespace FlatCircuit {
                  label + "; }"));
     }
 
+    void addQVBVDecl(const std::string& name,
+                     const int length) {
+      addLine(ln("BitVector " + name + "(" + std::to_string(length) + ", 0)"));
+    }
+
+    void addUpdateMemoryCode(const CellId cid,
+                             const std::string& waddrName,
+                             const std::string& wdataName,
+                             ValueStore& valueStore) {
+      std::string updateValueClk = "values[" +
+        std::to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
+        "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
+      addLine(ln(updateValueClk));
+    }
     void addMemoryTestJNE(const std::string& wenName,
                           const std::string& lastClkVar,
                           const std::string& clkVar,
                           const std::string& label) {
-      addLine("\tif ((" + wenName + " == BitVector(1, 1)) && posedge(" +
-              lastClkVar + ", " + clkVar + ")) { goto " + label + "; }\n");
+      addLine("\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+              lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n");
     }
     
     void addRegisterAssign(const CellId cid,
@@ -271,10 +289,6 @@ namespace FlatCircuit {
       return argName;
     }
     
-    void addLine(const std::string& str) {
-      codeLines.push_back(str);
-    }
-
     void addComment(const std::string& str) {
       codeLines.push_back(str);
     }
@@ -1167,7 +1181,6 @@ namespace FlatCircuit {
     }
 
     template<typename F>
-    //std::string
     void
     unopCode(CodeGenState& codeState,
              const CellId cid,

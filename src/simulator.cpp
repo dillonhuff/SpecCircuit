@@ -439,14 +439,6 @@ namespace FlatCircuit {
     return {myLibHandle, myFuncFunV};
   }
 
-  // std::string
-  // Simulator::codeToMaterializeOffset(const CellId cid,
-  //                                    const PortId pid,
-  //                                    const std::string& argName,
-  //                                    const std::map<SigPort, unsigned long>& offsets) const {
-  //   return valueStore.codeToMaterializeOffset(cid, pid, argName, offsets);
-  // }
-
   std::string
   ValueStore::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
@@ -581,13 +573,9 @@ namespace FlatCircuit {
         string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
         string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
 
-        string updateValueClk = "values[" +
-          to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
-          "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
-
         string lbl = codeState.getNewLabel("mem_clk");
         codeState.addMemoryTestJNE(wenName, lastClkVar, clkVar, lbl);
-        codeState.addLine(ln(updateValueClk));
+        codeState.addUpdateMemoryCode(cid, waddrName, wdataName, valueStore);
         codeState.addLabel(lbl);
 
       } else {
@@ -626,7 +614,11 @@ namespace FlatCircuit {
       if (sentToSeqPort) {
 
         pastValueTmp = codeState.getPortTemp(cid, PORT_ID_OUT);
-        codeState.addLine(ln("BitVector " + pastValueTmp + " = values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]"));
+
+        codeState.addQVBVDecl(pastValueTmp, cell.getPortWidth(PORT_ID_OUT));
+        codeState.addAssign(pastValueTmp,
+                            "values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]");
+        
       }
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
