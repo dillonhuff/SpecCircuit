@@ -528,24 +528,17 @@ namespace FlatCircuit {
       if (tp == CELL_TYPE_REG_ARST) {
 
         string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
-
         string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
-
-        string lastClkVar = codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
-
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         string rstVar = codeState.getVariableName(cid, PORT_ID_ARST, valueStore);
-
-        string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
+        string lastRstVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
 
         string lbl = codeState.getNewLabel("reg_clk");
         EdgeType edgeType =
           cell.clkPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
         codeState.addEdgeTestJNE(edgeType, lastClkVar, clkVar, lbl);
-        // if (cell.clkPosedge()) {
-        //   codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        // } else {
-        //   codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        // }
         codeState.addRegisterAssign(cid, inVar, valueStore);
         codeState.addLabel(lbl);
 
@@ -557,12 +550,6 @@ namespace FlatCircuit {
           cell.rstPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
         codeState.addEdgeTestJNE(rstEdge, lastRstVar, rstVar, rlbl);
         
-        // if (cell.rstPosedge()) {
-        //   codeState.addLine("\tif (!posedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
-        // } else {
-        //   codeState.addLine("\tif (!negedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
-        // }
-
         string rstVal = "BitVector(\"" + init.hex_string() + "\")";
         codeState.addRegisterAssign(cid, rstVal, valueStore);
         codeState.addLabel(rlbl);
@@ -576,14 +563,10 @@ namespace FlatCircuit {
           codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
         
         string lbl = codeState.getNewLabel("reg_arst");
-        if (cell.clkPosedge()) {
 
-          codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        } else {
-          
-          codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-        }
-
+        EdgeType edgeType =
+          cell.clkPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
+        codeState.addEdgeTestJNE(edgeType, lastClkVar, clkVar, lbl);
         codeState.addRegisterAssign(cid, inVar, valueStore);
         codeState.addLabel(lbl);
 
@@ -597,13 +580,15 @@ namespace FlatCircuit {
         string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, valueStore);
         string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
         string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
-        
+
         string updateValueClk = "values[" +
           to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
           "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
 
-        codeState.addLine("\tif ((" + wenName + " == BitVector(1, 1))");
-        codeState.addLine(" && posedge(" + lastClkVar + ", " + clkVar + ")) { " + updateValueClk + " }\n");
+        string lbl = codeState.getNewLabel("mem_clk");
+        codeState.addMemoryTestJNE(wenName, lastClkVar, clkVar, lbl);
+        codeState.addLine(ln(updateValueClk));
+        codeState.addLabel(lbl);
 
       } else {
         cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;

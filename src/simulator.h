@@ -248,6 +248,14 @@ namespace FlatCircuit {
                  label + "; }"));
     }
 
+    void addMemoryTestJNE(const std::string& wenName,
+                          const std::string& lastClkVar,
+                          const std::string& clkVar,
+                          const std::string& label) {
+      addLine("\tif ((" + wenName + " == BitVector(1, 1)) && posedge(" +
+              lastClkVar + ", " + clkVar + ")) { goto " + label + "; }\n");
+    }
+    
     void addRegisterAssign(const CellId cid,
                            const std::string& value,
                            ValueStore& valueStore) {
