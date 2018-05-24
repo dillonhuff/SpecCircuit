@@ -543,15 +543,11 @@ namespace FlatCircuit {
 
         string lastRstVar = codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
 
-        string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
+        //string updateValueClk = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = " + inVar + ";";
 
-        string lbl = codeState.getNewLabel("reg_arst");
+        string lbl = codeState.getNewLabel("reg_clk");
         if (cell.clkPosedge()) {
           codeState.addLine("if (!posedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
-          //codeState.addLine(updateValueClk);
-          // codeState.addRegisterAssign(cid, inVar, valueStore);
-          // codeState.addLabel(lbl);
-
         } else {
           codeState.addLine("if (!negedge(" + lastClkVar + ", " + clkVar + ")) { goto " + lbl + "; }");
         }
@@ -559,12 +555,18 @@ namespace FlatCircuit {
         codeState.addLabel(lbl);
 
         BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
-        string updateValueRst = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
+        //string updateValueRst = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "] = BitVector(\"" + init.hex_string() + "\")" + ";";
+
+        string rlbl = codeState.getNewLabel("reg_arst");
         if (cell.rstPosedge()) {
-          codeState.addLine("\tif (posedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n");
+          codeState.addLine("\tif (!posedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + " }\n");
         } else {
-          codeState.addLine("\tif (negedge(" + lastRstVar + ", " + rstVar + ")) { " + updateValueRst + " }\n");
+          codeState.addLine("\tif (!negedge(" + lastRstVar + ", " + rstVar + ")) { goto " + rlbl + "; }\n");
         }
+
+        string rstVal = "BitVector(\"" + init.hex_string() + "\")";
+        codeState.addRegisterAssign(cid, rstVal, valueStore);
+        codeState.addLabel(rlbl);
         
       } else if (tp == CELL_TYPE_REG) {
 
