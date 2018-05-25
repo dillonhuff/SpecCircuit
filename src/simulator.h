@@ -1221,11 +1221,9 @@ namespace FlatCircuit {
       codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
 
-    template<typename F>
     void
     unopCode(CodeGenState& codeState,
-             const CellId cid,
-             F f) {
+             const CellId cid) {
 
       std::string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
       std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);

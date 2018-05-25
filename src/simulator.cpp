@@ -634,10 +634,10 @@ namespace FlatCircuit {
         codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
-        int outWidth = cell.getPortWidth(PORT_ID_OUT);
-        unopCode(codeState, cid, [outWidth](const string& argName) {
-            return "zero_extend(" + to_string(outWidth) + ", " + argName + ")";
-          });
+        //        int outWidth = cell.getPortWidth(PORT_ID_OUT);
+        unopCode(codeState, cid); //, [outWidth](const string& argName) {
+          //   return "zero_extend(" + to_string(outWidth) + ", " + argName + ")";
+          // });
 
       } else if (cell.getCellType() == CELL_TYPE_UGE) {
 
@@ -691,12 +691,12 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_SLICE) {
 
-        int start = bvToInt(cell.getParameterValue(PARAM_LOW));
-        int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
+        // int start = bvToInt(cell.getParameterValue(PARAM_LOW));
+        // int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
 
-        unopCode(codeState, cid, [start, end](const string& argName) {
-            return "slice(" + argName + ", " + to_string(start) + ", " + to_string(end) + ")";
-          });
+        unopCode(codeState, cid); //, [start, end](const string& argName) {
+          //   return "slice(" + argName + ", " + to_string(start) + ", " + to_string(end) + ")";
+          // });
         
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
 
@@ -745,15 +745,15 @@ namespace FlatCircuit {
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
-        unopCode(codeState, cid, [](const string& argName) {
-            return "orr(" + argName + ")";
-          });
+        unopCode(codeState, cid); //, [](const string& argName) {
+          //   return "orr(" + argName + ")";
+          // });
         
       } else if (cell.getCellType() == CELL_TYPE_NOT) {
 
-        unopCode(codeState, cid, [](const string& argName) {
-            return "~(" + argName + ")";
-          });
+        unopCode(codeState, cid); //, [](const string& argName) {
+          //   return "~(" + argName + ")";
+          // });
         
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
@@ -790,9 +790,9 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
-        unopCode(codeState, cid, [](const string& argName) {
-            return argName;
-          });
+        unopCode(codeState, cid); //, [](const string& argName) {
+          //   return argName;
+          // });
       
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
