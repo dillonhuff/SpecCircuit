@@ -33,17 +33,19 @@ namespace FlatCircuit {
 
   class IRInstruction {
   public:
-    std::string text;
+    //    std::string text;
 
-    IRInstruction() : text("") {}
-    IRInstruction(const std::string& text_) : text(text_) {}
+    //IRInstruction() : text("") {}
+    //    IRInstruction(const std::string& text_) : text(text_) {}
 
     virtual std::string toString() const {
-      return text;
+      assert(false);
+      //      return text;
     }
 
     virtual std::string twoStateCppCode() const {
-      return "//No code\n";
+      assert(false);
+      //      return "//No code\n";
     }
 
     virtual ~IRInstruction() {}

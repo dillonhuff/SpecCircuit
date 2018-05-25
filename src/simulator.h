@@ -254,7 +254,7 @@ namespace FlatCircuit {
     CellDefinition& def;
 
     void addLine(const std::string& str) {
-      codeLines.push_back(new IRInstruction(str));
+      //      codeLines.push_back(new IRInstruction(str));
     }
 
   public:
@@ -322,7 +322,6 @@ namespace FlatCircuit {
                                 const PortId pid,
                                 ValueStore& store) {
       std::string argName = getPortTemp(cid, pid);
-      //addLine(store.codeToMaterialize(cid, pid, argName));
       for (auto instr : store.codeToMaterialize(cid, pid, argName)) {
         codeLines.push_back(instr);
       }
@@ -349,12 +348,17 @@ namespace FlatCircuit {
                              const std::string& waddrName,
                              const std::string& wdataName,
                              ValueStore& valueStore) {
-      std::string updateValueClk = "values[" +
-        std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-        "(" + waddrName + ".is_binary() ? " + waddrName +
-        ".to_type<int>() : 0)] = " + wdataName + ";";
+      codeLines.push_back(new IRAssign("values[" +
+                                       std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                                       "(" + waddrName + ".is_binary() ? " + waddrName +
+                                       ".to_type<int>() : 0)]", wdataName));
 
-      addLine(ln(updateValueClk));
+      // std::string updateValueClk = "values[" +
+      //   std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //   "(" + waddrName + ".is_binary() ? " + waddrName +
+      //   ".to_type<int>() : 0)] = " + wdataName + ";";
+
+      // addLine(ln(updateValueClk));
     }
 
     void addMemoryTestJNE(const std::string& wenName,
@@ -368,7 +372,6 @@ namespace FlatCircuit {
     void addRegisterAssign(const CellId cid,
                            const std::string& value,
                            ValueStore& valueStore) {
-      //addLine(valueStore.codeToAssignRegister(cid, value));
       codeLines.push_back(valueStore.codeToAssignRegister(cid, value));
     }
     
@@ -376,7 +379,6 @@ namespace FlatCircuit {
                                          const PortId pid,
                                          ValueStore& store) {
       std::string argName = getPortTemp(cid, pid, "last");
-      //addLine(store.codeToMaterializePastValue(cid, pid, argName));
       for (auto instr : store.codeToMaterializePastValue(cid, pid, argName)) {
         codeLines.push_back(instr);
       }
