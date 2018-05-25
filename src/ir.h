@@ -125,7 +125,7 @@ namespace FlatCircuit {
         std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
         assert(false);
       }
-      //return ln(receiver + " = "); // + arg);
+
     }
 
   };

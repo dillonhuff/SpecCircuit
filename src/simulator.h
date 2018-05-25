@@ -255,7 +255,7 @@ namespace FlatCircuit {
                             const std::string& suffix) {
       std::string argName =
         "cell_" + std::to_string(cid) + "_" +
-        portIdString(PORT_ID_IN) + "_" +
+        portIdString(pid) + "_" +
         suffix + "_" +
         std::to_string(uniqueNum);
 
@@ -1209,18 +1209,15 @@ namespace FlatCircuit {
     combinationalBlockCode(const std::vector<SigPort>& levelized,
                            CodeGenState& state);
 
-    template<typename F>
     void
     binopCode(CodeGenState& codeState,
-              const CellId cid,
-              F f) {
+              const CellId cid) {
 
       std::string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
       std::string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
 
       std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
       codeState.addBinop(outName, def.getCellRefConst(cid), argName0, argName1);
-      //f(argName0, argName1));
       codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
 

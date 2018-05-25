@@ -640,119 +640,67 @@ namespace FlatCircuit {
 
       } else if (cell.getCellType() == CELL_TYPE_UGE) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, (" + argName0 + " > " + argName1 + ") || (" +
-                      argName0 + " == " + argName1 + "))";
-                    });
-        
+        binopCode(codeState, cid);
+
       } else if (cell.getCellType() == CELL_TYPE_ULE) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, (" + argName0 + " < " + argName1 + ") || (" + argName0 + " == " + argName1 + "))";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_UGT) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, (" + argName0 + " > " + argName1 + "))";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_ULT) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, (" + argName0 + " < " + argName1 + "))";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_LSHR) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "lshr(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_ASHR) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "ashr(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_SHL) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "shl(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_SLICE) {
 
-        // int start = bvToInt(cell.getParameterValue(PARAM_LOW));
-        // int end = bvToInt(cell.getParameterValue(PARAM_HIGH));
-
-        unopCode(codeState, cid); //, [start, end](const string& argName) {
-          //   return "slice(" + argName + ", " + to_string(start) + ", " + to_string(end) + ")";
-          // });
+        unopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_SUB) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "sub_general_width_bv(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
 
       } else if (cell.getCellType() == CELL_TYPE_ADD) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "add_general_width_bv(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_MUL) {
 
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "mul_general_width_bv(" + argName0 + ", " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_AND) {
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "(" + argName0 + " & " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
 
       } else if (cell.getCellType() == CELL_TYPE_OR) {
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "(" + argName0 + " | " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
 
       } else if (cell.getCellType() == CELL_TYPE_EQ) {
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, " + argName0 + " == " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
 
       } else if (cell.getCellType() == CELL_TYPE_NEQ) {
-          binopCode(codeState, cid, [](const string& argName0,
-                                     const string& argName1) {
-                      return "BitVector(1, " + argName0 + " != " + argName1 + ")";
-                    });
+        binopCode(codeState, cid);
 
       } else if (cell.getCellType() == CELL_TYPE_ORR) {
 
-        unopCode(codeState, cid); //, [](const string& argName) {
-          //   return "orr(" + argName + ")";
-          // });
-        
+        unopCode(codeState, cid);        
+
       } else if (cell.getCellType() == CELL_TYPE_NOT) {
 
-        unopCode(codeState, cid); //, [](const string& argName) {
-          //   return "~(" + argName + ")";
-          // });
+        unopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
@@ -789,9 +737,7 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
-        unopCode(codeState, cid); //, [](const string& argName) {
-          //   return argName;
-          // });
+        unopCode(codeState, cid);
       
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
