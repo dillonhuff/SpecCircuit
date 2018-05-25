@@ -428,7 +428,9 @@ namespace FlatCircuit {
 
     void* myFuncFunV;
     // Must remove the first underscore from the symbol name to find it?
-    myFuncFunV = dlsym(myLibHandle, "_Z8simulateRNSt3__16vectorIN4bsim21quad_value_bit_vectorENS_9allocatorIS2_EEEE");
+    //    myFuncFunV = dlsym(myLibHandle, "_Z8simulateRNSt3__16vectorIN4bsim21quad_value_bit_vectorENS_9allocatorIS2_EEEE");
+
+    myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim21quad_value_bit_vectorE");
     if (myFuncFunV == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
       assert(false);
@@ -833,7 +835,8 @@ namespace FlatCircuit {
       "typedef bsim::quad_value_bit_vector BitVector;\n\n"
       "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
       "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
-      "void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
+      "void simulate(bsim::quad_value_bit_vector* values) {\n";
+      //"void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     assert((updates.size() % 2) == 0);
 

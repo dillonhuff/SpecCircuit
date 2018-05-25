@@ -482,11 +482,14 @@ namespace FlatCircuit {
       userInputs = {};
 
       if (hasSimulateFunction()) {
-        void (*simFunc)(std::vector<BitVector>&) =
-          reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
+        // void (*simFunc)(std::vector<BitVector>&) =
+        //   reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
+        void (*simFunc)(BitVector*) =
+          reinterpret_cast<void (*)(BitVector*)>(simulateFuncHandle);
+        
         //simFunc(valueStore.simValueTable);
-        simFunc(valueStore.getValueTable());
+        simFunc(&(valueStore.getValueTable()[0]));
         return;
       }
 
