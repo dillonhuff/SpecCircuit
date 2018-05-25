@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "circuit.h"
 #include "cpp_utils.h"
 
 using namespace std;
@@ -34,26 +35,67 @@ namespace FlatCircuit {
   public:
     std::string text;
 
-IRInstruction() : text("") {}
-IRInstruction(const std::string& text_) : text(text_) {}
+    IRInstruction() : text("") {}
+    IRInstruction(const std::string& text_) : text(text_) {}
 
-virtual std::string toString() const {
-return text;
-}
+    virtual std::string toString() const {
+      return text;
+    }
     virtual ~IRInstruction() {}
   };
 
-class IRLabel : public IRInstruction {
+  class IRLabel : public IRInstruction {
 
-public:
-std::string name;
+  public:
+    std::string name;
 
-IRLabel(const std::string& name_) : name(name_) {}
+    IRLabel(const std::string& name_) : name(name_) {}
 
-virtual std::string toString() const {
-return ln(name + ":");
-}
-};
+    virtual std::string toString() const {
+      return ln(name + ":");
+    }
+  };
+
+  class IRBinop : public IRInstruction {
+  public:
+    std::string receiver;
+    std::string arg;
+
+    IRBinop(const std::string& receiver_, const std::string& arg_) :
+      receiver(receiver_), arg(arg_) {}
+
+    virtual std::string toString() const {
+      return ln(receiver + " = " + arg);
+    }
+
+  };
+
+  class IRUnop : public IRInstruction {
+  public:
+    std::string receiver;
+    CellType unop;
+    std::string arg;
+
+    IRUnop(const std::string& receiver_,
+           const CellType tp_,
+           const std::string& arg_) :
+      receiver(receiver_), unop(tp_), arg(arg_) {}
+
+    virtual std::string toString() const {
+      switch (unop) {
+
+      case CELL_TYPE_PASSTHROUGH:
+        return ln(receiver + " = " + arg);
+      case CELL_TYPE_NOT:
+        return ln(receiver + " = ~(" + arg + ")");
+
+      default:
+        std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
+        assert(false);
+      }
+    }
+
+  };
 
   // Need:
   // binop, unop, multiplex, jump from test, load slice?

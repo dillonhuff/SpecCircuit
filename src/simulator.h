@@ -200,6 +200,7 @@ namespace FlatCircuit {
   class CodeGenState {
     unsigned long long uniqueNum;
     std::vector<IRInstruction*> codeLines;
+    CellDefinition& def;
 
     void addLine(const std::string& str) {
       codeLines.push_back(new IRInstruction(str));
@@ -207,7 +208,7 @@ namespace FlatCircuit {
 
   public:
 
-    CodeGenState() : uniqueNum(0) {}
+    CodeGenState(CellDefinition& def_) : uniqueNum(0), def(def_) {}
 
     ~CodeGenState() {
       for (auto i : codeLines) {
@@ -222,6 +223,17 @@ namespace FlatCircuit {
       addLine(valueStore.codeToAssign(cid, pid, assignCode));
     }
 
+    void addBinop(const std::string& receiver,
+                  const std::string& org) {
+      codeLines.push_back(new IRBinop(receiver, org));
+    }
+
+    void addUnop(const std::string& receiver,
+                 const CellType tp,
+                 const std::string& org) {
+      codeLines.push_back(new IRUnop(receiver, tp, org));
+    }
+    
     void addLabel(const std::string& labelName) {
       codeLines.push_back(new IRLabel(labelName));
     }
@@ -247,6 +259,9 @@ namespace FlatCircuit {
 
       uniqueNum++;
 
+      addQVBVDecl(argName,
+                  def.getCellRefConst(cid).getPortWidth(pid));
+      
       return argName;
     }
 
@@ -1201,8 +1216,9 @@ namespace FlatCircuit {
       std::string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
       std::string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
 
-      codeState.addAssign(cid, PORT_ID_OUT, f(argName0, argName1), valueStore);
-
+      std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
+      codeState.addBinop(outName, f(argName0, argName1));
+      codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
 
     template<typename F>
@@ -1211,12 +1227,10 @@ namespace FlatCircuit {
              const CellId cid,
              F f) {
 
-      std::string cppCode = ""; //code;
-
       std::string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
-
-      codeState.addAssign(cid, PORT_ID_OUT, f(argName), valueStore);
-
+      std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
+      codeState.addUnop(outName, def.getCellRefConst(cid).getCellType(), argName);
+      codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
     
     

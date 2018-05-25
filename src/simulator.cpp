@@ -449,8 +449,6 @@ namespace FlatCircuit {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
     string cppCode = "";
-    cppCode += ln("bsim::quad_value_bit_vector " + argName + "(" +
-                  to_string(drivers.signals.size()) + ", 0)");
 
     bool canDirectCopy = true;
     CellId singleDriverCell;
@@ -617,7 +615,6 @@ namespace FlatCircuit {
 
         pastValueTmp = codeState.getPortTemp(cid, PORT_ID_OUT);
 
-        codeState.addQVBVDecl(pastValueTmp, cell.getPortWidth(PORT_ID_OUT));
         codeState.addAssign(pastValueTmp,
                             "values[" +
                             to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
@@ -820,7 +817,7 @@ namespace FlatCircuit {
   void
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
 
-    CodeGenState codeState;
+    CodeGenState codeState(def);
     for (int i = 0; i < updates.size(); i += 2) {
       combinationalBlockCode(updates[i + 0], codeState);
       sequentialBlockCode(updates[i + 1], codeState);
