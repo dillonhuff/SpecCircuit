@@ -175,6 +175,23 @@ namespace FlatCircuit {
 
   };
 
+  class IRAssign : public IRInstruction {
+  public:
+    std::string receiver;
+    std::string source;
+
+    IRAssign(const std::string& receiver_,
+             const std::string& source_) : receiver(receiver_), source(source_) {}
+
+    virtual std::string twoStateCppCode() const {
+      return ln(receiver + " = " + source);
+    }
+    
+    virtual std::string toString() const {
+      return ln(receiver + " = " + source);
+    }
+  };
+
   class IRUnop : public IRInstruction {
   public:
     std::string receiver;

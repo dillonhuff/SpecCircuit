@@ -216,19 +216,24 @@ namespace FlatCircuit {
                 assignCode);
     }
     
-    std::string
+    //std::string
+    std::vector<IRInstruction*>
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
                             const std::string& argName,
                             const std::map<SigPort, unsigned long>& offsets) const;
 
-    std::string codeToMaterialize(const CellId cid,
-                                  const PortId pid,
-                                  const std::string& argName) const;
+    //    std::string
+    std::vector<IRInstruction*>
+    codeToMaterialize(const CellId cid,
+                      const PortId pid,
+                      const std::string& argName) const;
 
-    std::string codeToMaterializePastValue(const CellId cid,
-                                           const PortId pid,
-                                           const std::string& argName) const {
+    // std::string
+    std::vector<IRInstruction*>
+    codeToMaterializePastValue(const CellId cid,
+                               const PortId pid,
+                               const std::string& argName) const {
       return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets);
     }
     
@@ -373,7 +378,7 @@ namespace FlatCircuit {
     }
     
     void addAssign(const std::string& receiver, const std::string& value) {
-      codeLines.push_back(new IRInstruction(ln(receiver + " = " + value)));
+      codeLines.push_back(new IRAssign(receiver, value));
     }
 
     std::string getCode() const {
