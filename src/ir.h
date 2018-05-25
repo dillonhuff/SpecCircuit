@@ -9,6 +9,11 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  enum EdgeType {
+    EDGE_TYPE_POSEDGE,
+    EDGE_TYPE_NEGEDGE
+  };
+
   class IRType {
   public:
     virtual ~IRType() {}
@@ -67,6 +72,40 @@ namespace FlatCircuit {
     }
 
     virtual ~IRComment() {}
+  };
+
+  class IREdgeTest : public IRInstruction {
+  public:
+    EdgeType edgeType;
+    std::string prev;
+    std::string curr;
+    std::string label;
+    
+    IREdgeTest(const EdgeType edgeType_,
+               const std::string& prev_,
+               const std::string& curr_,
+               const std::string& label_) : edgeType(edgeType_),
+                                            prev(prev_),
+                                            curr(curr_),
+                                            label(label_) {}
+
+    virtual std::string toString() const {
+      std::string edgeName =
+        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+
+      return ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
+                label + "; }");
+    }
+
+    virtual std::string twoStateCppCode() const {
+      std::string edgeName =
+        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+
+      return ln("// if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
+                label + "; }");
+    }
+
+    virtual ~IREdgeTest() {}
   };
   
   class IRLabel : public IRInstruction {

@@ -243,11 +243,6 @@ namespace FlatCircuit {
     
   };
 
-  enum EdgeType {
-    EDGE_TYPE_POSEDGE,
-    EDGE_TYPE_NEGEDGE
-  };
-
   class CodeGenState {
     unsigned long long uniqueNum;
     std::vector<IRInstruction*> codeLines;
@@ -333,10 +328,12 @@ namespace FlatCircuit {
                         const std::string& prev,
                         const std::string& curr,
                         const std::string& label) {
-      std::string edgeName =
-        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
-      addLine(ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
-                 label + "; }"));
+      // std::string edgeName =
+      //   (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+
+      codeLines.push_back(new IREdgeTest(edgeType, prev, curr, label));
+      // addLine(ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
+      //            label + "; }"));
     }
 
     void addQVBVDecl(const std::string& name,
