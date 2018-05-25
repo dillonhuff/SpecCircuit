@@ -35,8 +35,16 @@ namespace FlatCircuit {
   // dereference :: Ptr(Tp) -> Tp
   // store array :: Ptr(Array[Tp]) -> offset -> Tp -> ()
   // load array :: Ptr(Array[n]) -> offset -> k -> Array[k]
+  // load array element :: Ptr(Array[n]) -> offset -> type stored in array
   // binop :: (Array[n] -> Array[i] -> Array[p]) -> Array[n] -> Array[i] -> Array[p]
-  // 
+
+  // Its annoying that quad value bit vectors are a single data structure. Ideally
+  // the quad value data structure would itself be a giant array of quad value bits
+
+  // Load array  :: Ptr(Array[Tp][n]) -> offset -> width -> Array[Tp][n]
+  // Store array :: Ptr(Array[Tp][n]) -> Array[Tp][n] -> offset -> ()
+  // Binop       :: Array[Tp][n] -> Array[Tp][m] -> Array[Tp][k]
+  
 
   // How do I model the input array? It is a pointer to an array of bits?
   // The normal arrays of bits will be stored as immediates

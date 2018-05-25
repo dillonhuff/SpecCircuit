@@ -11,10 +11,12 @@ namespace FlatCircuit {
   class ValueStore {
     std::vector<BitVector> simValueTable;
 
+    std::map<SigPort, unsigned long> portOffsets;
+    
   public:
     CellDefinition& def;
     
-    std::map<SigPort, unsigned long> portOffsets;
+
     std::map<CellId, unsigned long> memoryOffsets;
     std::map<CellId, unsigned long> registerOffsets;
     std::map<SigPort, unsigned long> pastValueOffsets;

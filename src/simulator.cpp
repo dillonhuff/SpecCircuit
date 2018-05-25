@@ -619,7 +619,10 @@ namespace FlatCircuit {
 
         codeState.addQVBVDecl(pastValueTmp, cell.getPortWidth(PORT_ID_OUT));
         codeState.addAssign(pastValueTmp,
-                            "values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]");
+                            "values[" +
+                            to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+                            "]");
+        //to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]");
         
       }
 
@@ -777,7 +780,12 @@ namespace FlatCircuit {
 
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
 
-        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
+        codeState.addAssign("values[" +
+                            to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+                            "]",
+                            state);
+
+        //to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
         
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
@@ -827,7 +835,9 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       if (cell.isInputPortCell()) {
         cppCode += ln("// " + def.getCellName(cid) + " ---> " +
-                      to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)));
+                      to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)));
+
+        //                      to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)));
       }
     }
 
