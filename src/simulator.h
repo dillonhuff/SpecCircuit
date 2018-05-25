@@ -224,8 +224,10 @@ namespace FlatCircuit {
     }
 
     void addBinop(const std::string& receiver,
-                  const std::string& org) {
-      codeLines.push_back(new IRBinop(receiver, org));
+                  const Cell& cell,
+                  const std::string& arg0,
+                  const std::string& arg1) {
+      codeLines.push_back(new IRBinop(receiver, arg0, arg1, cell));
     }
 
     void addUnop(const std::string& receiver,
@@ -1217,7 +1219,8 @@ namespace FlatCircuit {
       std::string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
 
       std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
-      codeState.addBinop(outName, f(argName0, argName1));
+      codeState.addBinop(outName, def.getCellRefConst(cid), argName0, argName1);
+      //f(argName0, argName1));
       codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
 

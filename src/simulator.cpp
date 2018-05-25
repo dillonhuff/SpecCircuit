@@ -619,7 +619,6 @@ namespace FlatCircuit {
                             "values[" +
                             to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
                             "]");
-        
       }
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {

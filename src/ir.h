@@ -59,13 +59,73 @@ namespace FlatCircuit {
   class IRBinop : public IRInstruction {
   public:
     std::string receiver;
-    std::string arg;
-
-    IRBinop(const std::string& receiver_, const std::string& arg_) :
-      receiver(receiver_), arg(arg_) {}
+    std::string arg0;
+    std::string arg1;
+    const Cell& cell;
+    
+    IRBinop(const std::string& receiver_,
+            const std::string& arg0_,
+            const std::string& arg1_,
+            const Cell& cell_) :
+      receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_) {}
 
     virtual std::string toString() const {
-      return ln(receiver + " = " + arg);
+      CellType tp = cell.getCellType();
+      switch (tp) {
+      case CELL_TYPE_AND:
+        return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
+
+      case CELL_TYPE_UGE:
+        return ln(receiver + " = BitVector(1, (" +
+                  arg0 + " > " + arg1 + ") || (" +
+                  arg0 + " == " + arg1 + "))");
+
+      case CELL_TYPE_ULE:
+        return ln(receiver + " = BitVector(1, (" +
+                  arg0 + " < " + arg1 + ") || (" +
+                  arg0 + " == " + arg1 + "))");
+
+      case CELL_TYPE_UGT:
+        return ln(receiver + " = BitVector(1, (" + arg0 + " > " + arg1 + "))");
+
+      case CELL_TYPE_ULT:
+        return ln(receiver + " = BitVector(1, (" + arg0 + " < " + arg1 + "))");
+        
+      case CELL_TYPE_OR:
+        return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
+
+      case CELL_TYPE_XOR:
+        return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
+
+      case CELL_TYPE_ADD:
+        return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
+
+      case CELL_TYPE_MUL:
+        return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
+
+      case CELL_TYPE_SUB:
+        return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
+
+      case CELL_TYPE_LSHR:
+        return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
+        
+      case CELL_TYPE_ASHR:
+        return ln(receiver + " = ashr(" + arg0 + ", " + arg1 + ")");
+        
+      case CELL_TYPE_SHL:
+        return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
+        
+      case CELL_TYPE_EQ:
+        return ln(receiver + " = BitVector(1, " + arg0 + " == " + arg1 + ")");
+
+      case CELL_TYPE_NEQ:
+        return ln(receiver + " = BitVector(1, " + arg0 + " != " + arg1 + ")");
+        
+      default:
+        std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
+        assert(false);
+      }
+      //return ln(receiver + " = "); // + arg);
     }
 
   };
