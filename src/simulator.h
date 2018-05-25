@@ -1,25 +1,20 @@
 #pragma once
 
 #include "circuit.h"
+#include "ir.h"
 
 namespace FlatCircuit {
 
-  static inline std::string ln(const std::string& s) {
-    return "\t" + s + ";\n";
-  }
-  
   class ValueStore {
     std::vector<BitVector> simValueTable;
 
     std::map<SigPort, unsigned long> portOffsets;
-    
+    std::map<CellId, unsigned long> memoryOffsets;
+    std::map<CellId, unsigned long> registerOffsets;    
+    std::map<SigPort, unsigned long> pastValueOffsets;
+
   public:
     CellDefinition& def;
-    
-
-    std::map<CellId, unsigned long> memoryOffsets;
-    std::map<CellId, unsigned long> registerOffsets;
-    std::map<SigPort, unsigned long> pastValueOffsets;
 
     ValueStore(CellDefinition& def_) : def(def_) {}
 
@@ -27,6 +22,14 @@ namespace FlatCircuit {
 
     std::vector<BitVector>& getValueTable() { return simValueTable; }
 
+    unsigned long getMemoryOffset(const CellId cid) const {
+      return map_find(cid, memoryOffsets);
+    }
+
+    unsigned long getRegisterOffset(const CellId cid) const {
+      return map_find(cid, registerOffsets);
+    }
+    
     unsigned long portValueOffset(const CellId cid,
                                   const PortId pid) {
       if (!contains_key({cid, pid}, portOffsets)) {
@@ -181,6 +184,12 @@ namespace FlatCircuit {
                                   const PortId pid,
                                   const std::string& argName) const;
 
+    std::string codeToMaterializePastValue(const CellId cid,
+                                           const PortId pid,
+                                           const std::string& argName) const {
+      return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets);
+    }
+    
   };
 
   enum EdgeType {
@@ -188,17 +197,23 @@ namespace FlatCircuit {
     EDGE_TYPE_NEGEDGE
   };
 
-  struct CodeGenState {
+  class CodeGenState {
     unsigned long long uniqueNum;
-    std::vector<std::string> codeLines;
+    std::vector<IRInstruction*> codeLines;
 
     void addLine(const std::string& str) {
-      codeLines.push_back(str);
+      codeLines.push_back(new IRInstruction(str));
     }
 
   public:
 
     CodeGenState() : uniqueNum(0) {}
+
+    ~CodeGenState() {
+      for (auto i : codeLines) {
+        delete i;
+      }
+    }
 
     void addAssign(const CellId cid,
                    const PortId pid,
@@ -208,7 +223,7 @@ namespace FlatCircuit {
     }
 
     void addLabel(const std::string& labelName) {
-      addLine(labelName + ":");
+      codeLines.push_back(new IRLabel(labelName));
     }
 
     std::string getNewLabel(const std::string& prefix) {
@@ -264,10 +279,13 @@ namespace FlatCircuit {
                              const std::string& wdataName,
                              ValueStore& valueStore) {
       std::string updateValueClk = "values[" +
-        std::to_string(map_find(cid, valueStore.memoryOffsets)) + " + " +
-        "(" + waddrName + ".is_binary() ? " + waddrName + ".to_type<int>() : 0)] = " + wdataName + ";";
+        std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+        "(" + waddrName + ".is_binary() ? " + waddrName +
+        ".to_type<int>() : 0)] = " + wdataName + ";";
+
       addLine(ln(updateValueClk));
     }
+
     void addMemoryTestJNE(const std::string& wenName,
                           const std::string& lastClkVar,
                           const std::string& clkVar,
@@ -286,23 +304,23 @@ namespace FlatCircuit {
                                          const PortId pid,
                                          ValueStore& store) {
       std::string argName = getPortTemp(cid, pid, "last");
-      addLine(store.codeToMaterializeOffset(cid, pid, argName, store.pastValueOffsets));
+      addLine(store.codeToMaterializePastValue(cid, pid, argName));
 
       return argName;
     }
     
     void addComment(const std::string& str) {
-      codeLines.push_back(str);
+      codeLines.push_back(new IRInstruction(str));
     }
     
     void addAssign(const std::string& receiver, const std::string& value) {
-      codeLines.push_back(ln(receiver + " = " + value));
+      codeLines.push_back(new IRInstruction(ln(receiver + " = " + value)));
     }
 
     std::string getCode() const {
       std::string cppCode = "";
-      for (auto line : codeLines) {
-        cppCode += line;
+      for (auto instr : codeLines) {
+        cppCode += instr->toString();
       }
 
       return cppCode;
@@ -1076,8 +1094,11 @@ namespace FlatCircuit {
     
     std::map<CellId, BitVector> allRegisterValues() const {
       std::map<CellId, BitVector> regValues;
-      for (auto roff : valueStore.registerOffsets) {
-        regValues.insert({roff.first, getRegisterValue(roff.first)});
+      //for (auto roff : valueStore.registerOffsets) {
+      for (auto roff : def.getCellMap()) {
+        if (isRegister(def.getCellRefConst(roff.first).getCellType())) {
+          regValues.insert({roff.first, getRegisterValue(roff.first)});
+        }
       }
       return regValues;
     }

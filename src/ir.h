@@ -1,5 +1,11 @@
 #pragma once
 
+#include <string>
+
+#include "cpp_utils.h"
+
+using namespace std;
+
 namespace FlatCircuit {
 
   class IRType {
@@ -26,8 +32,28 @@ namespace FlatCircuit {
 
   class IRInstruction {
   public:
+    std::string text;
+
+IRInstruction() : text("") {}
+IRInstruction(const std::string& text_) : text(text_) {}
+
+virtual std::string toString() const {
+return text;
+}
     virtual ~IRInstruction() {}
   };
+
+class IRLabel : public IRInstruction {
+
+public:
+std::string name;
+
+IRLabel(const std::string& name_) : name(name_) {}
+
+virtual std::string toString() const {
+return ln(name + ":");
+}
+};
 
   // Need:
   // binop, unop, multiplex, jump from test, load slice?
@@ -44,7 +70,6 @@ namespace FlatCircuit {
   // Load array  :: Ptr(Array[Tp][n]) -> offset -> width -> Array[Tp][n]
   // Store array :: Ptr(Array[Tp][n]) -> Array[Tp][n] -> offset -> ()
   // Binop       :: Array[Tp][n] -> Array[Tp][m] -> Array[Tp][k]
-  
 
   // How do I model the input array? It is a pointer to an array of bits?
   // The normal arrays of bits will be stored as immediates

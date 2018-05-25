@@ -622,7 +622,6 @@ namespace FlatCircuit {
                             "values[" +
                             to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
                             "]");
-        //to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]");
         
       }
 
@@ -763,7 +762,9 @@ namespace FlatCircuit {
 
         string raddrName = codeState.getVariableName(cid, PORT_ID_RADDR, valueStore);
 
-        codeState.addAssign(cid, PORT_ID_RDATA, "values[" + to_string(map_find(cid, valueStore.memoryOffsets)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
+        codeState.addAssign(cid,
+                            PORT_ID_RDATA,
+                            "values[" + to_string(valueStore.getMemoryOffset(cid)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
 
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 
@@ -778,17 +779,15 @@ namespace FlatCircuit {
 
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
-        string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
+        string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
         codeState.addAssign("values[" +
                             to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
                             "]",
                             state);
 
-        //to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)) + "]", state);
-        
       } else if (cell.getCellType() == CELL_TYPE_REG) {
-        string state = "values[" + to_string(map_find(cid, valueStore.registerOffsets)) + "]";
+        string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
         codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
         
@@ -807,7 +806,7 @@ namespace FlatCircuit {
 
       if (sentToSeqPort) {
 
-        codeState.addAssign("values[" + to_string(map_find({cid, PORT_ID_OUT}, valueStore.pastValueOffsets)) + "]", pastValueTmp);
+        codeState.addAssign("values[" + to_string(valueStore.pastValueOffset(cid, PORT_ID_OUT)) + "]", pastValueTmp);
 
       }
 
