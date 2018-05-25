@@ -436,14 +436,16 @@ namespace FlatCircuit {
     return {myLibHandle, myFuncFunV};
   }
 
-  std::string
+  //  std::string
+  std::vector<IRInstruction*>
   ValueStore::codeToMaterializeOffset(const CellId cid,
                                      const PortId pid,
                                      const std::string& argName,
                                      const std::map<SigPort, unsigned long>& offsets) const {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
-    string cppCode = "";
+    //string cppCode = "";
+    vector<IRInstruction*> instrs;
 
     bool canDirectCopy = true;
     CellId singleDriverCell;
@@ -480,22 +482,31 @@ namespace FlatCircuit {
     }
 
     if (canDirectCopy) {
-      cppCode += ln(argName + " = " + "values[" + to_string(map_find(sp, offsets)) + "]");
+      //instrs.push_back(new IRInstruction(ln(argName + " = " + "values[" + to_string(map_find(sp, offsets)) + "]")));
+      instrs.push_back(new IRAssign(argName,
+                                    "values[" +
+                                    to_string(map_find(sp, offsets)) +
+                                    "]"));
     } else {
 
       for (int offset = 0; offset < drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
         string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
 
-        cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+        //cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
+        //instrs.push_back(new IRInstruction(ln(argName + ".set(" + to_string(offset) + ", " + valString + ")")));
+
+        instrs.push_back(new IRSetBit(argName, offset, valString));
       }
     }
 
-    return cppCode;
+    return instrs;
     
   }
 
-  std::string ValueStore::codeToMaterialize(const CellId cid,
+  //std::string
+  std::vector<IRInstruction*>
+  ValueStore::codeToMaterialize(const CellId cid,
                                             const PortId pid,
                                             const std::string& argName) const {
     return codeToMaterializeOffset(cid, pid, argName, portOffsets);

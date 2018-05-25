@@ -49,6 +49,24 @@ namespace FlatCircuit {
     virtual ~IRInstruction() {}
   };
 
+  class IRComment : public IRInstruction {
+  public:
+    std::string text;
+
+    IRComment() : text("") {}
+    IRComment(const std::string& text_) : text(text_) {}
+
+    virtual std::string toString() const {
+      return ln("// " + text);
+    }
+
+    virtual std::string twoStateCppCode() const {
+      return ln("// " + text);
+    }
+
+    virtual ~IRComment() {}
+  };
+  
   class IRLabel : public IRInstruction {
 
   public:
@@ -59,6 +77,11 @@ namespace FlatCircuit {
     virtual std::string toString() const {
       return ln(name + ":");
     }
+
+    virtual std::string twoStateCppCode() const {
+      return ln(name + ":");
+    }
+
   };
 
   class IRTableStore : public IRInstruction {
@@ -88,7 +111,7 @@ namespace FlatCircuit {
       bitWidth(bitWidth_), name(name_) {}
 
     virtual std::string twoStateCppCode() const {
-      return ln("char " + name + "[" + std::to_string(storedByteLength(bitWidth)) + "]");
+      return ln("//char " + name + "[" + std::to_string(storedByteLength(bitWidth)) + "]");
     }
     
     virtual std::string toString() const {
@@ -184,7 +207,7 @@ namespace FlatCircuit {
              const std::string& source_) : receiver(receiver_), source(source_) {}
 
     virtual std::string twoStateCppCode() const {
-      return ln(receiver + " = " + source);
+      return ln("//" + receiver + " = " + source);
     }
     
     virtual std::string toString() const {
@@ -192,6 +215,27 @@ namespace FlatCircuit {
     }
   };
 
+  class IRSetBit : public IRInstruction {
+  public:
+    std::string receiver;
+    unsigned long offset;
+    std::string source;
+
+    IRSetBit(const std::string& receiver_,
+             const unsigned long offset_,
+             const std::string& source_) :
+      receiver(receiver_), offset(offset_), source(source_) {}
+
+    virtual std::string twoStateCppCode() const {
+      return "// set bit";
+    }
+    
+    virtual std::string toString() const {
+      return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
+        //ln(receiver + " = " + source);
+    }
+  };
+  
   class IRUnop : public IRInstruction {
   public:
     std::string receiver;

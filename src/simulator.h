@@ -203,10 +203,14 @@ namespace FlatCircuit {
                 assignCode);
     }
 
-    std::string codeToAssignRegister(const CellId cid,
-                                     const std::string& assignCode) {
-      return ln("values[" + std::to_string(map_find(cid, registerOffsets)) + "] = " +
-                assignCode);
+    IRInstruction* codeToAssignRegister(const CellId cid,
+                                        const std::string& assignCode) {
+      // return ln("values[" + std::to_string(map_find(cid, registerOffsets)) + "] = " +
+      //           assignCode);
+
+      return
+        new IRAssign("values[" + std::to_string(map_find(cid, registerOffsets)) + "]",
+                     assignCode);
     }
     
     std::string codeToAssignPastValue(const CellId cid,
@@ -318,7 +322,10 @@ namespace FlatCircuit {
                                 const PortId pid,
                                 ValueStore& store) {
       std::string argName = getPortTemp(cid, pid);
-      addLine(store.codeToMaterialize(cid, pid, argName));
+      //addLine(store.codeToMaterialize(cid, pid, argName));
+      for (auto instr : store.codeToMaterialize(cid, pid, argName)) {
+        codeLines.push_back(instr);
+      }
 
       return argName;
     }
@@ -361,20 +368,24 @@ namespace FlatCircuit {
     void addRegisterAssign(const CellId cid,
                            const std::string& value,
                            ValueStore& valueStore) {
-      addLine(valueStore.codeToAssignRegister(cid, value));
+      //addLine(valueStore.codeToAssignRegister(cid, value));
+      codeLines.push_back(valueStore.codeToAssignRegister(cid, value));
     }
     
     std::string getLastValueVariableName(const CellId cid,
                                          const PortId pid,
                                          ValueStore& store) {
       std::string argName = getPortTemp(cid, pid, "last");
-      addLine(store.codeToMaterializePastValue(cid, pid, argName));
+      //addLine(store.codeToMaterializePastValue(cid, pid, argName));
+      for (auto instr : store.codeToMaterializePastValue(cid, pid, argName)) {
+        codeLines.push_back(instr);
+      }
 
       return argName;
     }
     
     void addComment(const std::string& str) {
-      codeLines.push_back(new IRInstruction(str));
+      codeLines.push_back(new IRComment(str));
     }
     
     void addAssign(const std::string& receiver, const std::string& value) {
