@@ -1,5 +1,9 @@
 #include "value_store.h"
 
+#include "ir.h"
+
+using namespace std;
+
 namespace FlatCircuit {
 
   void ValueStore::debugPrintTableValues() const {
@@ -13,7 +17,8 @@ namespace FlatCircuit {
   ValueStore::codeToMaterializeOffset(const CellId cid,
                                       const PortId pid,
                                       const std::string& argName,
-                                      const std::map<SigPort, unsigned long>& offsets) const {
+                                      const std::map<SigPort, unsigned long>& offsets,
+                                      const bool isPast) const {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
     vector<IRInstruction*> instrs;
@@ -61,9 +66,9 @@ namespace FlatCircuit {
 
       for (int offset = 0; offset < drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
-        string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
+        //string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
 
-        instrs.push_back(new IRSetBit(argName, offset, valString));
+        instrs.push_back(new IRSetBit(argName, offset, driverBit, isPast)); //offset, valString));
       }
     }
 
@@ -75,7 +80,16 @@ namespace FlatCircuit {
   ValueStore::codeToMaterialize(const CellId cid,
                                             const PortId pid,
                                             const std::string& argName) const {
-    return codeToMaterializeOffset(cid, pid, argName, portOffsets);
+    return codeToMaterializeOffset(cid, pid, argName, portOffsets, false);
   }
 
+  IRInstruction* ValueStore::codeToAssignRegister(const CellId cid,
+                                                  const std::string& assignCode) {
+    return new IRRegisterStore(cid, assignCode);
+    // return
+    //   new IRAssign("values[" + std::to_string(map_find(cid, registerOffsets)) + "]",
+    //                assignCode);
+  }
+    
+  
 }

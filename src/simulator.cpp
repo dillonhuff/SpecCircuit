@@ -322,7 +322,6 @@ namespace FlatCircuit {
 
       cout << "In got " << combChanges.size() << " comb changes" << endl;
 
-      //staticEvents.push_back(combChanges.getVec());
       staticEvents.push_back(combChanges);
       combChanges = {};
 

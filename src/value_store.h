@@ -1,9 +1,13 @@
 #pragma once
 
+#include <map>
+
 #include "circuit.h"
-#include "ir.h"
+#include "cpp_utils.h"
 
 namespace FlatCircuit {
+
+  class IRInstruction;
 
   class ValueStore {
     std::vector<BitVector> simValueTable;
@@ -29,7 +33,7 @@ namespace FlatCircuit {
 
     void buildRawValueTable() {
       unsigned long rawOffset = 0;
-      map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
+      std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
       for (unsigned long i = 0; i < simValueTable.size(); i++) {
         quadOffsetsToRawOffsets[i] = rawOffset;
         rawOffset += storedByteLength(simValueTable[i].bitLength());
@@ -196,49 +200,26 @@ namespace FlatCircuit {
       }
     }
 
-    std::string codeToAssign(const CellId cid,
-                             const PortId pid,
-                             const std::string& assignCode) {
-      return ln("values[" + std::to_string(portValueOffset(cid, pid)) + "] = " +
-                assignCode);
-    }
-
     IRInstruction* codeToAssignRegister(const CellId cid,
-                                        const std::string& assignCode) {
-      // return ln("values[" + std::to_string(map_find(cid, registerOffsets)) + "] = " +
-      //           assignCode);
-
-      return
-        new IRAssign("values[" + std::to_string(map_find(cid, registerOffsets)) + "]",
-                     assignCode);
-    }
+                                        const std::string& assignCode);
     
-    std::string codeToAssignPastValue(const CellId cid,
-                                      const PortId pid,
-                                      const std::string& assignCode) {
-      return ln("values[" + std::to_string(map_find({cid, pid}, pastValueOffsets)) + "] = " +
-                assignCode);
-    }
-    
-    //std::string
     std::vector<IRInstruction*>
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
                             const std::string& argName,
-                            const std::map<SigPort, unsigned long>& offsets) const;
+                            const std::map<SigPort, unsigned long>& offsets,
+                            const bool isPast) const;
 
-    //    std::string
     std::vector<IRInstruction*>
     codeToMaterialize(const CellId cid,
                       const PortId pid,
                       const std::string& argName) const;
 
-    // std::string
     std::vector<IRInstruction*>
     codeToMaterializePastValue(const CellId cid,
                                const PortId pid,
                                const std::string& argName) const {
-      return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets);
+      return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets, true);
     }
     
   };

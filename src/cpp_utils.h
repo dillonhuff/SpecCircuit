@@ -14,5 +14,29 @@ namespace FlatCircuit {
     return ceil(numBits / 8);
   }
 
-  
+  static inline std::string containerPrimitive(const unsigned long bitWidth) {
+    if (bitWidth <= 8) {
+      return "uint8_t";
+    }
+
+    if (bitWidth <= 16) {
+      return "uint16_t";
+    }
+
+    if (bitWidth <= 32) {
+      return "uint32_t";
+    }
+
+    if (bitWidth <= 64) {
+      return "uint64_t";
+    }
+
+    assert(false);
+  }
+
+  enum EdgeType {
+    EDGE_TYPE_POSEDGE,
+    EDGE_TYPE_NEGEDGE
+  };
+
 }

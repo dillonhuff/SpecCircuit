@@ -4,53 +4,21 @@
 
 #include "circuit.h"
 #include "cpp_utils.h"
+#include "value_store.h"
 
 using namespace std;
 
 namespace FlatCircuit {
 
-  enum EdgeType {
-    EDGE_TYPE_POSEDGE,
-    EDGE_TYPE_NEGEDGE
-  };
-
-  class IRType {
-  public:
-    virtual ~IRType() {}
-  };
-
-  class TwoStateBitType : public IRType {
-  };
-
-  class FourStateBitType : public IRType {
-  };
-
-  class ArrayType : public IRType {
-  public:
-    IRType* elemType;
-    unsigned long long length;
-  };
-
-  class PointerType : public IRType {
-  public:
-    IRType* refType;
-  };
-
   class IRInstruction {
   public:
-    //    std::string text;
 
-    //IRInstruction() : text("") {}
-    //    IRInstruction(const std::string& text_) : text(text_) {}
-
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       assert(false);
-      //      return text;
     }
 
     virtual std::string twoStateCppCode() const {
       assert(false);
-      //      return "//No code\n";
     }
 
     virtual ~IRInstruction() {}
@@ -63,7 +31,7 @@ namespace FlatCircuit {
     IRComment() : text("") {}
     IRComment(const std::string& text_) : text(text_) {}
 
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return ln("// " + text);
     }
 
@@ -89,7 +57,7 @@ namespace FlatCircuit {
                                               clkVar(clkVar_),
                                               label(label_) {}
 
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return "\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
 
@@ -118,7 +86,7 @@ namespace FlatCircuit {
                                             curr(curr_),
                                             label(label_) {}
 
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       std::string edgeName =
         (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
 
@@ -144,7 +112,7 @@ namespace FlatCircuit {
 
     IRLabel(const std::string& name_) : name(name_) {}
 
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return ln(name + ":");
     }
 
@@ -154,6 +122,41 @@ namespace FlatCircuit {
 
   };
 
+  class IRMemoryStore : public IRInstruction {
+  public:
+    CellId cid;
+    std::string waddrName;
+    std::string wdataName;
+
+    virtual std::string twoStateCppCode() const {
+      assert(false);
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      assert(false);
+    }
+
+  };
+
+  class IRRegisterStore : public IRInstruction {
+  public:
+    CellId cid;
+    std::string result;
+
+    IRRegisterStore(const CellId cid_,
+                    const std::string& result_) : cid(cid_), result(result_) {}
+
+    virtual std::string twoStateCppCode() const {
+      return ln("// Register store");
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
+                result);
+    }
+
+  };
+  
   class IRTableStore : public IRInstruction {
   public:
     unsigned long offset;
@@ -166,7 +169,7 @@ namespace FlatCircuit {
       return "// Table store " + value + "\n";
     }
     
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return ln("values[" + std::to_string(offset) + "] = " + value);
     }
     
@@ -178,13 +181,15 @@ namespace FlatCircuit {
     std::string name;
 
     IRDeclareTemp(const unsigned long bitWidth_, const std::string& name_) :
-      bitWidth(bitWidth_), name(name_) {}
+      bitWidth(bitWidth_), name(name_) {
+      assert(bitWidth < 64);
+    }
 
     virtual std::string twoStateCppCode() const {
-      return ln("//char " + name + "[" + std::to_string(storedByteLength(bitWidth)) + "]");
+      return ln(containerPrimitive(bitWidth) + " " + name);
     }
     
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
     }
     
@@ -207,7 +212,7 @@ namespace FlatCircuit {
       return "// Binop " + receiver + "\n";
     }
     
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       CellType tp = cell.getCellType();
       switch (tp) {
       case CELL_TYPE_AND:
@@ -280,7 +285,7 @@ namespace FlatCircuit {
       return ln("//" + receiver + " = " + source);
     }
     
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       return ln(receiver + " = " + source);
     }
   };
@@ -289,20 +294,42 @@ namespace FlatCircuit {
   public:
     std::string receiver;
     unsigned long offset;
-    std::string source;
+    SignalBit driverBit;
+    bool isPastValue;
+    //std::string source;
 
     IRSetBit(const std::string& receiver_,
              const unsigned long offset_,
-             const std::string& source_) :
-      receiver(receiver_), offset(offset_), source(source_) {}
+             const SignalBit driverBit_,
+             const bool isPastValue_) :
+      receiver(receiver_),
+      offset(offset_),
+      driverBit(driverBit_),
+      isPastValue(isPastValue_) {}
 
     virtual std::string twoStateCppCode() const {
       return "// set bit\n";
     }
     
-    virtual std::string toString() const {
-      return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
-        //ln(receiver + " = " + source);
+    virtual std::string toString(ValueStore& valueStore) const {
+      //return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
+
+      if (isPastValue) {
+        string valString = "values[" +
+          std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
+                         "].get(" + std::to_string(driverBit.offset) + ")";
+
+        return ln(receiver + ".set(" + valString);
+      } else {
+        string valString = "values[" +
+          std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
+                         "].get(" + std::to_string(driverBit.offset) + ")";
+
+        return ln(receiver + ".set(" + std::to_string(offset) + ", " +
+                  valString + ")");
+
+      }
+
     }
   };
   
@@ -321,7 +348,7 @@ namespace FlatCircuit {
       return "// Unop " + receiver + "\n";
     }
     
-    virtual std::string toString() const {
+    virtual std::string toString(ValueStore& valueStore) const {
       CellType unop = cell.getCellType();
 
       switch (unop) {
@@ -352,40 +379,4 @@ namespace FlatCircuit {
 
   };
 
-  // Need:
-  // binop, unop, multiplex, jump from test, load slice?
-  // offset?
-  // dereference :: Ptr(Tp) -> Tp
-  // store array :: Ptr(Array[Tp]) -> offset -> Tp -> ()
-  // load array :: Ptr(Array[n]) -> offset -> k -> Array[k]
-  // load array element :: Ptr(Array[n]) -> offset -> type stored in array
-  // binop :: (Array[n] -> Array[i] -> Array[p]) -> Array[n] -> Array[i] -> Array[p]
-
-  // Its annoying that quad value bit vectors are a single data structure. Ideally
-  // the quad value data structure would itself be a giant array of quad value bits
-
-  // Load array  :: Ptr(Array[Tp][n]) -> offset -> width -> Array[Tp][n]
-  // Store array :: Ptr(Array[Tp][n]) -> Array[Tp][n] -> offset -> ()
-  // Binop       :: Array[Tp][n] -> Array[Tp][m] -> Array[Tp][k]
-
-  // How do I model the input array? It is a pointer to an array of bits?
-  // The normal arrays of bits will be stored as immediates
-
-  // Copy segment of input array to temp would be:
-  // set(temp[0], (*array)[0]);
-  // OR
-  // set(temp[0], *(array[0]));
-
-  // I guess the array indexing will be in stages:
-  // 1. Get the bit vector in the array
-  // 2. Get the bit within the bit vector that we want
-
-  // Really the issue is that the "array" isnt really a C-style array
-  // because the entries (bit vectors) have variable size.
-
-  // One solution is to treat it as an array of sum[0, i, n](size[i]) bits
-  // Then load the bits completely
-
-  // Also: Need to support loading from a vector of bit values as well
-  
 }

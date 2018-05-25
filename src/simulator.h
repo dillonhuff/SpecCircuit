@@ -1,6 +1,6 @@
 #pragma once
 
-#include "value_store.h"
+#include "ir.h"
 
 namespace FlatCircuit {
 
@@ -110,13 +110,6 @@ namespace FlatCircuit {
                                        std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
                                        "(" + waddrName + ".is_binary() ? " + waddrName +
                                        ".to_type<int>() : 0)]", wdataName));
-
-      // std::string updateValueClk = "values[" +
-      //   std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-      //   "(" + waddrName + ".is_binary() ? " + waddrName +
-      //   ".to_type<int>() : 0)] = " + wdataName + ";";
-
-      // addLine(ln(updateValueClk));
     }
 
     void addMemoryTestJNE(const std::string& wenName,
@@ -124,8 +117,6 @@ namespace FlatCircuit {
                           const std::string& clkVar,
                           const std::string& label) {
       codeLines.push_back(new IRMemoryTest(wenName, lastClkVar, clkVar, label));
-      // addLine("\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
-      //         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n");
     }
     
     void addRegisterAssign(const CellId cid,
@@ -156,7 +147,7 @@ namespace FlatCircuit {
     std::string getCode(ValueStore& valueStore) const {
       std::string cppCode = "";
       for (auto instr : codeLines) {
-        cppCode += instr->toString();
+        cppCode += instr->toString(valueStore);
       }
 
       return cppCode;
