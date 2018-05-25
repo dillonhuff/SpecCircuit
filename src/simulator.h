@@ -48,6 +48,19 @@ namespace FlatCircuit {
       for (auto sp : portOffsets) {
         rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
       }
+
+      for (auto sp : pastValueOffsets) {
+        rawPastValueOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      }
+
+      for (auto sp : memoryOffsets) {
+        rawMemoryOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      }
+
+      for (auto sp : registerOffsets) {
+        rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      }
+      
     }
 
     void debugPrintTableValues() const;
