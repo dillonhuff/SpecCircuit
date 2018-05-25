@@ -186,7 +186,7 @@ namespace FlatCircuit {
     }
 
     virtual std::string twoStateCppCode() const {
-      return ln(containerPrimitive(bitWidth) + " " + name);
+      return ln(containerPrimitive(bitWidth) + " " + name + " = 0");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -308,7 +308,14 @@ namespace FlatCircuit {
       isPastValue(isPastValue_) {}
 
     virtual std::string twoStateCppCode() const {
-      return "// set bit\n";
+      string valString = "values[0]";
+      if (isPastValue) {
+      } else {
+      }
+
+      return ln(receiver + " |= ((" + valString + " >> " +
+                std::to_string(driverBit.offset) + " ) & 0x1) << " +
+                std::to_string(offset));
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
