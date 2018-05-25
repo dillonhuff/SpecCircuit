@@ -74,6 +74,35 @@ namespace FlatCircuit {
     virtual ~IRComment() {}
   };
 
+  class IRMemoryTest : public IRInstruction {
+  public:
+    std::string wenName;
+    std::string lastClkVar;
+    std::string clkVar;
+    std::string label;
+
+    IRMemoryTest(const std::string& wenName_,
+                 const std::string& lastClkVar_,
+                 const std::string& clkVar_,
+                 const std::string& label_) : wenName(wenName_),
+                                              lastClkVar(lastClkVar_),
+                                              clkVar(clkVar_),
+                                              label(label_) {}
+
+    virtual std::string toString() const {
+      return "\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+        lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
+
+    }
+
+    virtual std::string twoStateCppCode() const {
+      return "\t// if (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+        lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
+
+    }
+    
+  };
+
   class IREdgeTest : public IRInstruction {
   public:
     EdgeType edgeType;
@@ -268,7 +297,7 @@ namespace FlatCircuit {
       receiver(receiver_), offset(offset_), source(source_) {}
 
     virtual std::string twoStateCppCode() const {
-      return "// set bit";
+      return "// set bit\n";
     }
     
     virtual std::string toString() const {

@@ -362,8 +362,9 @@ namespace FlatCircuit {
                           const std::string& lastClkVar,
                           const std::string& clkVar,
                           const std::string& label) {
-      addLine("\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
-              lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n");
+      codeLines.push_back(new IRMemoryTest(wenName, lastClkVar, clkVar, label));
+      // addLine("\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+      //         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n");
     }
     
     void addRegisterAssign(const CellId cid,
