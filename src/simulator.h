@@ -229,9 +229,9 @@ namespace FlatCircuit {
     }
 
     void addUnop(const std::string& receiver,
-                 const CellType tp,
+                 const Cell& cell,
                  const std::string& org) {
-      codeLines.push_back(new IRUnop(receiver, tp, org));
+      codeLines.push_back(new IRUnop(receiver, org, cell));
     }
     
     void addLabel(const std::string& labelName) {
@@ -1229,7 +1229,7 @@ namespace FlatCircuit {
 
       std::string argName = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
       std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
-      codeState.addUnop(outName, def.getCellRefConst(cid).getCellType(), argName);
+      codeState.addUnop(outName, def.getCellRefConst(cid), argName);
       codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
     

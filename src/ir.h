@@ -73,22 +73,37 @@ namespace FlatCircuit {
   class IRUnop : public IRInstruction {
   public:
     std::string receiver;
-    CellType unop;
     std::string arg;
+    const Cell& cell;
 
     IRUnop(const std::string& receiver_,
-           const CellType tp_,
-           const std::string& arg_) :
-      receiver(receiver_), unop(tp_), arg(arg_) {}
+           const std::string& arg_,
+           const Cell& cell_) :
+      receiver(receiver_), arg(arg_), cell(cell_) {}
 
     virtual std::string toString() const {
+      CellType unop = cell.getCellType();
+
       switch (unop) {
 
       case CELL_TYPE_PASSTHROUGH:
         return ln(receiver + " = " + arg);
+
       case CELL_TYPE_NOT:
         return ln(receiver + " = ~(" + arg + ")");
 
+      case CELL_TYPE_ORR:
+        return ln(receiver + " = orr(" + arg + ")");
+
+      case CELL_TYPE_SLICE:
+        return ln(receiver + " = slice(" + arg + ", " +
+                  to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+                  to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
+        
+      case CELL_TYPE_ZEXT:
+        return ln(receiver + " = zero_extend(" +
+                  to_string(cell.getPortWidth(PORT_ID_OUT)) + 
+                  ", " + arg + ")");
       default:
         std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
         assert(false);
