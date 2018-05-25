@@ -626,23 +626,10 @@ namespace FlatCircuit {
         codeState.addComment(ln("// No code for input port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
         codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
-      // } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
-
-      //   unopCode(codeState, cid);
-
       } else if (isBinop(cell.getCellType())) {
         binopCode(codeState, cid);
       } else if (isUnop(cell.getCellType())) {
         unopCode(codeState, cid);        
-        //      }
-      // else if (cell.getCellType() == CELL_TYPE_ORR) {
-
-      //   unopCode(codeState, cid);        
-
-      // } else if (cell.getCellType() == CELL_TYPE_NOT) {
-
-      //   unopCode(codeState, cid);
-        
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
         string raddrName = codeState.getVariableName(cid, PORT_ID_RADDR, valueStore);
@@ -676,10 +663,6 @@ namespace FlatCircuit {
 
         codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
 
-      // } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
-
-      //   unopCode(codeState, cid);
-      
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
         cout << "Insert code for unsupported node " + def.cellName(cid)
@@ -726,12 +709,22 @@ namespace FlatCircuit {
       }
     }
 
+    // CodeGenState codeState(def);
+    // for (int i = 0; i < updates.size(); i += 2) {
+    //   rawCombinationalBlockCode(updates[i + 0], codeState);
+    //   rawSequentialBlockCode(updates[i + 1], codeState);
+    // }
+
+    cppCode +=
+      "void simulate_two_state(unsigned char* values) {\n";
+    cppCode += codeState.getTwoStateCode();
+    cppCode += "}\n\n";
+    
     cppCode +=
       "typedef bsim::quad_value_bit_vector BitVector;\n\n"
       "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
       "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
       "void simulate(bsim::quad_value_bit_vector* values) {\n";
-      //"void simulate(std::vector<bsim::quad_value_bit_vector>& values) {\n";
 
     assert((updates.size() % 2) == 0);
 

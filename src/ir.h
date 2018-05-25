@@ -41,6 +41,11 @@ namespace FlatCircuit {
     virtual std::string toString() const {
       return text;
     }
+
+    virtual std::string twoStateCppCode() const {
+      return "//No code\n";
+    }
+
     virtual ~IRInstruction() {}
   };
 
@@ -64,8 +69,30 @@ namespace FlatCircuit {
     IRTableStore(const unsigned long offset_, const std::string& value_) :
       offset(offset_), value(value_) {}
 
+    virtual std::string twoStateCppCode() const {
+      return "// Table store " + value + "\n";
+    }
+    
     virtual std::string toString() const {
       return ln("values[" + std::to_string(offset) + "] = " + value);
+    }
+    
+  };
+
+  class IRDeclareTemp : public IRInstruction {
+  public:
+    unsigned long bitWidth;
+    std::string name;
+
+    IRDeclareTemp(const unsigned long bitWidth_, const std::string& name_) :
+      bitWidth(bitWidth_), name(name_) {}
+
+    virtual std::string twoStateCppCode() const {
+      return ln("char " + name + "[" + std::to_string(storedByteLength(bitWidth)) + "]");
+    }
+    
+    virtual std::string toString() const {
+      return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
     }
     
   };
@@ -83,6 +110,10 @@ namespace FlatCircuit {
             const Cell& cell_) :
       receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_) {}
 
+    virtual std::string twoStateCppCode() const {
+      return "// Binop " + receiver + "\n";
+    }
+    
     virtual std::string toString() const {
       CellType tp = cell.getCellType();
       switch (tp) {
@@ -155,6 +186,10 @@ namespace FlatCircuit {
            const Cell& cell_) :
       receiver(receiver_), arg(arg_), cell(cell_) {}
 
+    virtual std::string twoStateCppCode() const {
+      return "// Unop " + receiver + "\n";
+    }
+    
     virtual std::string toString() const {
       CellType unop = cell.getCellType();
 

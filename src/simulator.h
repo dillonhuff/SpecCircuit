@@ -5,14 +5,6 @@
 
 namespace FlatCircuit {
 
-  static inline unsigned long storedByteLength(const unsigned long numBits) {
-    if (numBits < 8) {
-      return 1;
-    }
-
-    return ceil(numBits / 8);
-  }
-
   class ValueStore {
     std::vector<BitVector> simValueTable;
 
@@ -338,7 +330,7 @@ namespace FlatCircuit {
 
     void addQVBVDecl(const std::string& name,
                      const int length) {
-      addLine(ln("BitVector " + name + "(" + std::to_string(length) + ", 0)"));
+      codeLines.push_back(new IRDeclareTemp(length, name));
     }
 
     void addUpdateMemoryCode(const CellId cid,
@@ -392,6 +384,16 @@ namespace FlatCircuit {
 
       return cppCode;
     }
+
+    std::string getTwoStateCode() const {
+      std::string cppCode = "";
+      for (auto instr : codeLines) {
+        cppCode += instr->twoStateCppCode();
+      }
+
+      return cppCode;
+    }
+
   };
 
   std::vector<SigPort>
