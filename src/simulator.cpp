@@ -436,82 +436,6 @@ namespace FlatCircuit {
     return {myLibHandle, myFuncFunV};
   }
 
-  //  std::string
-  std::vector<IRInstruction*>
-  ValueStore::codeToMaterializeOffset(const CellId cid,
-                                     const PortId pid,
-                                     const std::string& argName,
-                                     const std::map<SigPort, unsigned long>& offsets) const {
-    const Cell& cell = def.getCellRefConst(cid);
-    auto drivers = cell.getDrivers(pid);
-    //string cppCode = "";
-    vector<IRInstruction*> instrs;
-
-    bool canDirectCopy = true;
-    CellId singleDriverCell;
-    PortId singleDriverPort;
-    set<CellId> driverCells;
-
-    for (int offset = 0; offset < drivers.signals.size(); offset++) {
-      SignalBit driverBit = drivers.signals[offset];
-      driverCells.insert(driverBit.cell);
-
-      singleDriverCell = driverBit.cell;
-      singleDriverPort = driverBit.port;
-
-      if (driverCells.size() > 1) {
-        canDirectCopy = false;
-        break;
-      }
-
-      if (driverBit.offset != offset) {
-        canDirectCopy = false;
-        break;
-      }
-    }
-
-    if (def.getCellRefConst(singleDriverCell).getPortWidth(singleDriverPort) !=
-        cell.getPortWidth(pid)) {
-      canDirectCopy = false;
-    }
-
-    SigPort sp = {singleDriverCell, singleDriverPort};
-    if (canDirectCopy && !contains_key(sp, offsets)) {
-      cout << "Error: " << sigPortString(def, sp) << endl;
-      assert(contains_key(sp, offsets));
-    }
-
-    if (canDirectCopy) {
-      //instrs.push_back(new IRInstruction(ln(argName + " = " + "values[" + to_string(map_find(sp, offsets)) + "]")));
-      instrs.push_back(new IRAssign(argName,
-                                    "values[" +
-                                    to_string(map_find(sp, offsets)) +
-                                    "]"));
-    } else {
-
-      for (int offset = 0; offset < drivers.signals.size(); offset++) {
-        SignalBit driverBit = drivers.signals[offset];
-        string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
-
-        //cppCode += ln(argName + ".set(" + to_string(offset) + ", " + valString + ")");
-        //instrs.push_back(new IRInstruction(ln(argName + ".set(" + to_string(offset) + ", " + valString + ")")));
-
-        instrs.push_back(new IRSetBit(argName, offset, valString));
-      }
-    }
-
-    return instrs;
-    
-  }
-
-  //std::string
-  std::vector<IRInstruction*>
-  ValueStore::codeToMaterialize(const CellId cid,
-                                            const PortId pid,
-                                            const std::string& argName) const {
-    return codeToMaterializeOffset(cid, pid, argName, portOffsets);
-  }
-
   std::string
   Simulator::sequentialBlockCode(const std::vector<SigPort>& levelized,
                                  CodeGenState& codeState) {
@@ -720,15 +644,9 @@ namespace FlatCircuit {
       }
     }
 
-    // CodeGenState codeState(def);
-    // for (int i = 0; i < updates.size(); i += 2) {
-    //   rawCombinationalBlockCode(updates[i + 0], codeState);
-    //   rawSequentialBlockCode(updates[i + 1], codeState);
-    // }
-
     cppCode +=
       "void simulate_two_state(unsigned char* values) {\n";
-    cppCode += codeState.getTwoStateCode();
+    cppCode += codeState.getTwoStateCode(valueStore);
     cppCode += "}\n\n";
     
     cppCode +=
@@ -739,7 +657,7 @@ namespace FlatCircuit {
 
     assert((updates.size() % 2) == 0);
 
-    cppCode += codeState.getCode();
+    cppCode += codeState.getCode(valueStore);
 
     cppCode += "}";
 
@@ -817,13 +735,6 @@ namespace FlatCircuit {
     }
   }
 
-  void ValueStore::debugPrintTableValues() const {
-    cout << "Table values" << endl;
-    for (int i = 0; i < (int) simValueTable.size(); i++) {
-      cout << "\t" << i << " = " << simValueTable.at(i) << endl;
-    }
-  }
-  
   void Simulator::debugPrintTableValues() const {
     valueStore.debugPrintTableValues();
   }
