@@ -5,6 +5,14 @@
 
 namespace FlatCircuit {
 
+  static inline unsigned long storedByteLength(const unsigned long numBits) {
+    if (numBits < 8) {
+      return 1;
+    }
+
+    return ceil(numBits / 8);
+  }
+
   class ValueStore {
     std::vector<BitVector> simValueTable;
 
@@ -13,10 +21,34 @@ namespace FlatCircuit {
     std::map<CellId, unsigned long> registerOffsets;    
     std::map<SigPort, unsigned long> pastValueOffsets;
 
+    // Raw (2 state) table entries
+    //    unsigned char* rawSimValueTable;
+    unsigned long rawTableSize;
+
+    std::map<SigPort, unsigned long> rawPortOffsets;
+    std::map<CellId, unsigned long> rawMemoryOffsets;
+    std::map<CellId, unsigned long> rawRegisterOffsets;
+    std::map<SigPort, unsigned long> rawPastValueOffsets;
+    
   public:
     CellDefinition& def;
 
     ValueStore(CellDefinition& def_) : def(def_) {}
+
+    void buildRawValueTable() {
+      unsigned long rawOffset = 0;
+      map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
+      for (unsigned long i = 0; i < simValueTable.size(); i++) {
+        quadOffsetsToRawOffsets[i] = rawOffset;
+        rawOffset += storedByteLength(simValueTable[i].bitLength());
+      }
+
+      rawTableSize = rawOffset;
+
+      for (auto sp : portOffsets) {
+        rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      }
+    }
 
     void debugPrintTableValues() const;
 
@@ -28,6 +60,11 @@ namespace FlatCircuit {
 
     unsigned long getRegisterOffset(const CellId cid) const {
       return map_find(cid, registerOffsets);
+    }
+
+    unsigned long rawPortValueOffset(const CellId cid,
+                                     const PortId pid) {
+      return map_find({cid, pid}, rawPortOffsets);
     }
     
     unsigned long portValueOffset(const CellId cid,
@@ -220,7 +257,7 @@ namespace FlatCircuit {
                    const PortId pid,
                    const std::string& assignCode,
                    ValueStore& valueStore) {
-      addLine(valueStore.codeToAssign(cid, pid, assignCode));
+      codeLines.push_back(new IRTableStore(valueStore.portValueOffset(cid, pid), assignCode));
     }
 
     void addBinop(const std::string& receiver,

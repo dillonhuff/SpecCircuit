@@ -261,12 +261,8 @@ namespace FlatCircuit {
                           std::set<SigPort>& seqChanges,
                           const CellDefinition& def) {
     for (auto sigPort : combinationalDependencies(cell, pid, def)) {
-      //      if (!combChanges.elem(sigPort)) {
       freshChanges.insert(sigPort);
       combChanges.push_back(sigPort);
-      //      } else {
-      //        assert(false);
-      //      }
     }
 
     for (auto sigPort : sequentialDependencies(cell, pid)) {
@@ -279,7 +275,6 @@ namespace FlatCircuit {
   staticSimulationEvents(const CellDefinition& def) {
 
     vector<vector<SigPort> > staticEvents;
-    //    UniqueVector<SigPort> combChanges;
     std::vector<SigPort> combChanges;
     set<SigPort> seqChanges;
 
@@ -631,76 +626,22 @@ namespace FlatCircuit {
         codeState.addComment(ln("// No code for input port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
         codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
-      } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
+      // } else if (cell.getCellType() == CELL_TYPE_ZEXT) {
 
-        //        int outWidth = cell.getPortWidth(PORT_ID_OUT);
-        unopCode(codeState, cid); //, [outWidth](const string& argName) {
-          //   return "zero_extend(" + to_string(outWidth) + ", " + argName + ")";
-          // });
+      //   unopCode(codeState, cid);
 
-      } else if (cell.getCellType() == CELL_TYPE_UGE) {
-
+      } else if (isBinop(cell.getCellType())) {
         binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_ULE) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_UGT) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_ULT) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_LSHR) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_ASHR) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_SHL) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_SLICE) {
-
-        unopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_SUB) {
-
-        binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_ADD) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_MUL) {
-
-        binopCode(codeState, cid);
-        
-      } else if (cell.getCellType() == CELL_TYPE_AND) {
-        binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_OR) {
-        binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_EQ) {
-        binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_NEQ) {
-        binopCode(codeState, cid);
-
-      } else if (cell.getCellType() == CELL_TYPE_ORR) {
-
+      } else if (isUnop(cell.getCellType())) {
         unopCode(codeState, cid);        
+        //      }
+      // else if (cell.getCellType() == CELL_TYPE_ORR) {
 
-      } else if (cell.getCellType() == CELL_TYPE_NOT) {
+      //   unopCode(codeState, cid);        
 
-        unopCode(codeState, cid);
+      // } else if (cell.getCellType() == CELL_TYPE_NOT) {
+
+      //   unopCode(codeState, cid);
         
       } else if (cell.getCellType() == CELL_TYPE_MEM) {
 
@@ -734,10 +675,10 @@ namespace FlatCircuit {
         string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
         codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
-        
-      } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
 
-        unopCode(codeState, cid);
+      // } else if (cell.getCellType() == CELL_TYPE_PASSTHROUGH) {
+
+      //   unopCode(codeState, cid);
       
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
@@ -771,6 +712,8 @@ namespace FlatCircuit {
     string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
       "using namespace bsim;\n\n";
 
+    valueStore.buildRawValueTable();
+    
     cppCode += ln("// Input layout");
     for (auto cid : def.getPortCells()) {
       const Cell& cell = def.getCellRefConst(cid);
@@ -778,7 +721,8 @@ namespace FlatCircuit {
         cppCode += ln("// " + def.getCellName(cid) + " ---> " +
                       to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)));
 
-        //                      to_string(map_find({cid, PORT_ID_OUT}, valueStore.portOffsets)));
+        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_OUT)));
       }
     }
 

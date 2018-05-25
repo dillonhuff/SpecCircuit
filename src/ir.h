@@ -56,6 +56,20 @@ namespace FlatCircuit {
     }
   };
 
+  class IRTableStore : public IRInstruction {
+  public:
+    unsigned long offset;
+    std::string value;
+
+    IRTableStore(const unsigned long offset_, const std::string& value_) :
+      offset(offset_), value(value_) {}
+
+    virtual std::string toString() const {
+      return ln("values[" + std::to_string(offset) + "] = " + value);
+    }
+    
+  };
+
   class IRBinop : public IRInstruction {
   public:
     std::string receiver;
