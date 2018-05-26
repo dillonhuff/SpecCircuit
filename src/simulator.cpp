@@ -578,10 +578,18 @@ namespace FlatCircuit {
         string argName1 = codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
         string sel = codeState.getVariableName(cid, PORT_ID_SEL, valueStore);
 
+        string out = codeState.getPortTemp(cid, PORT_ID_OUT);
+        codeState.addInstruction(new IRMux(out, sel, argName0, argName1, cid));
+
         codeState.addAssign(cid,
                             PORT_ID_OUT,
-                            "(" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")",
+                            out,
                             valueStore);
+        
+        // codeState.addAssign(cid,
+        //                     PORT_ID_OUT,
+        //                     "(" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")",
+        //                     valueStore);
 
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 

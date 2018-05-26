@@ -30,6 +30,10 @@ namespace FlatCircuit {
       codeLines.push_back(new IRTableStore(valueStore.portValueOffset(cid, pid), assignCode));
     }
 
+    void addInstruction(IRInstruction* instr) {
+      codeLines.push_back(instr);
+    }
+    
     void addBinop(const std::string& receiver,
                   const Cell& cell,
                   const std::string& arg0,
@@ -106,10 +110,13 @@ namespace FlatCircuit {
                              const std::string& waddrName,
                              const std::string& wdataName,
                              ValueStore& valueStore) {
-      codeLines.push_back(new IRAssign("values[" +
-                                       std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-                                       "(" + waddrName + ".is_binary() ? " + waddrName +
-                                       ".to_type<int>() : 0)]", wdataName));
+
+      codeLines.push_back(new IRMemoryStore(cid, waddrName, wdataName));
+      
+      // codeLines.push_back(new IRAssign("values[" +
+      //                                  std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //                                  "(" + waddrName + ".is_binary() ? " + waddrName +
+      //                                  ".to_type<int>() : 0)]", wdataName));
     }
 
     void addMemoryTestJNE(const std::string& wenName,
@@ -156,7 +163,7 @@ namespace FlatCircuit {
     std::string getTwoStateCode(ValueStore& valueStore) const {
       std::string cppCode = "";
       for (auto instr : codeLines) {
-        cppCode += instr->twoStateCppCode();
+        cppCode += instr->twoStateCppCode(valueStore);
       }
 
       return cppCode;

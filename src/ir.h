@@ -17,7 +17,7 @@ namespace FlatCircuit {
       assert(false);
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       assert(false);
     }
 
@@ -35,7 +35,7 @@ namespace FlatCircuit {
       return ln("// " + text);
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return ln("// " + text);
     }
 
@@ -63,7 +63,7 @@ namespace FlatCircuit {
 
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return "\t// if (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
 
@@ -94,7 +94,7 @@ namespace FlatCircuit {
                 label + "; }");
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       std::string edgeName =
         (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
 
@@ -116,7 +116,7 @@ namespace FlatCircuit {
       return ln(name + ":");
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return ln(name + ":");
     }
 
@@ -128,12 +128,23 @@ namespace FlatCircuit {
     std::string waddrName;
     std::string wdataName;
 
-    virtual std::string twoStateCppCode() const {
-      assert(false);
+    IRMemoryStore(const CellId cid_,
+                  const std::string& waddrName_,
+                  const std::string& wdataName_) :
+      cid(cid_), waddrName(waddrName_), wdataName(wdataName_) {}
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      return ln("values[" +
+                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                waddrName + "] = " + wdataName);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      assert(false);
+      return ln("values[" +
+                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                "(" + waddrName + ".is_binary() ? " + waddrName +
+                ".to_type<int>() : 0)] = " + wdataName);
+
     }
 
   };
@@ -146,7 +157,7 @@ namespace FlatCircuit {
     IRRegisterStore(const CellId cid_,
                     const std::string& result_) : cid(cid_), result(result_) {}
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return ln("// Register store");
     }
     
@@ -165,7 +176,7 @@ namespace FlatCircuit {
     IRTableStore(const unsigned long offset_, const std::string& value_) :
       offset(offset_), value(value_) {}
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return "// Table store " + value + "\n";
     }
     
@@ -185,7 +196,7 @@ namespace FlatCircuit {
       assert(bitWidth < 64);
     }
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return ln(containerPrimitive(bitWidth) + " " + name + " = 0");
     }
     
@@ -208,7 +219,7 @@ namespace FlatCircuit {
             const Cell& cell_) :
       receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_) {}
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return "// Binop " + receiver + "\n";
     }
     
@@ -281,8 +292,8 @@ namespace FlatCircuit {
     IRAssign(const std::string& receiver_,
              const std::string& source_) : receiver(receiver_), source(source_) {}
 
-    virtual std::string twoStateCppCode() const {
-      return ln("//" + receiver + " = " + source);
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      return ln(receiver + " = " + source);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -307,7 +318,7 @@ namespace FlatCircuit {
       driverBit(driverBit_),
       isPastValue(isPastValue_) {}
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       string valString = "values[0]";
       if (isPastValue) {
       } else {
@@ -339,7 +350,32 @@ namespace FlatCircuit {
 
     }
   };
-  
+
+  class IRMux : public IRInstruction {
+  public:
+    std::string receiver;
+    std::string sel;
+    std::string arg0;
+    std::string arg1;
+    CellId cid;
+
+    IRMux(const std::string& receiver_,
+          const std::string& sel_,
+          const std::string& arg0_,
+          const std::string& arg1_,
+          const CellId cid_) :
+      receiver(receiver_), sel(sel_), arg0(arg0_), arg1(arg1_), cid(cid_) {}
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      return ln(receiver + " = (" + sel + " ? " + arg1 + " : " + arg0 + ")");
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      return ln(receiver + " = (" + sel + " == BitVector(1, 1) ? " + arg1 + " : " + arg0 + ")");
+    }
+    
+  };
+
   class IRUnop : public IRInstruction {
   public:
     std::string receiver;
@@ -351,7 +387,7 @@ namespace FlatCircuit {
            const Cell& cell_) :
       receiver(receiver_), arg(arg_), cell(cell_) {}
 
-    virtual std::string twoStateCppCode() const {
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return "// Unop " + receiver + "\n";
     }
     
