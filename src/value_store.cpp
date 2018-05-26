@@ -58,10 +58,11 @@ namespace FlatCircuit {
     }
 
     if (canDirectCopy) {
-      instrs.push_back(new IRAssign(argName,
-                                    "values[" +
-                                    to_string(map_find(sp, offsets)) +
-                                    "]"));
+      instrs.push_back(new IRPortLoad(argName, sp.cell, sp.port, isPast));
+      // instrs.push_back(new IRAssign(argName,
+      //                               "values[" +
+      //                               to_string(map_find(sp, offsets)) +
+      //                               "]"));
     } else {
 
       for (int offset = 0; offset < drivers.signals.size(); offset++) {

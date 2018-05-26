@@ -168,17 +168,7 @@ namespace FlatCircuit {
 
   };
   
-
-  static inline
-  std::string
-  accessString(const std::string& arrayName,
-               const int byteOffset,
-               const int bitWidth) {
-    auto cBvType = containerPrimitive(bitWidth);
-    return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
-  }
-
-    class IRTableStore : public IRInstruction {
+  class IRTableStore : public IRInstruction {
   public:
     CellId cid;
     PortId pid;
@@ -197,9 +187,6 @@ namespace FlatCircuit {
       std::string accessStr = accessString("values", offset, bitWidth);
 
       return ln(accessStr + " = " + value + "; // table store");
-
-      // return ln("values[" + std::to_string(offset) + "] = " + value +
-      //           "; // table store");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -307,6 +294,52 @@ namespace FlatCircuit {
 
   };
 
+  class IRPortLoad : public IRInstruction {
+  public:
+    std::string receiver;
+    const CellId cid;
+    const PortId pid;
+    bool isPast;
+
+    IRPortLoad(const std::string& receiver_,
+               const CellId cid_,
+               const PortId pid_,
+               const bool isPast_) :
+      receiver(receiver_), cid(cid_), pid(pid_), isPast(isPast_) {}
+
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+
+      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
+      unsigned long offset;
+      if (!isPast) {
+        offset = valueStore.rawPortValueOffset(cid, pid);
+      } else {
+        offset = valueStore.rawPortPastValueOffset(cid, pid);
+      }
+
+      std::cout << "Got offset" << std::endl;
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(receiver + " = " + accessStr + "; // IRPortLoad");
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      unsigned long offset;
+      if (!isPast) {
+        offset = valueStore.portValueOffset(cid, pid);
+      } else {
+        offset = valueStore.pastValueOffset(cid, pid);
+      }
+
+      //unsigned long offset = valueStore.portValueOffset(cid, pid);
+      return ln(receiver + " = values[" + std::to_string(offset) + "]");
+    }
+
+  };
+
   class IRAssign : public IRInstruction {
   public:
     std::string receiver;
@@ -316,7 +349,7 @@ namespace FlatCircuit {
              const std::string& source_) : receiver(receiver_), source(source_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return ln(receiver + " = " + source);
+      return ln(receiver + " = " + source + "; // IRAssign");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {

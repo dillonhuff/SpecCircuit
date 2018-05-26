@@ -39,4 +39,13 @@ namespace FlatCircuit {
     EDGE_TYPE_NEGEDGE
   };
 
+  static inline
+  std::string
+  accessString(const std::string& arrayName,
+               const int byteOffset,
+               const int bitWidth) {
+    auto cBvType = containerPrimitive(bitWidth);
+    return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
+  }
+
 }
