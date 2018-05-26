@@ -135,13 +135,38 @@ namespace FlatCircuit {
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-      if (!contains_key({cid, pid}, portOffsets)) {
-        unsigned long nextInd = simValueTable.size();
-        portOffsets[{cid, pid}] = nextInd;
-        simValueTable.push_back(bv);
-      }
 
-      simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+      if (compiledRaw) {
+        int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
+
+        assert(pWidth <= 64);
+
+        if (bv.bitLength() <= 8) {
+          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+            (uint8_t) bv.to_type<uint8_t>();
+        } else if (bv.bitLength() <= 16) {
+          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+            (uint16_t) bv.to_type<uint16_t>();
+        } else if (bv.bitLength() <= 32) {
+          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+            (uint32_t) bv.to_type<uint32_t>();
+        } else if (bv.bitLength() <= 64) {
+          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+            (uint64_t) bv.to_type<uint64_t>();
+        } else {
+          assert(false);
+        }
+
+      } else {
+
+        if (!contains_key({cid, pid}, portOffsets)) {
+          unsigned long nextInd = simValueTable.size();
+          portOffsets[{cid, pid}] = nextInd;
+          simValueTable.push_back(bv);
+        }
+
+        simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+      }
     }
 
     BitVector getPortValue(const CellId cid,

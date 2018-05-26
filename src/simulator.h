@@ -9,10 +9,6 @@ namespace FlatCircuit {
     std::vector<IRInstruction*> codeLines;
     CellDefinition& def;
 
-    void addLine(const std::string& str) {
-      //      codeLines.push_back(new IRInstruction(str));
-    }
-
   public:
 
     CodeGenState(CellDefinition& def_) : uniqueNum(0), def(def_) {}
@@ -93,12 +89,7 @@ namespace FlatCircuit {
                         const std::string& prev,
                         const std::string& curr,
                         const std::string& label) {
-      // std::string edgeName =
-      //   (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
-
       codeLines.push_back(new IREdgeTest(edgeType, prev, curr, label));
-      // addLine(ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
-      //            label + "; }"));
     }
 
     void addQVBVDecl(const std::string& name,
