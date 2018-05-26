@@ -92,5 +92,11 @@ namespace FlatCircuit {
     //                assignCode);
   }
     
-  
+
+  void ValueStore::debugPrintRawValueTable() const {
+    cout << "value table" << endl;
+    for (unsigned long i = 0; i < rawTableSize; i++) {
+      cout << "\trawTable[" << i << "] = " << (int) rawSimValueTable[i] << endl;
+    }
+  }
 }

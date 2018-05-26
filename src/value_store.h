@@ -62,6 +62,7 @@ namespace FlatCircuit {
       compiledRaw = true;
       rawSimValueTable =
         static_cast<unsigned char*>(malloc(rawOffset));
+      memset(rawSimValueTable, 0, rawTableSize);
       //rawSimValueTable[0] = 23;
       
     }
@@ -143,6 +144,8 @@ namespace FlatCircuit {
 
     }
 
+    void debugPrintRawValueTable() const;
+    
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
@@ -159,6 +162,8 @@ namespace FlatCircuit {
           std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
           *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint16_t) bv.to_type<uint16_t>();
+
+          debugPrintRawValueTable();
         } else if (bv.bitLength() <= 32) {
           *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint32_t) bv.to_type<uint32_t>();
@@ -190,8 +195,31 @@ namespace FlatCircuit {
 
         assert(pWidth <= 64);
 
-        return BitVector(pWidth,
-                         rawSimValueTable[map_find({cid, pid}, rawPortOffsets)]);
+        if (pWidth <= 8) {
+          return BitVector(pWidth,
+                           *((uint8_t*)
+                             (rawSimValueTable +
+                              map_find({cid, pid}, rawPortOffsets))));
+        } else if (pWidth <= 16) {
+          return BitVector(pWidth,
+                           *((uint16_t*)
+                             (rawSimValueTable +
+                              map_find({cid, pid}, rawPortOffsets))));
+
+        } else if (pWidth <= 32) {
+          return BitVector(pWidth,
+                           *((uint32_t*)
+                             (rawSimValueTable +
+                              map_find({cid, pid}, rawPortOffsets))));
+
+        } else if (pWidth <= 64) {
+          return BitVector(pWidth,
+                           *((uint64_t*)
+                             (rawSimValueTable +
+                              map_find({cid, pid}, rawPortOffsets))));
+        } else {
+          assert(false);
+        }
       }
     }
 
