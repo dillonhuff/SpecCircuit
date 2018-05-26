@@ -153,16 +153,17 @@ namespace FlatCircuit {
         assert(pWidth <= 64);
 
         if (bv.bitLength() <= 8) {
-          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+          *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint8_t) bv.to_type<uint8_t>();
         } else if (bv.bitLength() <= 16) {
-          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+          *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint16_t) bv.to_type<uint16_t>();
         } else if (bv.bitLength() <= 32) {
-          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+          *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint32_t) bv.to_type<uint32_t>();
         } else if (bv.bitLength() <= 64) {
-          rawSimValueTable[map_find({cid, pid}, rawPortOffsets)] =
+          *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint64_t) bv.to_type<uint64_t>();
         } else {
           assert(false);
