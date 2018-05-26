@@ -23,7 +23,7 @@ namespace FlatCircuit {
                    const PortId pid,
                    const std::string& assignCode,
                    ValueStore& valueStore) {
-      codeLines.push_back(new IRTableStore(valueStore.portValueOffset(cid, pid), assignCode));
+      codeLines.push_back(new IRTableStore(cid, pid, assignCode));
     }
 
     void addInstruction(IRInstruction* instr) {

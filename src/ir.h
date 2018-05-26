@@ -168,19 +168,42 @@ namespace FlatCircuit {
 
   };
   
-  class IRTableStore : public IRInstruction {
+
+  static inline
+  std::string
+  accessString(const std::string& arrayName,
+               const int byteOffset,
+               const int bitWidth) {
+    auto cBvType = containerPrimitive(bitWidth);
+    return "*((values + "  + std::to_string(byteOffset) + ")(" + cBvType + "*))";
+  }
+
+    class IRTableStore : public IRInstruction {
   public:
-    unsigned long offset;
+    CellId cid;
+    PortId pid;
     std::string value;
 
-    IRTableStore(const unsigned long offset_, const std::string& value_) :
-      offset(offset_), value(value_) {}
+    IRTableStore(const CellId cid_, const PortId pid_, const std::string& value_) :
+      cid(cid_), pid(pid_), value(value_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return ln("values[" + std::to_string(offset) + "] = " + value);
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+
+      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
+      unsigned long offset = valueStore.rawPortValueOffset(cid, pid);
+      std::cout << "Got offset" << std::endl;
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(accessStr + " = " + value + "; // table store");
+
+      // return ln("values[" + std::to_string(offset) + "] = " + value +
+      //           "; // table store");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+      unsigned long offset = valueStore.portValueOffset(cid, pid);
       return ln("values[" + std::to_string(offset) + "] = " + value);
     }
     

@@ -81,6 +81,9 @@ namespace FlatCircuit {
 
     unsigned long rawPortValueOffset(const CellId cid,
                                      const PortId pid) {
+      assert(contains_key({cid, pid}, portOffsets));
+      assert(contains_key({cid, pid}, rawPortOffsets));
+
       return map_find({cid, pid}, rawPortOffsets);
     }
     
