@@ -53,6 +53,11 @@ namespace FlatCircuit {
                   out, PORT_ID_IN);
 
       Simulator sim(e, def);
+      sim.setFreshValue("in", BitVec(8, 0));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
+
       sim.compileCircuit();
       sim.simulateRaw();
 
@@ -77,6 +82,11 @@ namespace FlatCircuit {
                   out, PORT_ID_IN);
 
       Simulator sim(e, def);
+      sim.setFreshValue("in", BitVec(16, 0));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(16, 0));
+      
       sim.compileCircuit();
       sim.simulateRaw();
 

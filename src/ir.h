@@ -175,7 +175,7 @@ namespace FlatCircuit {
                const int byteOffset,
                const int bitWidth) {
     auto cBvType = containerPrimitive(bitWidth);
-    return "*((values + "  + std::to_string(byteOffset) + ")(" + cBvType + "*))";
+    return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
   }
 
     class IRTableStore : public IRInstruction {
