@@ -37,6 +37,34 @@ namespace FlatCircuit {
                              {"mem_0x18"}));
   }
 
+  TEST_CASE("Compiling 2 state values") {
+
+    SECTION("Directly from inputs to outputs") {
+      Env e;
+      CellType modType = e.addCellType("in_to_out");
+      CellDefinition& def = e.getDef(modType);
+      def.addPort("in", 8, PORT_TYPE_IN);
+      def.addPort("out", 8, PORT_TYPE_OUT);
+
+      CellId in = def.getPortCellId("in");
+      CellId out = def.getPortCellId("out");
+
+      def.connect(in, PORT_ID_OUT,
+                  out, PORT_ID_IN);
+
+      Simulator sim(e, def);
+      sim.compileCircuit();
+      sim.simulateRaw();
+
+      sim.setFreshValue("in", BitVec(8, 12));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      
+    }
+
+  }
+
   TEST_CASE("Compiled code generation for circuit with register") {
 
     SECTION("One register") {

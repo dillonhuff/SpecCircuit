@@ -18,18 +18,20 @@ namespace FlatCircuit {
     std::map<SigPort, unsigned long> pastValueOffsets;
 
     // Raw (2 state) table entries
-    //    unsigned char* rawSimValueTable;
+    unsigned char* rawSimValueTable;
     unsigned long rawTableSize;
 
     std::map<SigPort, unsigned long> rawPortOffsets;
     std::map<CellId, unsigned long> rawMemoryOffsets;
     std::map<CellId, unsigned long> rawRegisterOffsets;
     std::map<SigPort, unsigned long> rawPastValueOffsets;
+
+    bool compiledRaw;
     
   public:
     CellDefinition& def;
 
-    ValueStore(CellDefinition& def_) : def(def_) {}
+    ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {}
 
     void buildRawValueTable() {
       unsigned long rawOffset = 0;
@@ -56,12 +58,18 @@ namespace FlatCircuit {
       for (auto sp : registerOffsets) {
         rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
       }
+
+      compiledRaw = true;
+      rawSimValueTable =
+        static_cast<unsigned char*>(malloc(rawOffset));
+      //rawSimValueTable[0] = 23;
       
     }
 
     void debugPrintTableValues() const;
 
     std::vector<BitVector>& getValueTable() { return simValueTable; }
+    unsigned char* getRawValueTable() { return rawSimValueTable; }
 
     unsigned long getMemoryOffset(const CellId cid) const {
       return map_find(cid, memoryOffsets);
@@ -138,7 +146,16 @@ namespace FlatCircuit {
 
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
-      return simValueTable[map_find({cid, pid}, portOffsets)];
+      if (!compiledRaw) {
+        return simValueTable[map_find({cid, pid}, portOffsets)];
+      } else {
+        int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
+
+        assert(pWidth <= 64);
+
+        return BitVector(pWidth,
+                         rawSimValueTable[map_find({cid, pid}, rawPortOffsets)]);
+      }
     }
 
     void setRegisterValue(const CellId cid,
@@ -220,6 +237,12 @@ namespace FlatCircuit {
                                const PortId pid,
                                const std::string& argName) const {
       return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets, true);
+    }
+
+    ~ValueStore() {
+      if (compiledRaw) {
+        free(rawSimValueTable);
+      }
     }
     
   };

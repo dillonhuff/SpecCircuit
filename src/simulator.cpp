@@ -408,6 +408,7 @@ namespace FlatCircuit {
   struct DylibInfo {
     void* libHandle;
     void* simFuncHandle;
+    void* rawSimFuncHandle;
   };
   
   DylibInfo loadLibWithFunc(const std::string& targetBinary) {
@@ -432,7 +433,15 @@ namespace FlatCircuit {
       printf("FOUND\n");
     }
 
-    return {myLibHandle, myFuncFunV};
+    void* rawSimFunc = dlsym(myLibHandle, "_Z18simulate_two_statePh");
+    if (rawSimFunc == nullptr) {
+      printf("dlsym failed: %s\n", dlerror());
+      assert(false);
+    } else {
+      printf("FOUND\n");
+    }
+    
+    return {myLibHandle, myFuncFunV, rawSimFunc};
   }
 
   std::string
@@ -586,11 +595,6 @@ namespace FlatCircuit {
                             out,
                             valueStore);
         
-        // codeState.addAssign(cid,
-        //                     PORT_ID_OUT,
-        //                     "(" + sel + " == BitVector(1, 1) ? " + argName1 + " : " + argName0 + ")",
-        //                     valueStore);
-
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
         string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
@@ -679,6 +683,7 @@ namespace FlatCircuit {
     DylibInfo dlib = loadLibWithFunc(targetBinary);
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
+    rawSimulateFuncHandle = dlib.rawSimFuncHandle;
   }
 
   // An update to a node is dead if:

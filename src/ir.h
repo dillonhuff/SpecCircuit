@@ -177,7 +177,7 @@ namespace FlatCircuit {
       offset(offset_), value(value_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return "// Table store " + value + "\n";
+      return ln("values[" + std::to_string(offset) + "] = " + value);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {

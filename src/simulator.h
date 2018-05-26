@@ -186,6 +186,9 @@ namespace FlatCircuit {
 
     void* libHandle;
     void* simulateFuncHandle;
+    void* rawSimulateFuncHandle;
+
+    bool simRaw;
 
   public:
 
@@ -196,7 +199,12 @@ namespace FlatCircuit {
     std::set<SigPort> seqChanges;
 
     Simulator(Env& e_, CellDefinition& def_) :
-      valueStore(def_), libHandle(nullptr), simulateFuncHandle(nullptr), def(def_) {
+      valueStore(def_),
+      libHandle(nullptr),
+      simulateFuncHandle(nullptr),
+      rawSimulateFuncHandle(nullptr),
+      simRaw(false),
+      def(def_) {
 
       std::cout << "Start init" << std::endl;
       for (auto c : def.getCellMap()) {
@@ -325,6 +333,10 @@ namespace FlatCircuit {
       std::cout << "End init" << std::endl;
     }
 
+    void simulateRaw() {
+      simRaw = true;
+    }
+
     void update() {
 
       //std::cout << "Starting with update" << std::endl;
@@ -345,6 +357,19 @@ namespace FlatCircuit {
 
       userInputs = {};
 
+      if (simRaw) {
+        assert(hasSimulateFunction());
+
+        void (*simFunc)(unsigned char*) =
+          reinterpret_cast<void (*)(unsigned char*)>(rawSimulateFuncHandle);
+        
+        simFunc(valueStore.getRawValueTable());
+
+        
+        return;
+      }
+
+      // Otherwise run x value simulation
       if (hasSimulateFunction()) {
         // void (*simFunc)(std::vector<BitVector>&) =
         //   reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
