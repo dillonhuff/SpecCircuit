@@ -396,12 +396,16 @@ namespace FlatCircuit {
 
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
+    string compileCommand =
+      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
+      cppName + " -o " + targetBinary;
+
+    cout << "Compile command = " << compileCommand << endl;
+
     int ret =
       //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
       //system(("g++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      system(("g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " + cppName + " -o " + targetBinary).c_str());
-
-    //    sleep(2);
+      system(compileCommand.c_str());
 
     assert(ret == 0);
   }
@@ -413,7 +417,7 @@ namespace FlatCircuit {
   };
   
   DylibInfo loadLibWithFunc(const std::string& targetBinary) {
-    void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_LOCAL);
+    void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_NOW);
 
     if (myLibHandle == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
@@ -682,7 +686,8 @@ namespace FlatCircuit {
     cppCode += "}";
 
     string libName = "circuit_jit";
-    string targetBinary = "./lib" + libName + ".dylib";
+    //string targetBinary = "./lib" + libName + ".dylib";
+    string targetBinary = "./lib" + libName + ".so";
     string cppName = "./" + libName + ".cpp";
     ofstream out(cppName);
     out << cppCode << endl;
