@@ -102,9 +102,9 @@ namespace FlatCircuit {
 
     auto drivers = cell.getDrivers(PORT_ID_IN);
 
-    assert(value.bitLength() == drivers.signals.size());
+    assert(value.bitLength() == (int) drivers.signals.size());
     
-    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+    for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
       SignalBit driverBit = drivers.signals[offset];
 
       SignalBit outputValue{cid, PORT_ID_OUT, offset};
@@ -128,7 +128,7 @@ namespace FlatCircuit {
 
     auto& drivers = cell.getDrivers(pid);
 
-    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+    for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
 
       SignalBit driver = drivers.signals.at(offset);
 
@@ -179,7 +179,7 @@ namespace FlatCircuit {
 
         int outWidth = nextCell.getPortWidth(PORT_ID_OUT);
         BitVector res(outWidth, 0);
-        for (uint i = 0; i < in.bitLength(); i++) {
+        for (uint i = 0; i < (uint) in.bitLength(); i++) {
           res.set(i, in.get(i));
         }
         
@@ -620,7 +620,7 @@ namespace FlatCircuit {
 
         auto receivers = toReplace.getPortReceivers(PORT_ID_OUT);
 
-        for (int offset = 0; offset < receivers.size(); offset++) {
+        for (int offset = 0; offset < (int) receivers.size(); offset++) {
           SignalBit newDriver{zc, PORT_ID_OUT, offset};
           for (auto receiverBit : receivers[offset]) {
             zeroCell.addReceiver(PORT_ID_OUT, offset, receiverBit);
@@ -647,7 +647,7 @@ namespace FlatCircuit {
     assert(cell.getPortWidth(in) == cell.getPortWidth(out));
 
     auto& receivers = cell.getPortReceivers(out);
-    for (int offset = 0; offset < receivers.size(); offset++) {
+    for (int offset = 0; offset < (int) receivers.size(); offset++) {
       SignalBit newDriver = inDrivers.signals[offset];
       auto offsetReceivers = receivers[offset];
 
