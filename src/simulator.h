@@ -181,6 +181,8 @@ namespace FlatCircuit {
 
     bool simRaw;
 
+    std::set<SigPort> sequentialPorts;
+
   public:
 
     CellDefinition& def;
@@ -327,6 +329,15 @@ namespace FlatCircuit {
         }
       }
 
+      for (auto portCell : def.getPortCells()) {
+        const Cell& cell = def.getCellRefConst(portCell);
+        if (cell.isInputPortCell()) {
+          if (sequentialDependencies(cell, PORT_ID_OUT).size() > 0) {
+            sequentialPorts.insert({portCell, PORT_ID_OUT});
+          }
+        }
+      }
+      
       std::cout << "End init" << std::endl;
     }
 
@@ -339,25 +350,19 @@ namespace FlatCircuit {
 
       //std::cout << "Starting with update" << std::endl;
 
-      // Add user inputs to combChanges
-      for (auto portCell : def.getPortCells()) {
-        if (def.getCellRefConst(portCell).isInputPortCell()) {
-          combinationalSignalChange({portCell, PORT_ID_OUT},
-                                    getPortValue(portCell, PORT_ID_OUT));
-        }
-      }
-      
-      for (auto in : userInputs) {
-        combinationalSignalChange({in.first.cell, in.first.port}, in.second);
-      }
-      userInputs = {};
-
-      
       if (simRaw) {
-        // for (auto in : userInputs) {
-        //   combinationalSignalChange({in.first.cell, in.first.port}, in.second);
-        // }
-        // userInputs = {};
+
+        // Set past values for inputs connected to clocks
+        for (auto sp : sequentialPorts) {
+          combinationalSignalChange({sp.cell, sp.port},
+                                    getPortValue(sp.cell, sp.port));
+        
+        }
+
+        for (auto in : userInputs) {
+          combinationalSignalChange({in.first.cell, in.first.port}, in.second);
+        }
+        userInputs = {};
 
         assert(hasSimulateFunction());
 
@@ -369,6 +374,21 @@ namespace FlatCircuit {
         
         return;
       }
+
+
+      // Add user inputs to combChanges
+      for (auto portCell : def.getPortCells()) {
+        if (def.getCellRefConst(portCell).isInputPortCell()) {
+          combinationalSignalChange({portCell, PORT_ID_OUT},
+                                    getPortValue(portCell, PORT_ID_OUT));
+        }
+      }
+
+      // Add user inputs 
+      for (auto in : userInputs) {
+        combinationalSignalChange({in.first.cell, in.first.port}, in.second);
+      }
+      userInputs = {};
 
       // Otherwise run x value simulation
       if (hasSimulateFunction()) {
