@@ -1260,6 +1260,8 @@ namespace FlatCircuit {
 
     REQUIRE(sim.hasSimulateFunction());
 
+    cout << "Done compiling" << endl;
+
     topVal = 56;
     sim.setFreshValue("in_BUS16_S2_T0", BitVector(16, topVal));
     sim.update();
@@ -1270,6 +1272,20 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
 
     outputVerilog(sim.def, "mul_2_pe.v");
+
+    cout << "Simulating raw" << endl;
+
+    sim.simulateRaw();
+
+    topVal = 239;
+    sim.setFreshValue("in_BUS16_S2_T0", BitVector(16, topVal));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, topVal*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, topVal*2));
+
   }
 
   TEST_CASE("Memory tile convolution") {

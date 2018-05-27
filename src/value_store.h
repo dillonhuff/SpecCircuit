@@ -35,6 +35,17 @@ namespace FlatCircuit {
 
     void setCompiledRaw() {
       compiledRaw = true;
+
+      // Copy over register, memory, and constants to the raw buffer
+      for (auto ctp : def.getCellMap()) {
+        CellId cid = ctp.first;
+        const Cell& cell = def.getCellRefConst(cid);
+        if (cell.getCellType() == CELL_TYPE_CONST) {
+          setPortValue(cid,
+                       PORT_ID_OUT,
+                       simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+        }
+      }
     }
 
     void buildRawValueTable() {

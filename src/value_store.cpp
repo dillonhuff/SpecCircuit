@@ -69,7 +69,8 @@ namespace FlatCircuit {
         SignalBit driverBit = drivers.signals[offset];
         //string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
 
-        instrs.push_back(new IRSetBit(argName, offset, driverBit, isPast)); //offset, valString));
+        //instrs.push_back(new IRSetBit(argName, offset, driverBit, isPast)); //offset, valString));
+        instrs.push_back(new IRSetBit(argName, cid, pid, offset, driverBit, isPast)); //offset, valString));
       }
     }
 

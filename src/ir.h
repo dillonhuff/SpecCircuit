@@ -246,7 +246,9 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
-      return ln(accessStr + " = " + value + "; // table store");
+      return ln(accessStr + " = " + value + "; // table store") +
+        ln("std::cout << \"" + valueStore.def.getCellName(cid) +
+           " = \" << (uint64_t) " + value + " << std::endl;");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -289,68 +291,66 @@ namespace FlatCircuit {
             const Cell& cell_) :
       receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_) {}
 
-    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return "// Binop " + receiver + "\n";
-    }
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const;
     
-    virtual std::string toString(ValueStore& valueStore) const {
-      CellType tp = cell.getCellType();
-      switch (tp) {
-      case CELL_TYPE_AND:
-        return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
+    virtual std::string toString(ValueStore& valueStore) const;
+    //   CellType tp = cell.getCellType();
+    //   switch (tp) {
+    //   case CELL_TYPE_AND:
+    //     return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
-      case CELL_TYPE_UGE:
-        return ln(receiver + " = BitVector(1, (" +
-                  arg0 + " > " + arg1 + ") || (" +
-                  arg0 + " == " + arg1 + "))");
+    //   case CELL_TYPE_UGE:
+    //     return ln(receiver + " = BitVector(1, (" +
+    //               arg0 + " > " + arg1 + ") || (" +
+    //               arg0 + " == " + arg1 + "))");
 
-      case CELL_TYPE_ULE:
-        return ln(receiver + " = BitVector(1, (" +
-                  arg0 + " < " + arg1 + ") || (" +
-                  arg0 + " == " + arg1 + "))");
+    //   case CELL_TYPE_ULE:
+    //     return ln(receiver + " = BitVector(1, (" +
+    //               arg0 + " < " + arg1 + ") || (" +
+    //               arg0 + " == " + arg1 + "))");
 
-      case CELL_TYPE_UGT:
-        return ln(receiver + " = BitVector(1, (" + arg0 + " > " + arg1 + "))");
+    //   case CELL_TYPE_UGT:
+    //     return ln(receiver + " = BitVector(1, (" + arg0 + " > " + arg1 + "))");
 
-      case CELL_TYPE_ULT:
-        return ln(receiver + " = BitVector(1, (" + arg0 + " < " + arg1 + "))");
+    //   case CELL_TYPE_ULT:
+    //     return ln(receiver + " = BitVector(1, (" + arg0 + " < " + arg1 + "))");
         
-      case CELL_TYPE_OR:
-        return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
+    //   case CELL_TYPE_OR:
+    //     return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
-      case CELL_TYPE_XOR:
-        return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
+    //   case CELL_TYPE_XOR:
+    //     return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
 
-      case CELL_TYPE_ADD:
-        return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_ADD:
+    //     return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
 
-      case CELL_TYPE_MUL:
-        return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_MUL:
+    //     return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
 
-      case CELL_TYPE_SUB:
-        return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_SUB:
+    //     return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
 
-      case CELL_TYPE_LSHR:
-        return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_LSHR:
+    //     return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
         
-      case CELL_TYPE_ASHR:
-        return ln(receiver + " = ashr(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_ASHR:
+    //     return ln(receiver + " = ashr(" + arg0 + ", " + arg1 + ")");
         
-      case CELL_TYPE_SHL:
-        return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
+    //   case CELL_TYPE_SHL:
+    //     return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
         
-      case CELL_TYPE_EQ:
-        return ln(receiver + " = BitVector(1, " + arg0 + " == " + arg1 + ")");
+    //   case CELL_TYPE_EQ:
+    //     return ln(receiver + " = BitVector(1, " + arg0 + " == " + arg1 + ")");
 
-      case CELL_TYPE_NEQ:
-        return ln(receiver + " = BitVector(1, " + arg0 + " != " + arg1 + ")");
+    //   case CELL_TYPE_NEQ:
+    //     return ln(receiver + " = BitVector(1, " + arg0 + " != " + arg1 + ")");
         
-      default:
-        std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
-        assert(false);
-      }
+    //   default:
+    //     std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
+    //     assert(false);
+    //   }
 
-    }
+    // }
 
   };
 
@@ -420,46 +420,74 @@ namespace FlatCircuit {
   class IRSetBit : public IRInstruction {
   public:
     std::string receiver;
-    unsigned long offset;
+    //unsigned long offset;
+    CellId cid;
+    PortId pid;
+    unsigned long setOffset;
     SignalBit driverBit;
     bool isPastValue;
     //std::string source;
 
     IRSetBit(const std::string& receiver_,
-             const unsigned long offset_,
+             //const unsigned long offset_,
+             const CellId cid_,
+             const PortId pid_,
+             const unsigned long setOffset_,
              const SignalBit driverBit_,
              const bool isPastValue_) :
       receiver(receiver_),
-      offset(offset_),
+      cid(cid_),
+      pid(pid_),
+      setOffset(setOffset_),
       driverBit(driverBit_),
       isPastValue(isPastValue_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      string valString = "values[0]";
-      if (isPastValue) {
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+
+      //      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
+
+      unsigned long offset;
+      if (!isPastValue) {
+        offset = valueStore.rawPortValueOffset(driverBit.cell, driverBit.port);
       } else {
+        offset = valueStore.rawPortPastValueOffset(driverBit.cell, driverBit.port);
       }
 
+      //std::cout << "Got offset" << std::endl;
+
+      std::string valString = accessString("values", offset, bitWidth);
+      
       return ln(receiver + " |= ((" + valString + " >> " +
                 std::to_string(driverBit.offset) + " ) & 0x1) << " +
-                std::to_string(offset));
+                std::to_string(setOffset)) + "\n" +
+        ln("std::cout << \"" + valueStore.def.getCellName(cid) +
+           " = \" << (uint64_t) " + receiver + " << std::endl;");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
       //return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
 
+      unsigned long offset;
+      if (!isPastValue) {
+        offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
+      } else {
+        offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
+      }
+      
       if (isPastValue) {
         string valString = "values[" +
           std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
                          "].get(" + std::to_string(driverBit.offset) + ")";
 
-        return ln(receiver + ".set(" + valString);
+        return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
+                  valString + ")");
       } else {
         string valString = "values[" +
           std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
                          "].get(" + std::to_string(driverBit.offset) + ")";
 
-        return ln(receiver + ".set(" + std::to_string(offset) + ", " +
+        return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
                   valString + ")");
 
       }
@@ -503,38 +531,38 @@ namespace FlatCircuit {
            const Cell& cell_) :
       receiver(receiver_), arg(arg_), cell(cell_) {}
 
-    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return "// Unop " + receiver + "\n";
-    }
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const;// {
+    //   return "// Unop " + receiver + "\n";
+    // }
     
-    virtual std::string toString(ValueStore& valueStore) const {
-      CellType unop = cell.getCellType();
+    virtual std::string toString(ValueStore& valueStore) const;// {
+    //   CellType unop = cell.getCellType();
 
-      switch (unop) {
+    //   switch (unop) {
 
-      case CELL_TYPE_PASSTHROUGH:
-        return ln(receiver + " = " + arg);
+    //   case CELL_TYPE_PASSTHROUGH:
+    //     return ln(receiver + " = " + arg);
 
-      case CELL_TYPE_NOT:
-        return ln(receiver + " = ~(" + arg + ")");
+    //   case CELL_TYPE_NOT:
+    //     return ln(receiver + " = ~(" + arg + ")");
 
-      case CELL_TYPE_ORR:
-        return ln(receiver + " = orr(" + arg + ")");
+    //   case CELL_TYPE_ORR:
+    //     return ln(receiver + " = orr(" + arg + ")");
 
-      case CELL_TYPE_SLICE:
-        return ln(receiver + " = slice(" + arg + ", " +
-                  to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
-                  to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
+    //   case CELL_TYPE_SLICE:
+    //     return ln(receiver + " = slice(" + arg + ", " +
+    //               to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+    //               to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
         
-      case CELL_TYPE_ZEXT:
-        return ln(receiver + " = zero_extend(" +
-                  to_string(cell.getPortWidth(PORT_ID_OUT)) + 
-                  ", " + arg + ")");
-      default:
-        std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
-        assert(false);
-      }
-    }
+    //   case CELL_TYPE_ZEXT:
+    //     return ln(receiver + " = zero_extend(" +
+    //               to_string(cell.getPortWidth(PORT_ID_OUT)) + 
+    //               ", " + arg + ")");
+    //   default:
+    //     std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
+    //     assert(false);
+    //   }
+    // }
 
   };
 
