@@ -396,12 +396,16 @@ namespace FlatCircuit {
 
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
+    string compileCommand =
+      "g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " +
+      cppName + " -o " + targetBinary;
+
+    cout << "Compile command = " << compileCommand << endl;
+
     int ret =
       //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
       //system(("g++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      system(("g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " + cppName + " -o " + targetBinary).c_str());
-
-    //    sleep(2);
+      system(compileCommand.c_str());
 
     assert(ret == 0);
   }
