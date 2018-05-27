@@ -409,12 +409,12 @@ namespace FlatCircuit {
     virtual std::string toString(ValueStore& valueStore) const {
       //return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
 
-      unsigned long offset;
-      if (!isPastValue) {
-        offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
-      } else {
-        offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
-      }
+      // unsigned long offset;
+      // if (!isPastValue) {
+      //   offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
+      // } else {
+      //   offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
+      // }
       
       if (isPastValue) {
         string valString = "values[" +
