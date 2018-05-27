@@ -577,9 +577,14 @@ namespace FlatCircuit {
 
         string raddrName = codeState.getVariableName(cid, PORT_ID_RADDR, valueStore);
 
-        codeState.addAssign(cid,
-                            PORT_ID_RDATA,
-                            "values[" + to_string(valueStore.getMemoryOffset(cid)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
+        string memValue = codeState.getPortTemp(cid, PORT_ID_RDATA);
+        codeState.addInstruction(new IRMemoryLoad(memValue, cid, raddrName));
+        codeState.addAssign(cid, PORT_ID_RDATA, memValue, valueStore);
+        
+        // codeState.addAssign(cid,
+        //                     PORT_ID_RDATA,
+        //                     "values[" + to_string(valueStore.getMemoryOffset(cid)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
+
 
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 

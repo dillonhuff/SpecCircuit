@@ -247,6 +247,12 @@ namespace FlatCircuit {
               }
             }
 
+          } else {
+
+            int width = cl.getParameterValue(PARAM_OUT_WIDTH).to_type<int>();
+            BitVector initVal = bsim::unknown_bv(width);
+            setPortValue(cid, PORT_ID_IN, initVal);
+
           }
         } else if (tp == CELL_TYPE_SLICE) {
 
@@ -326,6 +332,7 @@ namespace FlatCircuit {
 
     void simulateRaw() {
       simRaw = true;
+      valueStore.setCompiledRaw();
     }
 
     void update() {

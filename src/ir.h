@@ -122,6 +122,33 @@ namespace FlatCircuit {
 
   };
 
+  class IRMemoryLoad : public IRInstruction {
+  public:
+
+    std::string receiver;
+    CellId cid;
+    std::string waddrName;
+
+    IRMemoryLoad(const std::string& receiver_,
+                 const CellId cid_,
+                 const std::string& waddrName_) :
+      receiver(receiver_), cid(cid_), waddrName(waddrName_) {}
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      // return ln(receiv"values[" +
+      //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //           waddrName + "] = " + wdataName);
+      return ln("// memory load");
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      return ln(receiver + " = values[" +
+                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                "(" + waddrName + ".is_binary() ? " + waddrName +
+                ".to_type<int>() : 0)]");
+    }
+  };
+  
   class IRMemoryStore : public IRInstruction {
   public:
     CellId cid;

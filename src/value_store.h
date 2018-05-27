@@ -33,6 +33,10 @@ namespace FlatCircuit {
 
     ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {}
 
+    void setCompiledRaw() {
+      compiledRaw = true;
+    }
+
     void buildRawValueTable() {
       unsigned long rawOffset = 0;
       std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
@@ -59,7 +63,7 @@ namespace FlatCircuit {
         rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
       }
 
-      compiledRaw = true;
+      //      compiledRaw = true;
       rawSimValueTable =
         static_cast<unsigned char*>(malloc(rawOffset));
       memset(rawSimValueTable, 0, rawTableSize);
@@ -159,11 +163,11 @@ namespace FlatCircuit {
           *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint8_t) bv.to_type<uint8_t>();
         } else if (bv.bitLength() <= 16) {
-          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+          //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
           *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint16_t) bv.to_type<uint16_t>();
 
-          debugPrintRawValueTable();
+          //debugPrintRawValueTable();
         } else if (bv.bitLength() <= 32) {
           *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
             (uint32_t) bv.to_type<uint32_t>();
