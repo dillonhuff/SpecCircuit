@@ -346,32 +346,36 @@ namespace FlatCircuit {
       valueStore.setCompiledRaw();
     }
 
+    void updateCompiledTwoState() {
+      // Set past values for inputs connected to clocks
+      for (auto sp : sequentialPorts) {
+        setPastValue(sp.cell, sp.port,
+                     getPortValue(sp.cell, sp.port));
+        // combinationalSignalChange({sp.cell, sp.port},
+        //                           getPortValue(sp.cell, sp.port));
+        
+      }
+
+      for (auto in : userInputs) {
+        setPortValue(in.first.cell, in.first.port, in.second);
+        //combinationalSignalChange({in.first.cell, in.first.port}, in.second);
+      }
+      userInputs = {};
+
+      assert(hasSimulateFunction());
+
+      void (*simFunc)(unsigned char*) =
+        reinterpret_cast<void (*)(unsigned char*)>(rawSimulateFuncHandle);
+        
+      simFunc(valueStore.getRawValueTable());
+    }
+
     void update() {
 
       //std::cout << "Starting with update" << std::endl;
 
       if (simRaw) {
-
-        // Set past values for inputs connected to clocks
-        for (auto sp : sequentialPorts) {
-          combinationalSignalChange({sp.cell, sp.port},
-                                    getPortValue(sp.cell, sp.port));
-        
-        }
-
-        for (auto in : userInputs) {
-          combinationalSignalChange({in.first.cell, in.first.port}, in.second);
-        }
-        userInputs = {};
-
-        assert(hasSimulateFunction());
-
-        void (*simFunc)(unsigned char*) =
-          reinterpret_cast<void (*)(unsigned char*)>(rawSimulateFuncHandle);
-        
-        simFunc(valueStore.getRawValueTable());
-
-        
+        updateCompiledTwoState();
         return;
       }
 
