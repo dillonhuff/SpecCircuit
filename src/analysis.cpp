@@ -22,7 +22,7 @@ namespace FlatCircuit {
   }
 
   dbhc::maybe<PortId> getTrueClockPort(const CellDefinition& def) {
-    SignalBit clkDriver;
+    SignalBit clkDriver{0, 0, 0};
     bool foundClk = false;
 
     for (auto cid : def.getCellList()) {

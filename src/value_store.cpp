@@ -24,8 +24,8 @@ namespace FlatCircuit {
     vector<IRInstruction*> instrs;
 
     bool canDirectCopy = true;
-    CellId singleDriverCell;
-    PortId singleDriverPort;
+    CellId singleDriverCell = 0;
+    PortId singleDriverPort = 0;
     set<CellId> driverCells;
 
     for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
