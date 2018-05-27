@@ -96,9 +96,9 @@ namespace FlatCircuit {
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       std::string edgeName =
-        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+        (edgeType == EDGE_TYPE_POSEDGE) ? "!two_state_posedge" : "!two_state_negedge";
 
-      return ln("// if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
+      return ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
                 label + "; }");
     }
 
@@ -185,12 +185,46 @@ namespace FlatCircuit {
                     const std::string& result_) : cid(cid_), result(result_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return ln("// Register store");
+
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+      unsigned long offset = valueStore.getRawRegisterOffset(cid);
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(accessStr + " = " + result);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
       return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
                 result);
+    }
+
+  };
+
+  class IRRegisterReset : public IRInstruction {
+  public:
+    CellId cid;
+    BitVector result;
+    std::string resString;
+
+    IRRegisterReset(const CellId cid_,
+                    const BitVector& result_) : cid(cid_), result(result_) {
+      resString = result.hex_string();
+    }
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+      unsigned long offset = valueStore.getRawRegisterOffset(cid);
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(accessStr + " = " + std::to_string(result.to_type<uint64_t>()));
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) +
+                "] = BitVector(\"" + resString + "\")");
     }
 
   };
@@ -207,9 +241,7 @@ namespace FlatCircuit {
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
 
-      //      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
       unsigned long offset = valueStore.rawPortValueOffset(cid, pid);
-      //      std::cout << "Got offset" << std::endl;
 
       std::string accessStr = accessString("values", offset, bitWidth);
 

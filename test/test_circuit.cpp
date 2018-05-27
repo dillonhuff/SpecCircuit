@@ -96,7 +96,62 @@ namespace FlatCircuit {
       REQUIRE(sim.getBitVec("out") == BitVec(16, 871));
       
     }
-    
+
+    SECTION("One register") {
+      Env e;
+      CellType modType = e.addCellType("reg_circ");
+      CellDefinition& def = e.getDef(modType);
+      def.addPort("in", 8, PORT_TYPE_IN);
+      def.addPort("clk", 1, PORT_TYPE_IN);
+      def.addPort("arst", 1, PORT_TYPE_IN);
+      def.addPort("out", 8, PORT_TYPE_OUT);
+
+      CellId reg = def.addCell("reg",
+                               CELL_TYPE_REG_ARST,
+                               {{PARAM_WIDTH, BitVector(32, 8)},
+                                   {PARAM_INIT_VALUE, BitVector(8, 12)},
+                                     {PARAM_CLK_POSEDGE, BitVector(1, 1)},
+                                       {PARAM_ARST_POSEDGE, BitVector(1, 0)}});
+
+      CellId in = def.getPortCellId("in");
+      CellId clk = def.getPortCellId("clk");
+      CellId arst = def.getPortCellId("arst");
+      CellId out = def.getPortCellId("out");
+
+      def.connect(in, PORT_ID_OUT,
+                  reg, PORT_ID_IN);
+
+      def.connect(clk, PORT_ID_OUT,
+                  reg, PORT_ID_CLK);
+
+      def.connect(arst, PORT_ID_OUT,
+                  reg, PORT_ID_ARST);
+
+      def.connect(reg, PORT_ID_OUT,
+                  out, PORT_ID_IN);
+
+      Simulator sim(e, def);
+      sim.compileCircuit();
+      sim.simulateRaw();
+
+      sim.setFreshValue("arst", BitVec(1, 1));
+      sim.update();
+      sim.setFreshValue("arst", BitVec(1, 0));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+
+      sim.setFreshValue("in", BitVec(8, 29));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 29));
+
+      posedge("arst", sim);
+      negedge("arst", sim);
+
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+
+    }
   }
 
   TEST_CASE("Compiled code generation for circuit with register") {

@@ -480,8 +480,9 @@ namespace FlatCircuit {
           cell.rstPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
         codeState.addEdgeTestJNE(rstEdge, lastRstVar, rstVar, rlbl);
         
-        string rstVal = "BitVector(\"" + init.hex_string() + "\")";
-        codeState.addRegisterAssign(cid, rstVal, valueStore);
+        // string rstVal = "BitVector(\"" + init.hex_string() + "\")";
+        // codeState.addRegisterAssign(cid, rstVal, valueStore);
+        codeState.addInstruction(new IRRegisterReset(cid, init));
         codeState.addLabel(rlbl);
         
       } else if (tp == CELL_TYPE_REG) {
@@ -661,6 +662,8 @@ namespace FlatCircuit {
     }
 
     cppCode +=
+      "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
+      "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
       "void simulate_two_state(unsigned char* values) {\n";
     cppCode += codeState.getTwoStateCode(valueStore);
     cppCode += "}\n\n";
