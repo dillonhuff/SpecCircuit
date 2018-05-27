@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.6)
 
 project(FlatCircuit)
 
-SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11 -I./src -I./test -I/opt/local/include -O2 -Werror -Wall")
+SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11 -I./src -I./test -O2 -Werror -Wall")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_COMPILE_FLAGS}")
 
-SET(CXX_OCL_LINK_FLAGS "-lcoreir -lcoreir-rtlil -lcoreir-commonlib -L../../coreir/lib -L/usr/lib")
-SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CXX_OCL_LINK_FLAGS}")
+SET(CXX_OCL_LINK_FLAGS " -ldl -lcoreir -lcoreir-rtlil -lcoreir-commonlib")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CXX_OCL_LINK_FLAGS}")
 
 
 INCLUDE_DIRECTORIES(./src/)
