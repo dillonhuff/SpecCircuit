@@ -1613,6 +1613,38 @@ namespace FlatCircuit {
     cout << "Done" << endl;
   }
 
+  TEST_CASE("Pre specialized CGRA multiply by 2") {
+    Env circuitEnv =
+      loadFromCoreIR("global.flat_module",
+                     "./mul_2_cgra.json");
+
+    CellDefinition& def = circuitEnv.getDef("flat_module");
+    Simulator sim(circuitEnv, def);
+
+    BitVector input(16, 5485);
+    setCGRAInput(2, input, sim);
+    sim.update();
+
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+
+    sim.compileCircuit();
+
+    input = BitVector(16, 23);
+    setCGRAInput(2, input, sim);
+    sim.update();
+
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+
+    sim.simulateRaw();
+
+    input = BitVector(16, 876);
+    setCGRAInput(2, input, sim);
+    sim.update();
+
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+
+  }
+
   TEST_CASE("CGRA multiply by 2") {
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
     Env circuitEnv =
@@ -1674,18 +1706,6 @@ namespace FlatCircuit {
     cout << "# of cells before constant folding = " << def.numCells() << endl;
 
     specializeCircuit(sim);
-
-    // foldConstants(def, sim.allRegisterValues());
-    // cout << "# of cells after constant deleting instances = "
-    //      << def.numCells() << endl;
-
-    // deleteDeadInstances(def);
-
-    // cout << "# of cells after constant folding = " << def.numCells() << endl;
-
-    // deDuplicate(def);
-    
-    // sim.refreshConstants();
 
     REQUIRE(definitionIsConsistent(def));
 

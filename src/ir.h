@@ -380,7 +380,9 @@ namespace FlatCircuit {
       isPastValue(isPastValue_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+      //int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+      int bitWidth =
+        valueStore.def.getCellRefConst(driverBit.cell).getPortWidth(driverBit.port);
 
       //      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
 
@@ -394,9 +396,11 @@ namespace FlatCircuit {
       //std::cout << "Got offset" << std::endl;
 
       std::string valString = accessString("values", offset, bitWidth);
-      
-      return ln(receiver + " |= ((" + valString + " >> " +
-                std::to_string(driverBit.offset) + " ) & 0x1) << " +
+
+      std::string receiverBV =
+        containerPrimitive(valueStore.def.getCellRefConst(cid).getPortWidth(pid));
+      return ln(receiver + " |= ((" + receiverBV+ ")((" + valString + " >> " +
+                std::to_string(driverBit.offset) + " ) & 0x1))<< " +
                 std::to_string(setOffset)); // + "\n" +
         // ln("std::cout << \"" + valueStore.def.getCellName(cid) +
         //    " = \" << (uint64_t) " + receiver + " << std::endl;");
