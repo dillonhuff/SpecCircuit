@@ -1284,7 +1284,7 @@ namespace FlatCircuit {
 
     BitVector input = BitVector(16, 0);
     for (int i = 0; i < nCycles; i++) {
-      //sim.update();
+      sim.update();
 
       input = BitVector(16, i);
       sim.setFreshValue("in_BUS16_S2_T0", input);

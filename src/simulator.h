@@ -347,16 +347,18 @@ namespace FlatCircuit {
         }
       }
       
-      
       for (auto in : userInputs) {
-
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);
-
       }
-
       userInputs = {};
 
+      
       if (simRaw) {
+        // for (auto in : userInputs) {
+        //   combinationalSignalChange({in.first.cell, in.first.port}, in.second);
+        // }
+        // userInputs = {};
+
         assert(hasSimulateFunction());
 
         void (*simFunc)(unsigned char*) =
@@ -370,8 +372,6 @@ namespace FlatCircuit {
 
       // Otherwise run x value simulation
       if (hasSimulateFunction()) {
-        // void (*simFunc)(std::vector<BitVector>&) =
-        //   reinterpret_cast<void (*)(std::vector<BitVector>&)>(simulateFuncHandle);
 
         void (*simFunc)(BitVector*) =
           reinterpret_cast<void (*)(BitVector*)>(simulateFuncHandle);
