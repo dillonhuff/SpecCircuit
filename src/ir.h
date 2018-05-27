@@ -98,6 +98,7 @@ namespace FlatCircuit {
       std::string edgeName =
         (edgeType == EDGE_TYPE_POSEDGE) ? "!two_state_posedge" : "!two_state_negedge";
 
+      //return ln("");
       return ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
                 label + "; }");
     }

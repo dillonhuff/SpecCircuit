@@ -249,8 +249,35 @@ namespace FlatCircuit {
     void setPastValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
-      unsigned long offset = pastValueOffset(cid, pid);
-      simValueTable[offset] = bv;
+      if (!compiledRaw) {
+        unsigned long offset = pastValueOffset(cid, pid);
+        simValueTable[offset] = bv;
+      } else {
+        int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
+
+        assert(pWidth <= 64);
+
+        if (bv.bitLength() <= 8) {
+          *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPastValueOffsets))) =
+            (uint8_t) bv.to_type<uint8_t>();
+        } else if (bv.bitLength() <= 16) {
+          //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+          *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPastValueOffsets))) =
+            (uint16_t) bv.to_type<uint16_t>();
+
+          //debugPrintRawValueTable();
+        } else if (bv.bitLength() <= 32) {
+          *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPastValueOffsets))) =
+            (uint32_t) bv.to_type<uint32_t>();
+        } else if (bv.bitLength() <= 64) {
+          *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPastValueOffsets))) =
+            (uint64_t) bv.to_type<uint64_t>();
+        } else {
+          assert(false);
+        }
+
+
+      }
     }
 
     BitVector getPastValue(const CellId cid,
