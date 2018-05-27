@@ -639,7 +639,7 @@ namespace FlatCircuit {
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
 
     CodeGenState codeState(def);
-    for (int i = 0; i < updates.size(); i += 2) {
+    for (int i = 0; i < (int) updates.size(); i += 2) {
       combinationalBlockCode(updates[i + 0], codeState);
       sequentialBlockCode(updates[i + 1], codeState);
     }
@@ -700,20 +700,6 @@ namespace FlatCircuit {
   std::vector<std::vector<SigPort> >
   deleteDeadUpdates(const std::vector<std::vector<SigPort> >& filteredUpdates,
                     const CellDefinition& def) {
-    // assert((filteredUpdates.size() % 2) == 0);
-
-    // std::vector<std::vector<SigPort> > updates;
-    // for (int i = 0; i < (int) filteredUpdates.size(); i += 2) {
-    //   vector<SigPort> combUpdates = updates[i];
-    //   bool updateLater = false;
-    //   bool anyUseBeforeUpdate = false;
-      
-    //   for (int j = i + 1; j < (int) filteredUpdates.size(); j++) {
-        
-    //   }
-    // }
-    
-    // return updates;
     return filteredUpdates;
   }
 

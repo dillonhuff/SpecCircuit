@@ -9,7 +9,7 @@ namespace FlatCircuit {
     reset("reset_in", sim);
 
     cout << "Reset chip" << endl;
-    for (int i = 0; i < configValues.size(); i++) {
+    for (int i = 0; i < (int) configValues.size(); i++) {
 
       cout << "Evaluating " << i << endl;
 
@@ -41,7 +41,7 @@ namespace FlatCircuit {
     posedge("clk_in", sim);
     
     cout << "Reset chip" << endl;
-    for (int i = 0; i < configValues.size(); i++) {
+    for (int i = 0; i < (int) configValues.size(); i++) {
 
       cout << "Evaluating " << i << endl;
 
