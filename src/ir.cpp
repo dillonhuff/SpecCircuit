@@ -12,8 +12,9 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
         
     default:
-      //assert(false);
-      return "// Binop " + receiver + "\n";
+      std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
+      assert(false);
+      //return "// Binop " + receiver + "\n";
     }
 
   }
@@ -103,6 +104,7 @@ namespace FlatCircuit {
       //           to_string(cell.getPortWidth(PORT_ID_OUT)) + 
       //           ", " + arg + ")");
     default:
+      //      return ln("// Unop");
       std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
       assert(false);
     }

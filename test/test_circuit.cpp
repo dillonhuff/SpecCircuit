@@ -1765,6 +1765,39 @@ namespace FlatCircuit {
     cout << "Output = " << outputS0 << endl;
     cout << "Done" << endl;
 
+    cout << "Starting to simulate raw" << endl;
+    sim.simulateRaw();
+
+    cout << "Running CGRA x2 raw for " << nCycles << endl;
+
+    start = high_resolution_clock::now();
+
+    input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+      // if ((i % 100) == 0) {
+      //   cout << "i = " << i << endl;
+      // }
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
+    stop = high_resolution_clock::now();
+    duration = duration_cast<milliseconds>(stop - start);
+    cout << "Time taken for " << nCycles << ": "
+         << duration.count() << " milliseconds" << endl;
+
+    input = BitVector(16, 5923);
+    setCGRAInput(2, input, sim);
+    sim.update();
+    
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
   }
 
 }

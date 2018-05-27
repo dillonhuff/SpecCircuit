@@ -351,14 +351,10 @@ namespace FlatCircuit {
       for (auto sp : sequentialPorts) {
         setPastValue(sp.cell, sp.port,
                      getPortValue(sp.cell, sp.port));
-        // combinationalSignalChange({sp.cell, sp.port},
-        //                           getPortValue(sp.cell, sp.port));
-        
       }
 
       for (auto in : userInputs) {
         setPortValue(in.first.cell, in.first.port, in.second);
-        //combinationalSignalChange({in.first.cell, in.first.port}, in.second);
       }
       userInputs = {};
 
