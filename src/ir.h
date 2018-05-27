@@ -207,9 +207,9 @@ namespace FlatCircuit {
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
 
-      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
+      //      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
       unsigned long offset = valueStore.rawPortValueOffset(cid, pid);
-      std::cout << "Got offset" << std::endl;
+      //      std::cout << "Got offset" << std::endl;
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
