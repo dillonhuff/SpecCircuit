@@ -338,7 +338,7 @@ namespace FlatCircuit {
     void update() {
 
       //std::cout << "Starting with update" << std::endl;
-      
+
       // Add user inputs to combChanges
       for (auto portCell : def.getPortCells()) {
         if (def.getCellRefConst(portCell).isInputPortCell()) {
@@ -346,7 +346,8 @@ namespace FlatCircuit {
                                     getPortValue(portCell, PORT_ID_OUT));
         }
       }
-
+      
+      
       for (auto in : userInputs) {
 
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);

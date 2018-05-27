@@ -246,9 +246,12 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
-      return ln(accessStr + " = " + value + "; // table store") +
-        ln("std::cout << \"" + valueStore.def.getCellName(cid) +
-           " = \" << (uint64_t) " + value + " << std::endl;");
+      return ln(accessStr + " = " + value + "; // table store");
+      //return ln("");
+
+      // +
+      // ln("std::cout << \"" + valueStore.def.getCellName(cid) +
+        //    " = \" << (uint64_t) " + value + " << std::endl;");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -460,9 +463,9 @@ namespace FlatCircuit {
       
       return ln(receiver + " |= ((" + valString + " >> " +
                 std::to_string(driverBit.offset) + " ) & 0x1) << " +
-                std::to_string(setOffset)) + "\n" +
-        ln("std::cout << \"" + valueStore.def.getCellName(cid) +
-           " = \" << (uint64_t) " + receiver + " << std::endl;");
+                std::to_string(setOffset)); // + "\n" +
+        // ln("std::cout << \"" + valueStore.def.getCellName(cid) +
+        //    " = \" << (uint64_t) " + receiver + " << std::endl;");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {

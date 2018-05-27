@@ -1277,6 +1277,27 @@ namespace FlatCircuit {
 
     sim.simulateRaw();
 
+    int nCycles = 10000;
+    cout << "Running pe tile x2 raw for " << nCycles << endl;
+
+    auto start = high_resolution_clock::now();
+
+    BitVector input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+      //sim.update();
+
+      input = BitVector(16, i);
+      sim.setFreshValue("in_BUS16_S2_T0", input);
+
+      sim.update();
+    }
+
+    cout << sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) << endl;
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << "Time taken for " << nCycles << ": "
+         << duration.count() << " milliseconds" << endl;
+    
     topVal = 239;
     sim.setFreshValue("in_BUS16_S2_T0", BitVector(16, topVal));
     sim.update();

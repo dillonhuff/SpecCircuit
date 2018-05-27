@@ -12,8 +12,8 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
         
     default:
-      assert(false);
-      //return "// Binop " + receiver + "\n";      
+      //assert(false);
+      return "// Binop " + receiver + "\n";
     }
 
   }
