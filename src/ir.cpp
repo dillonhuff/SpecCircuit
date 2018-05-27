@@ -12,9 +12,9 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
         
     default:
-      std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
-      assert(false);
-      //return "// Binop " + receiver + "\n";
+      // std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
+      // assert(false);
+      return "// Binop " + receiver + "\n";
     }
 
   }
