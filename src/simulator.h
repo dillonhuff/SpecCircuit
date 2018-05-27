@@ -647,7 +647,7 @@ namespace FlatCircuit {
 
         int outWidth = c.getPortWidth(PORT_ID_OUT);
         BitVector res(outWidth, 0);
-        for (uint i = 0; i < in.bitLength(); i++) {
+        for (uint i = 0; i < (uint) in.bitLength(); i++) {
           res.set(i, in.get(i));
         }
         
@@ -880,7 +880,7 @@ namespace FlatCircuit {
 
       auto& sigBus = def.getCellRef(sigPort.cell).getDrivers(sigPort.port);
 
-      assert(sigBus.signals.size() == width);
+      assert(((int) sigBus.signals.size()) == width);
 
       for (int i = 0; i < (int) sigBus.signals.size(); i++) {
         SignalBit b = sigBus.signals.at(i);

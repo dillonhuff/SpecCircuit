@@ -31,7 +31,7 @@ namespace FlatCircuit {
 
     vector<pair<unsigned int, unsigned int> > configValues;
     cout << "Config lines" << endl;
-    for (int i = 0; i < strings.size(); i++) {
+    for (int i = 0; i < (int) strings.size(); i++) {
       cout << strings[i] << endl;
 
       string addrStr = strings[i].substr(0, 8);

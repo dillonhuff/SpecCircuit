@@ -28,7 +28,7 @@ namespace FlatCircuit {
     PortId singleDriverPort;
     set<CellId> driverCells;
 
-    for (int offset = 0; offset < drivers.signals.size(); offset++) {
+    for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
       SignalBit driverBit = drivers.signals[offset];
       driverCells.insert(driverBit.cell);
 
@@ -65,7 +65,7 @@ namespace FlatCircuit {
       //                               "]"));
     } else {
 
-      for (int offset = 0; offset < drivers.signals.size(); offset++) {
+      for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
         //string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
 
