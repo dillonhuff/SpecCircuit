@@ -1643,6 +1643,35 @@ namespace FlatCircuit {
 
     REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
 
+    int nCycles = 10000;
+    cout << "Running CGRA x2 raw for " << nCycles << endl;
+
+    auto start = high_resolution_clock::now();
+
+    input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << "Time taken for " << nCycles << ": "
+         << duration.count() << " milliseconds" << endl;
+
+    input = BitVector(16, 5923);
+    setCGRAInput(2, input, sim);
+    sim.update();
+    
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+    
   }
 
   TEST_CASE("CGRA multiply by 2") {
