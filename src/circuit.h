@@ -692,7 +692,7 @@ namespace FlatCircuit {
 
       auto& rcv = receivers[port];
 
-      assert(rcv.size() > offset);
+      assert(((int) rcv.size()) > offset);
       
       //rcv[offset].push_back(receiver);
       rcv[offset].insert(receiver);
@@ -702,7 +702,7 @@ namespace FlatCircuit {
       assert(contains_key(port, receivers));
 
       auto& rcv = receivers[port];
-      for (int i = 0; i < rcv.size(); i++) {
+      for (int i = 0; i < (int) rcv.size(); i++) {
         rcv[i] = {};
       }
     }
@@ -729,21 +729,10 @@ namespace FlatCircuit {
 
       std::vector<std::set<SignalBit> >& rcv = receivers[port];
 
-      assert(rcv.size() > offset);
+      assert(((int) rcv.size()) > offset);
 
-      //std::set<SignalBit>& rcvo = rcv[offset];
       auto& rcvo = rcv[offset];
       rcvo.erase(oldReceiver);
-
-      // for (int offset = 0; offset < rcvo.size(); offset++) {
-      //   if (oldReceiver == rcvo[offset]) {
-      //     rcvo[offset] = {0, 0, 0};
-      //   }
-      // }
-
-      // delete_if(rcvo, [oldReceiver](const SignalBit b) {
-      //     return b == oldReceiver;
-      //   });
 
       assert(!elem(oldReceiver, rcv[offset]));
     }
@@ -759,7 +748,7 @@ namespace FlatCircuit {
 
       auto& sigBus = drivers[port];
 
-      assert(sigBus.signals.size() > offset);
+      assert(((int) sigBus.signals.size()) > offset);
 
       sigBus.signals[offset] = driver;
 
@@ -834,7 +823,7 @@ namespace FlatCircuit {
           if (c.getPortType(pid) == PORT_TYPE_IN) {
             auto& drivers = c.getDrivers(pid);
 
-            for (int offset = 0; offset < drivers.signals.size(); offset++) {
+            for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
               SignalBit driverBit = drivers.signals[offset];
               if (notEmpty(driverBit) && !hasCell(driverBit.cell)) {
                 c.setDriver(pid, offset, {0, 0, 0});
@@ -853,7 +842,7 @@ namespace FlatCircuit {
             //   }
             // }
             
-            for (int offset = 0; offset < receivers.size(); offset++) {
+            for (int offset = 0; offset < (int) receivers.size(); offset++) {
               auto sigList = receivers[offset];
               for (auto sigBit : sigList) {
                 if (notEmpty(sigBit) && !hasCell(sigBit.cell)) {
@@ -891,7 +880,7 @@ namespace FlatCircuit {
 
           auto drivers = c.getDrivers(pid);
 
-          for (int offset = 0; offset < drivers.signals.size(); offset++) {
+          for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
             SignalBit driverBit = drivers.signals[offset];
             auto& driverCell = getCellRef(driverBit.cell);
 
@@ -909,7 +898,7 @@ namespace FlatCircuit {
           auto receivers = c.getPortReceivers(pid);
           int offset = 0;
 
-          for (offset = 0; offset < receivers.size(); offset++) {
+          for (offset = 0; offset < (int) receivers.size(); offset++) {
             auto sigList = receivers[offset];
             for (auto sigBit : sigList) {
               auto& receiverCell = getCellRef(sigBit.cell);
@@ -1089,7 +1078,7 @@ namespace FlatCircuit {
       std::vector<std::set<SignalBit> > receivers =
         portCell.getPortReceivers(pid);
       
-      for (int offset = 0; offset < receivers.size(); offset++) {
+      for (int offset = 0; offset < (int) receivers.size(); offset++) {
         auto& sigBus = receivers.at(offset);
         SignalBit driverSignal{constId, PORT_ID_OUT, offset};
         for (auto receiverSignal : sigBus) {
