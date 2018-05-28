@@ -276,8 +276,8 @@ void iverilogBenchmarks() {
 int main() {
   cout << "================== Starting Benchmarks ==================" << endl;
 
-  //  flatCircuitBenchmarks();
-  iverilogBenchmarks();
+  flatCircuitBenchmarks();
+  //iverilogBenchmarks();
   
   cout << "================== Done Benchmarks     ==================" << endl;
 }
