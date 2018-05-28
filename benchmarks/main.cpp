@@ -264,9 +264,10 @@ using namespace FlatCircuit;
 
 void iverilogBenchmarks() {
   cout << "================== Starting iverilog ==================" << endl;
+  // Test unspecialized
+
   // Test specialized
 
-  // Test unspecialized
   cout << "================== Done iverilog     ==================" << endl;
 }
 
