@@ -1444,7 +1444,8 @@ namespace FlatCircuit {
     auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
     Env circuitEnv =
       loadFromCoreIR("global.top",
-                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+                     "./test/top.json");
+                     //"/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     CellDefinition& def = circuitEnv.getDef("top");
 
@@ -1678,7 +1679,8 @@ namespace FlatCircuit {
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
     Env circuitEnv =
       loadFromCoreIR("global.top",
-                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
+                     "./test/top.json");
+    //                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     CellDefinition& def = circuitEnv.getDef("top");
 
