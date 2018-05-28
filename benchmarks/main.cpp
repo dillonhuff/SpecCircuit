@@ -12,6 +12,21 @@ using namespace std::chrono;
 
 namespace FlatCircuit {
 
+  void runCGRA(const int nCycles, Simulator& sim) {
+    BitVector input = BitVector(16, 0);
+    for (int i = 0; i < nCycles; i++) {
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.update();
+    }
+
+  }
+
   void runTimesTwo(Env& circuitEnv) {
     cout << "================== Starting Times Two ==================" << endl;
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
@@ -110,7 +125,7 @@ namespace FlatCircuit {
     printCGRAOutputs(sim);
 
     outputS0 = getCGRAOutput(0, sim);    
-    
+
     cout << "outputS0 = " << outputS0 << endl;;
 
     assert(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
@@ -122,21 +137,22 @@ namespace FlatCircuit {
 
     auto start = high_resolution_clock::now();
 
-    input = BitVector(16, 0);
-    for (int i = 0; i < nCycles; i++) {
-      if ((i % 100) == 0) {
-        cout << "i = " << i << endl;
-      }
+    runCGRA(nCycles, sim);
+    // input = BitVector(16, 0);
+    // for (int i = 0; i < nCycles; i++) {
+    //   if ((i % 100) == 0) {
+    //     cout << "i = " << i << endl;
+    //   }
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
+    //   sim.setFreshValue("clk_in", BitVec(1, 0));
+    //   sim.update();
 
-      input = BitVector(16, i);
-      setCGRAInput(2, input, sim);
+    //   input = BitVector(16, i);
+    //   setCGRAInput(2, input, sim);
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
-    }
+    //   sim.setFreshValue("clk_in", BitVec(1, 1));
+    //   sim.update();
+    // }
 
     auto stop = high_resolution_clock::now();
 
@@ -157,21 +173,18 @@ namespace FlatCircuit {
 
     start = high_resolution_clock::now();
 
-    input = BitVector(16, 0);
-    for (int i = 0; i < nCycles; i++) {
-      // if ((i % 100) == 0) {
-      //   cout << "i = " << i << endl;
-      // }
+    runCGRA(nCycles, sim);
+    // input = BitVector(16, 0);
+    // for (int i = 0; i < nCycles; i++) {
+    //   sim.setFreshValue("clk_in", BitVec(1, 0));
+    //   sim.update();
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.update();
+    //   input = BitVector(16, i);
+    //   setCGRAInput(2, input, sim);
 
-      input = BitVector(16, i);
-      setCGRAInput(2, input, sim);
-
-      sim.setFreshValue("clk_in", BitVec(1, 1));
-      sim.update();
-    }
+    //   sim.setFreshValue("clk_in", BitVec(1, 1));
+    //   sim.update();
+    // }
 
     stop = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(stop - start);
