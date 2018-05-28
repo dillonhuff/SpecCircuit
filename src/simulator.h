@@ -953,8 +953,8 @@ namespace FlatCircuit {
                                const PortId pid,
                                const int width,
                                const unsigned long value) {
-      assert(def.hasCell(cid));
-      assert(def.getCellRef(cid).getPortWidth(pid) == width);
+      // assert(def.hasCell(cid));
+      // assert(def.getCellRef(cid).getPortWidth(pid) == width);
 
       valueStore.setPortValueTwoState(cid, pid, width, value);
     }
