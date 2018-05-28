@@ -17,6 +17,7 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/analysis.cpp
               ./src/output_verilog.cpp
               ./src/transformations.cpp
+              ./src/cpp_utils.cpp
               ./src/ir.cpp
               ./src/value_store.cpp)
 

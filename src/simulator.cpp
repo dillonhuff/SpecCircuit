@@ -394,70 +394,6 @@ namespace FlatCircuit {
     return levelized.getVec();
   }
 
-  void compileCppLib(const std::string& cppName,
-                     const std::string& targetBinary) {
-
-#ifdef _WIN32
-    //define something for Windows (32-bit and 64-bit, this part is common)
-    assert(false);
-#ifdef _WIN64
-    //define something for Windows (64-bit only)
-    assert(false);
-#else
-    //define something for Windows (32-bit only)
-    assert(false);
-#endif
-#elif __APPLE__
-#include "TargetConditionals.h"
-#if TARGET_IPHONE_SIMULATOR
-    // iOS Simulator
-    assert(false);
-#elif TARGET_OS_IPHONE
-    // iOS device
-    assert(false);
-#elif TARGET_OS_MAC
-    // Other kinds of Mac OS
-    string compileCommand =
-      "g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " +
-      cppName + " -o " + targetBinary;
-
-#else
-#   error "Unknown Apple platform"
-    assert(false);
-#endif
-#elif __linux__
-    // linux
-    string compileCommand =
-      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
-      cppName + " -o " + targetBinary;
-
-#elif __unix__ // all unices not caught above
-    // Unix
-    string compileCommand =
-      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
-      cppName + " -o " + targetBinary;
-
-#elif defined(_POSIX_VERSION)
-    // POSIX
-    string compileCommand =
-      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
-      cppName + " -o " + targetBinary;
-
-#else
-#   error "Unknown compiler"
-    assert(false);
-#endif
-
-    cout << "Compile command = " << compileCommand << endl;
-
-    int ret =
-      //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      //system(("g++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      system(compileCommand.c_str());
-
-    assert(ret == 0);
-  }
-
   struct DylibInfo {
     void* libHandle;
     void* simFuncHandle;
@@ -734,7 +670,7 @@ namespace FlatCircuit {
     cppCode += "}";
 
     string libName = "circuit_jit";
-    string targetBinary = "./lib" + libName + ".dylib";
+    string targetBinary = cppLibName(libName);
     string cppName = "./" + libName + ".cpp";
     ofstream out(cppName);
     out << cppCode << endl;
