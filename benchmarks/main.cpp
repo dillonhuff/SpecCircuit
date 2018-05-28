@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 using namespace std;
@@ -261,10 +262,19 @@ namespace FlatCircuit {
 
 using namespace FlatCircuit;
 
+void iverilogBenchmarks() {
+  cout << "================== Starting iverilog ==================" << endl;
+  // Test specialized
+
+  // Test unspecialized
+  cout << "================== Done iverilog     ==================" << endl;
+}
+
 int main() {
   cout << "================== Starting Benchmarks ==================" << endl;
 
   flatCircuitBenchmarks();
+  iverilogBenchmarks();
   
   cout << "================== Done Benchmarks     ==================" << endl;
 }
