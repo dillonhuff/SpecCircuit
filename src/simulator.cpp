@@ -396,9 +396,57 @@ namespace FlatCircuit {
 
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
+
+#ifdef _WIN32
+    //define something for Windows (32-bit and 64-bit, this part is common)
+    assert(false);
+#ifdef _WIN64
+    //define something for Windows (64-bit only)
+    assert(false);
+#else
+    //define something for Windows (32-bit only)
+    assert(false);
+#endif
+#elif __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_IPHONE_SIMULATOR
+    // iOS Simulator
+    assert(false);
+#elif TARGET_OS_IPHONE
+    // iOS device
+    assert(false);
+#elif TARGET_OS_MAC
+    // Other kinds of Mac OS
     string compileCommand =
       "g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " +
       cppName + " -o " + targetBinary;
+
+#else
+#   error "Unknown Apple platform"
+    assert(false);
+#endif
+#elif __linux__
+    // linux
+    string compileCommand =
+      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
+      cppName + " -o " + targetBinary;
+
+#elif __unix__ // all unices not caught above
+    // Unix
+    string compileCommand =
+      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
+      cppName + " -o " + targetBinary;
+
+#elif defined(_POSIX_VERSION)
+    // POSIX
+    string compileCommand =
+      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
+      cppName + " -o " + targetBinary;
+
+#else
+#   error "Unknown compiler"
+    assert(false);
+#endif
 
     cout << "Compile command = " << compileCommand << endl;
 
