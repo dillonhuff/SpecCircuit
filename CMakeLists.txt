@@ -19,12 +19,13 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/transformations.cpp
               ./src/cpp_utils.cpp
               ./src/ir.cpp
+              ./src/utils.cpp
               ./src/value_store.cpp)
 
 add_library(flatcircuit ${CPP_FILES})
 
-SET(TEST_FILES ./test/test_circuit.cpp
-               ./test/utils.cpp)
+SET(TEST_FILES ./test/test_circuit.cpp)
+#               ./test/utils.cpp)
 
 add_executable(all-tests ${TEST_FILES})
 

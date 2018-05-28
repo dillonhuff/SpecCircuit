@@ -16,21 +16,6 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
-  void specializeCircuit(Simulator& sim) {
-    cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
-    foldConstants(sim.def, sim.allRegisterValues());
-    cout << "# of cells after constant deleting instances = " <<
-      sim.def.numCells() << endl;
-
-    deleteDeadInstances(sim.def);
-
-    cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
-
-    deDuplicate(sim.def);
-
-    sim.refreshConstants();
-  }
-
   TEST_CASE("Prefix matching") {
 
     REQUIRE(matchesAnyPrefix("mem_0x18$memory_core$mem_inst1$mem_inst$data_array$mem",

@@ -1,5 +1,6 @@
 #include "analysis.h"
 #include "simulator.h"
+#include "transformations.h"
 
 #include <fstream>
 
@@ -825,5 +826,20 @@ namespace FlatCircuit {
       }
     }
   }
-  
+
+  void specializeCircuit(Simulator& sim) {
+    cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
+    foldConstants(sim.def, sim.allRegisterValues());
+    cout << "# of cells after constant deleting instances = " <<
+      sim.def.numCells() << endl;
+
+    deleteDeadInstances(sim.def);
+
+    cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
+
+    deDuplicate(sim.def);
+
+    sim.refreshConstants();
+  }
+
 }

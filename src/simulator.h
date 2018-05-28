@@ -1135,5 +1135,6 @@ namespace FlatCircuit {
   
   bool matchesAnyPrefix(const std::string& str,
                         const std::vector<std::string>& prefixes);
-  
+
+  void specializeCircuit(Simulator& sim);
 }
