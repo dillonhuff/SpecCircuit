@@ -1512,7 +1512,7 @@ namespace FlatCircuit {
       sim.setFreshValueTwoState(pad_S2_T15, PORT_ID_OUT, 1, (value >> (15 - 15)) & 0x1);
 
       //sim.setFreshValueTwoState("clk_in", 1, 0);
-      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 0);
+      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 1);
       sim.update();
 
       lastVal = i;

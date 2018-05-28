@@ -27,6 +27,74 @@ namespace FlatCircuit {
 
   }
 
+  void runCGRATwoState(const int nCycles, Simulator& sim) {
+
+    CellId pad_S2_T0 = sim.def.getPortCellId("pad_S2_T0_in");
+    CellId pad_S2_T1 = sim.def.getPortCellId("pad_S2_T1_in");
+    CellId pad_S2_T2 = sim.def.getPortCellId("pad_S2_T2_in");
+    CellId pad_S2_T3 = sim.def.getPortCellId("pad_S2_T3_in");
+    CellId pad_S2_T4 = sim.def.getPortCellId("pad_S2_T4_in");
+    CellId pad_S2_T5 = sim.def.getPortCellId("pad_S2_T5_in");
+    CellId pad_S2_T6 = sim.def.getPortCellId("pad_S2_T6_in");
+    CellId pad_S2_T7 = sim.def.getPortCellId("pad_S2_T7_in");
+    CellId pad_S2_T8 = sim.def.getPortCellId("pad_S2_T8_in");
+    CellId pad_S2_T9 = sim.def.getPortCellId("pad_S2_T9_in");
+    CellId pad_S2_T10 = sim.def.getPortCellId("pad_S2_T10_in");
+    CellId pad_S2_T11 = sim.def.getPortCellId("pad_S2_T11_in");
+    CellId pad_S2_T12 = sim.def.getPortCellId("pad_S2_T12_in");
+    CellId pad_S2_T13 = sim.def.getPortCellId("pad_S2_T13_in");
+    CellId pad_S2_T14 = sim.def.getPortCellId("pad_S2_T14_in");
+    CellId pad_S2_T15 = sim.def.getPortCellId("pad_S2_T15_in");
+
+    CellId clkIn = sim.def.getPortCellId("clk_in");
+
+    int lastVal = 0;
+    
+    //BitVector input = BitVector(16, 0);
+
+    for (int i = 0; i < nCycles; i++) {
+      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 0);
+      sim.update();
+
+      // sim.setFreshValue("clk_in", BitVec(1, 0));
+      // sim.update();
+
+      unsigned long value = i;
+
+      sim.setFreshValueTwoState(pad_S2_T0, PORT_ID_OUT, 1, (value >> (15 - 0)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T1, PORT_ID_OUT, 1, (value >> (15 - 1)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T2, PORT_ID_OUT, 1, (value >> (15 - 2)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T3, PORT_ID_OUT, 1, (value >> (15 - 3)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T4, PORT_ID_OUT, 1, (value >> (15 - 4)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T5, PORT_ID_OUT, 1, (value >> (15 - 5)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T6, PORT_ID_OUT, 1, (value >> (15 - 6)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T7, PORT_ID_OUT, 1, (value >> (15 - 7)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T8, PORT_ID_OUT, 1, (value >> (15 - 8)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T9, PORT_ID_OUT, 1, (value >> (15 - 9)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T10, PORT_ID_OUT, 1, (value >> (15 - 10)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T11, PORT_ID_OUT, 1, (value >> (15 - 11)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T12, PORT_ID_OUT, 1, (value >> (15 - 12)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T13, PORT_ID_OUT, 1, (value >> (15 - 13)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T14, PORT_ID_OUT, 1, (value >> (15 - 14)) & 0x1);
+      sim.setFreshValueTwoState(pad_S2_T15, PORT_ID_OUT, 1, (value >> (15 - 15)) & 0x1);
+      
+      // input = BitVector(16, i);
+      // setCGRAInput(2, input, sim);
+
+      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 1);
+      sim.update();
+      
+      // sim.setFreshValue("clk_in", BitVec(1, 1));
+      // sim.update();
+
+      lastVal = i;
+    }
+
+    assert(mul_general_width_bv(BitVector(16, 2), BitVector(16, lastVal)) ==
+           getCGRAOutput(0, sim));
+    
+  }
+
   void runTimesTwo(Env& circuitEnv) {
     cout << "================== Starting Times Two ==================" << endl;
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
@@ -138,21 +206,6 @@ namespace FlatCircuit {
     auto start = high_resolution_clock::now();
 
     runCGRA(nCycles, sim);
-    // input = BitVector(16, 0);
-    // for (int i = 0; i < nCycles; i++) {
-    //   if ((i % 100) == 0) {
-    //     cout << "i = " << i << endl;
-    //   }
-
-    //   sim.setFreshValue("clk_in", BitVec(1, 0));
-    //   sim.update();
-
-    //   input = BitVector(16, i);
-    //   setCGRAInput(2, input, sim);
-
-    //   sim.setFreshValue("clk_in", BitVec(1, 1));
-    //   sim.update();
-    // }
 
     auto stop = high_resolution_clock::now();
 
@@ -173,24 +226,17 @@ namespace FlatCircuit {
 
     start = high_resolution_clock::now();
 
-    runCGRA(nCycles, sim);
-    // input = BitVector(16, 0);
-    // for (int i = 0; i < nCycles; i++) {
-    //   sim.setFreshValue("clk_in", BitVec(1, 0));
-    //   sim.update();
-
-    //   input = BitVector(16, i);
-    //   setCGRAInput(2, input, sim);
-
-    //   sim.setFreshValue("clk_in", BitVec(1, 1));
-    //   sim.update();
-    // }
+    runCGRATwoState(nCycles, sim);
 
     stop = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(stop - start);
     cout << "Specialized 2 state mode. Time taken for " << nCycles << ": "
          << duration.count() << " milliseconds" << endl;
 
+    cout << "Input  = " << input << endl;
+    cout << "Output = " << outputS0 << endl;
+    cout << "Done" << endl;
+    
     input = BitVector(16, 5923);
     setCGRAInput(2, input, sim);
     sim.update();
