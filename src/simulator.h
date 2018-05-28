@@ -921,9 +921,23 @@ namespace FlatCircuit {
       setFreshValue(cid, id, bv);
     }
 
+    void setFreshValueTwoState(const std::string& cellName,
+                               const PortId id,
+                               const int width,
+                               const unsigned long value) {
+      CellId cid = def.getPortCellId(cellName);
+      setFreshValueTwoState(cid, id, width, value);
+    }
+    
     void setFreshValue(const std::string& cellName,
                        const BitVector& bv) {
       setFreshValue(cellName, PORT_ID_OUT, bv);
+    }
+
+    void setFreshValueTwoState(const std::string& cellName,
+                               const int width,
+                               const unsigned long value) {
+      setFreshValueTwoState(cellName, PORT_ID_OUT, width, value);
     }
     
     void setFreshValue(const CellId cid,
@@ -935,6 +949,16 @@ namespace FlatCircuit {
       userInputs.insert({{cid, pid}, bv});
     }
 
+    void setFreshValueTwoState(const CellId cid,
+                               const PortId pid,
+                               const int width,
+                               const unsigned long value) {
+      // assert(def.hasCell(cid));
+      // assert(def.getCellRef(cid).getPortWidth(pid) == width);
+
+      valueStore.setPortValueTwoState(cid, pid, width, value);
+    }
+    
     void initMemory(const CellId cid) {
       valueStore.initMemory(cid);
     }
@@ -982,7 +1006,6 @@ namespace FlatCircuit {
     
     std::map<CellId, BitVector> allRegisterValues() const {
       std::map<CellId, BitVector> regValues;
-      //for (auto roff : valueStore.registerOffsets) {
       for (auto roff : def.getCellMap()) {
         if (isRegister(def.getCellRefConst(roff.first).getCellType())) {
           regValues.insert({roff.first, getRegisterValue(roff.first)});
@@ -1112,5 +1135,6 @@ namespace FlatCircuit {
   
   bool matchesAnyPrefix(const std::string& str,
                         const std::vector<std::string>& prefixes);
-  
+
+  void specializeCircuit(Simulator& sim);
 }

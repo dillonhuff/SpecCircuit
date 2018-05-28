@@ -30,6 +30,11 @@ namespace FlatCircuit {
 
   void setCGRAInput(const int side, const BitVector& input, Simulator& sim);
 
+  void setCGRAInputTwoState(const int side,
+                            const int width,
+                            const unsigned long value,
+                            Simulator& sim);
+
   std::vector<std::string> splitString(const std::string& str,
                                        const std::string& delimiter);
   

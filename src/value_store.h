@@ -164,7 +164,35 @@ namespace FlatCircuit {
     }
 
     void debugPrintRawValueTable() const;
-    
+
+    void setPortValueTwoState(const CellId cid,
+                              const PortId pid,
+                              const int width,
+                              const unsigned long value) {
+      assert(compiledRaw);
+
+      int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
+
+      assert(pWidth == width);
+
+      if (width <= 8) {
+        *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+          (uint8_t) value;
+      } else if (width <= 16) {
+        *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+          (uint16_t) value;
+      } else if (width <= 32) {
+        *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+          (uint32_t) value;
+      } else if (width <= 64) {
+        *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+          (uint64_t) value;
+      } else {
+        assert(false);
+      }
+      
+    }
+
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {

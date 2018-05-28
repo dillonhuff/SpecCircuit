@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cassert>
+#include <cmath>
+#include <string>
+
 namespace FlatCircuit {
 
   static inline std::string ln(const std::string& s) {
@@ -48,4 +52,8 @@ namespace FlatCircuit {
     return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
   }
 
+  void compileCppLib(const std::string& cppName,
+                     const std::string& targetBinary);
+
+  std::string cppLibName(const std::string& baseName);
 }

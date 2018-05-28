@@ -14,3 +14,12 @@ libcircuit_jit.dylib.dSYM/
 \#*
 .\#*
 a.out
+conv_test_output.txt
+conv_test_output_bits_en.txt
+libflatcircuit.a
+mul_2_cgra_specialized
+my-main
+run-benchmarks
+test/memory_tile_unq1_saved.json
+mul_2_pe.v
+

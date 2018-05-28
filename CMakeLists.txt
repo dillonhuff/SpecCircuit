@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(FlatCircuit)
 
-SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11 -I./src -I./test -O2 -Werror -Wall")
+SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11 -I./src -I./test -I./benchmarks -I/opt/local/include -O2 -Werror -Wall -fPIC")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_COMPILE_FLAGS}")
 
 SET(CXX_OCL_LINK_FLAGS "-L/Users/dillon/CppWorkspace/coreir/lib/ -Lrelease/lib")
@@ -16,14 +16,19 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/analysis.cpp
               ./src/output_verilog.cpp
               ./src/transformations.cpp
+              ./src/cpp_utils.cpp
               ./src/ir.cpp
+              ./src/utils.cpp
               ./src/value_store.cpp)
 
-SET(TEST_FILES ./test/test_circuit.cpp
-               ./test/utils.cpp)
+add_library(flatcircuit ${CPP_FILES})
 
-add_executable(all-tests ${TEST_FILES} ${CPP_FILES})
-target_link_libraries(all-tests dl)
-target_link_libraries(all-tests coreir)
-target_link_libraries(all-tests coreir-rtlil)
-target_link_libraries(all-tests coreir-commonlib)
+SET(TEST_FILES ./test/test_circuit.cpp)
+
+add_executable(all-tests ${TEST_FILES})
+
+target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+SET(BENCHMARK_FILES ./benchmarks/main.cpp)
+add_executable(run-benchmarks ${BENCHMARK_FILES})
+target_link_libraries(run-benchmarks flatcircuit dl coreir coreir-rtlil coreir-commonlib)

@@ -1,5 +1,6 @@
 #include "analysis.h"
 #include "simulator.h"
+#include "transformations.h"
 
 #include <fstream>
 
@@ -394,22 +395,6 @@ namespace FlatCircuit {
     return levelized.getVec();
   }
 
-  void compileCppLib(const std::string& cppName,
-                     const std::string& targetBinary) {
-    string compileCommand =
-      "g++ -std=c++11 -fPIC -rdynamic -shared -Ijitted_utils/ " +
-      cppName + " -o " + targetBinary;
-
-    cout << "Compile command = " << compileCommand << endl;
-
-    int ret =
-      //system(("clang++ -std=c++11 -O3 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      //system(("g++ -std=c++11 -fPIC -dynamiclib -I/Users/dillon/CppWorkspace/bsim/src/ " + cppName + " -o " + targetBinary).c_str());
-      system(compileCommand.c_str());
-
-    assert(ret == 0);
-  }
-
   struct DylibInfo {
     void* libHandle;
     void* simFuncHandle;
@@ -686,8 +671,8 @@ namespace FlatCircuit {
     cppCode += "}";
 
     string libName = "circuit_jit";
-    //string targetBinary = "./lib" + libName + ".dylib";
-    string targetBinary = "./lib" + libName + ".so";
+
+    string targetBinary = cppLibName(libName);
     string cppName = "./" + libName + ".cpp";
     ofstream out(cppName);
     out << cppCode << endl;
@@ -842,5 +827,20 @@ namespace FlatCircuit {
       }
     }
   }
-  
+
+  void specializeCircuit(Simulator& sim) {
+    cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
+    foldConstants(sim.def, sim.allRegisterValues());
+    cout << "# of cells after constant deleting instances = " <<
+      sim.def.numCells() << endl;
+
+    deleteDeadInstances(sim.def);
+
+    cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
+
+    deDuplicate(sim.def);
+
+    sim.refreshConstants();
+  }
+
 }
