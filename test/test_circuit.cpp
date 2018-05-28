@@ -1650,22 +1650,29 @@ namespace FlatCircuit {
     auto start = high_resolution_clock::now();
 
     input = BitVector(16, 0);
+    int lastVal = 0;
     for (int i = 0; i < nCycles; i++) {
 
       sim.setFreshValue("clk_in", BitVec(1, 0));
       sim.update();
 
-      input = BitVector(16, i);
-      setCGRAInput(2, input, sim);
+      //input = BitVector(16, i);
+      setCGRAInputTwoState(2, 16, i, sim);
+      //setCGRAInput(2, input, sim);
 
       sim.setFreshValue("clk_in", BitVec(1, 1));
       sim.update();
+
+      lastVal = i;
     }
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << "Time taken for " << nCycles << ": "
          << duration.count() << " milliseconds" << endl;
+
+    REQUIRE(mul_general_width_bv(BitVector(16, 2), BitVector(16, lastVal)) ==
+            getCGRAOutput(0, sim));
 
     input = BitVector(16, 5923);
     setCGRAInput(2, input, sim);

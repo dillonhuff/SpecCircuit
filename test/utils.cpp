@@ -111,6 +111,18 @@ namespace FlatCircuit {
       sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
     }
   }
+
+  void setCGRAInputTwoState(const int side,
+                            const int width,
+                            const unsigned long value,
+                            Simulator& sim) {
+
+    for (int track = 0; track < 16; track++) {
+      string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
+      sim.setFreshValueTwoState(inName, 1, (value >> (15 - track)) & 0x1);
+    }
+    
+  }
   
   void setCGRAInput(const BitVector& input, Simulator& sim) {
     for (int side = 0; side < 4; side++) {
