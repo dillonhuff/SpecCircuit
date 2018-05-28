@@ -1642,7 +1642,7 @@ namespace FlatCircuit {
     setCGRAInput(2, input, sim);
     sim.update();
 
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+    //    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
 
     int nCycles = 10000;
     cout << "Running CGRA x2 raw for " << nCycles << endl;
