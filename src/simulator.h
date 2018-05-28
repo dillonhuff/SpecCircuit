@@ -956,7 +956,7 @@ namespace FlatCircuit {
       assert(def.hasCell(cid));
       assert(def.getCellRef(cid).getPortWidth(pid) == width);
 
-      //userInputs.insert({{cid, pid}, bv});
+      valueStore.setPortValueTwoState(cid, pid, width, value);
     }
     
     void initMemory(const CellId cid) {
