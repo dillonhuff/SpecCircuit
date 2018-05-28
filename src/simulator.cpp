@@ -401,7 +401,7 @@ namespace FlatCircuit {
   };
   
   DylibInfo loadLibWithFunc(const std::string& targetBinary) {
-    void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_LOCAL);
+    void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_NOW);
 
     if (myLibHandle == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
