@@ -266,7 +266,9 @@ void iverilogBenchmarks() {
   cout << "================== Starting iverilog ==================" << endl;
   // Test unspecialized
 
+
   // Test specialized
+  system("./benchmarks/run_iverilog_specialized.sh > iverilog_specialized_time.txt");
 
   cout << "================== Done iverilog     ==================" << endl;
 }
@@ -274,7 +276,7 @@ void iverilogBenchmarks() {
 int main() {
   cout << "================== Starting Benchmarks ==================" << endl;
 
-  flatCircuitBenchmarks();
+  //  flatCircuitBenchmarks();
   iverilogBenchmarks();
   
   cout << "================== Done Benchmarks     ==================" << endl;
