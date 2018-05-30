@@ -367,15 +367,17 @@ namespace FlatCircuit {
     }
 
     SECTION("Specializing wrt select == 1") {
-      def.replacePortWithConstant("sel", BitVec(1, 1));
+      //def.replacePortWithConstant("sel", BitVec(1, 1));
+      Simulator sim(e, def);
+      //sim.update();
+      sim.specializePort("sel", BitVec(1, 1));
+      //def.replacePortWithConstant("sel", BitVec(1, 1));
 
       foldConstants(def, {});
       deleteDeadInstances(def);
+      sim.refreshConstants();
 
       REQUIRE(definitionIsConsistent(def));
-
-
-      Simulator sim(e, def);
 
       cout << "Setting in0" << endl;
 

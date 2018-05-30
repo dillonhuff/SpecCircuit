@@ -827,6 +827,26 @@ namespace FlatCircuit {
     }
   }
 
+  void Simulator::specializePort(const std::string& port, const BitVector& value) {
+    CellId cid = def.getPortCellId(port);
+
+    assert(!elem(cid, specializedPorts));
+
+    def.replacePortWithConstant(port, value);
+    specializedPorts.insert(cid);
+  }
+
+  void specializeCircuit(const std::vector<std::string>& constantPorts,
+                         Simulator& sim) {
+    for (auto portName : constantPorts) {
+      CellId cid = sim.def.getPortCellId(portName);
+      BitVector currentValue = sim.getBitVec(cid, PORT_ID_OUT);
+      sim.def.replacePortWithConstant(portName, currentValue);
+    }
+    specializeCircuit(sim);
+  }
+
+
   void specializeCircuit(Simulator& sim) {
     cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
     foldConstants(sim.def, sim.allRegisterValues());

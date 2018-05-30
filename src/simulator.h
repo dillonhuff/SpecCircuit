@@ -182,6 +182,7 @@ namespace FlatCircuit {
     bool simRaw;
 
     std::set<SigPort> sequentialPorts;
+    std::set<CellId> specializedPorts;
 
   public:
 
@@ -337,6 +338,8 @@ namespace FlatCircuit {
           }
         }
       }
+
+      update();
       
       std::cout << "End init" << std::endl;
     }
@@ -374,7 +377,6 @@ namespace FlatCircuit {
         updateCompiledTwoState();
         return;
       }
-
 
       // Add user inputs to combChanges
       for (auto portCell : def.getPortCells()) {
@@ -1124,7 +1126,8 @@ namespace FlatCircuit {
       codeState.addUnop(outName, def.getCellRefConst(cid), argName);
       codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
     }
-    
+
+    void specializePort(const std::string& port, const BitVector& value);
     
     ~Simulator();
     
@@ -1137,4 +1140,7 @@ namespace FlatCircuit {
                         const std::vector<std::string>& prefixes);
 
   void specializeCircuit(Simulator& sim);
+
+  void specializeCircuit(const std::vector<std::string>& constantPorts,
+                         Simulator& sim);
 }
