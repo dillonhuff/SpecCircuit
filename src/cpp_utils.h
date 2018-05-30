@@ -11,11 +11,24 @@ namespace FlatCircuit {
   }
 
   static inline unsigned long storedByteLength(const unsigned long numBits) {
-    if (numBits < 8) {
+    if (numBits <= 8) {
       return 1;
     }
 
-    return ceil(numBits / 8);
+    if (numBits <= 16) {
+      return 2;
+    }
+
+    if (numBits <= 32) {
+      return 4;
+    }
+
+    if (numBits <= 64) {
+      return 8;
+    }
+    
+    assert(false);
+    //return ceil(numBits / 8);
   }
 
   static inline std::string containerPrimitive(const unsigned long bitWidth) {
@@ -46,10 +59,20 @@ namespace FlatCircuit {
   static inline
   std::string
   accessString(const std::string& arrayName,
-               const int byteOffset,
+               const std::string& offsetStr,
                const int bitWidth) {
     auto cBvType = containerPrimitive(bitWidth);
-    return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
+    return "*((" + cBvType + "*)(values + "  + offsetStr + "))";
+  }
+  
+  static inline
+  std::string
+  accessString(const std::string& arrayName,
+               const int byteOffset,
+               const int bitWidth) {
+    return accessString(arrayName, std::to_string(byteOffset), bitWidth);
+    // auto cBvType = containerPrimitive(bitWidth);
+    // return "*((" + cBvType + "*)(values + "  + std::to_string(byteOffset) + "))";
   }
 
   void compileCppLib(const std::string& cppName,

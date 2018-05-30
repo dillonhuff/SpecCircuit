@@ -58,6 +58,11 @@ namespace FlatCircuit {
 
       rawTableSize = rawOffset;
 
+      std::cout << "Raw table offset map" << std::endl;
+      for (auto ent : quadOffsetsToRawOffsets) {
+        std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
+      }
+
       for (auto sp : portOffsets) {
         rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
       }
@@ -91,6 +96,10 @@ namespace FlatCircuit {
       return map_find(cid, memoryOffsets);
     }
 
+    unsigned long getRawMemoryOffset(const CellId cid) const {
+      return map_find(cid, rawMemoryOffsets);
+    }
+    
     unsigned long getRegisterOffset(const CellId cid) const {
       return map_find(cid, registerOffsets);
     }
@@ -112,7 +121,7 @@ namespace FlatCircuit {
       assert(contains_key({cid, pid}, pastValueOffsets));
       assert(contains_key({cid, pid}, rawPastValueOffsets));
 
-      return map_find({cid, pid}, pastValueOffsets);
+      return map_find({cid, pid}, rawPastValueOffsets);
     }
     
     unsigned long portValueOffset(const CellId cid,
@@ -198,29 +207,52 @@ namespace FlatCircuit {
                       const BitVector& bv) {
 
       if (compiledRaw) {
+        std::cout << "Setting raw offset " << map_find({cid, pid}, rawPortOffsets) << " with bit vector " << bv << " with bit length " << bv.bitLength() << std::endl;
         int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
 
         assert(pWidth <= 64);
 
-        if (bv.bitLength() <= 8) {
-          *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint8_t) bv.to_type<uint8_t>();
-        } else if (bv.bitLength() <= 16) {
-          //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
-          *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint16_t) bv.to_type<uint16_t>();
+        bool isBinary = bv.is_binary();
 
-          //debugPrintRawValueTable();
-        } else if (bv.bitLength() <= 32) {
-          *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint32_t) bv.to_type<uint32_t>();
-        } else if (bv.bitLength() <= 64) {
-          *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint64_t) bv.to_type<uint64_t>();
+        if (isBinary) {
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint8_t) bv.to_type<uint8_t>();
+          } else if (bv.bitLength() <= 16) {
+            //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+            *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint16_t) bv.to_type<uint16_t>();
+
+            //debugPrintRawValueTable();
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint32_t) bv.to_type<uint32_t>();
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint64_t) bv.to_type<uint64_t>();
+          } else {
+            assert(false);
+          }
         } else {
-          assert(false);
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint8_t) 0;
+          } else if (bv.bitLength() <= 16) {
+            //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+            *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint16_t) 0;
+            //debugPrintRawValueTable();
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint32_t) 0;
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint64_t) 0;
+          } else {
+            assert(false);
+          }
+          
         }
-
       } else {
 
         if (!contains_key({cid, pid}, portOffsets)) {

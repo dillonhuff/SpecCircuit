@@ -948,7 +948,11 @@ namespace FlatCircuit {
       assert(def.hasCell(cid));
       assert(def.getCellRef(cid).getPortWidth(pid) == bv.bitLength());
 
-      userInputs.insert({{cid, pid}, bv});
+      //if (!simRaw) {
+        userInputs.insert({{cid, pid}, bv});
+      // } else {
+      //   valueStore.setPortValue(cid, pid, bv);
+      // }
     }
 
     void setFreshValueTwoState(const CellId cid,
@@ -1090,6 +1094,8 @@ namespace FlatCircuit {
 
     void
     compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates);
+
+    void debugPrintRawValueTable() const;
     
     void debugPrintTableValues() const;
     void debugPrintMemories() const;

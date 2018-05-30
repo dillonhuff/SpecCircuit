@@ -523,6 +523,70 @@ namespace FlatCircuit {
       REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
 
+    SECTION("Simulating with two state compiled code") {
+      Env circuitEnv = convertFromCoreIR(c, memory);
+      CellDefinition cDef = circuitEnv.getDef("memory0");
+
+      Simulator state(circuitEnv, cDef);
+      state.compileCircuit();
+      state.simulateRaw();
+
+      state.setFreshValue("clk", BitVec(1, 0));
+      state.update();
+
+      // Do not write when write_en == 0
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.setFreshValue("write_en", BitVec(1, 0));
+      state.setFreshValue("write_addr", BitVec(index, 0));
+
+      cout << "Before setting 23 in write_data" << endl;
+      state.debugPrintRawValueTable();
+
+      state.setFreshValue("write_data", BitVec(width, 23));
+
+      cout << "After setting 23 in write_data" << endl;
+      state.debugPrintRawValueTable();
+
+      state.setFreshValue("read_addr", BitVec(index, 0));
+      cout << "After setting read_addr" << endl;
+      state.debugPrintRawValueTable();
+
+      state.update();
+
+      cout << "After setting read_addr and updating" << endl;
+      state.debugPrintRawValueTable();
+      
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+
+      state.setFreshValue("clk", BitVec(1, 0));
+
+      cout << "After setting clk" << endl;
+      state.debugPrintRawValueTable();
+      
+      state.setFreshValue("write_en", BitVec(1, 1));
+
+      cout << "After setting write_en" << endl;
+      state.debugPrintRawValueTable();
+      
+      state.update();
+
+      cout << "After first update call" << endl;
+      state.debugPrintRawValueTable();
+      
+      state.setFreshValue("clk", BitVec(1, 1));
+      state.update();
+
+      cout << "Before testing for 23 in read_data" << endl;
+      state.debugPrintRawValueTable();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 23));
+
+      state.setFreshValue("read_addr", BitVec(index, 2));
+      state.update();
+
+      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+    }
+    
     deleteContext(c);
   }
 

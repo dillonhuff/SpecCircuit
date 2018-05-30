@@ -64,9 +64,8 @@ namespace FlatCircuit {
     }
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return "\t// if (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+      return "\tif (!((" + wenName + ") && two_state_posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
-
     }
     
   };
@@ -135,7 +134,13 @@ namespace FlatCircuit {
       receiver(receiver_), cid(cid_), waddrName(waddrName_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return ln("// memory load");
+      int memWidth =
+        valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RDATA);
+      unsigned long offset = valueStore.getRawMemoryOffset(cid);
+      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + ")";
+      std::string accessStr = accessString("values", offsetStr, memWidth);
+
+      return ln(receiver + " = " + accessStr);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -158,9 +163,17 @@ namespace FlatCircuit {
       cid(cid_), waddrName(waddrName_), wdataName(wdataName_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      return ln("values[" +
-                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-                waddrName + "] = " + wdataName);
+      int memWidth =
+        valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RDATA);
+      unsigned long offset = valueStore.getRawMemoryOffset(cid);
+      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + ")";
+      std::string accessStr = accessString("values", offsetStr, memWidth);
+
+      return ln(accessStr + " = " + wdataName);
+
+      // return ln("values[" +
+      //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //           waddrName + "] = " + wdataName);
     }
     
     virtual std::string toString(ValueStore& valueStore) const {

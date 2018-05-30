@@ -10,11 +10,17 @@ namespace FlatCircuit {
     switch (tp) {
     case CELL_TYPE_MUL:
       return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
-        
+
+    case CELL_TYPE_EQ:
+      return ln(receiver + " = (" + arg0 + " == " + arg1 + ")");
+
+    case CELL_TYPE_NEQ:
+      return ln(receiver + " = (" + arg0 + " != " + arg1 + ")");
+      
     default:
-      // std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
-      // assert(false);
-      return "// Binop " + receiver + "\n";
+      std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
+      assert(false);
+      //      return "// Binop " + receiver + "\n";
     }
 
   }

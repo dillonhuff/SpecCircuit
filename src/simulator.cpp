@@ -648,6 +648,10 @@ namespace FlatCircuit {
 
         cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
                       to_string(valueStore.rawPortValueOffset(cid, PORT_ID_OUT)));
+        if (sequentialDependencies(cell, PORT_ID_OUT).size() > 0) {
+          cppCode += ln("// RAW Offset past value: " + def.getCellName(cid) + " ---> " +
+                        to_string(valueStore.rawPortPastValueOffset(cid, PORT_ID_OUT)));
+        }
       }
     }
 
@@ -735,6 +739,10 @@ namespace FlatCircuit {
     valueStore.debugPrintTableValues();
   }
 
+  void Simulator::debugPrintRawValueTable() const {
+    valueStore.debugPrintRawValueTable();
+  }
+  
   void Simulator::debugPrintRegisters() const {
     cout << "Register values" << endl;
     for (auto ctp : def.getCellMap()) {
