@@ -198,7 +198,8 @@ namespace FlatCircuit {
       std::string accessStr = accessString("values", offset, bitWidth);
       std::string registerStr = accessString("values", regOffset, bitWidth);
 
-      return ln(accessStr + " = " + registerStr + "; // register state store");
+      return ln(accessStr + " = " + registerStr + "; // register state copy") +
+        ln("std::cout << \"After storing value = \" << " + accessStr + " << std::endl");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
@@ -236,7 +237,8 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
-      return ln(accessStr + " = " + result + "; // IRRegisterStore");
+      return ln(accessStr + " = " + result + "; // IRRegisterStore") +
+        ln("std::cout << \"After storing value = \" << " + result + " << \" to location the result is \" << " + accessStr + " << std::endl");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
