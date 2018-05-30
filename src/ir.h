@@ -137,7 +137,7 @@ namespace FlatCircuit {
       int memWidth =
         valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RDATA);
       unsigned long offset = valueStore.getRawMemoryOffset(cid);
-      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + ")";
+      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + " * " + std::to_string(storedByteLength(memWidth)) + ")";
       std::string accessStr = accessString("values", offsetStr, memWidth);
 
       return ln(receiver + " = " + accessStr);
@@ -166,7 +166,8 @@ namespace FlatCircuit {
       int memWidth =
         valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RDATA);
       unsigned long offset = valueStore.getRawMemoryOffset(cid);
-      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + ")";
+      std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + " * " + std::to_string(storedByteLength(memWidth)) + ")";
+      //std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + ")";
       std::string accessStr = accessString("values", offsetStr, memWidth);
 
       return ln(accessStr + " = " + wdataName);

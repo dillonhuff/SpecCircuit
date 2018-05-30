@@ -11,11 +11,38 @@ namespace FlatCircuit {
     case CELL_TYPE_MUL:
       return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
 
+    case CELL_TYPE_ADD:
+      return ln(receiver + " = (" + arg0 + " + " + arg1 + ")");
+
+    case CELL_TYPE_SUB:
+      return ln(receiver + " = (" + arg0 + " - " + arg1 + ")");
+      
+    case CELL_TYPE_AND:
+      return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
+
+    case CELL_TYPE_OR:
+      return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
+
+    case CELL_TYPE_XOR:
+      return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
+      
     case CELL_TYPE_EQ:
       return ln(receiver + " = (" + arg0 + " == " + arg1 + ")");
 
     case CELL_TYPE_NEQ:
       return ln(receiver + " = (" + arg0 + " != " + arg1 + ")");
+
+    case CELL_TYPE_UGE:
+      return ln(receiver + " = (" + arg0 + " >= " + arg1 + ")");
+
+    case CELL_TYPE_ULE:
+      return ln(receiver + " = (" + arg0 + " <= " + arg1 + ")");
+
+    case CELL_TYPE_ULT:
+      return ln(receiver + " = (" + arg0 + " < " + arg1 + ")");
+
+    case CELL_TYPE_UGT:
+      return ln(receiver + " = (" + arg0 + " > " + arg1 + ")");
       
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -84,6 +111,15 @@ namespace FlatCircuit {
 
   }
 
+  std::string bitMask(const int width) {
+    assert(width > 0);
+
+    std::string ones = "";
+    for (int i = 0; i < width; i++) {
+      ones += "1";
+    }
+    return "0b" + ones;
+  }
   std::string IRUnop::twoStateCppCode(ValueStore& valueStore) const {
     CellType unop = cell.getCellType();
 
@@ -93,7 +129,7 @@ namespace FlatCircuit {
       return ln(receiver + " = " + arg);
 
     case CELL_TYPE_NOT:
-      return ln(receiver + " = ~(" + arg + ")");
+      return ln(receiver + " = (~(" + arg + ") & " + bitMask(cell.getPortWidth(PORT_ID_OUT)) + ")");
 
     case CELL_TYPE_ORR:
       return ln(receiver + " = !!(" + arg + ")");

@@ -710,6 +710,9 @@ namespace FlatCircuit {
       posedge("clk", sim);
       posedge("clk", sim);
 
+      cout << "Value table before check for 562 output" << endl;
+      sim.debugPrintRawValueTable();
+
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
       sim.setFreshValue("addr", BitVector(9, 0));

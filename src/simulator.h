@@ -948,11 +948,7 @@ namespace FlatCircuit {
       assert(def.hasCell(cid));
       assert(def.getCellRef(cid).getPortWidth(pid) == bv.bitLength());
 
-      //if (!simRaw) {
-        userInputs.insert({{cid, pid}, bv});
-      // } else {
-      //   valueStore.setPortValue(cid, pid, bv);
-      // }
+      userInputs.insert({{cid, pid}, bv});
     }
 
     void setFreshValueTwoState(const CellId cid,
