@@ -611,6 +611,58 @@ namespace FlatCircuit {
 
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
     }
+
+    SECTION("Two state compiled simulation") {
+      Simulator sim(circuitEnv, def);
+      sim.refreshConstants();
+
+      cout << "Compiling mem unq" << endl;
+      sim.compileCircuit();
+      sim.simulateRaw();
+      cout << "Done compiling mem unq" << endl;
+
+      sim.setFreshValue("addr", BitVector(9, 13));
+      sim.setFreshValue("cen", BitVector(1, 1));
+      sim.setFreshValue("wen", BitVector(1, 1));
+      sim.setFreshValue("data_in", BitVector(16, 562));
+
+      posedge("clk", sim);
+
+      sim.debugPrintPorts();
+
+      // cout << "All values in mem unq" << endl;
+      // sim.debugPrintTableValues();
+    
+      // cout << "WEN should be 1" << endl;
+      // sim.debugPrintMemories();
+      
+      sim.setFreshValue("wen", BitVector(1, 0));
+      posedge("clk", sim);
+
+      //      cout << "WEN should be 0" << endl;
+      //      sim.debugPrintMemories();
+
+      posedge("clk", sim);
+      posedge("clk", sim);
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
+
+      sim.setFreshValue("addr", BitVector(9, 0));
+      sim.setFreshValue("data_in", BitVector(16, 4965));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+      sim.setFreshValue("wen", BitVector(1, 1));
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+      posedge("clk", sim);
+
+      REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+    }
     
   }
 
@@ -1713,7 +1765,6 @@ namespace FlatCircuit {
     Env circuitEnv =
       loadFromCoreIR("global.top",
                      "./test/top.json");
-    //                     "/Users/dillon/CoreIRWorkspace/CGRA_coreir/top.json");
 
     CellDefinition& def = circuitEnv.getDef("top");
 
