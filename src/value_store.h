@@ -54,6 +54,8 @@ namespace FlatCircuit {
                        simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         }
       }
+
+      rawSimValueTable[44] = 0xff;
     }
 
     void buildRawValueTable() {
@@ -91,6 +93,7 @@ namespace FlatCircuit {
       rawSimValueTable =
         static_cast<unsigned char*>(malloc(rawOffset));
       memset(rawSimValueTable, 0, rawTableSize);
+      //rawSimValueTable[44] = 1;
       //rawSimValueTable[0] = 23;
       
     }
