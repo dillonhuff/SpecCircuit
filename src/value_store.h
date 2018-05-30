@@ -215,7 +215,7 @@ namespace FlatCircuit {
                       const BitVector& bv) {
 
       if (compiledRaw) {
-        std::cout << "Setting raw offset " << map_find({cid, pid}, rawPortOffsets) << " with bit vector " << bv << " with bit length " << bv.bitLength() << std::endl;
+        //        std::cout << "Setting raw offset " << map_find({cid, pid}, rawPortOffsets) << " with bit vector " << bv << " with bit length " << bv.bitLength() << std::endl;
         int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
 
         assert(pWidth <= 64);

@@ -236,7 +236,7 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
-      return ln(accessStr + " = " + result);
+      return ln(accessStr + " = " + result + "; // IRRegisterStore");
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
