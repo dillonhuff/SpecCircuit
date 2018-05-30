@@ -405,10 +405,10 @@ namespace FlatCircuit {
     }
 
     SECTION("Specializing wrt select == 0") {
-      //def.replacePortWithConstant("sel", BitVec(1, 0));
-
       Simulator sim(e, def);
       sim.specializePort("sel", BitVec(1, 0));
+      sim.refreshConstants();
+      
       sim.setFreshValue("in0", BitVector(4, 2));
       sim.setFreshValue("in1", BitVector(4, 13));
       sim.update();
