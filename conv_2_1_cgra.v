@@ -1,23 +1,31 @@
-module CELL_TYPE_CONST #(parameter PARAM_WIDTH=1, parameter PARAM_INIT_VALUE=0) (output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PARAM_INIT_VALUE;
+module CELL_TYPE_CONST #(parameter PARAM_WIDTH=1, parameter PARAM_INIT_VALUE=0) (output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PARAM_INIT_VALUE;
 endmodule
 
-module CELL_TYPE_MUL #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 * PORT_ID_IN1;
+module CELL_TYPE_MUL #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+assign PORT_ID_OUT = PORT_ID_IN0 * PORT_ID_IN1;
  endmodule
 
-module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1;
+module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1;
  endmodule
 
-module CELL_TYPE_SUB #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 - PORT_ID_IN1;
+module CELL_TYPE_SUB #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 - PORT_ID_IN1;
  endmodule
 
-module CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;
- endmodule
+module CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;
+endmodule
 
-module CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;
- endmodule
+module CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
 
-module CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;
- endmodule
+   assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;
+endmodule
+
+module CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;
+endmodule
 
 module CELL_TYPE_ULT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 < PORT_ID_IN1;
  endmodule
@@ -67,6 +75,8 @@ module CELL_TYPE_REG_ARST #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_ARST_
    end
 
    assign PORT_ID_OUT = data;
+   //assign PORT_ID_OUT = 1;
+   
    
 endmodule // CELL_TYPE_REG_ARST
 
@@ -75,13 +85,19 @@ module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, 
    reg [PARAM_MEM_WIDTH -  1 : 0] data_array [0 : PARAM_MEM_DEPTH - 1];
 
    always @(posedge PORT_ID_CLK) begin
+      $display("waddr = %b", PORT_ID_WADDR);
+      $display("wdata = %b", PORT_ID_WDATA);
+      $display("raddr = %b", PORT_ID_RADDR);
+      $display("rdata = %b", PORT_ID_RDATA);
+      $display("rdata = %b", PORT_ID_RDATA);
+      
       if (PORT_ID_WEN) begin
          data_array[PORT_ID_WADDR] = PORT_ID_WDATA;
       end
    end
 
    //assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];
-   assign PORT_ID_RDATA = 1;
+   assign PORT_ID_RDATA = 15;
       
 endmodule
 
@@ -92,7 +108,7 @@ module CELL_TYPE_MUX #(parameter PARAM_WIDTH=1) (input PORT_ID_SEL, input [PARAM
 module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;
  endmodule
 
-module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;
+module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;
  endmodule
 
 module CELL_TYPE_PORT #(parameter PARAM_PORT_TYPE=0, parameter PARAM_OUT_WIDTH=1) (input [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN;
@@ -1928,6 +1944,10 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN(fresh_wire_378),
 .PORT_ID_OUT(fresh_wire_379));
 
+   always @(posedge clk_in) begin
+      $display("fresh_wire_379 = %b", fresh_wire_379);
+   end
+
 	CELL_TYPE_REG_ARST #(.PARAM_ARST_POSEDGE(1'h1),
 .PARAM_CLK_POSEDGE(1'h1),
 .PARAM_INIT_VALUE(1'h0),
@@ -1951,6 +1971,11 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_CLK(fresh_wire_391),
 .PORT_ID_IN(fresh_wire_389),
 .PORT_ID_OUT(fresh_wire_390));
+
+   always @(posedge clk_in) begin
+      $display("one bit register in linebuf ctrl in  = %b", fresh_wire_389);
+      $display("one bit register in linebuf ctrl out = %b", fresh_wire_390);
+   end
 
 	CELL_TYPE_REG_ARST #(.PARAM_ARST_POSEDGE(1'h1),
 .PARAM_CLK_POSEDGE(1'h1),
@@ -2046,6 +2071,10 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_442),
 .PORT_ID_OUT(fresh_wire_443),
 .PORT_ID_SEL(fresh_wire_444));
+
+   initial begin
+      fresh_wire_443 = 0;
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__procmux__DOLLAR__2877$mux0(.PORT_ID_IN0(fresh_wire_445),
 .PORT_ID_IN1(fresh_wire_446),
@@ -2245,6 +2274,10 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_600),
 .PORT_ID_SEL(fresh_wire_601));
 
+   always @(posedge clk_in) begin
+      $display("mux output after mem register = %b", fresh_wire_600);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__ternary__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__linebuffer_control_unq1__DOT__v__COLON__273__DOLLAR__526$mux0(.PORT_ID_IN0(fresh_wire_602),
 .PORT_ID_IN1(fresh_wire_603),
 .PORT_ID_OUT(fresh_wire_604),
@@ -2257,6 +2290,10 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_608),
 .PORT_ID_OUT(fresh_wire_609),
 .PORT_ID_SEL(fresh_wire_610));
+
+   always @(posedge clk_in) begin
+      $display("fresh_wire_609 = %b", fresh_wire_609);
+   end
 
 	CELL_TYPE_ADD #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$input_sr$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__input_sr_unq1__DOT__v__COLON__101__DOLLAR__314$op0(.PORT_ID_IN0(fresh_wire_611),
 .PORT_ID_IN1(fresh_wire_612),
@@ -2428,6 +2465,12 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_733),
 .PORT_ID_OUT(fresh_wire_734));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to eq 748 = %b", fresh_wire_732);
+      $display("input 1 to eq 748 = %b", fresh_wire_733);
+      $display("output  to eq 748 = %b", fresh_wire_734);
+   end
+
 	CELL_TYPE_EQ #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__eq__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__108__DOLLAR__753$op0(.PORT_ID_IN0(fresh_wire_735),
 .PORT_ID_IN1(fresh_wire_736),
 .PORT_ID_OUT(fresh_wire_737));
@@ -2451,6 +2494,12 @@ module top(	output [0 : 0] aux_div_pad,
 	CELL_TYPE_EQ #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__eq__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__137__DOLLAR__786$op0(.PORT_ID_IN0(fresh_wire_750),
 .PORT_ID_IN1(fresh_wire_751),
 .PORT_ID_OUT(fresh_wire_752));
+
+   always @(posedge clk_in) begin
+      $display("eq outsr 137 in0 = %b", fresh_wire_750);
+      $display("eq outsr 137 in1 = %b", fresh_wire_751);
+      
+   end
 
 	CELL_TYPE_UGE #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__ge__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__121__DOLLAR__765$op0(.PORT_ID_IN0(fresh_wire_753),
 .PORT_ID_IN1(fresh_wire_754),
@@ -2543,9 +2592,20 @@ module top(	output [0 : 0] aux_div_pad,
 	CELL_TYPE_ORR #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_and__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__124__DOLLAR__776$aRed(.PORT_ID_IN(fresh_wire_815),
 .PORT_ID_OUT(fresh_wire_816));
 
+   always @(posedge clk_in) begin
+      $display("input             to orr 776 = %b", fresh_wire_815);
+      $display("output  to and output_sr 776 = %b", fresh_wire_816);
+   end
+   
 	CELL_TYPE_AND #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_and__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__124__DOLLAR__776$andOps(.PORT_ID_IN0(fresh_wire_817),
 .PORT_ID_IN1(fresh_wire_818),
 .PORT_ID_OUT(fresh_wire_819));
+
+   always @(posedge clk_in) begin
+      $display("input 0 to and output_sr 776 = %b", fresh_wire_817);
+      $display("input 1 to and output_sr 776 = %b", fresh_wire_818);
+      $display("output  to and output_sr 776 = %b", fresh_wire_819);
+   end
 
 	CELL_TYPE_ORR #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_and__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__124__DOLLAR__776$bRed(.PORT_ID_IN(fresh_wire_820),
 .PORT_ID_OUT(fresh_wire_821));
@@ -2586,9 +2646,21 @@ module top(	output [0 : 0] aux_div_pad,
 	CELL_TYPE_ORR #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_or__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__124__DOLLAR__774$bRed(.PORT_ID_IN(fresh_wire_845),
 .PORT_ID_OUT(fresh_wire_846));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to orr 774 = %b", fresh_wire_845);
+      $display("output  to orr 774 = %b", fresh_wire_846);
+   end
+
 	CELL_TYPE_OR #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_or__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__124__DOLLAR__774$orOps(.PORT_ID_IN0(fresh_wire_847),
 .PORT_ID_IN1(fresh_wire_848),
 .PORT_ID_OUT(fresh_wire_849));
+
+   always @(posedge clk_in) begin
+      $display("input 0 to or 774 = %b", fresh_wire_847);
+      $display("input 1 to or 774 = %b", fresh_wire_848);
+      $display("output  to or 774 = %b", fresh_wire_849);
+      
+   end
 
 	CELL_TYPE_ORR #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__logic_or__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__output_sr_unq1__DOT__v__COLON__126__DOLLAR__779$aRed(.PORT_ID_IN(fresh_wire_850),
 .PORT_ID_OUT(fresh_wire_851));
@@ -2608,77 +2680,157 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN(fresh_wire_857),
 .PORT_ID_OUT(fresh_wire_858));
 
+   always @(posedge clk_in) begin
+      $display("output_sr width 2 reg (count) input  = %b", fresh_wire_857);
+      $display("output_sr width 2 reg (count) output = %b", fresh_wire_858);
+   end
+
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
 .PARAM_INIT_VALUE(48'hxxxxxxxxxxxx),
 .PARAM_WIDTH(32'h00000030)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procdff__DOLLAR__3702$reg0(.PORT_ID_CLK(fresh_wire_863),
 .PORT_ID_IN(fresh_wire_861),
 .PORT_ID_OUT(fresh_wire_862));
 
+   always @(posedge clk_in) begin
+      $display("second reg in rdata path = %b", fresh_wire_862);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2382$mux0(.PORT_ID_IN0(fresh_wire_864),
 .PORT_ID_IN1(fresh_wire_865),
 .PORT_ID_OUT(fresh_wire_866),
 .PORT_ID_SEL(fresh_wire_867));
 
+   always @(posedge clk_in) begin
+      $display("mux 2382 sel = %b", fresh_wire_867);
+      $display("mux 2382 in0 = %b", fresh_wire_864);
+      $display("mux 2382 in1 = %b", fresh_wire_865);
+      $display("mux 2382 out = %b", fresh_wire_866);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2385$mux0(.PORT_ID_IN0(fresh_wire_868),
 .PORT_ID_IN1(fresh_wire_869),
 .PORT_ID_OUT(fresh_wire_870),
 .PORT_ID_SEL(fresh_wire_871));
 
+   always @(posedge clk_in) begin
+      $display("mux 2385 in0 = %b", fresh_wire_868);
+      $display("mux 2385 in1 = %b", fresh_wire_869);
+      $display("mux 2385 out = %b", fresh_wire_870);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2388$mux0(.PORT_ID_IN0(fresh_wire_872),
 .PORT_ID_IN1(fresh_wire_873),
 .PORT_ID_OUT(fresh_wire_874),
 .PORT_ID_SEL(fresh_wire_875));
+
+      always @(posedge clk_in) begin
+      $display("mux 2388 in0 = %b", fresh_wire_872);
+      $display("mux 2388 in1 = %b", fresh_wire_873);
+      $display("mux 2388 out = %b", fresh_wire_874);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2390$mux0(.PORT_ID_IN0(fresh_wire_876),
 .PORT_ID_IN1(fresh_wire_877),
 .PORT_ID_OUT(fresh_wire_878),
 .PORT_ID_SEL(fresh_wire_879));
 
+   always @(posedge clk_in) begin
+      $display("a bunch more muxes later in0 = %b", fresh_wire_876);
+      $display("a bunch more muxes later in1 = %b", fresh_wire_877);
+      $display("a bunch more muxes later, wire 878 = %b", fresh_wire_878);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2393$mux0(.PORT_ID_IN0(fresh_wire_880),
 .PORT_ID_IN1(fresh_wire_881),
 .PORT_ID_OUT(fresh_wire_882),
 .PORT_ID_SEL(fresh_wire_883));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2393 = %b", fresh_wire_880);
+      $display("input 1 to mux 2293 = %b", fresh_wire_881);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2396$mux0(.PORT_ID_IN0(fresh_wire_884),
 .PORT_ID_IN1(fresh_wire_885),
 .PORT_ID_OUT(fresh_wire_886),
 .PORT_ID_SEL(fresh_wire_887));
 
+   always @(posedge clk_in) begin
+      $display("sel to mux 2396     = %b", fresh_wire_887);
+      $display("input 0 to mux 2396 = %b", fresh_wire_884);
+      $display("input 1 to mux 2296 = %b", fresh_wire_885);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2399$mux0(.PORT_ID_IN0(fresh_wire_888),
 .PORT_ID_IN1(fresh_wire_889),
 .PORT_ID_OUT(fresh_wire_890),
 .PORT_ID_SEL(fresh_wire_891));
 
+   always @(posedge clk_in) begin
+      $display("sel to mux 2399     = %b", fresh_wire_891);
+      $display("input 0 to mux 2399 = %b", fresh_wire_888);
+      $display("input 1 to mux 2299 = %b", fresh_wire_889);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2402$mux0(.PORT_ID_IN0(fresh_wire_892),
 .PORT_ID_IN1(fresh_wire_893),
 .PORT_ID_OUT(fresh_wire_894),
 .PORT_ID_SEL(fresh_wire_895));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2402 = %b", fresh_wire_892);
+      $display("input 1 to mux 2402 = %b", fresh_wire_893);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2406$mux0(.PORT_ID_IN0(fresh_wire_896),
 .PORT_ID_IN1(fresh_wire_897),
 .PORT_ID_OUT(fresh_wire_898),
 .PORT_ID_SEL(fresh_wire_899));
+
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2406 = %b", fresh_wire_896);
+      $display("input 1 to mux 2406 = %b", fresh_wire_897);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2409$mux0(.PORT_ID_IN0(fresh_wire_900),
 .PORT_ID_IN1(fresh_wire_901),
 .PORT_ID_OUT(fresh_wire_902),
 .PORT_ID_SEL(fresh_wire_903));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2409 = %b", fresh_wire_900);
+      $display("input 1 to mux 2409 = %b", fresh_wire_901);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2412$mux0(.PORT_ID_IN0(fresh_wire_904),
 .PORT_ID_IN1(fresh_wire_905),
 .PORT_ID_OUT(fresh_wire_906),
 .PORT_ID_SEL(fresh_wire_907));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2412 = %b", fresh_wire_904);
+      $display("input 1 to mux 2412 = %b", fresh_wire_905);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2415$mux0(.PORT_ID_IN0(fresh_wire_908),
 .PORT_ID_IN1(fresh_wire_909),
 .PORT_ID_OUT(fresh_wire_910),
 .PORT_ID_SEL(fresh_wire_911));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2415 = %b", fresh_wire_908);
+      $display("input 1 to mux 2415 = %b", fresh_wire_909);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2418$mux0(.PORT_ID_IN0(fresh_wire_912),
 .PORT_ID_IN1(fresh_wire_913),
 .PORT_ID_OUT(fresh_wire_914),
 .PORT_ID_SEL(fresh_wire_915));
 
+   always @(posedge clk_in) begin
+      $display("input 0 to mux 2418 = %b", fresh_wire_912);
+      $display("input 1 to mux 2418 = %b", fresh_wire_913);
+   end
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000030)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2427$mux0(.PORT_ID_IN0(fresh_wire_916),
 .PORT_ID_IN1(fresh_wire_917),
 .PORT_ID_OUT(fresh_wire_918),
@@ -2716,10 +2868,18 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN(fresh_wire_938),
 .PORT_ID_OUT(fresh_wire_939));
 
+   always @(posedge clk_in) begin
+      $display("reg output after mem mux = %b", fresh_wire_939);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1557$mux0(.PORT_ID_IN0(fresh_wire_941),
 .PORT_ID_IN1(fresh_wire_942),
 .PORT_ID_OUT(fresh_wire_943),
 .PORT_ID_SEL(fresh_wire_944));
+
+   always @(posedge clk_in) begin
+      $display("First mux after rdata = %b", fresh_wire_943);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1567$mux0(.PORT_ID_IN0(fresh_wire_945),
 .PORT_ID_IN1(fresh_wire_946),
@@ -3670,6 +3830,12 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_1140),
 .PORT_ID_OUT(fresh_wire_1141));
 
+   always @(posedge clk_in) begin
+      $display("mul in0 = %b", fresh_wire_1139);
+      $display("mul in1 = %b", fresh_wire_1140);
+      $display("mul output = %b", fresh_wire_1141);
+   end
+   
 	CELL_TYPE_ZEXT #(.PARAM_IN_WIDTH(32'h00000010),
 .PARAM_OUT_WIDTH(32'h00000011)) pe_0x29$test_pe$test_pe_comp$GEN_ADD__LEFT_BRACKET__0__RIGHT_BRACKET____DOT__full_add$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_full_add__DOT__sv__COLON__50__DOLLAR__1494$extendA(.PORT_ID_IN(fresh_wire_1142),
 .PORT_ID_OUT(fresh_wire_1143));
@@ -3682,9 +3848,21 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_1147),
 .PORT_ID_OUT(fresh_wire_1148));
 
+   always @(posedge clk_in) begin
+      $display("fadder in0 = %b", fresh_wire_1146);
+      $display("fadder in1 = %b", fresh_wire_1157);
+      $display("fadder output = %b", fresh_wire_1148);
+   end
+   
 	CELL_TYPE_ADD #(.PARAM_WIDTH(32'h00000011)) pe_0x29$test_pe$test_pe_comp$GEN_ADD__LEFT_BRACKET__0__RIGHT_BRACKET____DOT__full_add$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_full_add__DOT__sv__COLON__50__DOLLAR__1495$op0(.PORT_ID_IN0(fresh_wire_1149),
 .PORT_ID_IN1(fresh_wire_1150),
 .PORT_ID_OUT(fresh_wire_1151));
+
+   always @(posedge clk_in) begin
+      $display("adder in0 = %b", fresh_wire_1149);
+      $display("adder in1 = %b", fresh_wire_1150);
+      $display("adder output = %b", fresh_wire_1151);
+   end
 
 	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) pe_0xFF__DOT__tile_id__LEFT_BRACKET__9__RIGHT_BRACKET___bit_const_9(.PORT_ID_OUT(fresh_wire_1152));
