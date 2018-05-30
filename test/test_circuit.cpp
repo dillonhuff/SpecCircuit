@@ -367,11 +367,8 @@ namespace FlatCircuit {
     }
 
     SECTION("Specializing wrt select == 1") {
-      //def.replacePortWithConstant("sel", BitVec(1, 1));
       Simulator sim(e, def);
-      //sim.update();
       sim.specializePort("sel", BitVec(1, 1));
-      //def.replacePortWithConstant("sel", BitVec(1, 1));
 
       foldConstants(def, {});
       deleteDeadInstances(def);
@@ -408,9 +405,10 @@ namespace FlatCircuit {
     }
 
     SECTION("Specializing wrt select == 0") {
-      def.replacePortWithConstant("sel", BitVec(1, 0));
+      //def.replacePortWithConstant("sel", BitVec(1, 0));
 
       Simulator sim(e, def);
+      sim.specializePort("sel", BitVec(1, 0));
       sim.setFreshValue("in0", BitVector(4, 2));
       sim.setFreshValue("in1", BitVector(4, 13));
       sim.update();
@@ -724,17 +722,17 @@ namespace FlatCircuit {
       sim.setFreshValue("config_en", BitVec(1, 0));
       sim.update();
 
-      sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
-      sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
-      sim.def.replacePortWithConstant("config_en_sram", BitVec(4, 0));
-      sim.def.replacePortWithConstant("clk_en", BitVec(1, 1));
-      sim.def.replacePortWithConstant("config_en_linebuf", BitVec(1, 0));
-      sim.def.replacePortWithConstant("config_read", BitVec(1, 0));
-      sim.def.replacePortWithConstant("config_write", BitVec(1, 0));
-      sim.def.replacePortWithConstant("config_en", BitVec(1, 0));
-      sim.def.replacePortWithConstant("reset", BitVec(1, 0));
-      sim.def.replacePortWithConstant("chain_wen_in", BitVec(1, 0));
-      sim.def.replacePortWithConstant("chain_in", BitVec(16, 0));
+      sim.specializePort("config_data", BitVec(32, 0));
+      sim.specializePort("config_addr", BitVec(32, 0));
+      sim.specializePort("config_en_sram", BitVec(4, 0));
+      sim.specializePort("clk_en", BitVec(1, 1));
+      sim.specializePort("config_en_linebuf", BitVec(1, 0));
+      sim.specializePort("config_read", BitVec(1, 0));
+      sim.specializePort("config_write", BitVec(1, 0));
+      sim.specializePort("config_en", BitVec(1, 0));
+      sim.specializePort("reset", BitVec(1, 0));
+      sim.specializePort("chain_wen_in", BitVec(1, 0));
+      sim.specializePort("chain_in", BitVec(16, 0));
 
       foldConstants(sim.def, sim.allRegisterValues());
       deleteDeadInstances(sim.def);
@@ -1191,21 +1189,21 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
 
-    sim.def.replacePortWithConstant("reset", BitVec(1, 0));
-    sim.def.replacePortWithConstant("config_addr", BitVec(32, 0));
-    sim.def.replacePortWithConstant("config_data", BitVec(32, 0));
-    sim.def.replacePortWithConstant("tile_id", BitVec("16'h15"));
+    sim.specializePort("reset", BitVec(1, 0));
+    sim.specializePort("config_addr", BitVec(32, 0));
+    sim.specializePort("config_data", BitVec(32, 0));
+    sim.specializePort("tile_id", BitVec("16'h15"));
 
     for (int s = 0; s < 4; s++) {
       for (int t = 0; t < 5; t++) {
 
         if ((s != 2) && (t != 0)) {
           string name16 = "in_BUS16_S" + to_string(s) + "_T" + to_string(t);
-          sim.def.replacePortWithConstant(name16, BitVec(16, 0));
+          sim.specializePort(name16, BitVec(16, 0));
         }
 
         string name1 = "in_BUS1_S" + to_string(s) + "_T" + to_string(t);
-        sim.def.replacePortWithConstant(name1, BitVec(1, 0));
+        sim.specializePort(name1, BitVec(1, 0));
         
       }
     }
@@ -1590,14 +1588,14 @@ namespace FlatCircuit {
     cout << "outputS0 = " << outputS0 << endl;
 
     // SPECIALIZE
-    sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
-    sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
-    sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
+    sim.specializePort("reset_in", BitVec(1, 0));
+    sim.specializePort("config_addr_in", BitVec(32, 0));
+    sim.specializePort("config_data_in", BitVec(32, 0));
 
-    sim.def.replacePortWithConstant("tck", BitVec(1, 0));
-    sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
-    sim.def.replacePortWithConstant("tms", BitVec(1, 0));
-    sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
+    sim.specializePort("tck", BitVec(1, 0));
+    sim.specializePort("tdi", BitVec(1, 0));
+    sim.specializePort("tms", BitVec(1, 0));
+    sim.specializePort("trst_n", BitVec(1, 0));
 
     setCGRAInput(0, BitVector(16, 0), sim);
     setCGRAInput(1, BitVector(16, 0), sim);
@@ -1748,14 +1746,14 @@ namespace FlatCircuit {
 
     REQUIRE(outputS0 == correctOutput);
 
-    sim.def.replacePortWithConstant("reset_in", BitVec(1, 0));
-    sim.def.replacePortWithConstant("config_addr_in", BitVec(32, 0));
-    sim.def.replacePortWithConstant("config_data_in", BitVec(32, 0));
+    sim.specializePort("reset_in", BitVec(1, 0));
+    sim.specializePort("config_addr_in", BitVec(32, 0));
+    sim.specializePort("config_data_in", BitVec(32, 0));
 
-    sim.def.replacePortWithConstant("tck", BitVec(1, 0));
-    sim.def.replacePortWithConstant("tdi", BitVec(1, 0));
-    sim.def.replacePortWithConstant("tms", BitVec(1, 0));
-    sim.def.replacePortWithConstant("trst_n", BitVec(1, 0));
+    sim.specializePort("tck", BitVec(1, 0));
+    sim.specializePort("tdi", BitVec(1, 0));
+    sim.specializePort("tms", BitVec(1, 0));
+    sim.specializePort("trst_n", BitVec(1, 0));
 
     for (int side = 0; side < 4; side++) {
 
@@ -1764,7 +1762,7 @@ namespace FlatCircuit {
           string outName =
             "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
           cout << "Setting " << outName << " to a constant" << endl;
-          sim.def.replacePortWithConstant(outName, BitVec(1, 0));
+          sim.specializePort(outName, BitVec(1, 0));
         }
       }
     }
