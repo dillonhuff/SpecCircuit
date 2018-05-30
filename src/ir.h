@@ -183,6 +183,44 @@ namespace FlatCircuit {
 
   };
 
+  class IRRegisterStateCopy : public IRInstruction {
+  public:
+    CellId cid;
+
+    IRRegisterStateCopy(const CellId cid_) : cid(cid_) {}
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+
+      unsigned long offset = valueStore.rawPortValueOffset(cid, PORT_ID_OUT);
+      unsigned long regOffset = valueStore.getRawRegisterOffset(cid);
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+      std::string registerStr = accessString("values", regOffset, bitWidth);
+
+      return ln(accessStr + " = " + registerStr + "; // register state store");
+    }
+    
+    virtual std::string toString(ValueStore& valueStore) const {
+      std::string state =
+        "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+      std::string wire =
+        "values[" +
+        to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+        "]";
+
+      return ln(wire + " = " + state);
+        // codeState.addAssign("values[" +
+        //                     to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+        //                     "]",
+        //                     state);
+
+      //      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
+      //                result);
+    }
+
+  };
+
   class IRRegisterStore : public IRInstruction {
   public:
     CellId cid;
