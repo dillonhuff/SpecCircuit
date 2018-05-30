@@ -652,6 +652,13 @@ namespace FlatCircuit {
           cppCode += ln("// RAW Offset past value: " + def.getCellName(cid) + " ---> " +
                         to_string(valueStore.rawPortPastValueOffset(cid, PORT_ID_OUT)));
         }
+      } else if (def.isPortCell(cid)) {
+        // Output cell
+        cppCode += ln("// " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.portValueOffset(cid, PORT_ID_IN)));
+
+        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_IN)));
       }
     }
 
