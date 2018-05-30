@@ -724,6 +724,8 @@ namespace FlatCircuit {
       sim.setFreshValue("wen", BitVector(1, 1));
       posedge("clk", sim);
 
+      sim.setFreshValue("wen", BitVector(1, 0));
+
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
       cout << "Value table before clk for 4965 output" << endl;
