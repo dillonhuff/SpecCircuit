@@ -22,4 +22,7 @@ my-main
 run-benchmarks
 test/memory_tile_unq1_saved.json
 mul_2_pe.v
-
+mul_2_cgra
+conv_2_1
+conv_3_1
+conv_3_3
