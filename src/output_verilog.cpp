@@ -419,7 +419,7 @@ namespace FlatCircuit {
       //assign PORT_ID_OUT = 1;
    
    
-      "endmodule\n\n // CELL_TYPE_REG_ARST";
+      "endmodule\n\n // CELL_TYPE_REG_ARST\n";
 
     str += "module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);\n"
 
@@ -437,8 +437,8 @@ namespace FlatCircuit {
       "   assign PORT_ID_OUT = PORT_ID_SEL ? PORT_ID_IN1 : PORT_ID_IN0;\n"
       " endmodule\n\n";
 
-    str += "module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;"
-      " endmodule\n\n\n\n";
+    // str += "module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;"
+    //   " endmodule\n\n\n\n";
     
     str += "module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;\n endmodule\n\n";
 

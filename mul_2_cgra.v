@@ -4,8 +4,8 @@ endmodule
 module CELL_TYPE_MUL #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 * PORT_ID_IN1;
  endmodule
 
-module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;
- endmodule
+// module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;
+//  endmodule
 
 module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
    assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1;
@@ -64,7 +64,8 @@ module CELL_TYPE_REG_ARST #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_ARST_
    assign PORT_ID_OUT = data;
 endmodule
 
- // CELL_TYPE_REG_ARSTmodule CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);
+ // CELL_TYPE_REG_ARST
+module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);
    reg [PARAM_MEM_WIDTH -  1 : 0] data_array [0 : PARAM_MEM_DEPTH - 1];
    always @(posedge PORT_ID_CLK) begin
       if (PORT_ID_WEN) begin
@@ -92,7 +93,7 @@ module CELL_TYPE_ZEXT #(parameter PARAM_IN_WIDTH=1, parameter PARAM_OUT_WIDTH=1)
  endmodule
 
 
-module flat_module(	output [0 : 0] aux_div_pad,
+module top(	output [0 : 0] aux_div_pad,
 	input [0 : 0] clk_ext_in,
 	input [0 : 0] clk_in,
 	input [31 : 0] config_addr_in,

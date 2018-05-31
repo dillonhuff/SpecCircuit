@@ -9,7 +9,7 @@ module test();
    wire trst_n;
    wire tdi;
    wire tms;
-   
+
    wire tck;
 
    reg [31:0] config_addr;
@@ -24,32 +24,29 @@ module test();
    wire [64:0] max_cycles;
 
    assign max_cycles = 100;
-   
+
    initial begin
 
       cycle_count = 0;
 
       #1 clk = 0;
 
-      data_driver_16_S2 = 1 << 14;
- //0;
-      
+      data_driver_16_S2 = 3;
+
       config_addr = 0;
       config_data = 0;
       config_done = 0;
-      
+
    end // initial begin
 
    always #2 clk = ~clk;
 
    reg [0:0] data_in_S0_T0_reg;
    wire      data_in_S0_T0;
- // = 1'b0;
-   
 
    wire [15:0] data_in_16_S2;
    wire [15:0] data_out_16_S0;
-   
+
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
 
@@ -165,22 +162,22 @@ module test();
 // + 1;
    end
 
-   assign    {data_in_S2_T15,
-	      data_in_S2_T14,
-	      data_in_S2_T13,
-	      data_in_S2_T12,
-	      data_in_S2_T11,
-	      data_in_S2_T10,
-	      data_in_S2_T9,
-	      data_in_S2_T8,
-	      data_in_S2_T7,
-	      data_in_S2_T6,
-	      data_in_S2_T5,
-	      data_in_S2_T4,
-	      data_in_S2_T3,
-	      data_in_S2_T2,
+   assign    {data_in_S2_T0,
 	      data_in_S2_T1,
-	      data_in_S2_T0} = data_driver_16_S2;
+	      data_in_S2_T2,
+	      data_in_S2_T3,
+	      data_in_S2_T4,
+	      data_in_S2_T5,
+	      data_in_S2_T6,
+	      data_in_S2_T7,
+	      data_in_S2_T8,
+	      data_in_S2_T9,
+	      data_in_S2_T10,
+	      data_in_S2_T11,
+	      data_in_S2_T12,
+	      data_in_S2_T13,
+	      data_in_S2_T14,
+	      data_in_S2_T15} = data_driver_16_S2;
 
    assign data_in_S0_T0 = 0;
    assign data_in_S0_T1 = 0;

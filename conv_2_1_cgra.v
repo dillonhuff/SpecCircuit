@@ -86,8 +86,8 @@ module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, 
       end
    end
 
-   //assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];
-   assign PORT_ID_RDATA = 15;
+   assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];
+   //assign PORT_ID_RDATA = 15;
       
 endmodule
 
