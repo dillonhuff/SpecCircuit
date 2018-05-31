@@ -44,8 +44,18 @@ namespace FlatCircuit {
           setPortValue(cid,
                        PORT_ID_OUT,
                        simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+        } else if (isRegister(cell.getCellType())) {
+          // TODO: Need to add register support
+          setRegisterValue(cid,
+                           simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+
+          setPortValue(cid,
+                       PORT_ID_OUT,
+                       simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         }
       }
+
+      rawSimValueTable[44] = 0xff;
     }
 
     void buildRawValueTable() {
@@ -57,6 +67,11 @@ namespace FlatCircuit {
       }
 
       rawTableSize = rawOffset;
+
+      // std::cout << "Raw table offset map" << std::endl;
+      // for (auto ent : quadOffsetsToRawOffsets) {
+      //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
+      // }
 
       for (auto sp : portOffsets) {
         rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
@@ -78,6 +93,7 @@ namespace FlatCircuit {
       rawSimValueTable =
         static_cast<unsigned char*>(malloc(rawOffset));
       memset(rawSimValueTable, 0, rawTableSize);
+      //rawSimValueTable[44] = 1;
       //rawSimValueTable[0] = 23;
       
     }
@@ -91,6 +107,10 @@ namespace FlatCircuit {
       return map_find(cid, memoryOffsets);
     }
 
+    unsigned long getRawMemoryOffset(const CellId cid) const {
+      return map_find(cid, rawMemoryOffsets);
+    }
+    
     unsigned long getRegisterOffset(const CellId cid) const {
       return map_find(cid, registerOffsets);
     }
@@ -112,7 +132,7 @@ namespace FlatCircuit {
       assert(contains_key({cid, pid}, pastValueOffsets));
       assert(contains_key({cid, pid}, rawPastValueOffsets));
 
-      return map_find({cid, pid}, pastValueOffsets);
+      return map_find({cid, pid}, rawPastValueOffsets);
     }
     
     unsigned long portValueOffset(const CellId cid,
@@ -198,29 +218,52 @@ namespace FlatCircuit {
                       const BitVector& bv) {
 
       if (compiledRaw) {
+        //        std::cout << "Setting raw offset " << map_find({cid, pid}, rawPortOffsets) << " with bit vector " << bv << " with bit length " << bv.bitLength() << std::endl;
         int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
 
         assert(pWidth <= 64);
 
-        if (bv.bitLength() <= 8) {
-          *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint8_t) bv.to_type<uint8_t>();
-        } else if (bv.bitLength() <= 16) {
-          //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
-          *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint16_t) bv.to_type<uint16_t>();
+        bool isBinary = bv.is_binary();
 
-          //debugPrintRawValueTable();
-        } else if (bv.bitLength() <= 32) {
-          *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint32_t) bv.to_type<uint32_t>();
-        } else if (bv.bitLength() <= 64) {
-          *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
-            (uint64_t) bv.to_type<uint64_t>();
+        if (isBinary) {
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint8_t) bv.to_type<uint8_t>();
+          } else if (bv.bitLength() <= 16) {
+            //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+            *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint16_t) bv.to_type<uint16_t>();
+
+            //debugPrintRawValueTable();
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint32_t) bv.to_type<uint32_t>();
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint64_t) bv.to_type<uint64_t>();
+          } else {
+            assert(false);
+          }
         } else {
-          assert(false);
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint8_t) 0;
+          } else if (bv.bitLength() <= 16) {
+            //          std::cout << "Setting " << sigPortString(def, {cid, pid}) << " to " << bv.to_type<uint16_t>() << std::endl;
+            *((uint16_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint16_t) 0;
+            //debugPrintRawValueTable();
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint32_t) 0;
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find({cid, pid}, rawPortOffsets))) =
+              (uint64_t) 0;
+          } else {
+            assert(false);
+          }
+          
         }
-
       } else {
 
         if (!contains_key({cid, pid}, portOffsets)) {
@@ -272,13 +315,57 @@ namespace FlatCircuit {
 
     void setRegisterValue(const CellId cid,
                           const BitVector& bv) {
-      if (!contains_key(cid, registerOffsets)) {
-        unsigned long nextInd = simValueTable.size();
-        registerOffsets[cid] = nextInd;
-        simValueTable.push_back(bv);
-      }
+      if (!compiledRaw) {
+        if (!contains_key(cid, registerOffsets)) {
+          unsigned long nextInd = simValueTable.size();
+          registerOffsets[cid] = nextInd;
+          simValueTable.push_back(bv);
+        }
 
-      simValueTable[map_find(cid, registerOffsets)] = bv;
+        simValueTable[map_find(cid, registerOffsets)] = bv;
+      } else {
+
+        bool isBinary = bv.is_binary();
+        
+        int pWidth =
+          bvToInt(def.getCellRefConst(cid).getParameterValue(PARAM_WIDTH));
+
+        assert(pWidth <= 64);
+
+        if (isBinary) {
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint8_t) bv.to_type<uint8_t>();
+          } else if (bv.bitLength() <= 16) {
+            *((uint16_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint16_t) bv.to_type<uint16_t>();
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint32_t) bv.to_type<uint32_t>();
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint64_t) bv.to_type<uint64_t>();
+          } else {
+            assert(false);
+          }
+        } else {
+          if (bv.bitLength() <= 8) {
+            *((uint8_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint8_t) 0;
+          } else if (bv.bitLength() <= 16) {
+            *((uint16_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint16_t) 0;
+          } else if (bv.bitLength() <= 32) {
+            *((uint32_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint32_t) 0;
+          } else if (bv.bitLength() <= 64) {
+            *((uint64_t*) (rawSimValueTable + map_find(cid, rawRegisterOffsets))) =
+              (uint64_t) 0;
+          } else {
+            assert(false);
+          }
+        }
+      }
     }
 
     BitVector getRegisterValue(const CellId cid) const {

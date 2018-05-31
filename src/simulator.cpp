@@ -593,17 +593,19 @@ namespace FlatCircuit {
         
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
-        string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+        codeState.addInstruction(new IRRegisterStateCopy(cid));
+        // string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
-        codeState.addAssign("values[" +
-                            to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
-                            "]",
-                            state);
+        // codeState.addAssign("values[" +
+        //                     to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+        //                     "]",
+        //                     state);
 
       } else if (cell.getCellType() == CELL_TYPE_REG) {
-        string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+        codeState.addInstruction(new IRRegisterStateCopy(cid));
+        // string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
-        codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
+        // codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
 
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
@@ -648,6 +650,17 @@ namespace FlatCircuit {
 
         cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
                       to_string(valueStore.rawPortValueOffset(cid, PORT_ID_OUT)));
+        if (sequentialDependencies(cell, PORT_ID_OUT).size() > 0) {
+          cppCode += ln("// RAW Offset past value: " + def.getCellName(cid) + " ---> " +
+                        to_string(valueStore.rawPortPastValueOffset(cid, PORT_ID_OUT)));
+        }
+      } else if (def.isPortCell(cid)) {
+        // Output cell
+        cppCode += ln("// " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.portValueOffset(cid, PORT_ID_IN)));
+
+        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_IN)));
       }
     }
 
@@ -736,6 +749,10 @@ namespace FlatCircuit {
     valueStore.debugPrintTableValues();
   }
 
+  void Simulator::debugPrintRawValueTable() const {
+    valueStore.debugPrintRawValueTable();
+  }
+  
   void Simulator::debugPrintRegisters() const {
     cout << "Register values" << endl;
     for (auto ctp : def.getCellMap()) {
@@ -827,6 +844,26 @@ namespace FlatCircuit {
       }
     }
   }
+
+  void Simulator::specializePort(const std::string& port, const BitVector& value) {
+    CellId cid = def.getPortCellId(port);
+
+    assert(!elem(cid, specializedPorts));
+
+    def.replacePortWithConstant(port, value);
+    specializedPorts.insert(cid);
+  }
+
+  void specializeCircuit(const std::vector<std::string>& constantPorts,
+                         Simulator& sim) {
+    for (auto portName : constantPorts) {
+      CellId cid = sim.def.getPortCellId(portName);
+      BitVector currentValue = sim.getBitVec(cid, PORT_ID_OUT);
+      sim.def.replacePortWithConstant(portName, currentValue);
+    }
+    specializeCircuit(sim);
+  }
+
 
   void specializeCircuit(Simulator& sim) {
     cout << "# of cells before constant folding = " << sim.def.numCells() << endl;

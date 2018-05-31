@@ -348,7 +348,99 @@ namespace FlatCircuit {
 
     str += "module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;\n endmodule\n\n";
 
-    str += "module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;\n endmodule\n\n";
+    str += "module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+      "   assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1;\n"
+      " endmodule\n\n";
+
+    str += "module CELL_TYPE_SUB #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);"
+      "   assign PORT_ID_OUT = PORT_ID_IN0 - PORT_ID_IN1;"
+      " endmodule\n\n";
+
+    str += "module CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+      "   assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;\n"
+      "endmodule\n\n";
+
+    str += "module CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+      "   assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;\n"
+      "endmodule\n\n";
+
+    str += "module CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT);\n"
+      "   assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;\n"
+      "endmodule\n\n";
+
+    str += "module CELL_TYPE_ULT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 < PORT_ID_IN1;\n"
+      " endmodule\n\n";
+
+    str += "module CELL_TYPE_UGE #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 >= PORT_ID_IN1;\n"
+      "endmodule\n\n // CELL_TYPE_UGE\n";
+
+    str += "module CELL_TYPE_REG #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+
+      "   reg [PARAM_WIDTH - 1 : 0] data;\n"
+   
+      "   initial begin\n"
+      "      data = PARAM_INIT_VALUE;\n"
+      "   end\n"
+
+      "   wire true_clk;\n"
+      "   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;\n"
+   
+      "   always @(posedge true_clk) begin\n"
+      "      data <= PORT_ID_IN;\n"
+      "   end\n"
+
+      "   assign PORT_ID_OUT = data;\n"
+   
+      "endmodule\n\n";
+
+    str += "module CELL_TYPE_REG_ARST #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_ARST_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_ARST, input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+
+      "   reg [PARAM_WIDTH - 1 : 0] data;\n"
+   
+      "   initial begin\n"
+      "      data = PARAM_INIT_VALUE;\n"
+      "   end\n"
+
+      "   wire true_clk;\n"
+      "   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;\n"
+
+      "   wire true_rst;\n"
+      "   assign true_rst = PARAM_ARST_POSEDGE ? PORT_ID_ARST : ~PORT_ID_ARST;\n"
+   
+      "   always @(posedge true_clk or posedge true_rst) begin\n"
+      "      if (true_rst) begin\n"
+      "         data <= PARAM_INIT_VALUE;\n"
+      "      end else begin\n"
+      "         data <= PORT_ID_IN;\n"
+      "      end\n"
+      "   end\n"
+
+      "   assign PORT_ID_OUT = data;\n"
+      //assign PORT_ID_OUT = 1;
+   
+   
+      "endmodule\n\n // CELL_TYPE_REG_ARST\n";
+
+    str += "module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);\n"
+
+      "   reg [PARAM_MEM_WIDTH -  1 : 0] data_array [0 : PARAM_MEM_DEPTH - 1];\n"
+
+      "   always @(posedge PORT_ID_CLK) begin\n"
+      "      if (PORT_ID_WEN) begin\n"
+      "         data_array[PORT_ID_WADDR] = PORT_ID_WDATA;\n"
+      "      end\n"
+      "   end\n"
+      "   assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];\n"
+      "endmodule\n\n";
+
+    str += "module CELL_TYPE_MUX #(parameter PARAM_WIDTH=1) (input PORT_ID_SEL, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);\n"
+      "   assign PORT_ID_OUT = PORT_ID_SEL ? PORT_ID_IN1 : PORT_ID_IN0;\n"
+      " endmodule\n\n";
+
+    // str += "module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;"
+    //   " endmodule\n\n\n\n";
+    
+    str += "module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;\n endmodule\n\n";
 
     str += "module CELL_TYPE_PORT #(parameter PARAM_PORT_TYPE=0, parameter PARAM_OUT_WIDTH=1) (input [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN;\n endmodule\n\n";
 
