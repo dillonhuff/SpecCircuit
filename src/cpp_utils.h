@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <iostream>
 #include <string>
 
 namespace FlatCircuit {
@@ -26,7 +27,12 @@ namespace FlatCircuit {
     if (numBits <= 64) {
       return 8;
     }
+
+    if (numBits <= 128) {
+      return 16;
+    }
     
+    std::cout << "Unsupported width = " << numBits << std::endl;
     assert(false);
     //return ceil(numBits / 8);
   }
@@ -48,6 +54,10 @@ namespace FlatCircuit {
       return "uint64_t";
     }
 
+    if (bitWidth <= 128) {
+      return "__uint128_t";
+    }
+    
     assert(false);
   }
 

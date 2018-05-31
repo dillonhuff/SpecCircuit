@@ -68,10 +68,10 @@ namespace FlatCircuit {
 
       rawTableSize = rawOffset;
 
-      std::cout << "Raw table offset map" << std::endl;
-      for (auto ent : quadOffsetsToRawOffsets) {
-        std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
-      }
+      // std::cout << "Raw table offset map" << std::endl;
+      // for (auto ent : quadOffsetsToRawOffsets) {
+      //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
+      // }
 
       for (auto sp : portOffsets) {
         rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);

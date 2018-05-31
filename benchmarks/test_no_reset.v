@@ -31,7 +31,8 @@ module test();
 
       #1 clk = 0;
 
-      data_driver_16_S2 = 0;
+      data_driver_16_S2 = 1 << 14;
+ //0;
       
       config_addr = 0;
       config_data = 0;
@@ -160,7 +161,8 @@ module test();
 			   data_in_S2_T15};
 
    always @(posedge clk) begin
-      data_driver_16_S2 <= data_driver_16_S2 + 1;
+      data_driver_16_S2 <= data_driver_16_S2;
+// + 1;
    end
 
    assign    {data_in_S2_T15,

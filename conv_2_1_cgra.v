@@ -4,10 +4,101 @@ endmodule
 module CELL_TYPE_MUL #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 * PORT_ID_IN1;
  endmodule
 
+module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_SUB #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 - PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_ULT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 < PORT_ID_IN1;
+ endmodule
+
+module CELL_TYPE_UGE #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 >= PORT_ID_IN1;
+endmodule // CELL_TYPE_UGE
+
+module CELL_TYPE_REG #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+
+   reg [PARAM_WIDTH - 1 : 0] data;
+   
+   initial begin
+      data = PARAM_INIT_VALUE;
+   end
+
+   wire true_clk;
+   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;
+   
+   always @(posedge true_clk) begin
+      data <= PORT_ID_IN;
+   end
+
+   assign PORT_ID_OUT = data;
+   
+endmodule
+
+module CELL_TYPE_REG_ARST #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_ARST_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_ARST, input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+
+   reg [PARAM_WIDTH - 1 : 0] data;
+   
+   initial begin
+      data = PARAM_INIT_VALUE;
+   end
+
+   wire true_clk;
+   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;
+
+   wire true_rst;
+   assign true_rst = PARAM_ARST_POSEDGE ? PORT_ID_ARST : ~PORT_ID_ARST;
+   
+   always @(posedge true_clk or posedge true_rst) begin
+      if (true_rst) begin
+         data <= PARAM_INIT_VALUE;
+      end else begin
+         data <= PORT_ID_IN;
+      end
+   end
+
+   assign PORT_ID_OUT = data;
+   
+endmodule // CELL_TYPE_REG_ARST
+
+module CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);
+
+   reg [PARAM_MEM_WIDTH -  1 : 0] data_array [0 : PARAM_MEM_DEPTH - 1];
+
+   always @(posedge PORT_ID_CLK) begin
+      $display("waddr = %b", PORT_ID_WADDR);
+      $display("wdata = %b", PORT_ID_WDATA);
+      $display("raddr = %b", PORT_ID_RADDR);
+      $display("rdata = %b", PORT_ID_RDATA);
+      $display("rdata = %b", PORT_ID_RDATA);
+      
+      if (PORT_ID_WEN) begin
+         data_array[PORT_ID_WADDR] = PORT_ID_WDATA;
+      end
+   end
+
+   //assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];
+   assign PORT_ID_RDATA = 15;
+      
+endmodule
+
+module CELL_TYPE_MUX #(parameter PARAM_WIDTH=1) (input PORT_ID_SEL, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_SEL ? PORT_ID_IN1 : PORT_ID_IN0;
+ endmodule
+
 module CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN;
  endmodule
 
-module CELL_TYPE_ADD #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_IN0 + PORT_ID_IN1; endmodulemodule CELL_TYPE_SUB #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_IN0 - PORT_ID_IN1; endmodulemodule CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;endmodulemodule CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;endmodulemodule CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;endmodulemodule CELL_TYPE_ULT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 < PORT_ID_IN1; endmodulemodule CELL_TYPE_UGE #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 >= PORT_ID_IN1;endmodule // CELL_TYPE_UGEmodule CELL_TYPE_REG #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   reg [PARAM_WIDTH - 1 : 0] data;   initial begin      data = PARAM_INIT_VALUE;   end   wire true_clk;   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;   always @(posedge true_clk) begin      data <= PORT_ID_IN;   end   assign PORT_ID_OUT = data;endmodulemodule CELL_TYPE_REG_ARST #(parameter PARAM_CLK_POSEDGE=1, parameter PARAM_ARST_POSEDGE=1, parameter PARAM_INIT_VALUE=0, parameter PARAM_WIDTH=1)(input PORT_ID_ARST, input PORT_ID_CLK, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   reg [PARAM_WIDTH - 1 : 0] data;   initial begin      data = PARAM_INIT_VALUE;   end   wire true_clk;   assign true_clk = PARAM_CLK_POSEDGE ? PORT_ID_CLK : ~PORT_ID_CLK;   wire true_rst;   assign true_rst = PARAM_ARST_POSEDGE ? PORT_ID_ARST : ~PORT_ID_ARST;   always @(posedge true_clk or posedge true_rst) begin      if (true_rst) begin         data <= PARAM_INIT_VALUE;      end else begin         data <= PORT_ID_IN;      end   end   assign PORT_ID_OUT = data;endmodule // CELL_TYPE_REG_ARSTmodule CELL_TYPE_MEM #(parameter PARAM_HAS_INIT=0, parameter PARAM_MEM_DEPTH=0, parameter PARAM_MEM_WIDTH=0)(input PORT_ID_CLK, input PORT_ID_WEN, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_RADDR, input [$clog2(PARAM_MEM_DEPTH) - 1 : 0] PORT_ID_WADDR, input [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_WDATA, output [PARAM_MEM_WIDTH - 1 : 0] PORT_ID_RDATA);   reg [PARAM_MEM_WIDTH -  1 : 0] data_array [0 : PARAM_MEM_DEPTH - 1];   always @(posedge PORT_ID_CLK) begin      if (PORT_ID_WEN) begin         data_array[PORT_ID_WADDR] = PORT_ID_WDATA;      end   end   assign PORT_ID_RDATA = data_array[PORT_ID_RADDR];endmodulemodule CELL_TYPE_MUX #(parameter PARAM_WIDTH=1) (input PORT_ID_SEL, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);   assign PORT_ID_OUT = PORT_ID_SEL ? PORT_ID_IN1 : PORT_ID_IN0; endmodulemodule CELL_TYPE_NOT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = ~PORT_ID_IN; endmodulemodule CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;
+module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;
  endmodule
 
 module CELL_TYPE_PORT #(parameter PARAM_PORT_TYPE=0, parameter PARAM_OUT_WIDTH=1) (input [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN;
@@ -17,7 +108,7 @@ module CELL_TYPE_ZEXT #(parameter PARAM_IN_WIDTH=1, parameter PARAM_OUT_WIDTH=1)
  endmodule
 
 
-module flat_module(	output [0 : 0] aux_div_pad,
+module top(	output [0 : 0] aux_div_pad,
 	input [0 : 0] clk_ext_in,
 	input [0 : 0] clk_in,
 	input [31 : 0] config_addr_in,
@@ -1820,28 +1911,32 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_368));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(1'hx),
+.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__procdff__DOLLAR__3712$reg0(.PORT_ID_CLK(fresh_wire_371),
 .PORT_ID_IN(fresh_wire_369),
 .PORT_ID_OUT(fresh_wire_370));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(2'hx),
+.PARAM_INIT_VALUE(2'h0),
 .PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__procdff__DOLLAR__3713$reg0(.PORT_ID_CLK(fresh_wire_374),
 .PORT_ID_IN(fresh_wire_372),
 .PORT_ID_OUT(fresh_wire_373));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(2'hx),
+.PARAM_INIT_VALUE(2'h0),
 .PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__procdff__DOLLAR__3714$reg0(.PORT_ID_CLK(fresh_wire_377),
 .PORT_ID_IN(fresh_wire_375),
 .PORT_ID_OUT(fresh_wire_376));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(16'hxxxx),
+.PARAM_INIT_VALUE(16'h0xxx),
 .PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__procdff__DOLLAR__3716$reg0(.PORT_ID_CLK(fresh_wire_380),
 .PORT_ID_IN(fresh_wire_378),
 .PORT_ID_OUT(fresh_wire_379));
+
+   always @(posedge clk_in) begin
+      $display("fresh_wire_379 = %b", fresh_wire_379);
+   end
 
 	CELL_TYPE_REG_ARST #(.PARAM_ARST_POSEDGE(1'h1),
 .PARAM_CLK_POSEDGE(1'h1),
@@ -2160,6 +2255,10 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_600),
 .PORT_ID_SEL(fresh_wire_601));
 
+   always @(posedge clk_in) begin
+      $display("mux output after mem register = %b", fresh_wire_600);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$__DOLLAR__ternary__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__linebuffer_control_unq1__DOT__v__COLON__273__DOLLAR__526$mux0(.PORT_ID_IN0(fresh_wire_602),
 .PORT_ID_IN1(fresh_wire_603),
 .PORT_ID_OUT(fresh_wire_604),
@@ -2172,6 +2271,10 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_608),
 .PORT_ID_OUT(fresh_wire_609),
 .PORT_ID_SEL(fresh_wire_610));
+
+   always @(posedge clk_in) begin
+      $display("fresh_wire_609 = %b", fresh_wire_609);
+   end
 
 	CELL_TYPE_ADD #(.PARAM_WIDTH(32'h00000002)) mem_0x18$memory_core$linebuffer_control$input_sr$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__input_sr_unq1__DOT__v__COLON__101__DOLLAR__314$op0(.PORT_ID_IN0(fresh_wire_611),
 .PORT_ID_IN1(fresh_wire_612),
@@ -2256,7 +2359,7 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_666));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(48'hxxxxxxxxxxxx),
+.PARAM_INIT_VALUE(48'h0xxxxxxxxxxx),
 .PARAM_WIDTH(32'h00000030)) mem_0x18$memory_core$linebuffer_control$input_sr$__DOLLAR__procdff__DOLLAR__3740$reg0(.PORT_ID_CLK(fresh_wire_671),
 .PORT_ID_IN(fresh_wire_669),
 .PORT_ID_OUT(fresh_wire_670));
@@ -2524,30 +2627,59 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_858));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(48'hxxxxxxxxxxxx),
+.PARAM_INIT_VALUE(48'h0xxxxxxxxxxx),
 .PARAM_WIDTH(32'h00000030)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procdff__DOLLAR__3702$reg0(.PORT_ID_CLK(fresh_wire_863),
 .PORT_ID_IN(fresh_wire_861),
 .PORT_ID_OUT(fresh_wire_862));
+
+   always @(posedge clk_in) begin
+      $display("second reg in rdata path = %b", fresh_wire_862);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2382$mux0(.PORT_ID_IN0(fresh_wire_864),
 .PORT_ID_IN1(fresh_wire_865),
 .PORT_ID_OUT(fresh_wire_866),
 .PORT_ID_SEL(fresh_wire_867));
 
+   always @(posedge clk_in) begin
+      $display("mux 2382 sel = %b", fresh_wire_867);
+      $display("mux 2382 in0 = %b", fresh_wire_864);
+      $display("mux 2382 in1 = %b", fresh_wire_865);
+      $display("mux 2382 out = %b", fresh_wire_866);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2385$mux0(.PORT_ID_IN0(fresh_wire_868),
 .PORT_ID_IN1(fresh_wire_869),
 .PORT_ID_OUT(fresh_wire_870),
 .PORT_ID_SEL(fresh_wire_871));
 
+   always @(posedge clk_in) begin
+      $display("mux 2385 in0 = %b", fresh_wire_868);
+      $display("mux 2385 in1 = %b", fresh_wire_869);
+      $display("mux 2385 out = %b", fresh_wire_870);
+   end
+   
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2388$mux0(.PORT_ID_IN0(fresh_wire_872),
 .PORT_ID_IN1(fresh_wire_873),
 .PORT_ID_OUT(fresh_wire_874),
 .PORT_ID_SEL(fresh_wire_875));
 
+      always @(posedge clk_in) begin
+      $display("mux 2388 in0 = %b", fresh_wire_872);
+      $display("mux 2388 in1 = %b", fresh_wire_873);
+      $display("mux 2388 out = %b", fresh_wire_874);
+   end
+
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2390$mux0(.PORT_ID_IN0(fresh_wire_876),
 .PORT_ID_IN1(fresh_wire_877),
 .PORT_ID_OUT(fresh_wire_878),
 .PORT_ID_SEL(fresh_wire_879));
+
+   always @(posedge clk_in) begin
+      $display("a bunch more muxes later in0 = %b", fresh_wire_876);
+      $display("a bunch more muxes later in1 = %b", fresh_wire_877);
+      $display("a bunch more muxes later, wire 878 = %b", fresh_wire_878);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$linebuffer_control$output_sr$__DOLLAR__procmux__DOLLAR__2393$mux0(.PORT_ID_IN0(fresh_wire_880),
 .PORT_ID_IN1(fresh_wire_881),
@@ -2626,15 +2758,23 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_937));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(16'hxxxx),
+.PARAM_INIT_VALUE(16'h0xxx),
 .PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procdff__DOLLAR__3630$reg0(.PORT_ID_CLK(fresh_wire_940),
 .PORT_ID_IN(fresh_wire_938),
 .PORT_ID_OUT(fresh_wire_939));
+
+   always @(posedge clk_in) begin
+      $display("reg output after mem mux = %b", fresh_wire_939);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1557$mux0(.PORT_ID_IN0(fresh_wire_941),
 .PORT_ID_IN1(fresh_wire_942),
 .PORT_ID_OUT(fresh_wire_943),
 .PORT_ID_SEL(fresh_wire_944));
+
+   always @(posedge clk_in) begin
+      $display("First mux after rdata = %b", fresh_wire_943);
+   end
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1567$mux0(.PORT_ID_IN0(fresh_wire_945),
 .PORT_ID_IN1(fresh_wire_946),
@@ -2654,52 +2794,52 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_956),
 .PORT_ID_SEL(fresh_wire_957));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_958));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__10__RIGHT_BRACKET___unknown_value_10$uConst(.PORT_ID_OUT(fresh_wire_959));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__11__RIGHT_BRACKET___unknown_value_11$uConst(.PORT_ID_OUT(fresh_wire_960));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__12__RIGHT_BRACKET___unknown_value_12$uConst(.PORT_ID_OUT(fresh_wire_961));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__13__RIGHT_BRACKET___unknown_value_13$uConst(.PORT_ID_OUT(fresh_wire_962));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__14__RIGHT_BRACKET___unknown_value_14$uConst(.PORT_ID_OUT(fresh_wire_963));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__15__RIGHT_BRACKET___unknown_value_15$uConst(.PORT_ID_OUT(fresh_wire_964));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_965));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_966));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_967));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_968));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_969));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_970));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_971));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_972));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__9__RIGHT_BRACKET___unknown_value_9$uConst(.PORT_ID_OUT(fresh_wire_973));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578$mux0(.PORT_ID_IN0(fresh_wire_974),
@@ -2707,52 +2847,52 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_976),
 .PORT_ID_SEL(fresh_wire_977));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_978));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__10__RIGHT_BRACKET___unknown_value_10$uConst(.PORT_ID_OUT(fresh_wire_979));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__11__RIGHT_BRACKET___unknown_value_11$uConst(.PORT_ID_OUT(fresh_wire_980));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__12__RIGHT_BRACKET___unknown_value_12$uConst(.PORT_ID_OUT(fresh_wire_981));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__13__RIGHT_BRACKET___unknown_value_13$uConst(.PORT_ID_OUT(fresh_wire_982));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__14__RIGHT_BRACKET___unknown_value_14$uConst(.PORT_ID_OUT(fresh_wire_983));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__15__RIGHT_BRACKET___unknown_value_15$uConst(.PORT_ID_OUT(fresh_wire_984));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_985));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_986));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_987));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_988));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_989));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_990));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_991));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_992));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__9__RIGHT_BRACKET___unknown_value_9$uConst(.PORT_ID_OUT(fresh_wire_993));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000009)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585$mux0(.PORT_ID_IN0(fresh_wire_994),
@@ -2760,31 +2900,31 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_996),
 .PORT_ID_SEL(fresh_wire_997));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_998));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_999));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1000));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1001));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1002));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1003));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1004));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1005));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1006));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000009)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587$mux0(.PORT_ID_IN0(fresh_wire_1007),
@@ -2792,31 +2932,31 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1009),
 .PORT_ID_SEL(fresh_wire_1010));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_1011));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_1012));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1013));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1014));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1015));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1016));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1017));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1018));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst0$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1019));
 
 	CELL_TYPE_MEM #(.PARAM_HAS_INIT(1'h0),
@@ -2843,7 +2983,7 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1035));
 
 	CELL_TYPE_REG #(.PARAM_CLK_POSEDGE(1'h1),
-.PARAM_INIT_VALUE(16'hxxxx),
+.PARAM_INIT_VALUE(16'h0xxx),
 .PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procdff__DOLLAR__3630$reg0(.PORT_ID_CLK(fresh_wire_1038),
 .PORT_ID_IN(fresh_wire_1036),
 .PORT_ID_OUT(fresh_wire_1037));
@@ -2871,52 +3011,52 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1054),
 .PORT_ID_SEL(fresh_wire_1055));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_1056));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__10__RIGHT_BRACKET___unknown_value_10$uConst(.PORT_ID_OUT(fresh_wire_1057));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__11__RIGHT_BRACKET___unknown_value_11$uConst(.PORT_ID_OUT(fresh_wire_1058));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__12__RIGHT_BRACKET___unknown_value_12$uConst(.PORT_ID_OUT(fresh_wire_1059));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__13__RIGHT_BRACKET___unknown_value_13$uConst(.PORT_ID_OUT(fresh_wire_1060));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__14__RIGHT_BRACKET___unknown_value_14$uConst(.PORT_ID_OUT(fresh_wire_1061));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__15__RIGHT_BRACKET___unknown_value_15$uConst(.PORT_ID_OUT(fresh_wire_1062));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_1063));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1064));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1065));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1066));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1067));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1068));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1069));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1070));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1576__DOT__A__LEFT_BRACKET__9__RIGHT_BRACKET___unknown_value_9$uConst(.PORT_ID_OUT(fresh_wire_1071));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000010)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578$mux0(.PORT_ID_IN0(fresh_wire_1072),
@@ -2924,52 +3064,52 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1074),
 .PORT_ID_SEL(fresh_wire_1075));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_1076));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__10__RIGHT_BRACKET___unknown_value_10$uConst(.PORT_ID_OUT(fresh_wire_1077));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__11__RIGHT_BRACKET___unknown_value_11$uConst(.PORT_ID_OUT(fresh_wire_1078));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__12__RIGHT_BRACKET___unknown_value_12$uConst(.PORT_ID_OUT(fresh_wire_1079));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__13__RIGHT_BRACKET___unknown_value_13$uConst(.PORT_ID_OUT(fresh_wire_1080));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__14__RIGHT_BRACKET___unknown_value_14$uConst(.PORT_ID_OUT(fresh_wire_1081));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__15__RIGHT_BRACKET___unknown_value_15$uConst(.PORT_ID_OUT(fresh_wire_1082));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_1083));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1084));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1085));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1086));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1087));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1088));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1089));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1090));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1578__DOT__A__LEFT_BRACKET__9__RIGHT_BRACKET___unknown_value_9$uConst(.PORT_ID_OUT(fresh_wire_1091));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000009)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585$mux0(.PORT_ID_IN0(fresh_wire_1092),
@@ -2977,31 +3117,31 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1094),
 .PORT_ID_SEL(fresh_wire_1095));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_1096));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_1097));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1098));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1099));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1100));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1101));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1102));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1103));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1585__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1104));
 
 	CELL_TYPE_MUX #(.PARAM_WIDTH(32'h00000009)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587$mux0(.PORT_ID_IN0(fresh_wire_1105),
@@ -3009,31 +3149,31 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(fresh_wire_1107),
 .PORT_ID_SEL(fresh_wire_1108));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__0__RIGHT_BRACKET___unknown_value_0$uConst(.PORT_ID_OUT(fresh_wire_1109));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__1__RIGHT_BRACKET___unknown_value_1$uConst(.PORT_ID_OUT(fresh_wire_1110));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__2__RIGHT_BRACKET___unknown_value_2$uConst(.PORT_ID_OUT(fresh_wire_1111));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__3__RIGHT_BRACKET___unknown_value_3$uConst(.PORT_ID_OUT(fresh_wire_1112));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__4__RIGHT_BRACKET___unknown_value_4$uConst(.PORT_ID_OUT(fresh_wire_1113));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__5__RIGHT_BRACKET___unknown_value_5$uConst(.PORT_ID_OUT(fresh_wire_1114));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__6__RIGHT_BRACKET___unknown_value_6$uConst(.PORT_ID_OUT(fresh_wire_1115));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__7__RIGHT_BRACKET___unknown_value_7$uConst(.PORT_ID_OUT(fresh_wire_1116));
 
-	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'hx),
+	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) mem_0x18$memory_core$mem_inst1$mem_inst$__DOLLAR__procmux__DOLLAR__1587__DOT__A__LEFT_BRACKET__8__RIGHT_BRACKET___unknown_value_8$uConst(.PORT_ID_OUT(fresh_wire_1117));
 
 	CELL_TYPE_MEM #(.PARAM_HAS_INIT(1'h0),
@@ -3585,6 +3725,12 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_1140),
 .PORT_ID_OUT(fresh_wire_1141));
 
+   always @(posedge clk_in) begin
+      $display("mul in0 = %b", fresh_wire_1139);
+      $display("mul in1 = %b", fresh_wire_1140);
+      $display("mul output = %b", fresh_wire_1141);
+   end
+   
 	CELL_TYPE_ZEXT #(.PARAM_IN_WIDTH(32'h00000010),
 .PARAM_OUT_WIDTH(32'h00000011)) pe_0x29$test_pe$test_pe_comp$GEN_ADD__LEFT_BRACKET__0__RIGHT_BRACKET____DOT__full_add$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_full_add__DOT__sv__COLON__50__DOLLAR__1494$extendA(.PORT_ID_IN(fresh_wire_1142),
 .PORT_ID_OUT(fresh_wire_1143));
@@ -3597,9 +3743,21 @@ module flat_module(	output [0 : 0] aux_div_pad,
 .PORT_ID_IN1(fresh_wire_1147),
 .PORT_ID_OUT(fresh_wire_1148));
 
+   always @(posedge clk_in) begin
+      $display("fadder in0 = %b", fresh_wire_1146);
+      $display("fadder in1 = %b", fresh_wire_1157);
+      $display("fadder output = %b", fresh_wire_1148);
+   end
+   
 	CELL_TYPE_ADD #(.PARAM_WIDTH(32'h00000011)) pe_0x29$test_pe$test_pe_comp$GEN_ADD__LEFT_BRACKET__0__RIGHT_BRACKET____DOT__full_add$__DOLLAR__add__DOLLAR____FORWARD_SLASH__Users__FORWARD_SLASH__dillon__FORWARD_SLASH__CoreIRWorkspace__FORWARD_SLASH__CGRA_coreir__FORWARD_SLASH__cgra_with_config_ports__FORWARD_SLASH__test_full_add__DOT__sv__COLON__50__DOLLAR__1495$op0(.PORT_ID_IN0(fresh_wire_1149),
 .PORT_ID_IN1(fresh_wire_1150),
 .PORT_ID_OUT(fresh_wire_1151));
+
+   always @(posedge clk_in) begin
+      $display("adder in0 = %b", fresh_wire_1149);
+      $display("adder in1 = %b", fresh_wire_1150);
+      $display("adder output = %b", fresh_wire_1151);
+   end
 
 	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
 .PARAM_WIDTH(32'h00000001)) pe_0xFF__DOT__tile_id__LEFT_BRACKET__9__RIGHT_BRACKET___bit_const_9(.PORT_ID_OUT(fresh_wire_1152));
