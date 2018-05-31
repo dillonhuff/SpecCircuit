@@ -68,7 +68,8 @@ namespace FlatCircuit {
       std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
       for (unsigned long i = 0; i < simValueTable.size(); i++) {
         quadOffsetsToRawOffsets[i] = rawOffset;
-        rawOffset += storedByteLength(simValueTable[i].bitLength()) + 5;
+        // Adding extra buffer space
+        rawOffset += storedByteLength(simValueTable[i].bitLength()) + 1;
       }
 
       rawTableSize = rawOffset;
