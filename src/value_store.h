@@ -33,6 +33,11 @@ namespace FlatCircuit {
 
     ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {}
 
+    unsigned char debugGetRawTable(const int index) {
+      assert(compiledRaw);
+      return rawSimValueTable[index];
+    }
+
     void setCompiledRaw() {
       compiledRaw = true;
 
@@ -63,7 +68,7 @@ namespace FlatCircuit {
       std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
       for (unsigned long i = 0; i < simValueTable.size(); i++) {
         quadOffsetsToRawOffsets[i] = rawOffset;
-        rawOffset += storedByteLength(simValueTable[i].bitLength());
+        rawOffset += storedByteLength(simValueTable[i].bitLength()) + 5;
       }
 
       rawTableSize = rawOffset;
@@ -75,6 +80,8 @@ namespace FlatCircuit {
 
       for (auto sp : portOffsets) {
         rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+        // std::cout << "Offset for port = " <<
+        //   rawMemoryOffsets[sp.first] << std::endl;
       }
 
       for (auto sp : pastValueOffsets) {
@@ -83,6 +90,8 @@ namespace FlatCircuit {
 
       for (auto sp : memoryOffsets) {
         rawMemoryOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+        // std::cout << "Offset for memory = " <<
+        //   rawMemoryOffsets[sp.first] << std::endl;
       }
 
       for (auto sp : registerOffsets) {

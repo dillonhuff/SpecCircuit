@@ -59,13 +59,13 @@ namespace FlatCircuit {
 
     virtual std::string toString(ValueStore& valueStore) const {
       return "\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
-        lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
+        lastClkVar + ", " + clkVar + "))) { std::cout << \"Memory not writing, instead jumping to " + label + " \" << std::endl; goto " + label + "; }\n";
 
     }
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       return "\tif (!((" + wenName + ") && two_state_posedge(" +
-        lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
+        lastClkVar + ", " + clkVar + "))) { std::cout << \"Memory not writing, instead jumping to " + label + " \" << std::endl; goto " + label + "; }\n";
     }
     
   };
