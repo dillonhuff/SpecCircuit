@@ -357,7 +357,11 @@ namespace FlatCircuit {
       Module* instMod = inst->getModuleRef();
 
       // Only handle primitives for now
-      assert(!instMod->hasDef());
+      if (instMod->hasDef()) {
+        cout << "Instmod " << instMod->toString() << " has definition!" << endl;
+        assert(!instMod->hasDef());
+      }
+      
 
       CellType instType = primitiveForMod(inst);
       map<Parameter, BitVector> params = paramsForMod(e, inst);
@@ -473,6 +477,10 @@ namespace FlatCircuit {
     return e;
   }
 
+  void flatten(Env& env, CellDefinition& def) {
+    
+  }
+
   Env loadFromCoreIR(const std::string& topName,
                      const std::string& fileName) {
     Context* c = newContext();
@@ -491,15 +499,20 @@ namespace FlatCircuit {
 
     assert(top != nullptr);
 
+    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
+    //       "deletedeadinstances","add-dummy-inputs", "packconnections",
+    //       "removeconstduplicates", "flatten"});
+
     c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
           "deletedeadinstances","add-dummy-inputs", "packconnections",
-          "removeconstduplicates", "flatten"});
+          "removeconstduplicates"}); //, "flatten"});
 
     Env circuitEnv = convertFromCoreIR(c, top);
     for (auto cellDefP : circuitEnv.getCellDefs()) {
       CellType tp = cellDefP.first;
 
       cout << "Removing constants and zero extends" << endl;
+      flatten(circuitEnv, circuitEnv.getDef(tp));
       removeConstDuplicates(circuitEnv.getDef(tp));
       cullZexts(circuitEnv.getDef(tp));
       cullPassthroughs(circuitEnv.getDef(tp));

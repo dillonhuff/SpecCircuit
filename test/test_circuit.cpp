@@ -743,26 +743,26 @@ namespace FlatCircuit {
       
       sim.setFreshValue("wen", BitVector(1, 0));
 
-      cout << "Value table after setting wen" << endl;
-      sim.debugPrintRawValueTable();
+      // cout << "Value table after setting wen" << endl;
+      // sim.debugPrintRawValueTable();
       
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
-      cout << "Value table before clk for 4965 output" << endl;
-      sim.debugPrintRawValueTable();
+      // cout << "Value table before clk for 4965 output" << endl;
+      // sim.debugPrintRawValueTable();
       
       //posedge("clk", sim);
       sim.setFreshValue("clk", BitVec(1, 0));
       sim.update();
 
-      cout << "After updating clk low" << endl;
-      sim.debugPrintRawValueTable();
+      // cout << "After updating clk low" << endl;
+      // sim.debugPrintRawValueTable();
       
       sim.setFreshValue("clk", BitVec(1, 1));
       sim.update();
       
-      cout << "Value table before check for 4965 output" << endl;
-      sim.debugPrintRawValueTable();
+      // cout << "Value table before check for 4965 output" << endl;
+      // sim.debugPrintRawValueTable();
       
       REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
     }
