@@ -307,7 +307,14 @@ namespace FlatCircuit {
       return e;
     }
 
-    CellType topType = e.addCellType(top->getName());
+    for (auto ns : c->getNamespaces()) {
+      for (auto mp : ns.second->getModules()) {
+        cout << "Adding cell type " << mp.first << endl;
+        e.addCellType(mp.first);
+      }
+    }
+
+    CellType topType = e.getCellType(top->getName()); //e.addCellType(top->getName());
     auto& cDef = e.getDef(topType);
 
     //map<Instance*, CellId> instsToCells;
@@ -359,16 +366,20 @@ namespace FlatCircuit {
       // Only handle primitives for now
       if (instMod->hasDef()) {
         cout << "Instmod " << instMod->toString() << " has definition!" << endl;
-        assert(!instMod->hasDef());
+        CellType instType = e.getCellType(instMod->getName());
+
+        map<Parameter, BitVector> params = {};
+        CellId cid = cDef.addCell(inst->toString(), instType, params);
+        elemsToCells.insert({inst, cid});
+          //assert(!instMod->hasDef());
+      } else {
+        CellType instType = primitiveForMod(inst);
+        map<Parameter, BitVector> params = paramsForMod(e, inst);
+
+        CellId cid = cDef.addCell(inst->toString(), instType, params);
+        elemsToCells.insert({inst, cid});
+        //cout << "Added instance " << inst->toString() << endl;
       }
-      
-
-      CellType instType = primitiveForMod(inst);
-      map<Parameter, BitVector> params = paramsForMod(e, inst);
-
-      CellId cid = cDef.addCell(inst->toString(), instType, params);
-      elemsToCells.insert({inst, cid});
-      //cout << "Added instance " << inst->toString() << endl;
     }
 
     cout << "Added all instances" << endl;
@@ -499,13 +510,13 @@ namespace FlatCircuit {
 
     assert(top != nullptr);
 
-    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
-    //       "deletedeadinstances","add-dummy-inputs", "packconnections",
-    //       "removeconstduplicates", "flatten"});
-
     c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
           "deletedeadinstances","add-dummy-inputs", "packconnections",
-          "removeconstduplicates"}); //, "flatten"});
+          "removeconstduplicates", "flatten"});
+
+    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
+    //       "deletedeadinstances","add-dummy-inputs", "packconnections",
+    //       "removeconstduplicates"}); //, "flatten"});
 
     Env circuitEnv = convertFromCoreIR(c, top);
     for (auto cellDefP : circuitEnv.getCellDefs()) {

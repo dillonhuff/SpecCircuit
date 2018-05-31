@@ -366,11 +366,11 @@ namespace FlatCircuit {
       void (*simFunc)(unsigned char*) =
         reinterpret_cast<void (*)(unsigned char*)>(rawSimulateFuncHandle);
 
-      std::cout << "Before simulation rawtable[143] = " << (int) valueStore.debugGetRawTable(143) << std::endl;
+      //std::cout << "Before simulation rawtable[143] = " << (int) valueStore.debugGetRawTable(143) << std::endl;
 
       simFunc(valueStore.getRawValueTable());
 
-      std::cout << "After simulation rawtable[143] = " << (int) valueStore.debugGetRawTable(143) << std::endl;
+      //std::cout << "After simulation rawtable[143] = " << (int) valueStore.debugGetRawTable(143) << std::endl;
     }
 
     void update() {

@@ -1119,7 +1119,11 @@ namespace FlatCircuit {
     CellDefinition& getDef(const CellType tp) {
       return cellDefs.at(tp);
     }
-    
+
+    CellType getCellType(const std::string& cellName) {
+      return map_find(cellName, cellTypeNames);
+    }
+
     CellDefinition& getDef(const std::string& cellName) {
       return cellDefs.at(cellTypeNames.at(cellName));
     }
