@@ -42,6 +42,20 @@ def run_iverilog(app_name, tb_name, top_mod_file_name):
 
     assert(run_res == 0)
 
+def run_vcs(app_name, tb_name, top_mod_verilog_files):
+    compile_cmd = 'vcs -assert disable +nbaopt +rad +nospecify +notimingchecks -ld gcc-4.4 +vcs+lic+wait -licqueue +cli -sverilog -full64 +incdir+/hd/cad/synopsys/dc_shell/latest/packages/gtech/src_ver/ +incdir+/hd/cad/synopsys/dc_shell/latest/dw/sim_ver/ -y /hd/cad/synopsys/dc_shell/latest/dw/sim_ver/ -CFLAGS \'-O3 -march=native\' ' + tb_name + ' ' + top_mod_verilog_files + ' -top test'
+    print 'vcs compile command = ', compile_cmd
+
+    compile_res = os.system(compile_cmd)
+
+    assert(compile_res == 0)
+
+    run_cmd = './simv'
+    print 'vcs run command = ', run_cmd
+    run_res = os.system(run_cmd)
+
+    assert(run_res == 0)
+    
 # This function compares output files from the end backward. It checks whether or
 # not the results are correct
 def compare_output_files(file0, file1):
@@ -74,15 +88,15 @@ def compare_output_files(file0, file1):
     
     
 generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
-run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
+run_vcs('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
 
 generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
-run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
+run_vcs('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
 
 compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
 
 generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
-run_iverilog('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
+run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
 compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
 
