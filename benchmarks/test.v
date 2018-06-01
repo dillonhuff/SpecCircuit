@@ -26,19 +26,21 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 1000000;
+   assign max_cycles = 100;
    
    initial begin
 
       cycle_count = 0;
-      config_file = $fopen("./test/pw2_16x16_only_config_lines.bsa", "r");
-      reset_done = 0;
+//      config_file = $fopen("./test/pw2_16x16_only_config_lines.bsa", "r");
+//      config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
+//      config_file = $fopen("./test/conv_3_1_only_config_lines.bsa", "r");
+      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");                        reset_done = 0;
 
       if (config_file == 0) begin
 	 $display("config_file was null");
 	 $finish;
       end else begin
-	 //$display("Loaded config file, descriptor = %d", config_file);
+	 $display("Loaded config file, descriptor = %d", config_file);
       end
 
       #1 clk = 0;
@@ -55,7 +57,7 @@ module test();
       reset_done = 1;
       config_done = 0;
       
-      //$display("DONE WITH RESET");
+      $display("DONE WITH RESET");
 
    end // initial begin
 
@@ -73,7 +75,7 @@ module test();
 
       cycle_count <= cycle_count + 1;
 
-      //$display("clk = %d", clk);
+      $display("clk = %d", clk);
       //$display("config file = %d", config_file);
 
       if (reset_done) begin
@@ -81,7 +83,7 @@ module test();
 
 	 if (!$feof(config_file)) begin
 	 
-	    //$display("config addr = %h", config_addr);
+	    $display("config addr = %h", config_addr);
 	    //$display("config data = %h", config_data);
 	 
 	 end else begin
