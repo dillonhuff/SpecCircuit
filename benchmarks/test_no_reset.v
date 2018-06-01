@@ -1,4 +1,4 @@
-// Full system test of CGRA
+// Full system test of configured CGRA verilog.
 module test();
 
    reg [15:0]       data_driver_16_S2;
@@ -167,7 +167,6 @@ module test();
 
    always @(posedge clk) begin
       data_driver_16_S2 <= data_driver_16_S2;
-// + 1;
    end
 
    assign    {data_in_S2_T0,
