@@ -52,7 +52,7 @@ module test();
 	 $display("test_output_file was null");
 	 $finish;
       end else begin
-	 //$display("Loaded config file, descriptor = %d", config_file);
+	 $display("Loaded config file, descriptor = %d", config_file);
       end
       
       #1 clk = 0;
@@ -89,32 +89,23 @@ module test();
 
       $fwrite(test_output_file, "%b\n", data_out_16_S0);      
 
-      //$display("clk = %d", clk);
-      //$display("config file = %d", config_file);
-
       if (reset_done) begin
 	 scan_file = $fscanf(config_file, "%h %h\n", config_addr, config_data);
 
 	 if (!$feof(config_file)) begin
 	 
 	    $display("config addr = %h", config_addr);
-	    //$display("config data = %h", config_data);
+
+	    $display("config data = %h", config_data);
 	 
 	 end else begin
-//	    $display("Reached end of file!");
 	    config_done <= 1;
 	    config_addr <= 0;
-
 	 end
 
 	 if (cycle_count >= max_cycles) begin
 	    $display("Finished at cycle count %d, data in = %b, %d, data out = %b, %d", cycle_count, data_in_16_S2, data_in_16_S2, data_out_16_S0, data_out_16_S0);
             $display("\tdata driver = %b, %d", data_driver_16_S2, data_driver_16_S2);
-            
-
-	    if (data_in_16_S2*2 != data_out_16_S0) begin
-	       $display("Test FAILED, output is not 2x input!");
-	    end
 
             $fclose(config_file);
 	    $finish();
@@ -157,28 +148,6 @@ module test();
 			    data_out_S0_T14,
 			    data_out_S0_T15};
    
-   
-   
-   always @(posedge clk) begin
-//      $display("data_out_S0_T0 = %d", data_out_S0_T0);
-//      $display("data_out_S0_T1 = %d", data_out_S0_T1);
-//      $display("data_out_S0_T2 = %d", data_out_S0_T2);
-//      $display("data_out_S0_T3 = %d", data_out_S0_T3);
-//      $display("data_out_S0_T4 = %d", data_out_S0_T4);
-//      $display("data_out_S0_T5 = %d", data_out_S0_T5);
-//      $display("data_out_S0_T6 = %d", data_out_S0_T6);
-//      $display("data_out_S0_T7 = %d", data_out_S0_T7);
-//      $display("data_out_S0_T8 = %d", data_out_S0_T8);
-//      $display("data_out_S0_T9 = %d", data_out_S0_T9);
-//      $display("data_out_S0_T10 = %d", data_out_S0_T10);
-//      $display("data_out_S0_T11 = %d", data_out_S0_T11);
-//      $display("data_out_S0_T11 = %d", data_out_S0_T12);
-//      $display("data_out_S0_T11 = %d", data_out_S0_T13);
-//      $display("data_out_S0_T11 = %d", data_out_S0_T14);
-//      $display("data_out_S0_T11 = %d", data_out_S0_T15);
-   end
-
-   
    wire [0:0] data_in_S2_T0;
    wire [0:0] data_in_S2_T1;
    wire [0:0] data_in_S2_T2;
@@ -215,8 +184,9 @@ module test();
 			   data_in_S2_T15};
 
    always @(posedge clk) begin
+
       data_driver_16_S2 <= data_driver_16_S2 + 1;
-// + 1;
+
    end
 
    assign    {data_in_S2_T0,
