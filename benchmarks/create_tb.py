@@ -1,10 +1,5 @@
 import os
 
-# config_file_name = './test/conv_3_1_only_config_lines.bsa'
-# output_file_name = 'conv_3_1_tb_output.txt'
-# tb_name = 'conv_3_1_tb.v'
-# tb_file = './benchmarks/test.v'
-
 def generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_file):
     with open(tb_template_file, 'r') as myfile:
         data = myfile.read()
@@ -47,15 +42,49 @@ def run_iverilog(app_name, tb_name, top_mod_file_name):
 
     assert(run_res == 0)
 
+# This function compares output files from the end backward. It checks whether or
+# not the results are correct
+def compare_output_files(file0, file1):
+    print 'Comparing outputs of ', file0, ' and ', file1
+
+    with open(file0, 'r') as myfile:
+        file0_str = myfile.read()
+
+    with open(file1, 'r') as myfile:
+        file1_str = myfile.read()
+
+    file0_lines = file0_str.splitlines()
+    file1_lines = file1_str.splitlines()
+
+    file0_num_lines = len(file0_lines)
+    file1_num_lines = len(file1_lines)
+
+    shared_suffix_len = min(file0_num_lines, file1_num_lines)
+
+    print 'Shared suffix_len = ', shared_suffix_len
+
+    for i in range(shared_suffix_len - 1, 0, -1):
+        l0 = file0_lines[i]
+        l1 = file1_lines[i]
+
+        if l0 != l1:
+            print 'Disagreement on shared suffix line ', i, ': ', l0, ' != ', l1
+
+    print 'Done with comparison'
+    
+    
 generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
 run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
 
 generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
 run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
 
+compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
+
 generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
 run_iverilog('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
-# Q: What should the testbench structure be?
-# A: I think that I want it to be: A specialized version and an unspecialized version
-#    of each testbench, so the file name needs to be different
+compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
+
+# Adding diffs
+
