@@ -17,6 +17,7 @@ module test();
 
    integer    config_file;
    integer    scan_file;
+   integer    test_output_file;
 
    reg 	      config_done;
 
@@ -32,6 +33,8 @@ module test();
       #1 clk = 0;
 
       data_driver_16_S2 = 3;
+
+      test_output_file = $fopen("test_output.txt", "w");
 
       config_addr = 0;
       config_data = 0;
@@ -52,6 +55,9 @@ module test();
 
       cycle_count <= cycle_count + 1;
 
+      $fwrite(test_output_file, "%b\n", data_out_16_S0);
+      
+
       if (cycle_count >= max_cycles) begin
 	 $display("Finished at cycle count %d, data in = %b, %d, data out = %b, %d", cycle_count, data_in_16_S2, data_in_16_S2, data_out_16_S0, data_out_16_S0);
          $display("\tdata driver = %b, %d", data_driver_16_S2, data_driver_16_S2);
@@ -60,6 +66,8 @@ module test();
 	    $display("Test FAILED, output is not 2x input!");
 	 end
 
+         $fclose(test_output_file);
+//         $fclose(config_file);
 	 $finish();
       end
 //      end

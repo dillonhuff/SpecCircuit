@@ -89,7 +89,7 @@ namespace FlatCircuit {
       assert(!isNumber(fstPort));
     }
 
-    // Every select off of self is driven by a port cells output port    
+    // Every select off of self is driven by a port cells output port
     if (fromSelf(sel)) {
       
       if (sel->getType()->getDir() == Type::DirKind::DK_In) {
