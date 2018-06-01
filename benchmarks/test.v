@@ -10,31 +10,36 @@ module test();
    wire trst_n;
    wire tdi;
    wire tms;
-   
+
    wire tck;
 
    reg reset_done;
-   
+
    reg [31:0] config_addr;
    reg [31:0] config_data;
 
    integer    config_file;
    integer    scan_file;
+   integer    test_output_file;
 
    reg 	      config_done;
 
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 100;
+   assign max_cycles = 10000;
    
    initial begin
 
       cycle_count = 0;
+
 //      config_file = $fopen("./test/pw2_16x16_only_config_lines.bsa", "r");
 //      config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
 //      config_file = $fopen("./test/conv_3_1_only_config_lines.bsa", "r");
-      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");                        reset_done = 0;
+      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");      
+      test_output_file = $fopen("tb_output.txt", "w");
+
+      reset_done = 0;
 
       if (config_file == 0) begin
 	 $display("config_file was null");
@@ -43,10 +48,17 @@ module test();
 	 $display("Loaded config file, descriptor = %d", config_file);
       end
 
+      if (test_output_file == 0) begin
+	 $display("test_output_file was null");
+	 $finish;
+      end else begin
+	 //$display("Loaded config file, descriptor = %d", config_file);
+      end
+      
       #1 clk = 0;
 
-      data_driver_16_S2 = 0;
-      
+      data_driver_16_S2 = 3;
+
       config_addr = 0;
       config_data = 0;
 
@@ -75,7 +87,9 @@ module test();
 
       cycle_count <= cycle_count + 1;
 
-      $display("clk = %d", clk);
+      $fwrite(test_output_file, "%b\n", data_out_16_S0);      
+
+      //$display("clk = %d", clk);
       //$display("config file = %d", config_file);
 
       if (reset_done) begin
@@ -90,6 +104,7 @@ module test();
 //	    $display("Reached end of file!");
 	    config_done <= 1;
 	    config_addr <= 0;
+
 	 end
 
 	 if (cycle_count >= max_cycles) begin
@@ -101,6 +116,7 @@ module test();
 	       $display("Test FAILED, output is not 2x input!");
 	    end
 
+            $fclose(config_file);
 	    $finish();
 	 end
       end
@@ -200,25 +216,26 @@ module test();
 
    always @(posedge clk) begin
       data_driver_16_S2 <= data_driver_16_S2 + 1;
+// + 1;
    end
 
-   assign    {data_in_S2_T15,
-	      data_in_S2_T14,
-	      data_in_S2_T13,
-	      data_in_S2_T12,
-	      data_in_S2_T11,
-	      data_in_S2_T10,
-	      data_in_S2_T9,
-	      data_in_S2_T8,
-	      data_in_S2_T7,
-	      data_in_S2_T6,
-	      data_in_S2_T5,
-	      data_in_S2_T4,
-	      data_in_S2_T3,
-	      data_in_S2_T2,
+   assign    {data_in_S2_T0,
 	      data_in_S2_T1,
-	      data_in_S2_T0} = data_driver_16_S2;
-   
+	      data_in_S2_T2,
+	      data_in_S2_T3,
+	      data_in_S2_T4,
+	      data_in_S2_T5,
+	      data_in_S2_T6,
+	      data_in_S2_T7,
+	      data_in_S2_T8,
+	      data_in_S2_T9,
+	      data_in_S2_T10,
+	      data_in_S2_T11,
+	      data_in_S2_T12,
+	      data_in_S2_T13,
+	      data_in_S2_T14,
+	      data_in_S2_T15} = data_driver_16_S2;
+
    top cgra(.clk_in(clk),
 	    .reset_in(rst),
 	    .config_addr_in(config_addr),
@@ -275,6 +292,23 @@ module test();
 	    .pad_S2_T14_in(data_in_S2_T14),
 	    .pad_S2_T15_in(data_in_S2_T15),
 
+	    .pad_S3_T0_in(data_in_S0_T0),
+	    .pad_S3_T1_in(data_in_S0_T1),
+	    .pad_S3_T2_in(data_in_S0_T2),
+	    .pad_S3_T3_in(data_in_S0_T3),
+	    .pad_S3_T4_in(data_in_S0_T4),
+	    .pad_S3_T5_in(data_in_S0_T5),
+	    .pad_S3_T6_in(data_in_S0_T6),
+	    .pad_S3_T7_in(data_in_S0_T7),
+	    .pad_S3_T8_in(data_in_S0_T8),
+	    .pad_S3_T9_in(data_in_S0_T9),
+	    .pad_S3_T10_in(data_in_S0_T10),
+	    .pad_S3_T11_in(data_in_S0_T11),
+	    .pad_S3_T12_in(data_in_S0_T12),
+	    .pad_S3_T13_in(data_in_S0_T13),
+	    .pad_S3_T14_in(data_in_S0_T14),
+	    .pad_S3_T15_in(data_in_S0_T15),
+            
 	    .pad_S0_T0_out(data_out_S0_T0),
 	    .pad_S0_T1_out(data_out_S0_T1),
 	    .pad_S0_T2_out(data_out_S0_T2),

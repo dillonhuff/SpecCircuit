@@ -89,7 +89,7 @@ namespace FlatCircuit {
       assert(!isNumber(fstPort));
     }
 
-    // Every select off of self is driven by a port cells output port    
+    // Every select off of self is driven by a port cells output port
     if (fromSelf(sel)) {
       
       if (sel->getType()->getDir() == Type::DirKind::DK_In) {
@@ -307,7 +307,14 @@ namespace FlatCircuit {
       return e;
     }
 
-    CellType topType = e.addCellType(top->getName());
+    for (auto ns : c->getNamespaces()) {
+      for (auto mp : ns.second->getModules()) {
+        cout << "Adding cell type " << mp.first << endl;
+        e.addCellType(mp.first);
+      }
+    }
+
+    CellType topType = e.getCellType(top->getName()); //e.addCellType(top->getName());
     auto& cDef = e.getDef(topType);
 
     //map<Instance*, CellId> instsToCells;
@@ -357,14 +364,22 @@ namespace FlatCircuit {
       Module* instMod = inst->getModuleRef();
 
       // Only handle primitives for now
-      assert(!instMod->hasDef());
+      if (instMod->hasDef()) {
+        cout << "Instmod " << instMod->toString() << " has definition!" << endl;
+        CellType instType = e.getCellType(instMod->getName());
 
-      CellType instType = primitiveForMod(inst);
-      map<Parameter, BitVector> params = paramsForMod(e, inst);
+        map<Parameter, BitVector> params = {};
+        CellId cid = cDef.addCell(inst->toString(), instType, params);
+        elemsToCells.insert({inst, cid});
+          //assert(!instMod->hasDef());
+      } else {
+        CellType instType = primitiveForMod(inst);
+        map<Parameter, BitVector> params = paramsForMod(e, inst);
 
-      CellId cid = cDef.addCell(inst->toString(), instType, params);
-      elemsToCells.insert({inst, cid});
-      //cout << "Added instance " << inst->toString() << endl;
+        CellId cid = cDef.addCell(inst->toString(), instType, params);
+        elemsToCells.insert({inst, cid});
+        //cout << "Added instance " << inst->toString() << endl;
+      }
     }
 
     cout << "Added all instances" << endl;
@@ -473,6 +488,10 @@ namespace FlatCircuit {
     return e;
   }
 
+  void flatten(Env& env, CellDefinition& def) {
+    
+  }
+
   Env loadFromCoreIR(const std::string& topName,
                      const std::string& fileName) {
     Context* c = newContext();
@@ -495,11 +514,16 @@ namespace FlatCircuit {
           "deletedeadinstances","add-dummy-inputs", "packconnections",
           "removeconstduplicates", "flatten"});
 
+    // c->runPasses({"rungenerators", "split-inouts","delete-unused-inouts",
+    //       "deletedeadinstances","add-dummy-inputs", "packconnections",
+    //       "removeconstduplicates"}); //, "flatten"});
+
     Env circuitEnv = convertFromCoreIR(c, top);
     for (auto cellDefP : circuitEnv.getCellDefs()) {
       CellType tp = cellDefP.first;
 
       cout << "Removing constants and zero extends" << endl;
+      flatten(circuitEnv, circuitEnv.getDef(tp));
       removeConstDuplicates(circuitEnv.getDef(tp));
       cullZexts(circuitEnv.getDef(tp));
       cullPassthroughs(circuitEnv.getDef(tp));
