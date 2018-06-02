@@ -85,6 +85,3 @@ generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './b
 run_iverilog('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
 compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
-
-# Adding diffs
-
