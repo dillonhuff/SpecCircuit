@@ -27,3 +27,7 @@ conv_2_1
 conv_3_1
 conv_3_3
 mul_2
+conv_bw
+conv_2_1_specialized
+conv_bw_specialized
+*.txt
