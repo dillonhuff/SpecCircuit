@@ -304,7 +304,12 @@ namespace FlatCircuit {
                        Env& e) {
     map<Wireable*, CellId> elemsToCells;
 
+    cout << "Getting cell type for " << top->getName() << endl;
+
     CellType topType = e.getCellType(top->getName());
+
+    cout << "Celltype = " << topType << endl;
+
     auto& cDef = e.getDef(topType);
 
     map<Instance*, CellId> instsToCells;
@@ -313,6 +318,7 @@ namespace FlatCircuit {
       auto field = r.first;
       auto tp = r.second;
 
+      cout << "Adding field " << field << endl;
       PortType portTp = tp->getDir() == Type::DirKind::DK_In ? PORT_TYPE_IN : PORT_TYPE_OUT;
 
       assert((tp->getDir() == Type::DirKind::DK_Out) ||
@@ -491,183 +497,14 @@ namespace FlatCircuit {
         if (mp.second->hasDef()) {
           cout << "Adding cell type " << mp.first << endl;
           e.addCellType(mp.first);
-          //convertCellType(c, mp.second, e);
+
+          cout << "Converting definition" << endl;
+          convertCellType(c, mp.second, e);
         }
       }
     }
 
-    convertCellType(c, top, e);
-
-    // map<Wireable*, CellId> elemsToCells;
-
-    // CellType topType = e.getCellType(top->getName()); //e.addCellType(top->getName());
-    // auto& cDef = e.getDef(topType);
-
-    // map<Instance*, CellId> instsToCells;
-    
-    // for (auto r : top->getType()->getRecord()) {
-    //   auto field = r.first;
-    //   auto tp = r.second;
-
-    //   PortType portTp = tp->getDir() == Type::DirKind::DK_In ? PORT_TYPE_IN : PORT_TYPE_OUT;
-
-    //   assert((tp->getDir() == Type::DirKind::DK_Out) ||
-    //          (tp->getDir() == Type::DirKind::DK_In));
-
-    //   int portWidth = 1;
-
-    //   if (isa<ArrayType>(tp)) {
-    //     ArrayType* artp = cast<ArrayType>(tp);
-
-    //     assert(isBitType(*(artp->getElemType())));
-        
-    //     portWidth = artp->getLen();
-    //   } else if (isBitType(*tp)) {
-    //     portWidth = 1;
-    //   } else if (isa<NamedType>(tp)) {
-    //     NamedType* ntp = cast<NamedType>(tp);
-
-    //     assert(ntp->getSize() == 1);
-
-    //     portWidth = ntp->getSize();
-    //   } else {
-    //     cout << "Field " << field << " has unsupported type " << tp->toString() << endl;
-    //     assert(false);
-    //   }
-
-    //   cDef.addPort(field, portWidth, portTp);
-    //   CellId c = cDef.getPortCellId(field);
-    //   elemsToCells.insert({top->getDef()->sel("self")->sel(field), c});
-    // }
-
-    // for (auto instR : top->getDef()->getInstances()) {
-    //   Instance* inst = instR.second;
-
-    //   //cout << "Adding instance " << inst->toString() << endl;
-      
-    //   Module* instMod = inst->getModuleRef();
-
-    //   // Only handle primitives for now
-    //   if (instMod->hasDef()) {
-    //     cout << "Instmod " << instMod->toString() << " has definition!" << endl;
-    //     CellType instType = e.getCellType(instMod->getName());
-
-    //     map<Parameter, BitVector> params = {};
-    //     CellId cid = cDef.addCell(inst->toString(), instType, params);
-    //     elemsToCells.insert({inst, cid});
-    //       //assert(!instMod->hasDef());
-    //   } else {
-    //     CellType instType = primitiveForMod(inst);
-    //     map<Parameter, BitVector> params = paramsForMod(e, inst);
-
-    //     CellId cid = cDef.addCell(inst->toString(), instType, params);
-    //     elemsToCells.insert({inst, cid});
-    //     //cout << "Added instance " << inst->toString() << endl;
-    //   }
-    // }
-
-    // cout << "Added all instances" << endl;
-
-    // for (auto conn : top->getDef()->getConnections()) {
-    //   Wireable* fst = conn.first;
-    //   Wireable* snd = conn.second;
-
-    //   assert(isa<Select>(fst));
-    //   assert(isa<Select>(snd));
-
-    //   Wireable* fstSrc = extractSource(cast<Select>(fst));
-    //   Wireable* sndSrc = extractSource(cast<Select>(snd));
-
-    //   assert(dbhc::contains_key(fstSrc, elemsToCells));
-    //   assert(dbhc::contains_key(sndSrc, elemsToCells));
-
-    //   CellId driverId;
-    //   CellId receiverId;
-
-    //   Select* driverSel;
-    //   Select* receiverSel;
-
-    //   if (fst->getType()->getDir() == Type::DirKind::DK_Out) {
-    //     driverSel = cast<Select>(fst);
-    //     receiverSel = cast<Select>(snd);
-        
-    //     driverId = elemsToCells.at(fstSrc);
-    //     receiverId = elemsToCells.at(sndSrc);
-    //   } else {
-    //     driverSel = cast<Select>(snd);
-    //     receiverSel = cast<Select>(fst);
-        
-    //     driverId = elemsToCells.at(sndSrc);
-    //     receiverId = elemsToCells.at(fstSrc);
-    //   }
-
-    //   Cell& driver = cDef.getCellRef(driverId);
-    //   Cell& receiver = cDef.getCellRef(receiverId);
-
-    //   // Cases:
-    //   // Bit by bit connection
-    //   //   - Each bit could be: bit select off array or bit output
-    //   // Array by array connection
-
-    //   // Port on driver driving connectoin
-    //   PortId driverPort = getPortId(driverSel);
-
-    //   // Port on receiver receiving connection
-    //   PortId receiverPort = getPortId(receiverSel);
-
-    //   // cout << "Adding drivers for" << endl;
-    //   // cout << "\tDriver           : " << driverSel->toString() << endl;
-    //   // cout << "\tReceiverSel      : " << receiverSel->toString() << endl;
-
-    //   // cout << "\tDriver Cell      : " << driverId << endl;
-    //   // cout << "\tReceiver Cell    : " << receiverId << endl;
-
-    //   // cout << "\tDriver Port      : " << driverPort << endl;
-    //   // cout << "\tReceiver Port    : " << receiverPort << endl;
-
-    //   // NOTE: Assuming named types are clk or reset
-    //   bool isBitConn = isBitType(*(driverSel->getType())) || isa<NamedType>(driverSel->getType());
-    //   if (isBitConn) {
-    //     assert(isBitType(*(receiverSel->getType())) || isa<NamedType>(receiverSel->getType()));
-
-    //     // TODO: Compute real connection offsets
-    //     int driverOffset = getBitOffset(driverSel);
-    //     int receiverOffset = getBitOffset(receiverSel);
-
-    //     SignalBit driverBit{driverId, driverPort, driverOffset};
-    //     SignalBit receiverBit{receiverId, receiverPort, receiverOffset};
-
-    //     // Connection types: Bit to bit, or array of bits to array of bits
-
-    //     receiver.setDriver(receiverPort, receiverOffset, driverBit);
-
-    //     //cout << "Set driver on receiver port" << endl;
-
-    //     driver.addReceiver(driverPort, driverOffset, receiverBit);
-
-    //     //cout << "Done adding drivers" << endl;
-    //   } else {
-    //     assert(isBitArray(*(driverSel->getType())));
-    //     assert(isBitArray(*(receiverSel->getType())));
-
-    //     int width = driver.getPortWidth(driverPort);
-    //     for (int i = 0; i < width; i++) {
-
-    //       SignalBit driverBit{driverId, driverPort, i};
-    //       SignalBit receiverBit{receiverId, receiverPort, i};
-
-    //       receiver.setDriver(receiverPort, i, driverBit);
-    //       driver.addReceiver(driverPort, i, receiverBit);
-          
-    //     }
-
-    //     // cout << "After connecting" << endl;
-    //     // for (auto sigBit : receiver.getDrivers(receiverPort).signals) {
-    //     //   cout << "\t" << toString(sigBit) << endl;
-    //     // }
-        
-    //   }
-    // }
+    //convertCellType(c, top, e);
     
     return e;
   }
