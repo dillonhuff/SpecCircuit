@@ -59,11 +59,17 @@ def compare_output_files(file0, file1):
     file0_num_lines = len(file0_lines)
     file1_num_lines = len(file1_lines)
 
-    shared_suffix_len = min(file0_num_lines, file1_num_lines)
+    assert(file0_num_lines == file1_num_lines)
 
-    print 'Shared suffix_len = ', shared_suffix_len
+    # 0 1
+    # 0 1
+    # 0 0
+    # 0 0
 
-    for i in range(shared_suffix_len - 1, 0, -1):
+    # Shared len == 2
+
+    num_lines = file0_num_lines
+    for i in range(0, num_lines):
         l0 = file0_lines[i]
         l1 = file1_lines[i]
 
@@ -71,8 +77,7 @@ def compare_output_files(file0, file1):
             print 'Disagreement on shared suffix line ', i, ': ', l0, ' != ', l1
 
     print 'Done with comparison'
-    
-    
+
 generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
 run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
 
