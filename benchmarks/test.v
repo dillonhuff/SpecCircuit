@@ -1,8 +1,16 @@
 // Full system test of CGRA
 module test();
 
+   reg [15:0]       data_driver_16_S0;
+   reg [15:0]       data_driver_16_S1;
    reg [15:0]       data_driver_16_S2;
+   reg [15:0]       data_driver_16_S3;
 
+   wire [15:0] data_out_16_S0;
+   wire [15:0] data_out_16_S1;
+   wire [15:0] data_out_16_S2;
+   wire [15:0] data_out_16_S3;
+   
    reg clk;
    reg rst;
 
@@ -79,11 +87,6 @@ module test();
    wire [15:0] data_in_16_S2;
    wire [15:0] data_in_16_S3;
 
-   wire [15:0] data_out_16_S0;
-   wire [15:0] data_out_16_S1;
-   wire [15:0] data_out_16_S2;
-   wire [15:0] data_out_16_S3;
-   
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
 
@@ -356,7 +359,7 @@ module test();
 	      data_in_S0_T12,
 	      data_in_S0_T13,
 	      data_in_S0_T14,
-	      data_in_S0_T15} = data_driver_16_S2;
+	      data_in_S0_T15} = data_driver_16_S0;
 
    assign    {data_in_S1_T0,
 	      data_in_S1_T1,
@@ -373,7 +376,7 @@ module test();
 	      data_in_S1_T12,
 	      data_in_S1_T13,
 	      data_in_S1_T14,
-	      data_in_S1_T15} = data_driver_16_S2;
+	      data_in_S1_T15} = data_driver_16_S1;
 
    assign    {data_in_S2_T0,
 	      data_in_S2_T1,
@@ -407,7 +410,7 @@ module test();
 	      data_in_S3_T12,
 	      data_in_S3_T13,
 	      data_in_S3_T14,
-	      data_in_S3_T15} = data_driver_16_S2;
+	      data_in_S3_T15} = data_driver_16_S3;
    
    top cgra(.clk_in(clk),
 	    .reset_in(rst),
