@@ -301,12 +301,13 @@ namespace FlatCircuit {
 
   void convertCellType(CoreIR::Context* const c,
                        CoreIR::Module* const top,
-                       Env& e) {
+                       Env& e,
+                       const CellType topType) {
     map<Wireable*, CellId> elemsToCells;
 
-    cout << "Getting cell type for " << top->getName() << endl;
+    //cout << "Getting cell type for " << top->getName() << endl;
 
-    CellType topType = e.getCellType(top->getName());
+    //CellType topType = e.getCellType(top->getName());
 
     cout << "Celltype = " << topType << endl;
 
@@ -352,6 +353,8 @@ namespace FlatCircuit {
       cout << "Selected field " << field << endl;
     }
 
+    cout << "Adding instances" << endl;
+    
     for (auto instR : top->getDef()->getInstances()) {
       Instance* inst = instR.second;
 
@@ -495,16 +498,17 @@ namespace FlatCircuit {
 
         // For primitives there is nothing to convert
         if (mp.second->hasDef()) {
-          cout << "Adding cell type " << mp.first << endl;
+          //cout << "Adding cell type " << mp.first << endl;
           e.addCellType(mp.first);
 
-          cout << "Converting definition" << endl;
-          convertCellType(c, mp.second, e);
+          //cout << "Converting definition" << endl;
+          //convertCellType(c, mp.second, e, cellTp);
         }
       }
     }
 
-    //convertCellType(c, top, e);
+    CellType topType = e.getCellType(top->getName());
+    convertCellType(c, top, e, topType);
     
     return e;
   }
