@@ -89,7 +89,7 @@ module CELL_TYPE_ZEXT #(parameter PARAM_IN_WIDTH=1, parameter PARAM_OUT_WIDTH=1)
  endmodule
 
 
-module flat_module(	output [0 : 0] aux_div_pad,
+module top(	output [0 : 0] aux_div_pad,
 	input [0 : 0] clk_ext_in,
 	input [0 : 0] clk_in,
 	input [31 : 0] config_addr_in,

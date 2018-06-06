@@ -1,5 +1,20 @@
 import os
 
+
+# Must replace x constants to avoid messing up linebuffer initialization
+def remove_x_constants(verilog_file_name):
+    myfile = open(verilog_file_name, 'r')
+    file_str = myfile.read()
+    myfile.close()
+
+    no_x_str = file_str.replace('\'hx', '\'h0')
+
+    outfile = open(verilog_file_name, 'w')
+    outfile.write(no_x_str)
+    outfile.close()
+
+remove_x_constants('conv_2_1_cgra_no_x.v')
+
 def generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_file):
     with open(tb_template_file, 'r') as myfile:
         data = myfile.read()
@@ -30,6 +45,8 @@ def generate_tb_for_application_from_template(app_name, bitstream_name, tb_templ
     generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_name)
 
 def run_iverilog(app_name, tb_name, top_mod_file_name):
+    remove_x_constants(top_mod_file_name)
+
     compile_cmd = 'iverilog -o ' + app_name + ' ' + tb_name + ' ' + top_mod_file_name
     print 'iverilog compile command = ', compile_cmd
     compile_res = os.system(compile_cmd)
@@ -80,13 +97,13 @@ def compare_output_files(file0, file1):
 
 generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
 run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
+#compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
 
-generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
-run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
+# generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
+# run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
+# compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
 
-compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
+# generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
+# run_iverilog('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
-generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
-run_iverilog('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
-
-compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
+# compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
