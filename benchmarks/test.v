@@ -72,11 +72,17 @@ module test();
    always #2 clk = ~clk;
 
    reg [0:0] data_in_S0_T0_reg;
-   wire      data_in_S0_T0 = 1'b0;
    
 
+   wire [15:0] data_in_16_S0;
+   wire [15:0] data_in_16_S1;
    wire [15:0] data_in_16_S2;
+   wire [15:0] data_in_16_S3;
+
    wire [15:0] data_out_16_S0;
+   wire [15:0] data_out_16_S1;
+   wire [15:0] data_out_16_S2;
+   wire [15:0] data_out_16_S3;
    
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
@@ -142,7 +148,143 @@ module test();
 			    data_out_S0_T13,
 			    data_out_S0_T14,
 			    data_out_S0_T15};
+
+   wire [0:0] data_out_S1_T0;
+   wire [0:0] data_out_S1_T1;
+   wire [0:0] data_out_S1_T2;
+   wire [0:0] data_out_S1_T3;
+   wire [0:0] data_out_S1_T4;
+   wire [0:0] data_out_S1_T5;
+   wire [0:0] data_out_S1_T6;
+   wire [0:0] data_out_S1_T7;
+   wire [0:0] data_out_S1_T8;
+   wire [0:0] data_out_S1_T9;
+   wire [0:0] data_out_S1_T10;
+   wire [0:0] data_out_S1_T11;
+   wire [0:0] data_out_S1_T12;
+   wire [0:0] data_out_S1_T13;
+   wire [0:0] data_out_S1_T14;
+   wire [0:0] data_out_S1_T15;
+
+   assign data_out_16_S1 = {data_out_S1_T0,
+			    data_out_S1_T1,
+			    data_out_S1_T2,
+			    data_out_S1_T3,
+			    data_out_S1_T4,
+			    data_out_S1_T5,
+			    data_out_S1_T6,
+			    data_out_S1_T7,
+			    data_out_S1_T8,
+			    data_out_S1_T9,
+			    data_out_S1_T10,
+			    data_out_S1_T11,
+			    data_out_S1_T12,
+			    data_out_S1_T13,
+			    data_out_S1_T14,
+			    data_out_S1_T15};
+
+   wire [0:0] data_out_S2_T0;
+   wire [0:0] data_out_S2_T1;
+   wire [0:0] data_out_S2_T2;
+   wire [0:0] data_out_S2_T3;
+   wire [0:0] data_out_S2_T4;
+   wire [0:0] data_out_S2_T5;
+   wire [0:0] data_out_S2_T6;
+   wire [0:0] data_out_S2_T7;
+   wire [0:0] data_out_S2_T8;
+   wire [0:0] data_out_S2_T9;
+   wire [0:0] data_out_S2_T10;
+   wire [0:0] data_out_S2_T11;
+   wire [0:0] data_out_S2_T12;
+   wire [0:0] data_out_S2_T13;
+   wire [0:0] data_out_S2_T14;
+   wire [0:0] data_out_S2_T15;
+
+   assign data_out_16_S2 = {data_out_S2_T0,
+			    data_out_S2_T1,
+			    data_out_S2_T2,
+			    data_out_S2_T3,
+			    data_out_S2_T4,
+			    data_out_S2_T5,
+			    data_out_S2_T6,
+			    data_out_S2_T7,
+			    data_out_S2_T8,
+			    data_out_S2_T9,
+			    data_out_S2_T10,
+			    data_out_S2_T11,
+			    data_out_S2_T12,
+			    data_out_S2_T13,
+			    data_out_S2_T14,
+			    data_out_S2_T15};
+
+   wire [0:0] data_out_S3_T0;
+   wire [0:0] data_out_S3_T1;
+   wire [0:0] data_out_S3_T2;
+   wire [0:0] data_out_S3_T3;
+   wire [0:0] data_out_S3_T4;
+   wire [0:0] data_out_S3_T5;
+   wire [0:0] data_out_S3_T6;
+   wire [0:0] data_out_S3_T7;
+   wire [0:0] data_out_S3_T8;
+   wire [0:0] data_out_S3_T9;
+   wire [0:0] data_out_S3_T10;
+   wire [0:0] data_out_S3_T11;
+   wire [0:0] data_out_S3_T12;
+   wire [0:0] data_out_S3_T13;
+   wire [0:0] data_out_S3_T14;
+   wire [0:0] data_out_S3_T15;
+
+   assign data_out_16_S3 = {data_out_S3_T0,
+			    data_out_S3_T1,
+			    data_out_S3_T2,
+			    data_out_S3_T3,
+			    data_out_S3_T4,
+			    data_out_S3_T5,
+			    data_out_S3_T6,
+			    data_out_S3_T7,
+			    data_out_S3_T8,
+			    data_out_S3_T9,
+			    data_out_S3_T10,
+			    data_out_S3_T11,
+			    data_out_S3_T12,
+			    data_out_S3_T13,
+			    data_out_S3_T14,
+			    data_out_S3_T15};
    
+   wire [0:0] data_in_S0_T0;
+   wire [0:0] data_in_S0_T1;
+   wire [0:0] data_in_S0_T2;
+   wire [0:0] data_in_S0_T3;
+   wire [0:0] data_in_S0_T4;
+   wire [0:0] data_in_S0_T5;
+   wire [0:0] data_in_S0_T6;
+   wire [0:0] data_in_S0_T7;
+   wire [0:0] data_in_S0_T8;
+   wire [0:0] data_in_S0_T9;
+   wire [0:0] data_in_S0_T10;
+   wire [0:0] data_in_S0_T11;
+   wire [0:0] data_in_S0_T12;
+   wire [0:0] data_in_S0_T13;
+   wire [0:0] data_in_S0_T14;
+   wire [0:0] data_in_S0_T15;   
+
+   wire [0:0] data_in_S1_T0;
+   wire [0:0] data_in_S1_T1;
+   wire [0:0] data_in_S1_T2;
+   wire [0:0] data_in_S1_T3;
+   wire [0:0] data_in_S1_T4;
+   wire [0:0] data_in_S1_T5;
+   wire [0:0] data_in_S1_T6;
+   wire [0:0] data_in_S1_T7;
+   wire [0:0] data_in_S1_T8;
+   wire [0:0] data_in_S1_T9;
+   wire [0:0] data_in_S1_T10;
+   wire [0:0] data_in_S1_T11;
+   wire [0:0] data_in_S1_T12;
+   wire [0:0] data_in_S1_T13;
+   wire [0:0] data_in_S1_T14;
+   wire [0:0] data_in_S1_T15;   
+
    wire [0:0] data_in_S2_T0;
    wire [0:0] data_in_S2_T1;
    wire [0:0] data_in_S2_T2;
@@ -159,7 +301,24 @@ module test();
    wire [0:0] data_in_S2_T13;
    wire [0:0] data_in_S2_T14;
    wire [0:0] data_in_S2_T15;   
-
+   
+   wire [0:0] data_in_S3_T0;
+   wire [0:0] data_in_S3_T1;
+   wire [0:0] data_in_S3_T2;
+   wire [0:0] data_in_S3_T3;
+   wire [0:0] data_in_S3_T4;
+   wire [0:0] data_in_S3_T5;
+   wire [0:0] data_in_S3_T6;
+   wire [0:0] data_in_S3_T7;
+   wire [0:0] data_in_S3_T8;
+   wire [0:0] data_in_S3_T9;
+   wire [0:0] data_in_S3_T10;
+   wire [0:0] data_in_S3_T11;
+   wire [0:0] data_in_S3_T12;
+   wire [0:0] data_in_S3_T13;
+   wire [0:0] data_in_S3_T14;
+   wire [0:0] data_in_S3_T15;   
+   
    assign data_in_16_S2 = {
 			   data_in_S2_T0,
 			   data_in_S2_T1,
@@ -182,6 +341,40 @@ module test();
       data_driver_16_S2 <= data_driver_16_S2;
    end
 
+   assign    {data_in_S0_T0,
+	      data_in_S0_T1,
+	      data_in_S0_T2,
+	      data_in_S0_T3,
+	      data_in_S0_T4,
+	      data_in_S0_T5,
+	      data_in_S0_T6,
+	      data_in_S0_T7,
+	      data_in_S0_T8,
+	      data_in_S0_T9,
+	      data_in_S0_T10,
+	      data_in_S0_T11,
+	      data_in_S0_T12,
+	      data_in_S0_T13,
+	      data_in_S0_T14,
+	      data_in_S0_T15} = data_driver_16_S2;
+
+   assign    {data_in_S1_T0,
+	      data_in_S1_T1,
+	      data_in_S1_T2,
+	      data_in_S1_T3,
+	      data_in_S1_T4,
+	      data_in_S1_T5,
+	      data_in_S1_T6,
+	      data_in_S1_T7,
+	      data_in_S1_T8,
+	      data_in_S1_T9,
+	      data_in_S1_T10,
+	      data_in_S1_T11,
+	      data_in_S1_T12,
+	      data_in_S1_T13,
+	      data_in_S1_T14,
+	      data_in_S1_T15} = data_driver_16_S2;
+
    assign    {data_in_S2_T0,
 	      data_in_S2_T1,
 	      data_in_S2_T2,
@@ -199,45 +392,62 @@ module test();
 	      data_in_S2_T14,
 	      data_in_S2_T15} = data_driver_16_S2;
 
+   assign    {data_in_S3_T0,
+	      data_in_S3_T1,
+	      data_in_S3_T2,
+	      data_in_S3_T3,
+	      data_in_S3_T4,
+	      data_in_S3_T5,
+	      data_in_S3_T6,
+	      data_in_S3_T7,
+	      data_in_S3_T8,
+	      data_in_S3_T9,
+	      data_in_S3_T10,
+	      data_in_S3_T11,
+	      data_in_S3_T12,
+	      data_in_S3_T13,
+	      data_in_S3_T14,
+	      data_in_S3_T15} = data_driver_16_S2;
+   
    top cgra(.clk_in(clk),
 	    .reset_in(rst),
 	    .config_addr_in(config_addr),
 	    .config_data_in(config_data),
 
 	    .pad_S0_T0_in(data_in_S0_T0),
-	    .pad_S0_T1_in(data_in_S0_T0),
-	    .pad_S0_T2_in(data_in_S0_T0),
-	    .pad_S0_T3_in(data_in_S0_T0),
-	    .pad_S0_T4_in(data_in_S0_T0),
-	    .pad_S0_T5_in(data_in_S0_T0),
-	    .pad_S0_T6_in(data_in_S0_T0),
-	    .pad_S0_T7_in(data_in_S0_T0),
-	    .pad_S0_T8_in(data_in_S0_T0),
-	    .pad_S0_T9_in(data_in_S0_T0),
-	    .pad_S0_T10_in(data_in_S0_T0),
-	    .pad_S0_T11_in(data_in_S0_T0),
-	    .pad_S0_T12_in(data_in_S0_T0),
-	    .pad_S0_T13_in(data_in_S0_T0),
-	    .pad_S0_T14_in(data_in_S0_T0),
-	    .pad_S0_T15_in(data_in_S0_T0),
+	    .pad_S0_T1_in(data_in_S0_T1),
+	    .pad_S0_T2_in(data_in_S0_T2),
+	    .pad_S0_T3_in(data_in_S0_T3),
+	    .pad_S0_T4_in(data_in_S0_T4),
+	    .pad_S0_T5_in(data_in_S0_T4),
+	    .pad_S0_T6_in(data_in_S0_T6),
+	    .pad_S0_T7_in(data_in_S0_T7),
+	    .pad_S0_T8_in(data_in_S0_T8),
+	    .pad_S0_T9_in(data_in_S0_T9),
+	    .pad_S0_T10_in(data_in_S0_T10),
+	    .pad_S0_T11_in(data_in_S0_T11),
+	    .pad_S0_T12_in(data_in_S0_T12),
+	    .pad_S0_T13_in(data_in_S0_T13),
+	    .pad_S0_T14_in(data_in_S0_T14),
+	    .pad_S0_T15_in(data_in_S0_T15),
 
-	    .pad_S1_T0_in(data_in_S0_T0),
-	    .pad_S1_T1_in(data_in_S0_T0),
-	    .pad_S1_T2_in(data_in_S0_T0),
-	    .pad_S1_T3_in(data_in_S0_T0),
-	    .pad_S1_T4_in(data_in_S0_T0),
-	    .pad_S1_T5_in(data_in_S0_T0),
-	    .pad_S1_T6_in(data_in_S0_T0),
-	    .pad_S1_T7_in(data_in_S0_T0),
-	    .pad_S1_T8_in(data_in_S0_T0),
-	    .pad_S1_T9_in(data_in_S0_T0),
-	    .pad_S1_T10_in(data_in_S0_T0),
-	    .pad_S1_T11_in(data_in_S0_T0),
-	    .pad_S1_T12_in(data_in_S0_T0),
-	    .pad_S1_T13_in(data_in_S0_T0),
-	    .pad_S1_T14_in(data_in_S0_T0),
-	    .pad_S1_T15_in(data_in_S0_T0),
-	    
+	    .pad_S1_T0_in(data_in_S1_T0),
+	    .pad_S1_T1_in(data_in_S1_T1),
+	    .pad_S1_T2_in(data_in_S1_T2),
+	    .pad_S1_T3_in(data_in_S1_T3),
+	    .pad_S1_T4_in(data_in_S1_T4),
+	    .pad_S1_T5_in(data_in_S1_T4),
+	    .pad_S1_T6_in(data_in_S1_T6),
+	    .pad_S1_T7_in(data_in_S1_T7),
+	    .pad_S1_T8_in(data_in_S1_T8),
+	    .pad_S1_T9_in(data_in_S1_T9),
+	    .pad_S1_T10_in(data_in_S1_T10),
+	    .pad_S1_T11_in(data_in_S1_T11),
+	    .pad_S1_T12_in(data_in_S1_T12),
+	    .pad_S1_T13_in(data_in_S1_T13),
+	    .pad_S1_T14_in(data_in_S1_T14),
+	    .pad_S1_T15_in(data_in_S1_T15),
+            
 	    .pad_S2_T0_in(data_in_S2_T0),
 	    .pad_S2_T1_in(data_in_S2_T1),
 	    .pad_S2_T2_in(data_in_S2_T2),
@@ -255,22 +465,22 @@ module test();
 	    .pad_S2_T14_in(data_in_S2_T14),
 	    .pad_S2_T15_in(data_in_S2_T15),
 
-	    .pad_S3_T0_in(data_in_S0_T0),
-	    .pad_S3_T1_in(data_in_S0_T1),
-	    .pad_S3_T2_in(data_in_S0_T2),
-	    .pad_S3_T3_in(data_in_S0_T3),
-	    .pad_S3_T4_in(data_in_S0_T4),
-	    .pad_S3_T5_in(data_in_S0_T5),
-	    .pad_S3_T6_in(data_in_S0_T6),
-	    .pad_S3_T7_in(data_in_S0_T7),
-	    .pad_S3_T8_in(data_in_S0_T8),
-	    .pad_S3_T9_in(data_in_S0_T9),
-	    .pad_S3_T10_in(data_in_S0_T10),
-	    .pad_S3_T11_in(data_in_S0_T11),
-	    .pad_S3_T12_in(data_in_S0_T12),
-	    .pad_S3_T13_in(data_in_S0_T13),
-	    .pad_S3_T14_in(data_in_S0_T14),
-	    .pad_S3_T15_in(data_in_S0_T15),
+	    .pad_S3_T0_in(data_in_S3_T0),
+	    .pad_S3_T1_in(data_in_S3_T1),
+	    .pad_S3_T2_in(data_in_S3_T2),
+	    .pad_S3_T3_in(data_in_S3_T3),
+	    .pad_S3_T4_in(data_in_S3_T4),
+	    .pad_S3_T5_in(data_in_S3_T5),
+	    .pad_S3_T6_in(data_in_S3_T6),
+	    .pad_S3_T7_in(data_in_S3_T7),
+	    .pad_S3_T8_in(data_in_S3_T8),
+	    .pad_S3_T9_in(data_in_S3_T9),
+	    .pad_S3_T10_in(data_in_S3_T10),
+	    .pad_S3_T11_in(data_in_S3_T11),
+	    .pad_S3_T12_in(data_in_S3_T12),
+	    .pad_S3_T13_in(data_in_S3_T13),
+	    .pad_S3_T14_in(data_in_S3_T14),
+	    .pad_S3_T15_in(data_in_S3_T15),
             
 	    .pad_S0_T0_out(data_out_S0_T0),
 	    .pad_S0_T1_out(data_out_S0_T1),
@@ -288,6 +498,57 @@ module test();
 	    .pad_S0_T13_out(data_out_S0_T13),
 	    .pad_S0_T14_out(data_out_S0_T14),
 	    .pad_S0_T15_out(data_out_S0_T15),	    
+
+	    .pad_S1_T0_out(data_out_S1_T0),
+	    .pad_S1_T1_out(data_out_S1_T1),
+	    .pad_S1_T2_out(data_out_S1_T2),
+	    .pad_S1_T3_out(data_out_S1_T3),	    	    
+	    .pad_S1_T4_out(data_out_S1_T4),
+	    .pad_S1_T5_out(data_out_S1_T5),
+	    .pad_S1_T6_out(data_out_S1_T6),
+	    .pad_S1_T7_out(data_out_S1_T7),
+	    .pad_S1_T8_out(data_out_S1_T8),
+	    .pad_S1_T9_out(data_out_S1_T9),
+	    .pad_S1_T10_out(data_out_S1_T10),
+	    .pad_S1_T11_out(data_out_S1_T11),
+	    .pad_S1_T12_out(data_out_S1_T12),
+	    .pad_S1_T13_out(data_out_S1_T13),
+	    .pad_S1_T14_out(data_out_S1_T14),
+	    .pad_S1_T15_out(data_out_S1_T15),	    
+
+	    .pad_S2_T0_out(data_out_S2_T0),
+	    .pad_S2_T1_out(data_out_S2_T1),
+	    .pad_S2_T2_out(data_out_S2_T2),
+	    .pad_S2_T3_out(data_out_S2_T3),	    	    
+	    .pad_S2_T4_out(data_out_S2_T4),
+	    .pad_S2_T5_out(data_out_S2_T5),
+	    .pad_S2_T6_out(data_out_S2_T6),
+	    .pad_S2_T7_out(data_out_S2_T7),
+	    .pad_S2_T8_out(data_out_S2_T8),
+	    .pad_S2_T9_out(data_out_S2_T9),
+	    .pad_S2_T10_out(data_out_S2_T10),
+	    .pad_S2_T11_out(data_out_S2_T11),
+	    .pad_S2_T12_out(data_out_S2_T12),
+	    .pad_S2_T13_out(data_out_S2_T13),
+	    .pad_S2_T14_out(data_out_S2_T14),
+	    .pad_S2_T15_out(data_out_S2_T15),	    
+
+	    .pad_S3_T0_out(data_out_S3_T0),
+	    .pad_S3_T1_out(data_out_S3_T1),
+	    .pad_S3_T2_out(data_out_S3_T2),
+	    .pad_S3_T3_out(data_out_S3_T3),	    	    
+	    .pad_S3_T4_out(data_out_S3_T4),
+	    .pad_S3_T5_out(data_out_S3_T5),
+	    .pad_S3_T6_out(data_out_S3_T6),
+	    .pad_S3_T7_out(data_out_S3_T7),
+	    .pad_S3_T8_out(data_out_S3_T8),
+	    .pad_S3_T9_out(data_out_S3_T9),
+	    .pad_S3_T10_out(data_out_S3_T10),
+	    .pad_S3_T11_out(data_out_S3_T11),
+	    .pad_S3_T12_out(data_out_S3_T12),
+	    .pad_S3_T13_out(data_out_S3_T13),
+	    .pad_S3_T14_out(data_out_S3_T14),
+	    .pad_S3_T15_out(data_out_S3_T15),	    
 	    
 	    .tdi(tdi),
 	    .tms(tms),
