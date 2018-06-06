@@ -101,31 +101,26 @@ def compare_output_files(file0, file1):
         print 'Files are equivalent on lines', i, ' ', j
 
     # Now move backward finding first disagreement?
-    ind = 0
-    while (ind < min(file0_num_lines, file1_num_lines)):
-        f0l = file0_lines[i + ind]
-        f1l = file1_lines[j + ind]
+    i_ind = i
+    j_ind = j
+    first_agreement_location_i = i
+    first_agreement_location_j = j
+    
+    while (i_ind >= 0 and j_ind >= 0):
+        f0l = file0_lines[i_ind]
+        f1l = file1_lines[j_ind]
 
         if (f0l != f1l):
             print 'Error: lines ', i + ind, ' ', j + ind, 'disagree!'
             break
 
-        ind += 1
-            
-    # # 0 1
-    # # 0 1
-    # # 0 0
-    # # 0 0
+        first_agreement_location_i = i_ind
+        first_agreement_location_j = j_ind
 
-    # # Shared len == 2
+        i_ind -= 1
+        j_ind -= 1
 
-    # num_lines = file0_num_lines
-    # for i in range(0, num_lines):
-    #     l0 = file0_lines[i]
-    #     l1 = file1_lines[i]
-
-    #     if l0 != l1:
-    #         print 'Disagreement on shared suffix line ', i, ': ', l0, ' != ', l1
+    print 'First agreement lines are ', first_agreement_location_i, ' and ', first_agreement_location_j
 
     print 'Done with comparison'
 
