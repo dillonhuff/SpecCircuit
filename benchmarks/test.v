@@ -108,8 +108,20 @@ module test();
 	 end
 
 	 if (cycle_count >= max_cycles) begin
-	    $display("Finished at cycle count %d, data in = %b, %d, data out = %b, %d", cycle_count, data_in_16_S2, data_in_16_S2, data_out_16_S0, data_out_16_S0);
-            $display("\tdata driver = %b, %d", data_driver_16_S2, data_driver_16_S2);
+	    $display("Finished at cycle count %d", cycle_count);
+
+            $display("\tdata in side 0 = %b, %d", data_driver_16_S0, data_driver_16_S0);
+            $display("\tdata in side 1 = %b, %d", data_driver_16_S1, data_driver_16_S1);
+            $display("\tdata in side 2 = %b, %d", data_driver_16_S2, data_driver_16_S2);
+            $display("\tdata in side 3 = %b, %d", data_driver_16_S3, data_driver_16_S3);
+
+            $display("\n");
+            //            $display("\tdata driver side 0 = %b, %d", data_driver_16_S2, data_driver_16_S2);
+
+            $display("\tdata out side 0 = %b, %d", data_out_16_S0, data_out_16_S0);
+            $display("\tdata out side 1 = %b, %d", data_out_16_S1, data_out_16_S1);
+            $display("\tdata out side 2 = %b, %d", data_out_16_S2, data_out_16_S2);
+            $display("\tdata out side 3 = %b, %d", data_out_16_S3, data_out_16_S3);
 
             $fclose(config_file);
 	    $finish();
