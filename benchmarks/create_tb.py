@@ -78,26 +78,60 @@ def compare_output_files(file0, file1):
 
     assert(file0_num_lines == file1_num_lines)
 
-    # 0 1
-    # 0 1
-    # 0 0
-    # 0 0
+    # Really we are trying to find the start of a section of total agreement, ignoring
+    # the x values at the start. There should be a fixed size prefix we can truncate
+    # from one of the files after which every line will be equivalent
+    found_eq_line = False
+    eq_0_line = 0
+    eq_1_line = 1
+    for i in xrange(file0_num_lines - 1, 0, -1):
+        for j in xrange(file1_num_lines - 1, 0, -1):
+            file0_line = file0_lines[i]
+            file1_line = file1_lines[j]
 
-    # Shared len == 2
+            if (file0_line == file1_line):
+                found_eq_line = True
+                eq_0_line = i
+                eq_1_line = j
+                break
+        if found_eq_line:
+            break;
 
-    num_lines = file0_num_lines
-    for i in range(0, num_lines):
-        l0 = file0_lines[i]
-        l1 = file1_lines[i]
+    if (found_eq_line):
+        print 'Files are equivalent on lines', i, ' ', j
 
-        if l0 != l1:
-            print 'Disagreement on shared suffix line ', i, ': ', l0, ' != ', l1
+    # Now move backward finding first disagreement?
+    ind = 0
+    while (ind < min(file0_num_lines, file1_num_lines)):
+        f0l = file0_lines[i + ind]
+        f1l = file1_lines[j + ind]
+
+        if (f0l != f1l):
+            print 'Error: lines ', i + ind, ' ', j + ind, 'disagree!'
+            break
+
+        ind += 1
+            
+    # # 0 1
+    # # 0 1
+    # # 0 0
+    # # 0 0
+
+    # # Shared len == 2
+
+    # num_lines = file0_num_lines
+    # for i in range(0, num_lines):
+    #     l0 = file0_lines[i]
+    #     l1 = file1_lines[i]
+
+    #     if l0 != l1:
+    #         print 'Disagreement on shared suffix line ', i, ': ', l0, ' != ', l1
 
     print 'Done with comparison'
 
 generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
 run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
-#compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
+compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
 
 # generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
 # run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')

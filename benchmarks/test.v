@@ -116,7 +116,6 @@ module test();
             $display("\tdata in side 3 = %b, %d", data_driver_16_S3, data_driver_16_S3);
 
             $display("\n");
-            //            $display("\tdata driver side 0 = %b, %d", data_driver_16_S2, data_driver_16_S2);
 
             $display("\tdata out side 0 = %b, %d", data_out_16_S0, data_out_16_S0);
             $display("\tdata out side 1 = %b, %d", data_out_16_S1, data_out_16_S1);
