@@ -131,11 +131,14 @@ def compare_output_files(file0, file1):
         first_agreement_location_i = i_ind
         first_agreement_location_j = j_ind
 
-    for i in range(shared_suffix_len - 1, 0, -1):
-        l0 = file0_lines[i + file0_suffix_start]
-        l1 = file1_lines[i + file1_suffix_start]
         i_ind -= 1
         j_ind -= 1
+
+    # for i in range(shared_suffix_len - 1, 0, -1):
+    #     l0 = file0_lines[i + file0_suffix_start]
+    #     l1 = file1_lines[i + file1_suffix_start]
+    #     i_ind -= 1
+    #     j_ind -= 1
 
     print 'First agreement lines are ', first_agreement_location_i, ' and ', first_agreement_location_j
 
@@ -166,3 +169,4 @@ run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
 generate_tb_for_application_from_template('conv_bw_unspecialized', 'conv_bw_travis', './benchmarks/test.v')
 run_vcs('conv_bw_unspecialized', 'conv_bw_unspecialized_tb.v', unspecialized_verilog_files)
+compare_output_files('conv_bw_specialized_tb_output.txt', 'conv_bw_unspecialized_tb_output.txt')
