@@ -275,7 +275,7 @@ namespace FlatCircuit {
 
   VerilogModule toVerilog(const CellDefinition& def) {
     VerilogModule vm;
-    vm.name = "flat_module";
+    vm.name = "top";
 
     map<string, map<PortId, VerilogWire> > instancePortWires;
 

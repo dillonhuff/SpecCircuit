@@ -299,31 +299,27 @@ namespace FlatCircuit {
     assert(false);
   }
 
-  Env convertFromCoreIR(CoreIR::Context* const c,
-                         CoreIR::Module* const top) {
-    Env e;
+  void convertCellType(CoreIR::Context* const c,
+                       CoreIR::Module* const top,
+                       Env& e,
+                       const CellType topType) {
+    map<Wireable*, CellId> elemsToCells;
 
-    if (!top->hasDef()) {
-      return e;
-    }
+    //cout << "Getting cell type for " << top->getName() << endl;
 
-    for (auto ns : c->getNamespaces()) {
-      for (auto mp : ns.second->getModules()) {
-        cout << "Adding cell type " << mp.first << endl;
-        e.addCellType(mp.first);
-      }
-    }
+    //CellType topType = e.getCellType(top->getName());
 
-    CellType topType = e.getCellType(top->getName()); //e.addCellType(top->getName());
+    cout << "Celltype = " << topType << endl;
+
     auto& cDef = e.getDef(topType);
 
-    //map<Instance*, CellId> instsToCells;
-    map<Wireable*, CellId> elemsToCells;
-    
+    map<Instance*, CellId> instsToCells;
+
     for (auto r : top->getType()->getRecord()) {
       auto field = r.first;
       auto tp = r.second;
 
+      cout << "Adding field " << field << endl;
       PortType portTp = tp->getDir() == Type::DirKind::DK_In ? PORT_TYPE_IN : PORT_TYPE_OUT;
 
       assert((tp->getDir() == Type::DirKind::DK_Out) ||
@@ -335,7 +331,6 @@ namespace FlatCircuit {
         ArrayType* artp = cast<ArrayType>(tp);
 
         assert(isBitType(*(artp->getElemType())));
-        
         portWidth = artp->getLen();
       } else if (isBitType(*tp)) {
         portWidth = 1;
@@ -352,10 +347,14 @@ namespace FlatCircuit {
 
       cDef.addPort(field, portWidth, portTp);
       CellId c = cDef.getPortCellId(field);
+      cout << "Selecting field " << field << endl;
+      assert(top->hasDef());
       elemsToCells.insert({top->getDef()->sel("self")->sel(field), c});
+      cout << "Selected field " << field << endl;
     }
 
-
+    cout << "Adding instances" << endl;
+    
     for (auto instR : top->getDef()->getInstances()) {
       Instance* inst = instR.second;
 
@@ -484,6 +483,32 @@ namespace FlatCircuit {
         
       }
     }
+  }
+
+  Env convertFromCoreIR(CoreIR::Context* const c,
+                        CoreIR::Module* const top) {
+    Env e;
+
+    if (!top->hasDef()) {
+      return e;
+    }
+
+    for (auto ns : c->getNamespaces()) {
+      for (auto mp : ns.second->getModules()) {
+
+        // For primitives there is nothing to convert
+        if (mp.second->hasDef()) {
+          //cout << "Adding cell type " << mp.first << endl;
+          e.addCellType(mp.first);
+
+          //cout << "Converting definition" << endl;
+          //convertCellType(c, mp.second, e, cellTp);
+        }
+      }
+    }
+
+    CellType topType = e.getCellType(top->getName());
+    convertCellType(c, top, e, topType);
     
     return e;
   }
