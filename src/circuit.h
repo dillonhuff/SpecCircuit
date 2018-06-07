@@ -1071,6 +1071,7 @@ namespace FlatCircuit {
     void replaceCellPortWithConstant(const CellId cid,
                                      const PortId pid,
                                      const BitVector& constValue) {
+      
       CellId constId = addCell("cell_" + std::to_string(cid) + "_" + std::to_string(pid) + "_const_replacement",
                                CELL_TYPE_CONST,
                                {{PARAM_WIDTH, BitVector(32, constValue.bitLength())},

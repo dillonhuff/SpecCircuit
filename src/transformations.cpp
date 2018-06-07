@@ -973,6 +973,7 @@ namespace FlatCircuit {
                      ||
                      def.isPortCell(rcBit.cell))) {
                   replaceOutputs = true;
+                  cout << "Cell " << def.getCellName(cid) << " is connected to non-const cell" << endl;
                   break;
                 }
               }
@@ -985,9 +986,11 @@ namespace FlatCircuit {
             }
           }
 
-          for (auto pid : cell.outputPorts()) {
-            BitVector value = valueStore.getPortValue(cid, pid);
-            def.replaceCellPortWithConstant(cid, pid, value);
+          if (replaceOutputs) {
+            for (auto pid : cell.outputPorts()) {
+              BitVector value = valueStore.getPortValue(cid, pid);
+              def.replaceCellPortWithConstant(cid, pid, value);
+            }
           }
         }
       }
