@@ -141,26 +141,28 @@ def compare_output_files(file0, file1):
 
     print 'Done with comparison'
 
-generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
-run_vcs('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
+#verilog_dir = '../cgra_test_ncsim/cgra_dev_no_mdll_05_15_2018/'
+verilog_dir = '../../CGRAGenerator/hardware/generator_z/top/genesis_verif/'
+unspecialized_verilog_files = '{0}*.v {0}*.sv'.format(verilog_dir)
 
-unspecialized_verilog_files = '../cgra_test_ncsim/cgra_dev_no_mdll_05_15_2018/*.v ../cgra_test_ncsim/cgra_dev_no_mdll_05_15_2018/*.sv'
-generate_tb_for_application_from_template('conv_3_1_unspecialized', 'conv_3_1', 'test.v')
-run_vcs('conv_3_1_unspecialized', 'conv_3_1_unspecialized_tb.v', unspecialized_verilog_files)
+# generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
+# run_vcs('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
 
-# compare_output_files('conv_3_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
+# generate_tb_for_application_from_template('conv_3_1_unspecialized', 'conv_3_1', 'test.v')
+# run_vcs('conv_3_1_unspecialized', 'conv_3_1_unspecialized_tb.v', unspecialized_verilog_files)
 
-# # Other applications
-generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
-run_vcs('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
+# # compare_output_files('conv_3_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
 
-generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
-run_vcs('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', unspecialized_verilog_files)
+# # conv_2_1
+# generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
+# run_vcs('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')
 
-# generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
-# run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
+# generate_tb_for_application_from_template('conv_2_1_unspecialized', 'conv_2_1', './benchmarks/test.v')
+# run_vcs('conv_2_1_unspecialized', 'conv_2_1_unspecialized_tb.v', unspecialized_verilog_files)
 
-# generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw', './benchmarks/test.v')
-# run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
+# conv_bw
+generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw_travis', './benchmarks/test.v')
+run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
-# compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_bw_specialized_tb_output.txt')
+generate_tb_for_application_from_template('conv_bw_unspecialized', 'conv_bw_travis', './benchmarks/test.v')
+run_vcs('conv_bw_unspecialized', 'conv_bw_unspecialized_tb.v', unspecialized_verilog_files)
