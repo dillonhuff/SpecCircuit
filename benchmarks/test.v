@@ -35,7 +35,7 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 200000;
+   assign max_cycles = 20000;
    
    initial begin
 
