@@ -16,6 +16,46 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  TEST_CASE("Constant fold line of nots") {
+    Env e;
+    CellType notChainType = e.addCellType("not_chain");
+    CellDefinition& def = e.getDef(notChainType);
+    def.addPort("in", 16, PORT_TYPE_IN);
+    def.addPort("out", 16, PORT_TYPE_OUT);
+
+    int chainLength = 10;
+    CellId baseConstant =
+      def.addCell("base_const",
+                  CELL_TYPE_CONST,
+                  {{PARAM_WIDTH, BitVector(32, 16)},
+                      {PARAM_INIT_VALUE, BitVector(16, 0)}});
+
+    CellId last = baseConstant;
+    for (int i = 0; i < chainLength; i++) {
+      string name = "not_" + to_string(i);
+      CellId notCell = def.addCell(name,
+                                   CELL_TYPE_NOT,
+                                   {{PARAM_WIDTH, BitVector(32, 16)}});
+
+      def.connect(last, PORT_ID_OUT, notCell, PORT_ID_IN);
+
+      last = notCell;
+    }
+
+    CellId outCell = def.getPortCellId("out");
+    def.connect(last, PORT_ID_OUT, outCell, PORT_ID_IN);
+
+    Simulator sim(e, def);
+    sim.update();
+
+    cout << "Done updating" << endl;
+
+    foldConstantsWRTState(def, sim.getValueStore());
+    deleteDeadInstances(def);
+
+    REQUIRE(def.numCells() == 3);
+  }
+
   TEST_CASE("Prefix matching") {
 
     REQUIRE(matchesAnyPrefix("mem_0x18$memory_core$mem_inst1$mem_inst$data_array$mem",

@@ -352,7 +352,7 @@ namespace FlatCircuit {
       CellId next = *std::begin(candidates);
       candidates.erase(next);
 
-      //cout << "Checking cell " << def.cellName(next) << endl;
+      //      cout << "Checking cell " << def.cellName(next) << endl;
 
       Cell& nextCell = def.getCellRef(next);
 
@@ -881,6 +881,123 @@ namespace FlatCircuit {
     }
 
     cout << "Done removing duplicates, num cells = " << def.numCells() << endl;
+  }
+
+  enum CellConstType {
+    CELL_IS_CONST,
+    CELL_IS_NON_CONST
+  };
+
+  // This is a monotonic dataflow analysis
+  void foldConstantsWRTState(CellDefinition& def,
+                             const ValueStore& valueStore) {
+    map<CellId, CellConstType> cellClassification;
+    // Initialize classification
+    std::set<CellId> cellsLeft;
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      cellsLeft.insert(cid);
+
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.getCellType() == CELL_TYPE_CONST) {
+        cellClassification[cid] = CELL_IS_CONST;
+      } else {
+        cellClassification[cid] = CELL_IS_NON_CONST;
+      }
+    }
+
+    // Do DF analysis
+    while (cellsLeft.size() > 0) {
+      //cout << "Cells left = " << cellsLeft.size() << endl;
+      CellId cid = *begin(cellsLeft);
+      cellsLeft.erase(cid);
+
+      const Cell& cell = def.getCellRefConst(cid);
+
+      CellConstType oldVal = map_find(cid, cellClassification);
+      bool allInputsConst = true;
+      // TODO: Add handling for registers and memory
+      for (auto pid : cell.inputPorts()) {
+        for (auto driverBit : cell.getDrivers(pid).signals) {
+          if (notEmpty(driverBit)) {
+            CellId driverId = driverBit.cell;
+            if (map_find(driverId, cellClassification) != CELL_IS_CONST) {
+              allInputsConst = false;
+              break;
+            }
+          }
+        }
+
+        if (!allInputsConst) {
+          break;
+        }
+      }
+
+      CellConstType newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
+      if (newVal != oldVal) {
+        cellClassification[cid] = newVal;
+        
+        for (auto outPort : cell.outputPorts()) {
+          auto receivers = cell.getPortReceivers(outPort);
+          for (auto rcList : receivers) {
+            for (auto rcBit : rcList) {
+              if (notEmpty(rcBit)) {
+                cellsLeft.insert(rcBit.cell);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    cout << "Done with dataflow, now removing constants" << endl;
+
+    std::set<CellId> toDelete;
+    // Walk over cells replacing ports with constants as appropriate
+    for (auto ctp : cellClassification) {
+      CellConstType ct = ctp.second;
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      
+      if (ct == CELL_IS_CONST) {
+        if (!def.isPortCell(cid)) {
+          toDelete.insert(cid);
+
+          bool replaceOutputs = false;
+          for (auto outPort : cell.outputPorts()) {
+            auto receivers = cell.getPortReceivers(outPort);
+            for (auto rcList : receivers) {
+              for (auto rcBit : rcList) {
+                if (notEmpty(rcBit) &&
+                    ((map_find(rcBit.cell, cellClassification) == CELL_IS_NON_CONST)
+                     ||
+                     def.isPortCell(rcBit.cell))) {
+                  replaceOutputs = true;
+                  break;
+                }
+              }
+              if (replaceOutputs) {
+                break;
+              }
+            }
+            if (replaceOutputs) {
+              break;
+            }
+          }
+
+          for (auto pid : cell.outputPorts()) {
+            BitVector value = valueStore.getPortValue(cid, pid);
+            def.replaceCellPortWithConstant(cid, pid, value);
+          }
+        }
+      }
+    }
+
+    cout << "Done with constant port folding, deleting useless cells" << endl;
+
+    def.bulkDelete(toDelete);
+
+    cout << "Done deleting useless cells" << endl;
   }
 
 }

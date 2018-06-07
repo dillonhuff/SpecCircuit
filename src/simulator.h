@@ -980,6 +980,10 @@ namespace FlatCircuit {
       valueStore.setPortValue(cid, pid, bv);
     }
 
+    const ValueStore& getValueStore() const {
+      return valueStore;
+    }
+
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       return valueStore.getPortValue(cid, pid);
