@@ -60,7 +60,7 @@ namespace FlatCircuit {
         }
       }
 
-      rawSimValueTable[44] = 0xff;
+      ///      rawSimValueTable[44] = 0xff;
     }
 
     void buildRawValueTable() {
