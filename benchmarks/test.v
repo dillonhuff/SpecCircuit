@@ -27,15 +27,12 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 10000;
+   assign max_cycles = 5000;
    
    initial begin
 
       cycle_count = 0;
 
-//      config_file = $fopen("./test/pw2_16x16_only_config_lines.bsa", "r");
-//      config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
-//      config_file = $fopen("./test/conv_3_1_only_config_lines.bsa", "r");
       config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");      
       test_output_file = $fopen("tb_output.txt", "w");
 
@@ -185,7 +182,8 @@ module test();
 
    always @(posedge clk) begin
 
-      data_driver_16_S2 <= data_driver_16_S2 + 1;
+      data_driver_16_S2 <= data_driver_16_S2;
+ // + 1;
 
    end
 
