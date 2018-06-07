@@ -35,7 +35,7 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 5000;
+   assign max_cycles = 200000;
    
    initial begin
 
@@ -355,8 +355,7 @@ module test();
 
    always @(posedge clk) begin
 
-      data_driver_16_S2 <= data_driver_16_S2;
- // + 1;
+      data_driver_16_S2 <= data_driver_16_S2 + 1;
 
    end
 
