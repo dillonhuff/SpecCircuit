@@ -417,13 +417,24 @@ namespace FlatCircuit {
       Simulator sim(e, def);
       sim.specializePort("sel", BitVec(1, 1));
       sim.refreshConstants();
-      sim.update();
 
       foldConstantsWRTState(def, sim.getValueStore());
       deleteDeadInstances(def);
       sim.refreshConstants();
 
       REQUIRE(definitionIsConsistent(def));
+
+      // Make sure the mux was removed
+      bool removedMux = true;
+      for (auto ctp : sim.def.getCellMap()) {
+        const Cell& cell = def.getCellRefConst(ctp.first);
+        if (cell.getCellType() == CELL_TYPE_MUX) {
+          removedMux = false;
+          break;
+        }
+      }
+
+      REQUIRE(removedMux);
 
       cout << "Setting in0" << endl;
 
