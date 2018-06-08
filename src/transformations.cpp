@@ -911,7 +911,7 @@ namespace FlatCircuit {
   }
   
   std::map<CellId, CellConstType>
-  labelConstantCells(CellDefinition& def) {
+  labelConstantCells(CellDefinition& def, const ValueStore& valueStore) {
     map<CellId, CellConstType> cellClassification;
 
     // Initialize classification
@@ -947,6 +947,15 @@ namespace FlatCircuit {
 
         if (selIsConstant) {
           newVal = CELL_IS_CONST_SEL_MUX;
+          BitVector bitVec = valueStore.materializeInput({cid, PORT_ID_SEL});
+          if (bitVec == BitVector(1, 0) &&
+              drivenByConstants(cid, PORT_ID_IN0, def, cellClassification)) {
+            newVal = CELL_IS_CONST;
+          } else if (bitVec == BitVector(1, 1) &&
+                     drivenByConstants(cid, PORT_ID_IN1, def, cellClassification)) {
+            newVal = CELL_IS_CONST;
+          }
+
         } else {
           // DO nothing. We cannot change the mux if select is not constant.
           // TODO: Actuall if both inputs are the same we can fold, but
@@ -1038,7 +1047,7 @@ namespace FlatCircuit {
     cout << "Starting dataflow" << endl;
 
     std::map<CellId, CellConstType> cellClassification =
-      labelConstantCells(def);
+      labelConstantCells(def, valueStore);
     
     cout << "Done with dataflow, now removing constants" << endl;
 

@@ -949,7 +949,10 @@ namespace FlatCircuit {
       sim.specializePort("chain_wen_in", BitVec(1, 0));
       sim.specializePort("chain_in", BitVec(16, 0));
 
-      foldConstants(sim.def, sim.allRegisterValues());
+      sim.refreshConstants();
+      
+      foldConstantsWRTState(def, sim.getValueStore());
+      //foldconstants(sim.def, sim.allRegisterValues());
       deleteDeadInstances(sim.def);
 
       dbhc::maybe<PortId> clkPort = getTrueClockPort(sim.def);
