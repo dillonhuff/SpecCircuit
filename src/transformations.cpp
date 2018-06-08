@@ -917,23 +917,32 @@ namespace FlatCircuit {
       CellConstType oldVal = map_find(cid, cellClassification);
       bool allInputsConst = true;
       // TODO: Add handling for registers and memory
-      for (auto pid : cell.inputPorts()) {
-        for (auto driverBit : cell.getDrivers(pid).signals) {
-          if (notEmpty(driverBit)) {
-            CellId driverId = driverBit.cell;
-            if (map_find(driverId, cellClassification) != CELL_IS_CONST) {
-              allInputsConst = false;
-              break;
+      if (!cell.isInputPortCell()) {
+        for (auto pid : cell.inputPorts()) {
+          for (auto driverBit : cell.getDrivers(pid).signals) {
+            if (notEmpty(driverBit)) {
+              CellId driverId = driverBit.cell;
+              if (map_find(driverId, cellClassification) != CELL_IS_CONST) {
+                allInputsConst = false;
+                break;
+              }
             }
           }
-        }
 
-        if (!allInputsConst) {
-          break;
+          if (!allInputsConst) {
+            break;
+          }
         }
+      } else {
+        allInputsConst = false;
       }
 
       CellConstType newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
+
+      if (newVal == CELL_IS_CONST) {
+        cout << "Cell " << def.getCellName(cid) << " is const" << endl;
+      }
+
       if (newVal != oldVal) {
         cellClassification[cid] = newVal;
         
@@ -1003,6 +1012,8 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       
       if (ct == CELL_IS_CONST) {
+        cout << "Processing constant cell " << def.getCellName(cid) << endl;
+        
         if (!def.isPortCell(cid)) {
           toDelete.insert(cid);
 

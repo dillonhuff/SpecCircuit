@@ -416,6 +416,8 @@ namespace FlatCircuit {
     SECTION("Specializing wrt select == 1") {
       Simulator sim(e, def);
       sim.specializePort("sel", BitVec(1, 1));
+      sim.refreshConstants();
+      sim.update();
 
       foldConstantsWRTState(def, sim.getValueStore());
       deleteDeadInstances(def);
