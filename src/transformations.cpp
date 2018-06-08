@@ -1010,7 +1010,18 @@ namespace FlatCircuit {
             CellType tp = cell.getCellType();
 
             if (tp == CELL_TYPE_MUX) {
-              
+              BitVector sval = valueStore.getPortValue(cid, PORT_ID_SEL);
+              BitVector value = valueStore.getPortValue(cid, PORT_ID_IN1);
+
+              if (sval == BitVector(1, 0)) {
+                value = valueStore.getPortValue(cid, PORT_ID_IN0);
+              }
+
+              def.replaceCellPortWithConstant(cid, PORT_ID_OUT, value);
+            } else if (isRegister(tp)) {
+              assert(false);
+            } else if (tp == CELL_TYPE_MEM) {
+              assert(false);
             } else {
               for (auto pid : cell.outputPorts()) {
                 BitVector value = valueStore.getPortValue(cid, pid);

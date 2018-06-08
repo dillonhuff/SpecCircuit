@@ -417,7 +417,7 @@ namespace FlatCircuit {
       Simulator sim(e, def);
       sim.specializePort("sel", BitVec(1, 1));
 
-      foldConstantsWRTState(def, sim.getValueStore()); //{});
+      foldConstantsWRTState(def, sim.getValueStore());
       deleteDeadInstances(def);
       sim.refreshConstants();
 
