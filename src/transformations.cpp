@@ -885,7 +885,8 @@ namespace FlatCircuit {
 
   enum CellConstType {
     CELL_IS_CONST,
-    CELL_IS_NON_CONST
+    CELL_IS_NON_CONST,
+    CELL_IS_CONST_SEL_MUX
   };
 
   std::map<CellId, CellConstType>
@@ -915,9 +916,16 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
 
       CellConstType oldVal = map_find(cid, cellClassification);
-      bool allInputsConst = true;
+
+      CellConstType newVal = oldVal;
+
       // TODO: Add handling for registers and memory
-      if (!cell.isInputPortCell()) {
+      if (cell.getCellType() == CELL_TYPE_MUX) {
+        assert(false);
+      } else if (!cell.isInputPortCell()) {
+
+        bool allInputsConst = true;
+
         for (auto pid : cell.inputPorts()) {
           for (auto driverBit : cell.getDrivers(pid).signals) {
             if (notEmpty(driverBit)) {
@@ -933,11 +941,13 @@ namespace FlatCircuit {
             break;
           }
         }
+
+        newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
       } else {
-        allInputsConst = false;
+        //allInputsConst = false;
       }
 
-      CellConstType newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
+      //CellConstType newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
 
       if (newVal == CELL_IS_CONST) {
         cout << "Cell " << def.getCellName(cid) << " is const" << endl;
@@ -1035,12 +1045,15 @@ namespace FlatCircuit {
               assert(false);
             } else {
               for (auto pid : cell.outputPorts()) {
+                
                 BitVector value = valueStore.getPortValue(cid, pid);
                 def.replaceCellPortWithConstant(cid, pid, value);
               }
             }
           }
         }
+      } else if (ct == CELL_IS_CONST_SEL_MUX) {
+        assert(false);
       }
     }
 
