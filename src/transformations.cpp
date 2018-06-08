@@ -889,6 +889,27 @@ namespace FlatCircuit {
     CELL_IS_CONST_SEL_MUX
   };
 
+  bool drivenByConstants(const CellId cid,
+                         const PortId pid,
+                         const CellDefinition& def,
+                         map<CellId, CellConstType>& cellClassification) {
+
+    bool allInputsConst = true;
+
+    const Cell& cell = def.getCellRefConst(cid);
+    for (auto driverBit : cell.getDrivers(pid).signals) {
+      if (notEmpty(driverBit)) {
+        CellId driverId = driverBit.cell;
+        if (map_find(driverId, cellClassification) != CELL_IS_CONST) {
+          allInputsConst = false;
+          break;
+        }
+      }
+    }
+
+    return allInputsConst;
+  }
+  
   std::map<CellId, CellConstType>
   labelConstantCells(CellDefinition& def) {
     map<CellId, CellConstType> cellClassification;
@@ -921,7 +942,16 @@ namespace FlatCircuit {
 
       // TODO: Add handling for registers and memory
       if (cell.getCellType() == CELL_TYPE_MUX) {
-        assert(false);
+        bool selIsConstant =
+          drivenByConstants(cid, PORT_ID_SEL, def, cellClassification);
+
+        if (selIsConstant) {
+          newVal = CELL_IS_CONST_SEL_MUX;
+        } else {
+          // DO nothing. We cannot change the mux if select is not constant.
+          // TODO: Actuall if both inputs are the same we can fold, but
+          // that case does not matter during configuration.
+        }
       } else if (!cell.isInputPortCell()) {
 
         bool allInputsConst = true;
@@ -944,10 +974,8 @@ namespace FlatCircuit {
 
         newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
       } else {
-        //allInputsConst = false;
+        // Do not change port cell designations
       }
-
-      //CellConstType newVal = allInputsConst ? CELL_IS_CONST : CELL_IS_NON_CONST;
 
       if (newVal == CELL_IS_CONST) {
         cout << "Cell " << def.getCellName(cid) << " is const" << endl;
@@ -1053,7 +1081,38 @@ namespace FlatCircuit {
           }
         }
       } else if (ct == CELL_IS_CONST_SEL_MUX) {
-        assert(false);
+        cout << "Getting mux sel" << endl;
+        BitVector bitVec = valueStore.materializeInput({cid, PORT_ID_SEL});
+        cout << "Got mux sel" << endl;
+
+        bool selIn1 = 0;
+        if (bitVec.get(0).is_binary()) {
+          selIn1 = bitVec.get(0).binary_value() == 1;
+        }
+
+        PortId inPort = selIn1 ? PORT_ID_IN1 : PORT_ID_IN0;
+        int width = cell.getPortWidth(inPort);
+
+        vector<SignalBit> inDrivers = cell.getDrivers(inPort).signals;
+        auto& outReceivers = cell.getPortReceivers(PORT_ID_OUT);
+
+        // if (outReceivers.size() != inDrivers.size()) {
+        //   cout << "Error while folding " << def.getCellName(next) << ": outReceivers.size() = " << outReceivers.size() << ", but inDrivers = " << inDrivers.size() << endl;
+
+              
+        // }
+        assert(outReceivers.size() == inDrivers.size());
+            
+        for (int offset = 0; offset < width; offset++) {
+          SignalBit newDriver = inDrivers[offset];
+          auto offsetReceivers = outReceivers[offset];
+
+          for (auto receiverBit : offsetReceivers) {
+            def.setDriver(receiverBit, newDriver);
+          }
+        }
+
+        def.deleteCell(cid);
       }
     }
 

@@ -453,6 +453,26 @@ namespace FlatCircuit {
       }
     }
 
+    BitVector materializeInput(const SigPort sigPort) const {
+      int width = def.getCellRefConst(sigPort.cell).getPortWidth(sigPort.port);
+
+      BitVector val(width, 0);
+
+      auto& sigBus = def.getCellRef(sigPort.cell).getDrivers(sigPort.port);
+
+      assert(((int) sigBus.signals.size()) == width);
+
+      for (int i = 0; i < (int) sigBus.signals.size(); i++) {
+        SignalBit b = sigBus.signals.at(i);
+
+        assert(notEmpty(b));
+
+        val.set(i, getPortValue(b.cell, b.port).get(b.offset));
+      }
+        
+      return val;
+    }
+    
     IRInstruction* codeToAssignRegister(const CellId cid,
                                         const std::string& assignCode);
     
