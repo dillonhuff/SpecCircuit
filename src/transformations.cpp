@@ -888,10 +888,10 @@ namespace FlatCircuit {
     CELL_IS_NON_CONST
   };
 
-  // This is a monotonic dataflow analysis
-  void foldConstantsWRTState(CellDefinition& def,
-                             const ValueStore& valueStore) {
+  std::map<CellId, CellConstType>
+  labelConstantCells(CellDefinition& def) {
     map<CellId, CellConstType> cellClassification;
+
     // Initialize classification
     std::set<CellId> cellsLeft;
     for (auto ctp : def.getCellMap()) {
@@ -950,6 +950,49 @@ namespace FlatCircuit {
       }
     }
 
+    return cellClassification;
+  }
+
+  bool isBoundaryCell(const Cell& cell,
+                      CellDefinition& def,
+                      std::map<CellId, CellConstType>& cellClassification) {
+
+    bool replaceOutputs = false;
+          
+    for (auto outPort : cell.outputPorts()) {
+      auto receivers = cell.getPortReceivers(outPort);
+      for (auto rcList : receivers) {
+        for (auto rcBit : rcList) {
+          if (notEmpty(rcBit) &&
+              ((map_find(rcBit.cell, cellClassification) == CELL_IS_NON_CONST)
+               ||
+               def.isPortCell(rcBit.cell))) {
+            replaceOutputs = true;
+            //cout << "Cell " << def.getCellName(cid) << " is connected to non-const cell" << endl;
+            break;
+          }
+        }
+        if (replaceOutputs) {
+          break;
+        }
+      }
+      if (replaceOutputs) {
+        break;
+      }
+    }
+
+    return replaceOutputs;
+  }
+
+  // This is a monotonic dataflow analysis
+  void foldConstantsWRTState(CellDefinition& def,
+                             const ValueStore& valueStore) {
+
+    cout << "Starting dataflow" << endl;
+
+    std::map<CellId, CellConstType> cellClassification =
+      labelConstantCells(def);
+    
     cout << "Done with dataflow, now removing constants" << endl;
 
     std::set<CellId> toDelete;
@@ -963,33 +1006,16 @@ namespace FlatCircuit {
         if (!def.isPortCell(cid)) {
           toDelete.insert(cid);
 
-          bool replaceOutputs = false;
-          for (auto outPort : cell.outputPorts()) {
-            auto receivers = cell.getPortReceivers(outPort);
-            for (auto rcList : receivers) {
-              for (auto rcBit : rcList) {
-                if (notEmpty(rcBit) &&
-                    ((map_find(rcBit.cell, cellClassification) == CELL_IS_NON_CONST)
-                     ||
-                     def.isPortCell(rcBit.cell))) {
-                  replaceOutputs = true;
-                  cout << "Cell " << def.getCellName(cid) << " is connected to non-const cell" << endl;
-                  break;
-                }
-              }
-              if (replaceOutputs) {
-                break;
-              }
-            }
-            if (replaceOutputs) {
-              break;
-            }
-          }
+          if (isBoundaryCell(cell, def, cellClassification)) {
+            CellType tp = cell.getCellType();
 
-          if (replaceOutputs) {
-            for (auto pid : cell.outputPorts()) {
-              BitVector value = valueStore.getPortValue(cid, pid);
-              def.replaceCellPortWithConstant(cid, pid, value);
+            if (tp == CELL_TYPE_MUX) {
+              
+            } else {
+              for (auto pid : cell.outputPorts()) {
+                BitVector value = valueStore.getPortValue(cid, pid);
+                def.replaceCellPortWithConstant(cid, pid, value);
+              }
             }
           }
         }

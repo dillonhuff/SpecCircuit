@@ -23,7 +23,7 @@ namespace FlatCircuit {
     def.addPort("in", 16, PORT_TYPE_IN);
     def.addPort("out", 16, PORT_TYPE_OUT);
 
-    int chainLength = 1000000;
+    int chainLength = 1000;
     CellId baseConstant =
       def.addCell("base_const",
                   CELL_TYPE_CONST,
@@ -48,13 +48,19 @@ namespace FlatCircuit {
     Simulator sim(e, def);
     sim.update();
 
+    BitVector pastRes = sim.getBitVec("out");
+
     cout << "Done updating" << endl;
 
     foldConstantsWRTState(def, sim.getValueStore());
-    //foldConstants(def, {});
     deleteDeadInstances(def);
 
     REQUIRE(def.numCells() == 3);
+
+    sim.refreshConstants();
+    sim.update();
+    
+    REQUIRE(sim.getBitVec("out") == pastRes);
   }
 
   TEST_CASE("Prefix matching") {
@@ -411,7 +417,7 @@ namespace FlatCircuit {
       Simulator sim(e, def);
       sim.specializePort("sel", BitVec(1, 1));
 
-      foldConstants(def, {});
+      foldConstantsWRTState(def, sim.getValueStore()); //{});
       deleteDeadInstances(def);
       sim.refreshConstants();
 
