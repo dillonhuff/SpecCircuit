@@ -125,7 +125,7 @@ def compare_output_files(file0, file1):
         f1l = file1_lines[j_ind]
 
         if (f0l != f1l):
-            print 'Error: lines ', i + ind, ' ', j + ind, 'disagree!'
+            print 'Error: lines ', i_ind, ' ', j_ind, 'disagree!'
             break
 
         first_agreement_location_i = i_ind
@@ -148,13 +148,13 @@ def compare_output_files(file0, file1):
 verilog_dir = '../../CGRAGenerator/hardware/generator_z/top/genesis_verif/'
 unspecialized_verilog_files = '{0}*.v {0}*.sv'.format(verilog_dir)
 
-# generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
-# run_vcs('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
+generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
+run_vcs('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
 
-# generate_tb_for_application_from_template('conv_3_1_unspecialized', 'conv_3_1', 'test.v')
-# run_vcs('conv_3_1_unspecialized', 'conv_3_1_unspecialized_tb.v', unspecialized_verilog_files)
+generate_tb_for_application_from_template('conv_3_1_unspecialized', 'conv_3_1', 'test.v')
+run_vcs('conv_3_1_unspecialized', 'conv_3_1_unspecialized_tb.v', unspecialized_verilog_files)
 
-# # compare_output_files('conv_3_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
+compare_output_files('conv_3_1_specialized_tb_output.txt', 'conv_3_1_unspecialized_tb_output.txt')
 
 # # conv_2_1
 # generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
@@ -164,9 +164,10 @@ unspecialized_verilog_files = '{0}*.v {0}*.sv'.format(verilog_dir)
 # run_vcs('conv_2_1_unspecialized', 'conv_2_1_unspecialized_tb.v', unspecialized_verilog_files)
 
 # conv_bw
-generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw_travis', './benchmarks/test.v')
-run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
+# generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw_travis', './benchmarks/test.v')
+# run_vcs('conv_bw_specialized', 'conv_bw_specialized_tb.v', 'conv_bw_cgra.v')
 
-generate_tb_for_application_from_template('conv_bw_unspecialized', 'conv_bw_travis', './benchmarks/test.v')
-run_vcs('conv_bw_unspecialized', 'conv_bw_unspecialized_tb.v', unspecialized_verilog_files)
-compare_output_files('conv_bw_specialized_tb_output.txt', 'conv_bw_unspecialized_tb_output.txt')
+# generate_tb_for_application_from_template('conv_bw_unspecialized', 'conv_bw_travis', './benchmarks/test.v')
+# run_vcs('conv_bw_unspecialized', 'conv_bw_unspecialized_tb.v', unspecialized_verilog_files)
+
+# compare_output_files('conv_bw_specialized_tb_output.txt', 'conv_bw_unspecialized_tb_output.txt')
