@@ -61,6 +61,12 @@ def run_iverilog(app_name, tb_name, top_mod_file_name):
 
     assert(run_res == 0)
 
+def run_ncsim(app_name, tb_name, top_mod_verilog_files):
+    compile_cmd = ''
+    print 'ncsim compile command =', compile_cmd
+
+    compile_res = os.system(compile_cmd)
+    
 def run_vcs(app_name, tb_name, top_mod_verilog_files):
     compile_cmd = 'vcs -assert disable +nbaopt +rad +nospecify +notimingchecks -ld gcc-4.4 +vcs+lic+wait -licqueue +cli -sverilog -full64 +incdir+/hd/cad/synopsys/dc_shell/latest/packages/gtech/src_ver/ +incdir+/hd/cad/synopsys/dc_shell/latest/dw/sim_ver/ -y /hd/cad/synopsys/dc_shell/latest/dw/sim_ver/ -CFLAGS \'-O3 -march=native\' ' + tb_name + ' ' + top_mod_verilog_files + ' -top test'
     print 'vcs compile command = ', compile_cmd
@@ -144,7 +150,7 @@ def compare_output_files(file0, file1):
 verilog_dir = '../../CGRAGenerator/hardware/generator_z/top/genesis_verif/'
 unspecialized_verilog_files = '{0}*.v {0}*.sv'.format(verilog_dir)
 
-def compare_specialized_and_unspecialized(app_name):
+def compare_specialized_and_unspecialized_vcs(app_name):
     generate_tb_for_application_from_template(app_name + '_specialized', app_name, './benchmarks/test.v')
     run_vcs(app_name + '_specialized', app_name + '_specialized_tb.v', app_name + '_cgra.v')
 
@@ -153,9 +159,22 @@ def compare_specialized_and_unspecialized(app_name):
 
     compare_output_files(app_name + '_specialized_tb_output.txt', app_name + '_unspecialized_tb_output.txt')
 
-compare_specialized_and_unspecialized('conv_3_1')
-compare_specialized_and_unspecialized('conv_2_1')
-compare_specialized_and_unspecialized('conv_bw_travis')
+# compare_specialized_and_unspecialized_vcs('conv_3_1')
+# compare_specialized_and_unspecialized_vcs('conv_2_1')
+# compare_specialized_and_unspecialized_vcs('conv_bw_travis')
+
+def compare_specialized_and_unspecialized_ncsim(app_name):
+    generate_tb_for_application_from_template(app_name + '_specialized', app_name, './benchmarks/test.v')
+    run_ncsim(app_name + '_specialized', app_name + '_specialized_tb.v', app_name + '_cgra.v')
+
+    generate_tb_for_application_from_template(app_name + '_unspecialized', app_name, './benchmarks/test.v')
+    run_ncsim(app_name + '_unspecialized', app_name + '_unspecialized_tb.v', unspecialized_verilog_files)
+
+    compare_output_files(app_name + '_specialized_tb_output.txt', app_name + '_unspecialized_tb_output.txt')
+
+compare_specialized_and_unspecialized_ncsim('conv_3_1')
+compare_specialized_and_unspecialized_ncsim('conv_2_1')
+compare_specialized_and_unspecialized_ncsim('conv_bw_travis')
 
 # conv_bw
 # generate_tb_for_application_from_template('conv_bw_specialized', 'conv_bw_travis', './benchmarks/test.v')
