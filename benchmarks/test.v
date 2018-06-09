@@ -29,13 +29,28 @@ module test();
    integer    config_file;
    integer    scan_file;
    integer    test_output_file;
+   integer    test_metadata_file;
 
    reg 	      config_done;
 
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 2000;
+   assign max_cycles = 200000;
+
+   function string get_time();
+      int      file_pointer;
+
+      void'($system("date +%X--%x > sys_time"));
+
+      file_pointer = $fopen("sys_time", "r");
+
+      void'($fscanf(file_pointer, "%s", get_time));
+
+      $fclose(file_pointer);
+
+      void '($system("rm sys_time"));
+   endfunction
    
    initial begin
 
@@ -43,6 +58,7 @@ module test();
 
       config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");      
       test_output_file = $fopen("tb_output.txt", "w");
+      test_metadata_file = $fopen("test_metadata.txt", "w");
 
       reset_done = 0;
 
@@ -76,6 +92,7 @@ module test();
       
       $display("DONE WITH RESET");
 
+      $fwrite(test_metadata_file, "Start=%s\n", get_time());
    end // initial begin
 
    always #2 clk = ~clk;
@@ -110,7 +127,10 @@ module test();
 	 end
 
 	 if (cycle_count >= max_cycles) begin
+	    $fwrite(test_metadata_file, "Finish=%s\n", get_time());
+
 	    $display("Finished at cycle count %d", cycle_count);
+	    $system("date");	    
 
             $display("\tdata in side 0 = %b, %d", data_driver_16_S0, data_driver_16_S0);
             $display("\tdata in side 1 = %b, %d", data_driver_16_S1, data_driver_16_S1);
@@ -125,6 +145,9 @@ module test();
             $display("\tdata out side 3 = %b, %d", data_out_16_S3, data_out_16_S3);
 
             $fclose(config_file);
+	    $fclose(test_output_file);
+	    $fclose(test_metadata_file);
+	    
 	    $finish();
 	 end
       end

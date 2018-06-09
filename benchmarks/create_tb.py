@@ -14,7 +14,7 @@ def remove_x_constants(verilog_file_name):
 
 # remove_x_constants('conv_2_1_cgra_no_x.v')
 
-def generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_file):
+def generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_file, metadata_file_name):
     with open(tb_template_file, 'r') as myfile:
         data = myfile.read()
 
@@ -27,6 +27,8 @@ def generate_tb_from_template(tb_template_file, config_file_name, output_file_na
             new_tb += '\tconfig_file = $fopen(\"' + config_file_name + '\", \"r\");\n'
         elif line.find('test_output_file = $fopen(') != -1:
             new_tb += '\ttest_output_file = $fopen(\"' + output_file_name + '\", \"w\");\n'
+        elif line.find('test_metadata_file = $fopen(\"') != -1:
+            new_tb += '\ttest_metadata_file = $fopen(\"' + metadata_file_name + '\", \"w\");\n'
         else:
             new_tb += line + '\n'
 
@@ -38,10 +40,11 @@ def generate_tb_for_application_from_template(app_name, bitstream_name, tb_templ
     # Generate the real test benches
     config_file_name = './test/' + bitstream_name + '_only_config_lines.bsa'
     output_file_name = app_name + '_tb_output.txt'
+    metadata_file_name = app_name + '_tb_metadata.txt'
     tb_name = app_name + '_tb.v'
     tb_template_file = './benchmarks/test.v'
 
-    generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_name)
+    generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_name, metadata_file_name)
 
 def run_iverilog(app_name, tb_name, top_mod_file_name):
     remove_x_constants(top_mod_file_name)
@@ -150,8 +153,8 @@ def compare_specialized_and_unspecialized(app_name):
 
     compare_output_files(app_name + '_specialized_tb_output.txt', app_name + '_unspecialized_tb_output.txt')
 
-#compare_specialized_and_unspecialized('conv_3_1')
-#compare_specialized_and_unspecialized('conv_2_1')
+compare_specialized_and_unspecialized('conv_3_1')
+compare_specialized_and_unspecialized('conv_2_1')
 compare_specialized_and_unspecialized('conv_bw_travis')
 
 # conv_bw
