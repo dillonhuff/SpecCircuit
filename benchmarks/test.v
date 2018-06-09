@@ -93,7 +93,7 @@ module test();
 
       cycle_count <= cycle_count + 1;
 
-      $fwrite(test_output_file, "%b\n", data_out_16_S0);      
+      $fwrite(test_output_file, "%b, %b, %b, %b\n", data_out_16_S0, data_out_16_S1, data_out_16_S2, data_out_16_S3);
 
       if (reset_done) begin
 	 scan_file = $fscanf(config_file, "%h %h\n", config_addr, config_data);
