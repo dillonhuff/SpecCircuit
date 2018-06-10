@@ -1690,7 +1690,7 @@ namespace FlatCircuit {
   }
 
   TEST_CASE("CGRA convolution 3 x 3") {
-    auto convConfigValues = loadBitStream("./test/conv_bw_only_config_lines.bsa");
+    auto convConfigValues = loadBitStream("./test/conv_bw_travis_only_config_lines.bsa");
     Env circuitEnv =
       loadFromCoreIR("global.top",
                      "./test/top.json");
@@ -1825,7 +1825,7 @@ namespace FlatCircuit {
 
     //REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
 
-    outputVerilog(sim.def, "conv_bw_cgra.v");
+    outputVerilog(sim.def, "conv_bw_travis_cgra.v");
 
     // PERFORMANCE TEST
     nCycles = 10000;

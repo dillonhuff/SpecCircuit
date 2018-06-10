@@ -1,3 +1,27 @@
+from sets import Set
+
+def num_tiles_used_in_bitstream(bs_file_name):
+    bs_file = open(bs_file_name, 'r')
+    bs = bs_file.read()
+    bs_file.close()
+
+    bs_lines = bs.splitlines()
+    tiles = Set([])
+    for ln in bs_lines:
+        addr = ln.partition(" ")[0]
+        addr = addr[len(addr) - 3:]
+        #print 'line = ', ln, 'addr = ', addr
+        if not (addr in tiles):
+            tiles.add(addr)
+            
+
+    return len(tiles)
+
+print num_tiles_used_in_bitstream('./test/pw2_16x16_only_config_lines.bsa')
+print num_tiles_used_in_bitstream('./test/conv_2_1_only_config_lines.bsa')
+print num_tiles_used_in_bitstream('./test/conv_3_1_only_config_lines.bsa')
+print num_tiles_used_in_bitstream('./test/conv_bw_travis_only_config_lines.bsa')
+
 def seconds_from_date(date_str):
     hr_min_sec = date_str.partition(":")
 
