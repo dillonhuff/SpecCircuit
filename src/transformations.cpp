@@ -961,6 +961,36 @@ namespace FlatCircuit {
           // TODO: Actuall if both inputs are the same we can fold, but
           // that case does not matter during configuration.
         }
+      } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
+
+        // Problem: Dataflow based constant folding runs into problems with registers
+        // The graph structure does not change, so checking for backwards loops is
+        // out of the question.
+        cout << "Checking register" << endl;
+
+        if (drivenByConstants(cid, PORT_ID_ARST, def, cellClassification)) {
+
+          cout << "Register is driven by constants" << endl;
+
+          bool inputIsOutput = true;
+          auto drivers = cell.getDrivers(PORT_ID_IN);
+          for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
+            SignalBit driverBit = drivers.signals[offset];
+
+            SignalBit outputValue{cid, PORT_ID_OUT, offset};
+
+            if (driverBit != outputValue) {
+              inputIsOutput = false;
+              break;
+            }
+          }
+
+          if (inputIsOutput) {
+            cout << "Register is const" << endl;
+            newVal = CELL_IS_CONST;
+          }
+        }
+        
       } else if (!cell.isInputPortCell()) {
 
         bool allInputsConst = true;
@@ -986,9 +1016,9 @@ namespace FlatCircuit {
         // Do not change port cell designations
       }
 
-      if (newVal == CELL_IS_CONST) {
-        cout << "Cell " << def.getCellName(cid) << " is const" << endl;
-      }
+      // if (newVal == CELL_IS_CONST) {
+      //   //cout << "Cell " << def.getCellName(cid) << " is const" << endl;
+      // }
 
       if (newVal != oldVal) {
         cellClassification[cid] = newVal;
@@ -1041,6 +1071,7 @@ namespace FlatCircuit {
   }
 
   // This is a monotonic dataflow analysis
+  // Start time: 1:03
   void foldConstantsWRTState(CellDefinition& def,
                              const ValueStore& valueStore) {
 
@@ -1059,7 +1090,7 @@ namespace FlatCircuit {
       const Cell& cell = def.getCellRefConst(cid);
       
       if (ct == CELL_IS_CONST) {
-        cout << "Processing constant cell " << def.getCellName(cid) << endl;
+        //cout << "Processing constant cell " << def.getCellName(cid) << endl;
         
         if (!def.isPortCell(cid)) {
           toDelete.insert(cid);

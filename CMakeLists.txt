@@ -25,20 +25,14 @@ SET(CPP_FILES ./src/simulator.cpp
 add_library(flatcircuit ${CPP_FILES})
 
 SET(TEST_FILES ./test/test_circuit.cpp)
-#               ./test/utils.cpp)
 
 add_executable(all-tests ${TEST_FILES})
 
 target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
-# target_link_libraries(all-tests dl)
-# target_link_libraries(all-tests coreir)
-# target_link_libraries(all-tests coreir-rtlil)
-# target_link_libraries(all-tests coreir-commonlib)
-
 SET(BENCHMARK_FILES ./benchmarks/main.cpp)
 add_executable(run-benchmarks ${BENCHMARK_FILES})
 target_link_libraries(run-benchmarks flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
-#SET(MAIN_FILES ./performance-benchmarks/main.cpp)
-#add_executable(my-main ${MAIN_FILES})
+add_executable(specialize-bitstream ./benchmarks/specialize_bitstream.cpp)
+target_link_libraries(specialize-bitstream flatcircuit dl coreir coreir-rtlil coreir-commonlib)
