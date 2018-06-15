@@ -951,8 +951,8 @@ namespace FlatCircuit {
 
       sim.refreshConstants();
       
-      foldConstantsWRTState(def, sim.getValueStore());
-      //foldconstants(sim.def, sim.allRegisterValues());
+      //foldConstantsWRTState(def, sim.getValueStore());
+      foldConstants(sim.def, sim.allRegisterValues());
       deleteDeadInstances(sim.def);
 
       dbhc::maybe<PortId> clkPort = getTrueClockPort(sim.def);

@@ -31,7 +31,7 @@ namespace FlatCircuit {
   public:
     CellDefinition& def;
 
-    ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {}
+    ValueStore(CellDefinition& def_);
 
     unsigned char debugGetRawTable(const int index) {
       assert(compiledRaw);
@@ -99,12 +99,9 @@ namespace FlatCircuit {
         rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
       }
 
-      //      compiledRaw = true;
       rawSimValueTable =
         static_cast<unsigned char*>(malloc(rawOffset));
       memset(rawSimValueTable, 0, rawTableSize);
-      //rawSimValueTable[44] = 1;
-      //rawSimValueTable[0] = 23;
       
     }
 

@@ -412,10 +412,10 @@ module top(	output [0 : 0] aux_div_pad,
 .PORT_ID_OUT(aux_div_pad));
 
 	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(1'h0),
-.PARAM_WIDTH(32'h00000001)) cell_261940_const_replacement(.PORT_ID_OUT(fresh_wire_161));
+.PARAM_WIDTH(32'h00000001)) cell_261940_3_const_replacement(.PORT_ID_OUT(fresh_wire_161));
 
 	CELL_TYPE_CONST #(.PARAM_INIT_VALUE(34'h000000002),
-.PARAM_WIDTH(32'h00000022)) cell_261945_const_replacement(.PORT_ID_OUT(fresh_wire_162));
+.PARAM_WIDTH(32'h00000022)) cell_261945_3_const_replacement(.PORT_ID_OUT(fresh_wire_162));
 
 	CELL_TYPE_PORT #(.PARAM_OUT_WIDTH(32'h00000001),
 .PARAM_PORT_TYPE(2'h0)) clk_ext_in_port_cell(.PORT_ID_IN(clk_ext_in),

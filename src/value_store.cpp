@@ -6,6 +6,10 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  ValueStore::ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {
+    
+  }
+
   void ValueStore::debugPrintTableValues() const {
     cout << "Table values" << endl;
     for (int i = 0; i < (int) simValueTable.size(); i++) {
