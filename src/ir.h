@@ -211,13 +211,6 @@ namespace FlatCircuit {
         "]";
 
       return ln(wire + " = " + state);
-        // codeState.addAssign("values[" +
-        //                     to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
-        //                     "]",
-        //                     state);
-
-      //      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
-      //                result);
     }
 
   };
@@ -297,7 +290,8 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       unsigned long offset = valueStore.portValueOffset(cid, pid);
-      return ln("values[" + std::to_string(offset) + "] = " + value);
+      return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
+      //return ln("values[" + std::to_string(offset) + "] = " + value);
     }
     
   };
