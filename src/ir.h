@@ -17,6 +17,12 @@ namespace FlatCircuit {
   }
 
   static inline std::string
+  storeRegisterStateString(const std::string& wireOffset,
+                           const std::string& stateOffset) {
+    return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ")");
+  }
+
+  static inline std::string
   loadTableString(const std::string& value, const std::string& offset) {
     return ln(value + " = loadFromTable(values, " + offset + ")");
   }
@@ -226,14 +232,18 @@ namespace FlatCircuit {
     virtual std::string toString(ValueStore& valueStore) const {
       std::string state =
         "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+
       // std::string wire =
       //   "values[" +
       //   to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
       //   "]";
 
       // Changing this causes an error?
-      return storeTableString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
-                              state);
+      return storeRegisterStateString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
+                                      to_string(valueStore.getRegisterOffset(cid)));
+
+      // return storeTableString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
+      //                         state);
       //      return ln(wire + " = " + state);
     }
 
@@ -479,24 +489,49 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      
+
+      string valString = "";
+      unsigned long offset = 0;
+
       if (isPastValue) {
-        string valString = "values[" +
-          std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
-                         "].get(" + std::to_string(driverBit.offset) + ")";
+        // string valString = "values[" +
+        //   std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
+        //                  "].get(" + std::to_string(driverBit.offset) + ")";
 
-        return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
-                  valString + ")");
+        // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
+        //           valString + ")");
+
+        offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
+
+        // valString = "values[" +
+        //   std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
+        //   "].get(" + std::to_string(driverBit.offset) + ")";
+
       } else {
-        string valString = "values[" +
-          std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
-                         "].get(" + std::to_string(driverBit.offset) + ")";
+        // string valString = "values[" +
+        //   std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
+        //                  "].get(" + std::to_string(driverBit.offset) + ")";
 
-        return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
-                  valString + ")");
+        // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
+        //           valString + ")");
 
+        offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
+
+        // valString = "values[" +
+        //   std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
+        //   "].get(" + std::to_string(driverBit.offset) + ")";
+        
       }
 
+      return ln("loadBitFromTable(values," + receiver +
+                ", " + std::to_string(setOffset) +
+                ", " + std::to_string(offset) +
+                ", " + std::to_string(driverBit.offset) + ")");
+
+      // valString = "values[" + std::to_string(offset) +
+      //   "].get(" + std::to_string(driverBit.offset) + ")";
+      // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
+      //           valString + ")");
     }
   };
 
