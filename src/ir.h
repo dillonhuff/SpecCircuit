@@ -155,7 +155,7 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return readTableString(receiver,
+      return loadTableString(receiver,
                              std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
                              "(" + waddrName + ".is_binary() ? " + waddrName +
                              ".to_type<int>() : 0)");
