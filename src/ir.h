@@ -224,16 +224,17 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      // std::string state =
-      //   "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
-      std::string wire =
-        "values[" +
-        to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
-        "]";
+      std::string state =
+        "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+      // std::string wire =
+      //   "values[" +
+      //   to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+      //   "]";
 
-      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
-                              wire);
-      //ln(wire + " = " + state);
+      // Changing this causes an error?
+      return storeTableString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
+                              state);
+      //      return ln(wire + " = " + state);
     }
 
   };
