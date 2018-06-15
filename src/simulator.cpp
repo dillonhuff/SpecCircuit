@@ -544,10 +544,11 @@ namespace FlatCircuit {
 
         pastValueTmp = codeState.getPortTemp(cid, PORT_ID_OUT);
 
-        codeState.addAssign(pastValueTmp,
-                            "values[" +
-                            to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
-                            "]");
+        codeState.addInstruction(new IRPortLoad(pastValueTmp, cid, PORT_ID_OUT, false));
+        // codeState.addAssign(pastValueTmp,
+        //                     "values[" +
+        //                     to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
+        //                     "]");
       }
 
       if ((cell.getCellType() == CELL_TYPE_PORT) && !cell.isInputPortCell()) {
@@ -616,7 +617,8 @@ namespace FlatCircuit {
 
       if (sentToSeqPort) {
 
-        codeState.addAssign("values[" + to_string(valueStore.pastValueOffset(cid, PORT_ID_OUT)) + "]", pastValueTmp);
+        codeState.addInstruction(new IRTableStore(cid, PORT_ID_OUT, pastValueTmp, true));
+        //codeState.addAssign("values[" + to_string(valueStore.pastValueOffset(cid, PORT_ID_OUT)) + "]", pastValueTmp);
 
       }
 

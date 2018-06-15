@@ -230,8 +230,8 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      std::string state =
-        "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+      // std::string state =
+      //   "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
       // std::string wire =
       //   "values[" +
@@ -313,14 +313,22 @@ namespace FlatCircuit {
     CellId cid;
     PortId pid;
     std::string value;
+    bool isPast;
 
     IRTableStore(const CellId cid_, const PortId pid_, const std::string& value_) :
-      cid(cid_), pid(pid_), value(value_) {}
+      cid(cid_), pid(pid_), value(value_), isPast(false) {}
 
+    IRTableStore(const CellId cid_, const PortId pid_, const std::string& value_, const bool isPast_) :
+
+      cid(cid_), pid(pid_), value(value_), isPast(isPast_) {}
+    
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
 
       unsigned long offset = valueStore.rawPortValueOffset(cid, pid);
+      if (isPast) {
+        offset = valueStore.rawPortPastValueOffset(cid, pid);
+      }
 
       std::string accessStr = accessString("values", offset, bitWidth);
 
@@ -329,6 +337,10 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       unsigned long offset = valueStore.portValueOffset(cid, pid);
+      if (isPast) {
+        offset = valueStore.pastValueOffset(cid, pid);
+      }
+      
       return storeTableString(std::to_string(offset), value);
       //return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
     }
