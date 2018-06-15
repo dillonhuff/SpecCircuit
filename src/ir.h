@@ -10,6 +10,17 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  static inline std::string
+  storeTableString(const std::string& offset,
+                   const std::string& value) {
+    return ln("storeToTable(values, " + offset + ", " + value + ")");
+  }
+
+  static inline std::string
+  loadTableString(const std::string& value, const std::string& offset) {
+    return ln(value + " = readFromTable(values, " + offset + ")");
+  }
+  
   class IRInstruction {
   public:
 
@@ -144,10 +155,15 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln(receiver + " = values[" +
-                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-                "(" + waddrName + ".is_binary() ? " + waddrName +
-                ".to_type<int>() : 0)]");
+      return readTableString(receiver,
+                             std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                             "(" + waddrName + ".is_binary() ? " + waddrName +
+                             ".to_type<int>() : 0)");
+
+      // return ln(receiver + " = values[" +
+      //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //           "(" + waddrName + ".is_binary() ? " + waddrName +
+      //           ".to_type<int>() : 0)]");
     }
   };
   
@@ -174,10 +190,15 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln("values[" +
-                std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-                "(" + waddrName + ".is_binary() ? " + waddrName +
-                ".to_type<int>() : 0)] = " + wdataName);
+      return storeTableString(std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+                              "(" + waddrName + ".is_binary() ? " + waddrName +
+                              ".to_type<int>() : 0)",
+                              wdataName);
+      //return ln("storeToTable(values, " + ")");
+      // return ln("values[" +
+      //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
+      //           "(" + waddrName + ".is_binary() ? " + waddrName +
+      //           ".to_type<int>() : 0)] = " + wdataName);
 
     }
 
@@ -203,14 +224,16 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      std::string state =
-        "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
+      // std::string state =
+      //   "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
       std::string wire =
         "values[" +
         to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
         "]";
 
-      return ln(wire + " = " + state);
+      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
+                              wire);
+      //ln(wire + " = " + state);
     }
 
   };
@@ -235,8 +258,10 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
-                result);
+      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
+                              result);
+      // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
+      //           result);
     }
 
   };
@@ -263,8 +288,11 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) +
-                "] = BitVector(\"" + resString + "\")");
+      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
+                              "BitVector(\"" + resString + "\")");
+
+      // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) +
+      //           "] = BitVector(\"" + resString + "\")");
     }
 
   };
@@ -290,8 +318,8 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       unsigned long offset = valueStore.portValueOffset(cid, pid);
-      return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
-      //return ln("values[" + std::to_string(offset) + "] = " + value);
+      return storeTableString(std::to_string(offset), value);
+      //return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
     }
     
   };
@@ -376,7 +404,8 @@ namespace FlatCircuit {
       }
 
       //unsigned long offset = valueStore.portValueOffset(cid, pid);
-      return ln(receiver + " = values[" + std::to_string(offset) + "]");
+      //return ln(receiver + " = values[" + std::to_string(offset) + "]");
+      return loadTableString(receiver, std::to_string(offset));
     }
 
   };
@@ -445,20 +474,10 @@ namespace FlatCircuit {
         containerPrimitive(valueStore.def.getCellRefConst(cid).getPortWidth(pid));
       return ln(receiver + " |= ((" + receiverBV+ ")((" + valString + " >> " +
                 std::to_string(driverBit.offset) + " ) & 0x1))<< " +
-                std::to_string(setOffset)); // + "\n" +
-        // ln("std::cout << \"" + valueStore.def.getCellName(cid) +
-        //    " = \" << (uint64_t) " + receiver + " << std::endl;");
+                std::to_string(setOffset));
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      //return ln(receiver + ".set(" + std::to_string(offset) + ", " + source + ")");
-
-      // unsigned long offset;
-      // if (!isPastValue) {
-      //   offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
-      // } else {
-      //   offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
-      // }
       
       if (isPastValue) {
         string valString = "values[" +

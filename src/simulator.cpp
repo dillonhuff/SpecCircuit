@@ -676,6 +676,7 @@ namespace FlatCircuit {
       "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
       "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
       "static inline void storeToTable(bsim::quad_value_bit_vector* values, const unsigned long offset, BitVector& bv) { values[offset] = bv; }\n\n"
+      "static inline BitVector loadFromTable(bsim::quad_value_bit_vector* values, const unsigned long offset) { return values[offset]; }\n\n"
       "void simulate(bsim::quad_value_bit_vector* values) {\n";
 
     assert((updates.size() % 2) == 0);
