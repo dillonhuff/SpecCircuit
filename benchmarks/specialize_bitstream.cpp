@@ -128,19 +128,20 @@ int main(const int argc, const char** argv) {
   }
     
   cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
+  nCycles = 100000;
   setCGRAInput(2, input, sim);
   for (int i = 0; i < nCycles; i++) {
 
     input = BitVector(16, i);
     setCGRAInput(2, input, sim);
 
-    cout << "Cycle " << i << endl;
+    //    cout << "Cycle " << i << endl;
 
     posedge("clk_in", sim);
 
     BitVector outputS0 = getCGRAOutput(0, sim);
-    cout << "input    = " << input << ", " << input.to_type<int>() << endl;
-    cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    // cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+    // cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
   }
 
   cout << "Outputs" << endl;
