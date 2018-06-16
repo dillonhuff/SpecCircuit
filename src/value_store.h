@@ -9,6 +9,26 @@ namespace FlatCircuit {
 
   class IRInstruction;
 
+  class QBitTable {
+    std::vector<BitVector> simValueTable;
+  public:
+
+    BitVector getBitVector(const unsigned long offset,
+                           const unsigned long width) {
+      BitVector bv = simValueTable[offset];
+      assert(width == (unsigned long) bv.bitLength());
+      return bv;
+    }
+
+    unsigned long addBitVector(const unsigned long width) {
+      BitVector bv = bsim::unknown_bv(width);
+      unsigned long nextInd = simValueTable.size();
+      simValueTable.push_back(bv);
+      return nextInd;
+    }
+
+  };
+
   class ValueStore {
     std::vector<BitVector> simValueTable;
 
@@ -151,22 +171,6 @@ namespace FlatCircuit {
 
       return map_find({cid, pid}, portOffsets);
     }
-
-    // void initMemory(const CellId cid) {
-    //   assert(!contains_key(cid, memoryOffsets));
-
-    //   const Cell& cl = def.getCellRefConst(cid);
-    //   int memWidth = cl.getMemWidth();
-    //   int memDepth = cl.getMemDepth();
-
-    //   BitVector defaultValue(memWidth, 0);
-
-    //   unsigned long nextInd = simValueTable.size();
-    //   memoryOffsets[cid] = nextInd;
-    //   for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
-    //     simValueTable.push_back(defaultValue);
-    //   }
-    // }
 
     BitVector getMemoryValue(const CellId cid,
                              const int offset) const {
