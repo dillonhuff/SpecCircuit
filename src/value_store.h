@@ -357,7 +357,7 @@ namespace FlatCircuit {
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       if (!compiledRaw) {
-        //std::cout << "Getting port value for " << sigPortString(def, {cid, pid}) << std::endl;
+        std::cout << "Getting port value for " << sigPortString(def, {cid, pid}) << std::endl;
         return simTableValue(cid, pid);
         //return simValueTable[map_find({cid, pid}, portOffsets)];
       } else {
