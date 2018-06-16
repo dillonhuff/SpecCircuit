@@ -24,6 +24,12 @@ namespace FlatCircuit {
         portOffsets[{cid, port}] = nextInd;
         simValueTable.push_back(bv);
 
+        if (sequentialDependencies(cell, port).size() > 0) {
+          BitVector bv = unknown_bv(cell.getPortWidth(port));
+          unsigned long nextInd = simValueTable.size();
+          pastValueOffsets[{cid, port}] = nextInd;
+          simValueTable.push_back(bv);
+        }
       }
 
       if (cell.isOutputPortCell()) {
