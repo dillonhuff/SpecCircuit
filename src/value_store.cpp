@@ -59,10 +59,10 @@ namespace FlatCircuit {
 
         //unsigned long nextInd = simValueTable.size();
         memoryOffsets[cid] =
-          simValueTable.addBitVector(cell.getPortWidth(memWidth));
+          simValueTable.addBitVector(memWidth);
 
         for (unsigned long i = 1; i < (unsigned long) memDepth; i++) {
-          simValueTable.addBitVector(cell.getPortWidth(memWidth));
+          simValueTable.addBitVector(memWidth);
           //simValueTable.push_back(defaultValue);
         }
       }

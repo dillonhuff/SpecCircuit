@@ -531,7 +531,7 @@ namespace FlatCircuit {
       state.setFreshValue("read_addr", BitVec(index, 0));
       state.update();
 
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
 
       state.setFreshValue("clk", BitVec(1, 0));
       state.setFreshValue("write_en", BitVec(1, 1));
@@ -545,7 +545,8 @@ namespace FlatCircuit {
       state.setFreshValue("read_addr", BitVec(index, 2));
       state.update();
 
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
+      //REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
 
     SECTION("Simulating with compiled code") {
@@ -566,7 +567,8 @@ namespace FlatCircuit {
       state.setFreshValue("read_addr", BitVec(index, 0));
       state.update();
 
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
+      //REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
 
       state.setFreshValue("clk", BitVec(1, 0));
       state.setFreshValue("write_en", BitVec(1, 1));
@@ -580,7 +582,8 @@ namespace FlatCircuit {
       state.setFreshValue("read_addr", BitVec(index, 2));
       state.update();
 
-      REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
+      REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
+      //REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
 
     SECTION("Simulating with two state compiled code") {
