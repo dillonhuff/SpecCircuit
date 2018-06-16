@@ -16,7 +16,11 @@ namespace FlatCircuit {
     BitVector getBitVector(const unsigned long offset,
                            const unsigned long width) const {
       BitVector bv = simValueTable.at(offset);
+      if (width != (unsigned long) bv.bitLength()) {
+        std::cout << "Error: Input width = " << width << " but actual width = " << bv.bitLength() << std::endl;
+      }
       assert(width == (unsigned long) bv.bitLength());
+
       return bv;
     }
 
@@ -353,6 +357,7 @@ namespace FlatCircuit {
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       if (!compiledRaw) {
+        //std::cout << "Getting port value for " << sigPortString(def, {cid, pid}) << std::endl;
         return simTableValue(cid, pid);
         //return simValueTable[map_find({cid, pid}, portOffsets)];
       } else {

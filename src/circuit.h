@@ -212,6 +212,20 @@ namespace FlatCircuit {
     return bv.to_type<int>();
   }
 
+  static inline bool isReduceOp(const CellType tp) {
+    // Why is cell type port here?
+    std::vector<CellType> unops{
+      CELL_TYPE_ORR,
+        CELL_TYPE_ULT,
+        CELL_TYPE_UGT,
+        CELL_TYPE_ULE,
+        CELL_TYPE_UGE,
+        CELL_TYPE_ANDR,
+        CELL_TYPE_XORR};
+
+    return elem(tp, unops);
+  }
+
   static inline bool isUnop(const CellType tp) {
     // Why is cell type port here?
     std::vector<CellType> unops{
@@ -513,7 +527,22 @@ namespace FlatCircuit {
         portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}});
         drivers.insert({PORT_ID_SEL, SignalBus(1)});
         
+      } else if (isUnop(cellType) && isReduceOp(cellType)) {
+
+        BitVector width = parameters.at(PARAM_WIDTH);
+        int wd = width.to_type<int>();
+        assert(width.bitLength() == 32);
+
+        portWidths.insert({PORT_ID_OUT, {1, PORT_TYPE_OUT}});
+        std::vector<std::set<SignalBit> > bus(1);
+        receivers.insert({PORT_ID_OUT, bus});
+
+        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+
       } else if (isUnop(cellType)) {
+
+        assert(!isReduceOp(cellType));
 
         BitVector width = parameters.at(PARAM_WIDTH);
         int wd = width.to_type<int>();

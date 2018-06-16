@@ -280,7 +280,7 @@ namespace FlatCircuit {
                    (tp == CELL_TYPE_MUX) || (tp == CELL_TYPE_REG_ARST) ||
                    (tp == CELL_TYPE_REG)) {
 
-          int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>(); 
+          //int width = cl.getParameterValue(PARAM_WIDTH).to_type<int>(); 
           if ((tp == CELL_TYPE_REG) ||
               (tp == CELL_TYPE_REG_ARST)) {
             BitVector initVal = cl.getParameterValue(PARAM_INIT_VALUE);
@@ -289,7 +289,7 @@ namespace FlatCircuit {
 
             setRegisterValue(cid, initVal);
           } else {
-            BitVector initVal = bsim::unknown_bv(width);
+            BitVector initVal = bsim::unknown_bv(cl.getPortWidth(PORT_ID_OUT));
             setPortValue(cid, PORT_ID_OUT, initVal);
           }
 
