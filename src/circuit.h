@@ -1167,4 +1167,13 @@ namespace FlatCircuit {
     return true;
   }
 
+  std::vector<SigPort>
+  sequentialDependencies(const Cell& cell,
+                         const PortId pid);
+
+  std::vector<SigPort>
+  combinationalDependencies(const Cell& cell,
+                            const PortId pid,
+                            const CellDefinition& def);
+  
 }

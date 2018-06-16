@@ -210,51 +210,6 @@ namespace FlatCircuit {
     return levelZero;
   }
 
-  std::vector<SigPort>
-  combinationalDependencies(const Cell& cell,
-                            const PortId pid,
-                            const CellDefinition& def) {
-    vector<SigPort> deps;
-    
-    for (auto sigPort : cell.receiverSigPorts(pid)) {
-      const Cell& receiverCell = def.getCellRefConst(sigPort.cell);
-
-      if ((receiverCell.getCellType() == CELL_TYPE_MEM) &&
-          (sigPort.port != PORT_ID_RADDR)) {
-        continue;
-      }
-
-      if (!isRegister(receiverCell.getCellType()) &&
-          !((receiverCell.getCellType() == CELL_TYPE_MEM) &&
-            (sigPort.port == PORT_ID_RADDR)) &&
-          (sigPort.port != PORT_ID_ARST) &&
-          (sigPort.port != PORT_ID_CLK)) {
-
-        deps.push_back(sigPort);
-
-      }
-    }
-
-    return deps;
-  }
-
-  std::vector<SigPort>
-  sequentialDependencies(const Cell& cell,
-                         const PortId pid) {
-    vector<SigPort> deps;
-    
-    for (auto sigPort : cell.receiverSigPorts(pid)) {
-      if ((sigPort.port == PORT_ID_ARST) ||
-          (sigPort.port == PORT_ID_CLK)) {
-
-        deps.push_back(sigPort);
-
-      }
-    }
-
-    return deps;
-  }
-
   void updateDependencies(const Cell& cell,
                           const PortId pid,
                           set<SigPort>& freshChanges,

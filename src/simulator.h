@@ -162,15 +162,6 @@ namespace FlatCircuit {
 
   };
 
-  std::vector<SigPort>
-  sequentialDependencies(const Cell& cell,
-                         const PortId pid);
-
-  std::vector<SigPort>
-  combinationalDependencies(const Cell& cell,
-                            const PortId pid,
-                            const CellDefinition& def);
-  
   class Simulator {
 
     ValueStore valueStore;
