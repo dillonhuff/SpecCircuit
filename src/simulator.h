@@ -211,7 +211,8 @@ namespace FlatCircuit {
             }
           }
         } else if (tp == CELL_TYPE_MEM) {
-          initMemory(cid);
+          //initMemory(cid);
+
           int memWidth = cl.getMemWidth();
 
           BitVector initVal(memWidth, 0);
@@ -956,9 +957,9 @@ namespace FlatCircuit {
       valueStore.setPortValueTwoState(cid, pid, width, value);
     }
     
-    void initMemory(const CellId cid) {
-      valueStore.initMemory(cid);
-    }
+    // void initMemory(const CellId cid) {
+    //   valueStore.initMemory(cid);
+    // }
 
     unsigned long portValueOffset(const CellId cid,
                                   const PortId pid) {

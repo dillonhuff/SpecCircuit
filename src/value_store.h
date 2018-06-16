@@ -152,21 +152,21 @@ namespace FlatCircuit {
       return map_find({cid, pid}, portOffsets);
     }
 
-    void initMemory(const CellId cid) {
-      assert(!contains_key(cid, memoryOffsets));
+    // void initMemory(const CellId cid) {
+    //   assert(!contains_key(cid, memoryOffsets));
 
-      const Cell& cl = def.getCellRefConst(cid);
-      int memWidth = cl.getMemWidth();
-      int memDepth = cl.getMemDepth();
+    //   const Cell& cl = def.getCellRefConst(cid);
+    //   int memWidth = cl.getMemWidth();
+    //   int memDepth = cl.getMemDepth();
 
-      BitVector defaultValue(memWidth, 0);
+    //   BitVector defaultValue(memWidth, 0);
 
-      unsigned long nextInd = simValueTable.size();
-      memoryOffsets[cid] = nextInd;
-      for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
-        simValueTable.push_back(defaultValue);
-      }
-    }
+    //   unsigned long nextInd = simValueTable.size();
+    //   memoryOffsets[cid] = nextInd;
+    //   for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
+    //     simValueTable.push_back(defaultValue);
+    //   }
+    // }
 
     BitVector getMemoryValue(const CellId cid,
                              const int offset) const {

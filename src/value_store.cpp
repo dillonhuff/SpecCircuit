@@ -38,7 +38,19 @@ namespace FlatCircuit {
         portOffsets[{cid, PORT_ID_IN}] = nextInd;
         simValueTable.push_back(bv);
       }
-      
+
+      if (cell.getCellType() == CELL_TYPE_MEM) {
+        int memWidth = cell.getMemWidth();
+        int memDepth = cell.getMemDepth();
+
+        BitVector defaultValue(memWidth, 0);
+
+        unsigned long nextInd = simValueTable.size();
+        memoryOffsets[cid] = nextInd;
+        for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
+          simValueTable.push_back(defaultValue);
+        }
+      }
     }
   }
 
