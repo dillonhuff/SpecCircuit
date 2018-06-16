@@ -14,10 +14,15 @@ namespace FlatCircuit {
   public:
 
     BitVector getBitVector(const unsigned long offset,
-                           const unsigned long width) {
-      BitVector bv = simValueTable[offset];
+                           const unsigned long width) const {
+      BitVector bv = simValueTable.at(offset);
       assert(width == (unsigned long) bv.bitLength());
       return bv;
+    }
+
+    // TODO: Remove when transistioning to raw bit vectors
+    BitVector bitVectorAt(const unsigned long i) const {
+      return simValueTable.at(i);
     }
 
     void setBitVector(const unsigned long offset,
@@ -27,13 +32,25 @@ namespace FlatCircuit {
     
     unsigned long addBitVector(const unsigned long width) {
       BitVector bv = bsim::unknown_bv(width);
+      auto nextInd = addBitVector(bv);
+      return nextInd;
+      // unsigned long nextInd = simValueTable.size();
+      // simValueTable.push_back(bv);
+      // return nextInd;
+    }
+
+    unsigned long addBitVector(const BitVector& bv) {
       unsigned long nextInd = simValueTable.size();
       simValueTable.push_back(bv);
       return nextInd;
     }
-
+    
     unsigned long size() const {
       return simValueTable.size();
+    }
+
+    std::vector<BitVector>& getValueVector() {
+      return simValueTable;
     }
 
   };
@@ -68,7 +85,7 @@ namespace FlatCircuit {
       return rawSimValueTable[index];
     }
 
-    BitVector simTableValue(const CellId cid, const PortId pid) {
+    BitVector simTableValue(const CellId cid, const PortId pid) const {
       return simValueTable.getBitVector(map_find({cid, pid}, portOffsets),
                                         def.getCellRefConst(cid).getPortWidth(pid));
     }
@@ -107,7 +124,7 @@ namespace FlatCircuit {
       for (unsigned long i = 0; i < simValueTable.size(); i++) {
         quadOffsetsToRawOffsets[i] = rawOffset;
         // Adding extra buffer space
-        rawOffset += storedByteLength(simValueTable[i].bitLength()) + 1;
+        rawOffset += storedByteLength(simValueTable.bitVectorAt(i).bitLength()) + 1;
       }
 
       rawTableSize = rawOffset;
@@ -145,7 +162,7 @@ namespace FlatCircuit {
 
     void debugPrintTableValues() const;
 
-    std::vector<BitVector>& getValueTable() { return simValueTable; }
+    std::vector<BitVector>& getValueTable() { return simValueTable.getValueVector(); }
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 
     unsigned long getMemoryOffset(const CellId cid) const {
@@ -206,7 +223,7 @@ namespace FlatCircuit {
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
-      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) offset), writeData);
+      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) addr), writeData);
       // simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
       //   writeData;
 
@@ -248,9 +265,11 @@ namespace FlatCircuit {
       if (!contains_key({cid, pid}, portOffsets)) {
         unsigned long nextInd = simValueTable.size();
         portOffsets[{cid, pid}] = nextInd;
-        simValueTable.push_back(bv);
+        simValueTable.addBitVector(bv);
+        //simValueTable.push_back(bv);
       } else {
-        simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+        simValueTable.setBitVector(map_find({cid, pid}, portOffsets), bv);
+        //simValueTable[map_find({cid, pid}, portOffsets)] = bv;
       }
     }
 
@@ -260,9 +279,11 @@ namespace FlatCircuit {
       if (!contains_key({cid, pid}, pastValueOffsets)) {
         unsigned long nextInd = simValueTable.size();
         pastValueOffsets[{cid, pid}] = nextInd;
-        simValueTable.push_back(bv);
+        //simValueTable.push_back(bv);
+        simValueTable.addBitVector(bv);
       } else {
-        simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
+        simValueTable.setBitVector(map_find({cid, pid}, pastValueOffsets), bv);
+        //simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
       }
     }
     
@@ -372,7 +393,8 @@ namespace FlatCircuit {
       if (!compiledRaw) {
         assert(contains_key(cid, registerOffsets));
 
-        simValueTable[map_find(cid, registerOffsets)] = bv;
+        //simValueTable[map_find(cid, registerOffsets)] = bv;
+        simValueTable.setBitVector(map_find(cid, registerOffsets), bv);
 
       } else {
 

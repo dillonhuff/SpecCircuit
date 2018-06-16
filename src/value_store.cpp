@@ -42,7 +42,7 @@ namespace FlatCircuit {
       }
 
       if (cell.isOutputPortCell()) {
-        portOffsets[{cid, port}] =
+        portOffsets[{cid, PORT_ID_IN}] =
           simValueTable.addBitVector(cell.getPortWidth(PORT_ID_IN));
 
         // BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_IN));
