@@ -12,53 +12,68 @@ namespace FlatCircuit {
       CellId cid = ctp.first;
       const Cell& cell = def.getCellRefConst(cid);
       if (isRegister(cell.getCellType())) {
-        BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_OUT));
-        unsigned long nextInd = simValueTable.size();
-        registerOffsets[cid] = nextInd;
-        simValueTable.push_back(bv);
+        // BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_OUT));
+        // unsigned long nextInd = simValueTable.size();
+        // registerOffsets[cid] = nextInd;
+        // simValueTable.push_back(bv);
+
+        registerOffsets[cid] =
+          simValueTable.addBitVector(cell.getPortWidth(PORT_ID_OUT));
       }
 
       for (auto port : cell.outputPorts()) {
-        BitVector bv = unknown_bv(cell.getPortWidth(port));
-        unsigned long nextInd = simValueTable.size();
-        portOffsets[{cid, port}] = nextInd;
-        simValueTable.push_back(bv);
+        portOffsets[{cid, port}] =
+          simValueTable.addBitVector(cell.getPortWidth(port));
+        
+        // BitVector bv = unknown_bv(cell.getPortWidth(port));
+        // unsigned long nextInd = simValueTable.size();
+        // portOffsets[{cid, port}] = nextInd;
+        // simValueTable.push_back(bv);
 
         if (sequentialDependencies(cell, port).size() > 0) {
-          BitVector bv = unknown_bv(cell.getPortWidth(port));
-          unsigned long nextInd = simValueTable.size();
-          pastValueOffsets[{cid, port}] = nextInd;
-          simValueTable.push_back(bv);
+          pastValueOffsets[{cid, port}] =
+            simValueTable.addBitVector(cell.getPortWidth(port));
+
+          // BitVector bv = unknown_bv(cell.getPortWidth(port));
+          // unsigned long nextInd = simValueTable.size();
+          // pastValueOffsets[{cid, port}] = nextInd;
+          // simValueTable.push_back(bv);
         }
       }
 
       if (cell.isOutputPortCell()) {
-        BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_IN));
-        unsigned long nextInd = simValueTable.size();
-        portOffsets[{cid, PORT_ID_IN}] = nextInd;
-        simValueTable.push_back(bv);
+        portOffsets[{cid, port}] =
+          simValueTable.addBitVector(cell.getPortWidth(PORT_ID_IN));
+
+        // BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_IN));
+        // unsigned long nextInd = simValueTable.size();
+        // portOffsets[{cid, PORT_ID_IN}] = nextInd;
+        // simValueTable.push_back(bv);
       }
 
       if (cell.getCellType() == CELL_TYPE_MEM) {
         int memWidth = cell.getMemWidth();
         int memDepth = cell.getMemDepth();
 
-        BitVector defaultValue(memWidth, 0);
+        //BitVector defaultValue(memWidth, 0);
 
-        unsigned long nextInd = simValueTable.size();
-        memoryOffsets[cid] = nextInd;
-        for (unsigned long i = 0; i < (unsigned long) memDepth; i++) {
-          simValueTable.push_back(defaultValue);
+        //unsigned long nextInd = simValueTable.size();
+        memoryOffsets[cid] =
+          simValueTable.addBitVector(cell.getPortWidth(memWidth));
+
+        for (unsigned long i = 1; i < (unsigned long) memDepth; i++) {
+          simValueTable.addBitVector(cell.getPortWidth(memWidth));
+          //simValueTable.push_back(defaultValue);
         }
       }
     }
   }
 
   void ValueStore::debugPrintTableValues() const {
-    cout << "Table values" << endl;
-    for (int i = 0; i < (int) simValueTable.size(); i++) {
-      cout << "\t" << i << " = " << simValueTable.at(i) << endl;
-    }
+    // cout << "Table values" << endl;
+    // for (int i = 0; i < (int) simValueTable.size(); i++) {
+    //   cout << "\t" << i << " = " << simValueTable.getBitVector(i) << endl;
+    // }
   }
 
   std::vector<IRInstruction*>

@@ -27,10 +27,15 @@ namespace FlatCircuit {
       return nextInd;
     }
 
+    unsigned long size() const {
+      return simValueTable.size();
+    }
+
   };
 
   class ValueStore {
-    std::vector<BitVector> simValueTable;
+    //std::vector<BitVector> simValueTable;
+    QBitTable simValueTable;
 
     std::map<SigPort, unsigned long> portOffsets;
     std::map<CellId, unsigned long> memoryOffsets;
@@ -58,6 +63,11 @@ namespace FlatCircuit {
       return rawSimValueTable[index];
     }
 
+    BitVector simTableValue(const CellId cid, const PortId pid) {
+      return simValueTable.getBitVector(map_find({cid, pid}, portOffsets),
+                                        def.getCellRefConst(cid).getPortWidth(pid));
+    }
+
     void setCompiledRaw() {
       compiledRaw = true;
 
@@ -68,15 +78,18 @@ namespace FlatCircuit {
         if (cell.getCellType() == CELL_TYPE_CONST) {
           setPortValue(cid,
                        PORT_ID_OUT,
-                       simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+                       simTableValue(cid, PORT_ID_OUT));
+          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         } else if (isRegister(cell.getCellType())) {
           // TODO: Need to add register support
           setRegisterValue(cid,
-                           simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+                           simTableValue(cid, PORT_ID_OUT));
+          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
 
           setPortValue(cid,
                        PORT_ID_OUT,
-                       simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
+                       simTableValue(cid, PORT_ID_OUT));
+          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         }
       }
 
@@ -436,7 +449,8 @@ namespace FlatCircuit {
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
-      return simValueTable[pastValueOffset(cid, pid)];
+      return simValueTable.getBitVector(pastValueOffset(cid, pid),
+                                        def.getCellRefConst(cid).getPortWidth(pid));
     }
 
     unsigned long pastValueOffset(const CellId cid,
