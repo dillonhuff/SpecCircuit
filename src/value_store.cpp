@@ -3,12 +3,20 @@
 #include "ir.h"
 
 using namespace std;
+using namespace bsim;
 
 namespace FlatCircuit {
 
   ValueStore::ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {
     for (auto ctp : def.getCellMap()) {
-      
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      if (isRegister(cell.getCellType())) {
+        BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_OUT));
+        unsigned long nextInd = simValueTable.size();
+        registerOffsets[cid] = nextInd;
+        simValueTable.push_back(bv);
+      }
     }
   }
 

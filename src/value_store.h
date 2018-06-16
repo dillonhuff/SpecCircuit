@@ -323,13 +323,15 @@ namespace FlatCircuit {
     void setRegisterValue(const CellId cid,
                           const BitVector& bv) {
       if (!compiledRaw) {
-        if (!contains_key(cid, registerOffsets)) {
-          unsigned long nextInd = simValueTable.size();
-          registerOffsets[cid] = nextInd;
-          simValueTable.push_back(bv);
-        }
+        assert(contains_key(cid, registerOffsets));
+        // if (!contains_key(cid, registerOffsets)) {
+        //   unsigned long nextInd = simValueTable.size();
+        //   registerOffsets[cid] = nextInd;
+        //   simValueTable.push_back(bv);
+        // }
 
         simValueTable[map_find(cid, registerOffsets)] = bv;
+
       } else {
 
         bool isBinary = bv.is_binary();
