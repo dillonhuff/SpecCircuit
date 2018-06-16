@@ -20,6 +20,11 @@ namespace FlatCircuit {
       return bv;
     }
 
+    void setBitVector(const unsigned long offset,
+                      const BitVector& bv) {
+      simValueTable[offset] = bv;
+    }
+    
     unsigned long addBitVector(const unsigned long width) {
       BitVector bv = bsim::unknown_bv(width);
       unsigned long nextInd = simValueTable.size();
@@ -189,7 +194,9 @@ namespace FlatCircuit {
                              const int offset) const {
       assert(offset >= 0);
 
-      return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
+      int memWidth = def.getCellRefConst(cid).getMemWidth();
+      return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) offset), memWidth);
+      //return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
     }
 
     void setMemoryValue(const CellId cid,
@@ -199,6 +206,7 @@ namespace FlatCircuit {
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
+      simValueTable.(map_find(cid, memoryOffsets) + ((unsigned long) offset), memWidth);
       simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
         writeData;
 
@@ -316,14 +324,16 @@ namespace FlatCircuit {
           assert(false);
         }
 
-        simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+        simValueTable.setBitVector(map_find({cid, pid}, portOffsets), bv);
+        //simValueTable[map_find({cid, pid}, portOffsets)] = bv;
       }
     }
 
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       if (!compiledRaw) {
-        return simValueTable[map_find({cid, pid}, portOffsets)];
+        return simTableValue(cid, pid);
+        //return simValueTable[map_find({cid, pid}, portOffsets)];
       } else {
         int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
 
@@ -410,7 +420,9 @@ namespace FlatCircuit {
     }
 
     BitVector getRegisterValue(const CellId cid) const {
-      return simValueTable[map_find(cid, registerOffsets)];
+      //return simValueTable[map_find(cid, registerOffsets)];
+      return simValueTable.getBitVector(map_find(cid, registerOffsets),
+                                        def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT));
     }
 
     void setPastValue(const CellId cid,
@@ -418,7 +430,8 @@ namespace FlatCircuit {
                       const BitVector& bv) {
       if (!compiledRaw) {
         unsigned long offset = pastValueOffset(cid, pid);
-        simValueTable[offset] = bv;
+        simValueTable.setBitVector(offset, bv);
+        //simValueTable[offset] = bv;
       } else {
         int pWidth = def.getCellRefConst(cid).getPortWidth(pid);
 
