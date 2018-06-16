@@ -573,11 +573,6 @@ namespace FlatCircuit {
         codeState.addInstruction(new IRMemoryLoad(memValue, cid, raddrName));
         codeState.addAssign(cid, PORT_ID_RDATA, memValue, valueStore);
         
-        // codeState.addAssign(cid,
-        //                     PORT_ID_RDATA,
-        //                     "values[" + to_string(valueStore.getMemoryOffset(cid)) + " + " + "(" + raddrName + ".is_binary() ? " + raddrName + ".to_type<int>() : 0)]", valueStore);
-
-
       } else if (cell.getCellType() == CELL_TYPE_MUX) {
 
         string argName0 = codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
@@ -595,18 +590,9 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_REG_ARST) {
 
         codeState.addInstruction(new IRRegisterStateCopy(cid));
-        // string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
-
-        // codeState.addAssign("values[" +
-        //                     to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)) +
-        //                     "]",
-        //                     state);
 
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         codeState.addInstruction(new IRRegisterStateCopy(cid));
-        // string state = "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
-
-        // codeState.addAssign(cid, PORT_ID_OUT, state, valueStore);
 
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;

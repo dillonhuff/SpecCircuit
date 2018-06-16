@@ -7,7 +7,9 @@ using namespace std;
 namespace FlatCircuit {
 
   ValueStore::ValueStore(CellDefinition& def_) : compiledRaw(false), def(def_) {
-    
+    for (auto ctp : def.getCellMap()) {
+      
+    }
   }
 
   void ValueStore::debugPrintTableValues() const {
