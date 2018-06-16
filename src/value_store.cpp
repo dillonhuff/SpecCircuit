@@ -23,7 +23,16 @@ namespace FlatCircuit {
         unsigned long nextInd = simValueTable.size();
         portOffsets[{cid, port}] = nextInd;
         simValueTable.push_back(bv);
+
       }
+
+      if (cell.isOutputPortCell()) {
+        BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_IN));
+        unsigned long nextInd = simValueTable.size();
+        portOffsets[{cid, PORT_ID_IN}] = nextInd;
+        simValueTable.push_back(bv);
+      }
+      
     }
   }
 

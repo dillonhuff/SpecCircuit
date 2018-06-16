@@ -222,6 +222,30 @@ namespace FlatCircuit {
       
     }
 
+    void resetPortValue(const CellId cid,
+                      const PortId pid,
+                      const BitVector& bv) {
+      if (!contains_key({cid, pid}, portOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        portOffsets[{cid, pid}] = nextInd;
+        simValueTable.push_back(bv);
+      } else {
+        simValueTable[map_find({cid, pid}, portOffsets)] = bv;
+      }
+    }
+
+    void resetPastValue(const CellId cid,
+                        const PortId pid,
+                        const BitVector& bv) {
+      if (!contains_key({cid, pid}, pastValueOffsets)) {
+        unsigned long nextInd = simValueTable.size();
+        pastValueOffsets[{cid, pid}] = nextInd;
+        simValueTable.push_back(bv);
+      } else {
+        simValueTable[map_find({cid, pid}, pastValueOffsets)] = bv;
+      }
+    }
+    
     void setPortValue(const CellId cid,
                       const PortId pid,
                       const BitVector& bv) {
@@ -276,9 +300,8 @@ namespace FlatCircuit {
       } else {
 
         if (!contains_key({cid, pid}, portOffsets)) {
-          unsigned long nextInd = simValueTable.size();
-          portOffsets[{cid, pid}] = nextInd;
-          simValueTable.push_back(bv);
+          std::cout << "Error: " << sigPortString(def, {cid, pid}) << " has no offset" << std::endl;
+          assert(false);
         }
 
         simValueTable[map_find({cid, pid}, portOffsets)] = bv;

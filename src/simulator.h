@@ -1057,10 +1057,10 @@ namespace FlatCircuit {
           const Cell& c = def.getCellRef(cid);
           BitVector initVal = c.getParameterValue(PARAM_INIT_VALUE);
 
-          setPortValue(cid, PORT_ID_OUT, initVal);
+          valueStore.resetPortValue(cid, PORT_ID_OUT, initVal);
 
           if (sequentialDependencies(c, PORT_ID_OUT).size() > 0) {
-            setPastValue(cid, PORT_ID_OUT, initVal);
+            valueStore.resetPastValue(cid, PORT_ID_OUT, initVal);
           }
 
           for (auto& receiverBus : c.getPortReceivers(PORT_ID_OUT)) {
