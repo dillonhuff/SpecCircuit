@@ -206,9 +206,9 @@ namespace FlatCircuit {
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
-      simValueTable.(map_find(cid, memoryOffsets) + ((unsigned long) offset), memWidth);
-      simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
-        writeData;
+      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) offset), writeData);
+      // simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
+      //   writeData;
 
     }
 
