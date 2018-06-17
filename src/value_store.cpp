@@ -25,7 +25,6 @@ namespace FlatCircuit {
         if (sequentialDependencies(cell, port).size() > 0) {
           pastValueOffsets[{cid, port}] =
             simValueTable.addBitVector(cell.getPortWidth(port));
-
         }
       }
 
@@ -33,25 +32,17 @@ namespace FlatCircuit {
         portOffsets[{cid, PORT_ID_IN}] =
           simValueTable.addBitVector(cell.getPortWidth(PORT_ID_IN));
 
-        // BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_IN));
-        // unsigned long nextInd = simValueTable.size();
-        // portOffsets[{cid, PORT_ID_IN}] = nextInd;
-        // simValueTable.push_back(bv);
       }
 
       if (cell.getCellType() == CELL_TYPE_MEM) {
         int memWidth = cell.getMemWidth();
         int memDepth = cell.getMemDepth();
 
-        //BitVector defaultValue(memWidth, 0);
-
-        //unsigned long nextInd = simValueTable.size();
         memoryOffsets[cid] =
           simValueTable.addBitVector(memWidth);
 
         for (unsigned long i = 1; i < (unsigned long) memDepth; i++) {
           simValueTable.addBitVector(memWidth);
-          //simValueTable.push_back(defaultValue);
         }
       }
     }
@@ -110,18 +101,12 @@ namespace FlatCircuit {
 
     if (canDirectCopy) {
       instrs.push_back(new IRPortLoad(argName, sp.cell, sp.port, isPast));
-      // instrs.push_back(new IRAssign(argName,
-      //                               "values[" +
-      //                               to_string(map_find(sp, offsets)) +
-      //                               "]"));
     } else {
 
       for (int offset = 0; offset < (int) drivers.signals.size(); offset++) {
         SignalBit driverBit = drivers.signals[offset];
-        //string valString = "values[" + to_string(map_find({driverBit.cell, driverBit.port}, offsets)) + "].get(" + to_string(driverBit.offset) + ")";
 
-        //instrs.push_back(new IRSetBit(argName, offset, driverBit, isPast)); //offset, valString));
-        instrs.push_back(new IRSetBit(argName, cid, pid, offset, driverBit, isPast)); //offset, valString));
+        instrs.push_back(new IRSetBit(argName, cid, pid, offset, driverBit, isPast));
       }
     }
 
@@ -139,9 +124,6 @@ namespace FlatCircuit {
   IRInstruction* ValueStore::codeToAssignRegister(const CellId cid,
                                                   const std::string& assignCode) {
     return new IRRegisterStore(cid, assignCode);
-    // return
-    //   new IRAssign("values[" + std::to_string(map_find(cid, registerOffsets)) + "]",
-    //                assignCode);
   }
     
 

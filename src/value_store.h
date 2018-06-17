@@ -10,42 +10,56 @@ namespace FlatCircuit {
   class IRInstruction;
 
   class QBitTable {
-    std::vector<BitVector> simValueTable;
+    //std::vector<BitVector> simValueTable;
+    std::vector<bsim::quad_value_bit> simValueTable;
+
   public:
 
     BitVector getBitVector(const unsigned long offset,
                            const unsigned long width) const {
-      BitVector bv = simValueTable.at(offset);
-      if (width != (unsigned long) bv.bitLength()) {
-        std::cout << "Error: Input width = " << width << " but actual width = " << bv.bitLength() << std::endl;
+      BitVector bv(width, 0);
+      for (unsigned long i = 0; i < width; i++) {
+        bv.set(i, simValueTable(offset + i));
       }
-      assert(width == (unsigned long) bv.bitLength());
-
       return bv;
+      // BitVector bv = simValueTable.at(offset);
+      // if (width != (unsigned long) bv.bitLength()) {
+      //   std::cout << "Error: Input width = " << width << " but actual width = " << bv.bitLength() << std::endl;
+      // }
+      // assert(width == (unsigned long) bv.bitLength());
+
+      // return bv;
     }
 
     // TODO: Remove when transistioning to raw bit vectors
-    BitVector bitVectorAt(const unsigned long i) const {
-      return simValueTable.at(i);
-    }
+    // BitVector bitVectorAt(const unsigned long i) const {
+    //   return simValueTable.at(i);
+    // }
 
     void setBitVector(const unsigned long offset,
                       const BitVector& bv) {
-      simValueTable[offset] = bv;
+
+      for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
+        simValueTable[offset + i] = bv.get(i);
+      }
+      
+      //simValueTable[offset] = bv;
     }
     
     unsigned long addBitVector(const unsigned long width) {
       BitVector bv = bsim::unknown_bv(width);
       auto nextInd = addBitVector(bv);
       return nextInd;
-      // unsigned long nextInd = simValueTable.size();
-      // simValueTable.push_back(bv);
-      // return nextInd;
     }
 
     unsigned long addBitVector(const BitVector& bv) {
+
       unsigned long nextInd = simValueTable.size();
-      simValueTable.push_back(bv);
+
+      for (unsigned long i = 0; i < bv.bitLength(); i++) {
+        simValueTable.push_back(bv.get(i));
+      }
+
       return nextInd;
     }
     
@@ -53,14 +67,14 @@ namespace FlatCircuit {
       return simValueTable.size();
     }
 
-    std::vector<BitVector>& getValueVector() {
+    std::vector<bsim::quad_value_bit>& getValueVector() {
       return simValueTable;
     }
 
   };
 
   class ValueStore {
-    //std::vector<BitVector> simValueTable;
+
     QBitTable simValueTable;
 
     std::map<SigPort, unsigned long> portOffsets;
@@ -105,62 +119,58 @@ namespace FlatCircuit {
           setPortValue(cid,
                        PORT_ID_OUT,
                        simTableValue(cid, PORT_ID_OUT));
-          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         } else if (isRegister(cell.getCellType())) {
           // TODO: Need to add register support
           setRegisterValue(cid,
                            simTableValue(cid, PORT_ID_OUT));
-          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
 
           setPortValue(cid,
                        PORT_ID_OUT,
                        simTableValue(cid, PORT_ID_OUT));
-          //simValueTable[map_find({cid, PORT_ID_OUT}, portOffsets)]);
         }
       }
 
-      ///      rawSimValueTable[44] = 0xff;
     }
 
     void buildRawValueTable() {
-      unsigned long rawOffset = 0;
-      std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
-      for (unsigned long i = 0; i < simValueTable.size(); i++) {
-        quadOffsetsToRawOffsets[i] = rawOffset;
-        // Adding extra buffer space
-        rawOffset += storedByteLength(simValueTable.bitVectorAt(i).bitLength()) + 1;
-      }
-
-      rawTableSize = rawOffset;
-
-      // std::cout << "Raw table offset map" << std::endl;
-      // for (auto ent : quadOffsetsToRawOffsets) {
-      //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
+      // unsigned long rawOffset = 0;
+      // std::map<unsigned long, unsigned long> quadOffsetsToRawOffsets;
+      // for (unsigned long i = 0; i < simValueTable.size(); i++) {
+      //   quadOffsetsToRawOffsets[i] = rawOffset;
+      //   // Adding extra buffer space
+      //   rawOffset += storedByteLength(simValueTable.bitVectorAt(i).bitLength()) + 1;
       // }
 
-      for (auto sp : portOffsets) {
-        rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-        // std::cout << "Offset for port = " <<
-        //   rawMemoryOffsets[sp.first] << std::endl;
-      }
+      // rawTableSize = rawOffset;
 
-      for (auto sp : pastValueOffsets) {
-        rawPastValueOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      }
+      // // std::cout << "Raw table offset map" << std::endl;
+      // // for (auto ent : quadOffsetsToRawOffsets) {
+      // //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
+      // // }
 
-      for (auto sp : memoryOffsets) {
-        rawMemoryOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-        // std::cout << "Offset for memory = " <<
-        //   rawMemoryOffsets[sp.first] << std::endl;
-      }
+      // for (auto sp : portOffsets) {
+      //   rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      //   // std::cout << "Offset for port = " <<
+      //   //   rawMemoryOffsets[sp.first] << std::endl;
+      // }
 
-      for (auto sp : registerOffsets) {
-        rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      }
+      // for (auto sp : pastValueOffsets) {
+      //   rawPastValueOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      // }
 
-      rawSimValueTable =
-        static_cast<unsigned char*>(malloc(rawOffset));
-      memset(rawSimValueTable, 0, rawTableSize);
+      // for (auto sp : memoryOffsets) {
+      //   rawMemoryOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      //   // std::cout << "Offset for memory = " <<
+      //   //   rawMemoryOffsets[sp.first] << std::endl;
+      // }
+
+      // for (auto sp : registerOffsets) {
+      //   rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
+      // }
+
+      // rawSimValueTable =
+      //   static_cast<unsigned char*>(malloc(rawOffset));
+      // memset(rawSimValueTable, 0, rawTableSize);
       
     }
 
@@ -217,7 +227,7 @@ namespace FlatCircuit {
 
       int memWidth = def.getCellRefConst(cid).getMemWidth();
       return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) offset), memWidth);
-      //return simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) offset)];
+
     }
 
     void setMemoryValue(const CellId cid,
@@ -228,9 +238,6 @@ namespace FlatCircuit {
       assert(addr >= 0);
 
       simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) addr), writeData);
-      // simValueTable[map_find(cid, memoryOffsets) + ((unsigned long) addr)] =
-      //   writeData;
-
     }
 
     void debugPrintRawValueTable() const;
@@ -567,9 +574,10 @@ namespace FlatCircuit {
 
           assert(notEmpty(b));
 
-          auto driverBV = simValueTable.getBitVector(map_find({b.cell, b.port},
-                                                               pastValueOffsets),
-                                                      def.getCellRefConst(b.cell).getPortWidth(b.port));
+          auto driverBV =
+            simValueTable.getBitVector(map_find({b.cell, b.port},
+                                                pastValueOffsets),
+                                       def.getCellRefConst(b.cell).getPortWidth(b.port));
           
           val.set(i, driverBV.get(b.offset));
         }
