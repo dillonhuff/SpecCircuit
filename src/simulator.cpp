@@ -619,7 +619,7 @@ namespace FlatCircuit {
     cppCode +=
       "typedef bsim::static_quad_value_bit_vector<1> BitVector;\n\n"
       "bool posedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(0)) && (b == BitVector(1)); }\n\n"
-      "bool negedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
+      "bool negedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(1)) && (b == BitVector(0)); }\n\n"
 
       "template<int N> static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, bsim::static_quad_value_bit_vector<N>& bv) {\n"
       "\tfor (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {\n"
@@ -628,14 +628,14 @@ namespace FlatCircuit {
       "}\n\n"
 
       "template<int N> static inline bsim::static_quad_value_bit_vector<N> loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
-      "\tBitVector bv(width, 0);\n"
+      "\tbsim::static_quad_value_bit_vector<N> bv(0);\n"
       "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
       "\t\tbv.set(i, values[offset + i]);\n"
       "\t}\n"
       "\treturn bv;\n"
       "}\n\n"
 
-      "template<int N> static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
+      "template<int N> static inline void loadBitFromTable(bsim::quad_value* values, bsim::static_quad_value_bit_vector<N>& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
 
       "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
       "\tfor (unsigned long i = 0; i < width; i++) {\n"

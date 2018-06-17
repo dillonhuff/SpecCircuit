@@ -25,7 +25,7 @@ namespace FlatCircuit {
 
   static inline std::string
   loadTableString(const std::string& value, const std::string& offset, const std::string& width) {
-    return ln(value + " = loadFromTable(values, " + offset + ", " + width + ")");
+    return ln(value + " = loadFromTable<" + width + ">(values, " + offset + ", " + width + ")");
   }
   
   class IRInstruction {
