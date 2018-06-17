@@ -162,11 +162,15 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+      int memWidth =
+        valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RDATA);
+      
       return loadTableString(receiver,
                              std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
                              to_string(valueStore.def.getCellRefConst(cid).getMemWidth()) + "* (" + waddrName + ".is_binary() ? " + waddrName +
                              ".to_type<int>() : 0)",
-                             std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RADDR)));
+                             std::to_string(memWidth));
+      //std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RADDR)));
 
       // return ln(receiver + " = values[" +
       //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
