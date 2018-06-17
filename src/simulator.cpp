@@ -370,7 +370,8 @@ namespace FlatCircuit {
     // Must remove the first underscore from the symbol name to find it?
     //    myFuncFunV = dlsym(myLibHandle, "_Z8simulateRNSt3__16vectorIN4bsim21quad_value_bit_vectorENS_9allocatorIS2_EEEE");
 
-    myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim21quad_value_bit_vectorE");
+    //myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim21quad_value_bit_vectorE");
+    myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim10quad_valueE");
     if (myFuncFunV == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
       assert(false);
@@ -629,9 +630,22 @@ namespace FlatCircuit {
       "typedef bsim::quad_value_bit_vector BitVector;\n\n"
       "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
       "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
-      "static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, BitVector bv) { values[offset] = bv; }\n\n"
-      "static inline BitVector loadFromTable(bsim::quad_value* values, const unsigned long offset) { return values[offset]; }\n\n"
-      "static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV].get(sourceOffset)); }\n\n"
+
+      "static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, BitVector bv) {\n"
+      "\tfor (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {\n"
+      "\t\tvalues[offset + i] = bv.get(i);\n"
+      "\t}\n"
+      "}\n\n"
+
+      "static inline BitVector loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
+      "\tBitVector bv(width, 0);\n"
+      "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
+      "\t\tbv.set(i, values[offset + i]);\n"
+      "\t}\n"
+      "\treturn bv;\n"
+      "}\n\n"
+
+      "static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
 
       "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset) { values[wireOffset] = values[stateOffset]; }\n\n"
       "void simulate(bsim::quad_value* values) {\n";

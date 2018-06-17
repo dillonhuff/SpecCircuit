@@ -23,8 +23,8 @@ namespace FlatCircuit {
   }
 
   static inline std::string
-  loadTableString(const std::string& value, const std::string& offset) {
-    return ln(value + " = loadFromTable(values, " + offset + ")");
+  loadTableString(const std::string& value, const std::string& offset, const std::string& width) {
+    return ln(value + " = loadFromTable(values, " + offset + ", " + width + ")");
   }
   
   class IRInstruction {
@@ -164,7 +164,8 @@ namespace FlatCircuit {
       return loadTableString(receiver,
                              std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
                              "(" + waddrName + ".is_binary() ? " + waddrName +
-                             ".to_type<int>() : 0)");
+                             ".to_type<int>() : 0)",
+                             std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RADDR)));
 
       // return ln(receiver + " = values[" +
       //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
@@ -428,7 +429,7 @@ namespace FlatCircuit {
 
       //unsigned long offset = valueStore.portValueOffset(cid, pid);
       //return ln(receiver + " = values[" + std::to_string(offset) + "]");
-      return loadTableString(receiver, std::to_string(offset));
+      return loadTableString(receiver, std::to_string(offset), std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(pid)));
     }
 
   };
