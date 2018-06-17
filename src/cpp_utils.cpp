@@ -30,7 +30,7 @@ namespace FlatCircuit {
 #elif TARGET_OS_MAC
     // Other kinds of Mac OS
     string compileCommand =
-      "g++ -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " +
+      "g++ -O3 -std=c++11 -fPIC -dynamiclib -Ijitted_utils/ " +
       cppName + " -o " + targetBinary;
 
 #else
