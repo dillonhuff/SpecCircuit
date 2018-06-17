@@ -369,7 +369,8 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
+      //return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
+      return ln("bsim::static_quad_value_bit_vector< " + std::to_string(bitWidth) + " > " + name + "(0)");
     }
     
   };

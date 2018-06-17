@@ -580,7 +580,8 @@ namespace FlatCircuit {
       sequentialBlockCode(updates[i + 1], codeState);
     }
 
-    string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
+    //string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
+    string cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"
       "using namespace bsim;\n\n";
 
     valueStore.buildRawValueTable();
@@ -615,29 +616,18 @@ namespace FlatCircuit {
     cppCode += codeState.getTwoStateCode(valueStore);
     cppCode += "}\n\n";
     
-    // cppCode +=
-    //   "typedef bsim::quad_value_bit_vector BitVector;\n\n"
-    //   "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
-    //   "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
-    //   "static inline void storeToTable(bsim::quad_value_bit_vector* values, const unsigned long offset, BitVector bv) { values[offset] = bv; }\n\n"
-    //   "static inline BitVector loadFromTable(bsim::quad_value_bit_vector* values, const unsigned long offset) { return values[offset]; }\n\n"
-    //   "static inline void loadBitFromTable(bsim::quad_value_bit_vector* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV].get(sourceOffset)); }\n\n"
-
-    //   "static inline void storeRegisterState(bsim::quad_value_bit_vector* values, const unsigned long wireOffset, const unsigned long stateOffset) { values[wireOffset] = values[stateOffset]; }\n\n"
-    //   "void simulate(bsim::quad_value_bit_vector* values) {\n";
-
     cppCode +=
-      "typedef bsim::quad_value_bit_vector BitVector;\n\n"
-      "bool posedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 0)) && (b == BitVector(1, 1)); }\n\n"
-      "bool negedge(const bsim::quad_value_bit_vector& a, const bsim::quad_value_bit_vector& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
+      "typedef bsim::static_quad_value_bit_vector<1> BitVector;\n\n"
+      "bool posedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(0)) && (b == BitVector(1)); }\n\n"
+      "bool negedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(1, 1)) && (b == BitVector(1, 0)); }\n\n"
 
-      "static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, BitVector bv) {\n"
+      "template<int N> static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, bsim::static_quad_value_bit_vector<N>& bv) {\n"
       "\tfor (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {\n"
       "\t\tvalues[offset + i] = bv.get(i);\n"
       "\t}\n"
       "}\n\n"
 
-      "static inline BitVector loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
+      "template<int N> static inline bsim::static_quad_value_bit_vector<N> loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
       "\tBitVector bv(width, 0);\n"
       "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
       "\t\tbv.set(i, values[offset + i]);\n"
@@ -645,7 +635,7 @@ namespace FlatCircuit {
       "\treturn bv;\n"
       "}\n\n"
 
-      "static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
+      "template<int N> static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
 
       "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
       "\tfor (unsigned long i = 0; i < width; i++) {\n"
