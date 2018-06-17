@@ -357,7 +357,7 @@ namespace FlatCircuit {
     BitVector getPortValue(const CellId cid,
                            const PortId pid) const {
       if (!compiledRaw) {
-        std::cout << "Getting port value for " << sigPortString(def, {cid, pid}) << std::endl;
+        //std::cout << "Getting port value for " << sigPortString(def, {cid, pid}) << std::endl;
         return simTableValue(cid, pid);
         //return simValueTable[map_find({cid, pid}, portOffsets)];
       } else {
@@ -489,8 +489,16 @@ namespace FlatCircuit {
 
     BitVector getPastValue(const CellId cid,
                            const PortId pid) {
-      return simValueTable.getBitVector(pastValueOffset(cid, pid),
-                                        def.getCellRefConst(cid).getPortWidth(pid));
+
+      return materializePastValue({cid, pid});
+      // std::cout << "Getting past value for " << sigPortString(def, {cid, pid}) << std::endl;
+      // assert(def.getCellRefConst(cid).getPortWidth(pid) == 1);
+      
+      // BitVector res = simValueTable.getBitVector(pastValueOffset(cid, pid),
+      //                                   def.getCellRefConst(cid).getPortWidth(pid));
+      // std::cout << "Got past value" << std::endl;
+
+      // return res;
     }
 
     unsigned long pastValueOffset(const CellId cid,
@@ -539,6 +547,35 @@ namespace FlatCircuit {
       }
         
       return val;
+    }
+
+    BitVector materializePastValue(const SigPort sigPort) const {
+      if (contains_key(sigPort, pastValueOffsets)) {
+          return simValueTable.getBitVector(map_find(sigPort, pastValueOffsets),
+                                            def.getCellRefConst(sigPort.cell).getPortWidth(sigPort.port));
+      } else {
+        int width = def.getCellRefConst(sigPort.cell).getPortWidth(sigPort.port);
+
+        BitVector val(width, 0);
+
+        auto& sigBus = def.getCellRef(sigPort.cell).getDrivers(sigPort.port);
+
+        assert(((int) sigBus.signals.size()) == width);
+
+        for (int i = 0; i < (int) sigBus.signals.size(); i++) {
+          SignalBit b = sigBus.signals.at(i);
+
+          assert(notEmpty(b));
+
+          auto driverBV = simValueTable.getBitVector(map_find({b.cell, b.port},
+                                                               pastValueOffsets),
+                                                      def.getCellRefConst(b.cell).getPortWidth(b.port));
+          
+          val.set(i, driverBV.get(b.offset));
+        }
+        
+        return val;
+      }
     }
     
     IRInstruction* codeToAssignRegister(const CellId cid,

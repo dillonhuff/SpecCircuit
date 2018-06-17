@@ -12,32 +12,20 @@ namespace FlatCircuit {
       CellId cid = ctp.first;
       const Cell& cell = def.getCellRefConst(cid);
       if (isRegister(cell.getCellType())) {
-        // BitVector bv = unknown_bv(cell.getPortWidth(PORT_ID_OUT));
-        // unsigned long nextInd = simValueTable.size();
-        // registerOffsets[cid] = nextInd;
-        // simValueTable.push_back(bv);
 
         registerOffsets[cid] =
           simValueTable.addBitVector(cell.getPortWidth(PORT_ID_OUT));
+
       }
 
       for (auto port : cell.outputPorts()) {
         portOffsets[{cid, port}] =
           simValueTable.addBitVector(cell.getPortWidth(port));
         
-        // BitVector bv = unknown_bv(cell.getPortWidth(port));
-        // unsigned long nextInd = simValueTable.size();
-        // portOffsets[{cid, port}] = nextInd;
-        // simValueTable.push_back(bv);
-
         if (sequentialDependencies(cell, port).size() > 0) {
           pastValueOffsets[{cid, port}] =
             simValueTable.addBitVector(cell.getPortWidth(port));
 
-          // BitVector bv = unknown_bv(cell.getPortWidth(port));
-          // unsigned long nextInd = simValueTable.size();
-          // pastValueOffsets[{cid, port}] = nextInd;
-          // simValueTable.push_back(bv);
         }
       }
 
