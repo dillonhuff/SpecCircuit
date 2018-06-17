@@ -218,8 +218,8 @@ namespace FlatCircuit {
           BitVector initVal(memWidth, 0);
           setPortValue(cid, PORT_ID_RDATA, initVal);
 
-          std::cout << "during setup rdata = " << getBitVec(cid, PORT_ID_RDATA) << std::endl;
-          std::cout << "during set rdata port = " << getBitVec("read_data") << std::endl;
+          //          std::cout << "during setup rdata = " << getBitVec(cid, PORT_ID_RDATA) << std::endl;
+          //          std::cout << "during set rdata port = " << getBitVec("read_data") << std::endl;
           BitVector clkVal(1, 0);
           SigPort clkPort = {cid, PORT_ID_CLK};
           setPastValue(clkPort.cell, clkPort.port, clkVal);
@@ -333,9 +333,9 @@ namespace FlatCircuit {
         }
       }
 
-      std::cout << "after setup, before update rdata = " << getBitVec("read_data") << std::endl;
+      //      std::cout << "after setup, before update rdata = " << getBitVec("read_data") << std::endl;
       update();
-      std::cout << "after setup, after udpate rdata  = " << getBitVec("read_data") << std::endl;
+      //      std::cout << "after setup, after udpate rdata  = " << getBitVec("read_data") << std::endl;
       
       std::cout << "End init" << std::endl;
     }
@@ -695,7 +695,7 @@ namespace FlatCircuit {
           rdata = getMemoryValue(sigPort.cell, raddr.to_type<int>());
         }
 
-        std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
+        //        std::cout << "Updating memory rdata port, raddr = " << raddr << ", rdata = " << rdata << std::endl;
 
         return combinationalSignalChange({sigPort.cell, PORT_ID_RDATA}, rdata);
       } else if (tp == CELL_TYPE_REG_ARST) {
