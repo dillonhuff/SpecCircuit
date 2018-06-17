@@ -520,6 +520,15 @@ namespace FlatCircuit {
 
       Simulator state(circuitEnv, cDef);
 
+      cout << "In interp: After initialization, before compilation" << endl;
+      for (auto ctp : state.def.getCellMap()) {
+        CellId cid = ctp.first;
+        const Cell& cell = state.def.getCellRefConst(cid);
+        for (auto port : cell.outputPorts()) {
+          cout << "\t" << sigPortString(state.def, {cid, port}) << " = " << state.getBitVec(cid, port) << endl;
+        }
+      }
+      
       state.setFreshValue("clk", BitVec(1, 0));
       state.update();
 
@@ -560,19 +569,67 @@ namespace FlatCircuit {
       CellDefinition cDef = circuitEnv.getDef("memory0");
 
       Simulator state(circuitEnv, cDef);
+      cout << "After initialization, before compilation" << endl;
+      for (auto ctp : state.def.getCellMap()) {
+        CellId cid = ctp.first;
+        const Cell& cell = state.def.getCellRefConst(cid);
+        for (auto port : cell.outputPorts()) {
+          cout << "\t" << sigPortString(state.def, {cid, port}) << " = " << state.getBitVec(cid, port) << endl;
+        }
+      }
+
+
       state.compileCircuit();
 
+      cout << "After initialization" << endl;
+      for (auto ctp : state.def.getCellMap()) {
+        CellId cid = ctp.first;
+        const Cell& cell = state.def.getCellRefConst(cid);
+        for (auto port : cell.outputPorts()) {
+          cout << "\t" << sigPortString(state.def, {cid, port}) << " = " << state.getBitVec(cid, port) << endl;
+        }
+      }
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+      
       state.setFreshValue("clk", BitVec(1, 0));
       state.update();
 
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+      
       // Do not write when write_en == 0
       state.setFreshValue("clk", BitVec(1, 1));
+      state.update();
+
+      cout << "After clock" << endl;
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+
       state.setFreshValue("write_en", BitVec(1, 0));
+      state.update();
+
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+      
       state.setFreshValue("write_addr", BitVec(index, 0));
+      state.update();
+
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+      
       state.setFreshValue("write_data", BitVec(width, 23));
+      state.update();
+
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
+      
       state.setFreshValue("read_addr", BitVec(index, 0));
       state.update();
 
+      cout << "Initial" << endl;
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
       REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
       //REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
 
@@ -588,6 +645,9 @@ namespace FlatCircuit {
       state.setFreshValue("read_addr", BitVec(index, 2));
       state.update();
 
+      cout << "Final" << endl;
+      cout << "read data = " << state.getBitVec("read_data") << endl;
+      cout << "expected  = " << BitVec("20'hxxxxx") << endl;
       REQUIRE(same_representation(state.getBitVec("read_data"), BitVec("20'hxxxxx")));
       //REQUIRE(state.getBitVec("read_data") == BitVec(width, 0));
     }
