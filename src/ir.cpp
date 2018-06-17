@@ -59,20 +59,20 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
     case CELL_TYPE_UGE:
-      return ln(receiver + " = BitVector(1, (" +
+      return ln(receiver + " = BitVector((" +
                 arg0 + " > " + arg1 + ") || (" +
                 arg0 + " == " + arg1 + "))");
 
     case CELL_TYPE_ULE:
-      return ln(receiver + " = BitVector(1, (" +
+      return ln(receiver + " = BitVector((" +
                 arg0 + " < " + arg1 + ") || (" +
                 arg0 + " == " + arg1 + "))");
 
     case CELL_TYPE_UGT:
-      return ln(receiver + " = BitVector(1, (" + arg0 + " > " + arg1 + "))");
+      return ln(receiver + " = BitVector((" + arg0 + " > " + arg1 + "))");
 
     case CELL_TYPE_ULT:
-      return ln(receiver + " = BitVector(1, (" + arg0 + " < " + arg1 + "))");
+      return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
         
     case CELL_TYPE_OR:
       return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
@@ -99,10 +99,10 @@ namespace FlatCircuit {
       return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
         
     case CELL_TYPE_EQ:
-      return ln(receiver + " = BitVector(1, " + arg0 + " == " + arg1 + ")");
+      return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
 
     case CELL_TYPE_NEQ:
-      return ln(receiver + " = BitVector(1, " + arg0 + " != " + arg1 + ")");
+      return ln(receiver + " = BitVector(" + arg0 + " != " + arg1 + ")");
         
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -174,7 +174,7 @@ namespace FlatCircuit {
                 to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
         
     case CELL_TYPE_ZEXT:
-      return ln(receiver + " = zero_extend(" +
+      return ln(receiver + " = zero_extend<" + to_string(cell.getPortWidth(PORT_ID_IN)) + ", " + to_string(cell.getPortWidth(PORT_ID_OUT)) + ">(" +
                 to_string(cell.getPortWidth(PORT_ID_OUT)) + 
                 ", " + arg + ")");
     default:

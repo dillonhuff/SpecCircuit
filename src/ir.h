@@ -20,7 +20,8 @@ namespace FlatCircuit {
   storeRegisterStateString(const std::string& wireOffset,
                            const std::string& stateOffset,
                            const std::string& width) {
-    return ln("storeRegisterState<" + width + ">(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
+    //return ln("storeRegisterState<" + width + ">(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
+    return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
   }
 
   static inline std::string
@@ -76,7 +77,7 @@ namespace FlatCircuit {
                                               label(label_) {}
 
     virtual std::string toString(ValueStore& valueStore) const {
-      return "\tif (!((" + wenName + " == BitVector(1, 1)) && posedge(" +
+      return "\tif (!((" + wenName + " == BitVector(1)) && posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
 
     }
@@ -306,8 +307,10 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+      std::string widthStr = std::to_string(bitWidth);
       return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
-                              "BitVector(\"" + resString + "\")");
+                              "bsim::static_quad_value_bit_vector<" + widthStr + ">(\"" + resString + "\")");
 
       // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) +
       //           "] = BitVector(\"" + resString + "\")");
@@ -575,7 +578,7 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln(receiver + " = (" + sel + " == BitVector(1, 1) ? " + arg1 + " : " + arg0 + ")");
+      return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
     }
     
   };
