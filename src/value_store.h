@@ -11,7 +11,7 @@ namespace FlatCircuit {
 
   class QBitTable {
     //std::vector<BitVector> simValueTable;
-    std::vector<bsim::quad_value_bit> simValueTable;
+    std::vector<bsim::quad_value> simValueTable;
 
   public:
 
@@ -19,7 +19,7 @@ namespace FlatCircuit {
                            const unsigned long width) const {
       BitVector bv(width, 0);
       for (unsigned long i = 0; i < width; i++) {
-        bv.set(i, simValueTable(offset + i));
+        bv.set(i, simValueTable.at(offset + i));
       }
       return bv;
       // BitVector bv = simValueTable.at(offset);
@@ -67,7 +67,7 @@ namespace FlatCircuit {
       return simValueTable.size();
     }
 
-    std::vector<bsim::quad_value_bit>& getValueVector() {
+    std::vector<bsim::quad_value>& getValueVector() {
       return simValueTable;
     }
 
@@ -141,42 +141,44 @@ namespace FlatCircuit {
       //   rawOffset += storedByteLength(simValueTable.bitVectorAt(i).bitLength()) + 1;
       // }
 
-      // rawTableSize = rawOffset;
+      //rawTableSize = rawOffset;
 
-      // // std::cout << "Raw table offset map" << std::endl;
-      // // for (auto ent : quadOffsetsToRawOffsets) {
-      // //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
-      // // }
+      unsigned long rawTableSize = tableSize();
 
-      // for (auto sp : portOffsets) {
-      //   rawPortOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      //   // std::cout << "Offset for port = " <<
-      //   //   rawMemoryOffsets[sp.first] << std::endl;
+      // std::cout << "Raw table offset map" << std::endl;
+      // for (auto ent : quadOffsetsToRawOffsets) {
+      //   std::cout << "\t" << ent.first << " --> " << ent.second << std::endl;
       // }
 
-      // for (auto sp : pastValueOffsets) {
-      //   rawPastValueOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      // }
+      for (auto sp : portOffsets) {
+        rawPortOffsets[sp.first] = sp.second; //map_find(sp.second, quadOffsetsToRawOffsets);
+        // std::cout << "Offset for port = " <<
+        //   rawMemoryOffsets[sp.first] << std::endl;
+      }
 
-      // for (auto sp : memoryOffsets) {
-      //   rawMemoryOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      //   // std::cout << "Offset for memory = " <<
-      //   //   rawMemoryOffsets[sp.first] << std::endl;
-      // }
+      for (auto sp : pastValueOffsets) {
+        rawPastValueOffsets[sp.first] = sp.second; //map_find(sp.second, quadOffsetsToRawOffsets);
+      }
 
-      // for (auto sp : registerOffsets) {
-      //   rawRegisterOffsets[sp.first] = map_find(sp.second, quadOffsetsToRawOffsets);
-      // }
+      for (auto sp : memoryOffsets) {
+        rawMemoryOffsets[sp.first] = sp.second; //map_find(sp.second, quadOffsetsToRawOffsets);
+        // std::cout << "Offset for memory = " <<
+        //   rawMemoryOffsets[sp.first] << std::endl;
+      }
 
-      // rawSimValueTable =
-      //   static_cast<unsigned char*>(malloc(rawOffset));
-      // memset(rawSimValueTable, 0, rawTableSize);
+      for (auto sp : registerOffsets) {
+        rawRegisterOffsets[sp.first] = sp.second; //map_find(sp.second, quadOffsetsToRawOffsets);
+      }
+
+      rawSimValueTable =
+        static_cast<unsigned char*>(malloc(rawTableSize));
+      memset(rawSimValueTable, 0, rawTableSize);
       
     }
 
     void debugPrintTableValues() const;
 
-    std::vector<BitVector>& getValueTable() { return simValueTable.getValueVector(); }
+    std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 
     unsigned long getMemoryOffset(const CellId cid) const {
@@ -606,6 +608,10 @@ namespace FlatCircuit {
                                const PortId pid,
                                const std::string& argName) const {
       return codeToMaterializeOffset(cid, pid, argName, pastValueOffsets, true);
+    }
+
+    unsigned long tableSize() const {
+      return simValueTable.size();
     }
 
     ~ValueStore() {

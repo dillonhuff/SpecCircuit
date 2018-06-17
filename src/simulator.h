@@ -391,8 +391,8 @@ namespace FlatCircuit {
       // Otherwise run x value simulation
       if (hasSimulateFunction()) {
 
-        void (*simFunc)(BitVector*) =
-          reinterpret_cast<void (*)(BitVector*)>(simulateFuncHandle);
+        void (*simFunc)(bsim::quad_value*) =
+          reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
         
         //simFunc(valueStore.simValueTable);
         simFunc(&(valueStore.getValueTable()[0]));
