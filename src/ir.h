@@ -18,8 +18,9 @@ namespace FlatCircuit {
 
   static inline std::string
   storeRegisterStateString(const std::string& wireOffset,
-                           const std::string& stateOffset) {
-    return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ")");
+                           const std::string& stateOffset,
+                           const std::string& width) {
+    return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
   }
 
   static inline std::string
@@ -241,7 +242,8 @@ namespace FlatCircuit {
 
       // Changing this causes an error?
       return storeRegisterStateString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
-                                      to_string(valueStore.getRegisterOffset(cid)));
+                                      to_string(valueStore.getRegisterOffset(cid)),
+                                      to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT)));
 
       // return storeTableString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
       //                         state);

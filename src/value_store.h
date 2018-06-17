@@ -10,7 +10,7 @@ namespace FlatCircuit {
   class IRInstruction;
 
   class QBitTable {
-    //std::vector<BitVector> simValueTable;
+
     std::vector<bsim::quad_value> simValueTable;
 
   public:
@@ -228,7 +228,7 @@ namespace FlatCircuit {
       assert(offset >= 0);
 
       int memWidth = def.getCellRefConst(cid).getMemWidth();
-      return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) offset), memWidth);
+      return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) memWidth*offset), memWidth);
 
     }
 
@@ -239,7 +239,8 @@ namespace FlatCircuit {
       assert(contains_key(cid, memoryOffsets));
       assert(addr >= 0);
 
-      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) addr), writeData);
+      int memWidth = def.getCellRefConst(cid).getMemWidth();
+      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) memWidth*addr), writeData);
     }
 
     void debugPrintRawValueTable() const;

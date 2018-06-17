@@ -647,7 +647,12 @@ namespace FlatCircuit {
 
       "static inline void loadBitFromTable(bsim::quad_value* values, BitVector& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
 
-      "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset) { values[wireOffset] = values[stateOffset]; }\n\n"
+      "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
+      "\tfor (unsigned long i = 0; i < width; i++) {\n"
+      "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
+      "\t}\n"
+      "}\n\n"
+      //"values[wireOffset] = values[stateOffset]; }\n\n"
       "void simulate(bsim::quad_value* values) {\n";
     
     assert((updates.size() % 2) == 0);
