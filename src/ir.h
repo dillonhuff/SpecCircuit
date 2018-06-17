@@ -20,7 +20,7 @@ namespace FlatCircuit {
   storeRegisterStateString(const std::string& wireOffset,
                            const std::string& stateOffset,
                            const std::string& width) {
-    return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
+    return ln("storeRegisterState<" + width + ">(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
   }
 
   static inline std::string
