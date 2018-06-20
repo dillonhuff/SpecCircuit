@@ -366,6 +366,25 @@ namespace FlatCircuit {
     }
 
     void updateCompiledFourState() {
+
+      for (auto sp : sequentialPorts) {
+        setPastValue(sp.cell, sp.port,
+                     getPortValue(sp.cell, sp.port));
+      }
+
+      for (auto in : userInputs) {
+        setPortValue(in.first.cell, in.first.port, in.second);
+      }
+      userInputs = {};
+
+      assert(hasSimulateFunction());
+
+      void (*simFunc)(bsim::quad_value*) =
+        reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
+        
+      //simFunc(valueStore.simValueTable);
+      simFunc(&(valueStore.getValueTable()[0]));
+      return;
     }
 
     void update() {
@@ -380,13 +399,6 @@ namespace FlatCircuit {
       // Otherwise run x value simulation
       if (hasSimulateFunction()) {
         updateCompiledFourState();
-
-        void (*simFunc)(bsim::quad_value*) =
-          reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
-        
-        //simFunc(valueStore.simValueTable);
-        simFunc(&(valueStore.getValueTable()[0]));
-        return;
       }
 
       // Add user inputs to combChanges
@@ -397,13 +409,14 @@ namespace FlatCircuit {
         }
       }
 
+      // If there is no simulate function use the interpreter
+      
       // Add user inputs 
       for (auto in : userInputs) {
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);
       }
       userInputs = {};
 
-      // If there is no simulate function use the interpreter
       do {
 
         while (combChanges.size() > 0) {
