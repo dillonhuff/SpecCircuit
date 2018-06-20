@@ -564,9 +564,19 @@ namespace FlatCircuit {
 
     }
 
-
-
     return "";
+  }
+
+  void Simulator::sequentialPortUpdateCode(CodeGenState& codeState) {
+    for (auto port : sequentialPorts) {
+      CellId cid = port.cell;
+      PortId pid = port.port;
+
+      // Copy the current value of the variable to the past value
+      string pastValueTmp = codeState.getPortTemp(cid, pid);
+      codeState.addInstruction(new IRPortLoad(pastValueTmp, cid, pid, false));
+      codeState.addInstruction(new IRTableStore(cid, pid, pastValueTmp, true));
+    }
   }
 
   void
@@ -577,6 +587,8 @@ namespace FlatCircuit {
       combinationalBlockCode(updates[i + 0], codeState);
       sequentialBlockCode(updates[i + 1], codeState);
     }
+
+    sequentialPortUpdateCode(codeState);
 
     //string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
     string cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"

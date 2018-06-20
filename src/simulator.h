@@ -343,10 +343,10 @@ namespace FlatCircuit {
 
     void updateCompiledTwoState() {
       // Set past values for inputs connected to clocks
-      for (auto sp : sequentialPorts) {
-        setPastValue(sp.cell, sp.port,
-                     getPortValue(sp.cell, sp.port));
-      }
+      // for (auto sp : sequentialPorts) {
+      //   setPastValue(sp.cell, sp.port,
+      //                getPortValue(sp.cell, sp.port));
+      // }
 
       for (auto in : userInputs) {
         setPortValue(in.first.cell, in.first.port, in.second);
@@ -367,10 +367,11 @@ namespace FlatCircuit {
 
     void updateCompiledFourState() {
 
-      for (auto sp : sequentialPorts) {
-        setPastValue(sp.cell, sp.port,
-                     getPortValue(sp.cell, sp.port));
-      }
+      // This should be compiled into the simulator code
+      // for (auto sp : sequentialPorts) {
+      //   setPastValue(sp.cell, sp.port,
+      //                getPortValue(sp.cell, sp.port));
+      // }
 
       for (auto in : userInputs) {
         setPortValue(in.first.cell, in.first.port, in.second);
@@ -382,7 +383,6 @@ namespace FlatCircuit {
       void (*simFunc)(bsim::quad_value*) =
         reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
         
-      //simFunc(valueStore.simValueTable);
       simFunc(&(valueStore.getValueTable()[0]));
       return;
     }
@@ -399,6 +399,7 @@ namespace FlatCircuit {
       // Otherwise run x value simulation
       if (hasSimulateFunction()) {
         updateCompiledFourState();
+        return;
       }
 
       // Add user inputs to combChanges
@@ -1140,6 +1141,8 @@ namespace FlatCircuit {
     }
 
     void specializePort(const std::string& port, const BitVector& value);
+
+    void sequentialPortUpdateCode(CodeGenState& codeState);
     
     ~Simulator();
     
