@@ -2139,7 +2139,7 @@ namespace FlatCircuit {
     outputVerilog(sim.def, "conv_3_1_cgra.v");
 
     // PERFORMANCE TEST
-    nCycles = 10000;
+    nCycles = 200000;
     cout << "Running cgra for " << nCycles << endl;
 
     auto start = high_resolution_clock::now();

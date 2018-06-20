@@ -426,8 +426,6 @@ namespace FlatCircuit {
           cell.rstPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
         codeState.addEdgeTestJNE(rstEdge, lastRstVar, rstVar, rlbl);
         
-        // string rstVal = "BitVector(\"" + init.hex_string() + "\")";
-        // codeState.addRegisterAssign(cid, rstVal, valueStore);
         codeState.addInstruction(new IRRegisterReset(cid, init));
         codeState.addLabel(rlbl);
         
@@ -642,7 +640,7 @@ namespace FlatCircuit {
       "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
       "\t}\n"
       "}\n\n"
-      //"values[wireOffset] = values[stateOffset]; }\n\n"
+
       "void simulate(bsim::quad_value* values) {\n";
     
     assert((updates.size() % 2) == 0);

@@ -588,10 +588,10 @@ namespace FlatCircuit {
         return val;
       }
     }
-    
+
     IRInstruction* codeToAssignRegister(const CellId cid,
                                         const std::string& assignCode);
-    
+
     std::vector<IRInstruction*>
     codeToMaterializeOffset(const CellId cid,
                             const PortId pid,
@@ -620,7 +620,7 @@ namespace FlatCircuit {
         free(rawSimValueTable);
       }
     }
-    
+
   };
 
 

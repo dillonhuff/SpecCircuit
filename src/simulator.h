@@ -104,10 +104,6 @@ namespace FlatCircuit {
 
       codeLines.push_back(new IRMemoryStore(cid, waddrName, wdataName));
       
-      // codeLines.push_back(new IRAssign("values[" +
-      //                                  std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-      //                                  "(" + waddrName + ".is_binary() ? " + waddrName +
-      //                                  ".to_type<int>() : 0)]", wdataName));
     }
 
     void addMemoryTestJNE(const std::string& wenName,
@@ -369,12 +365,27 @@ namespace FlatCircuit {
       //std::cout << "After simulation rawtable[143] = " << (int) valueStore.debugGetRawTable(143) << std::endl;
     }
 
+    void updateCompiledFourState() {
+    }
+
     void update() {
 
       //std::cout << "Starting with update" << std::endl;
 
       if (simRaw) {
         updateCompiledTwoState();
+        return;
+      }
+
+      // Otherwise run x value simulation
+      if (hasSimulateFunction()) {
+        updateCompiledFourState();
+
+        void (*simFunc)(bsim::quad_value*) =
+          reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
+        
+        //simFunc(valueStore.simValueTable);
+        simFunc(&(valueStore.getValueTable()[0]));
         return;
       }
 
@@ -391,17 +402,6 @@ namespace FlatCircuit {
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);
       }
       userInputs = {};
-
-      // Otherwise run x value simulation
-      if (hasSimulateFunction()) {
-
-        void (*simFunc)(bsim::quad_value*) =
-          reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
-        
-        //simFunc(valueStore.simValueTable);
-        simFunc(&(valueStore.getValueTable()[0]));
-        return;
-      }
 
       // If there is no simulate function use the interpreter
       do {
