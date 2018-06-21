@@ -70,6 +70,25 @@ namespace FlatCircuit {
     virtual ~IRComment() {}
   };
 
+  class IRTestJNE : public IRInstruction {
+  public:
+    std::string wenName;
+    std::string label;
+
+    IRTestJNE(const std::string& wenName_,
+              const std::string& label_) : wenName(wenName_),
+                                              label(label_) {}
+
+    virtual std::string toString(ValueStore& valueStore) const {
+      return "\tif (!((" + wenName + " == BitVector(1)))) { goto " + label + "; }\n";
+    }
+
+    virtual std::string twoStateCppCode(ValueStore& valueStore) const {
+      return "\tif (!((" + wenName + "))) { goto " + label + "; }\n";
+    }
+
+  };
+
   class IRMemoryTest : public IRInstruction {
   public:
     std::string wenName;

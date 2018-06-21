@@ -519,7 +519,12 @@ namespace FlatCircuit {
         string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
         string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
 
+        string lbl = codeState.getNewLabel("mem_en");
+        codeState.addInstruction(new IRTestJNE(wenName, lbl));
         codeState.addUpdateMemoryCode(cid, waddrName, wdataName, valueStore);
+        codeState.addLabel(lbl);
+        
+        ///codeState.addUpdateMemoryCode(cid, waddrName, wdataName, valueStore);
 
       } else {
         cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;
