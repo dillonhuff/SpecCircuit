@@ -28,9 +28,18 @@ namespace FlatCircuit {
   loadTableString(const std::string& value, const std::string& offset, const std::string& width) {
     return ln(value + " = loadFromTable<" + width + ">(values, " + offset + ", " + width + ")");
   }
+
+  enum IRInstrType {
+    IR_INSTR_DECLARE_TEMP,
+    IR_INSTR_OTHER
+  };
   
   class IRInstruction {
   public:
+
+    virtual IRInstrType getType() const {
+      return IR_INSTR_OTHER;
+    }
 
     virtual std::string toString(ValueStore& valueStore) const {
       assert(false);
@@ -361,6 +370,10 @@ namespace FlatCircuit {
   public:
     unsigned long bitWidth;
     std::string name;
+
+    virtual IRInstrType getType() const {
+      return IR_INSTR_DECLARE_TEMP;
+    }
 
     IRDeclareTemp(const unsigned long bitWidth_, const std::string& name_) :
       bitWidth(bitWidth_), name(name_) {

@@ -140,17 +140,38 @@ namespace FlatCircuit {
 
     std::string getCode(ValueStore& valueStore) const {
       std::string cppCode = "";
+
+      // Declare temps
       for (auto instr : codeLines) {
-        cppCode += instr->toString(valueStore);
+        if (instr->getType() == IR_INSTR_DECLARE_TEMP) {
+          cppCode += instr->toString(valueStore);
+        }
       }
+      
+      for (auto instr : codeLines) {
+        if (instr->getType() != IR_INSTR_DECLARE_TEMP) {
+          cppCode += instr->toString(valueStore);
+        }
+      }
+
 
       return cppCode;
     }
 
     std::string getTwoStateCode(ValueStore& valueStore) const {
       std::string cppCode = "";
+
+      // Declare temps
       for (auto instr : codeLines) {
-        cppCode += instr->twoStateCppCode(valueStore);
+        if (instr->getType() == IR_INSTR_DECLARE_TEMP) {
+          cppCode += instr->twoStateCppCode(valueStore);
+        }
+      }
+      
+      for (auto instr : codeLines) {
+        if (instr->getType() != IR_INSTR_DECLARE_TEMP) {
+          cppCode += instr->twoStateCppCode(valueStore);
+        }
       }
 
       return cppCode;
