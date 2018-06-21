@@ -1965,7 +1965,7 @@ namespace FlatCircuit {
     outputVerilog(sim.def, "conv_bw_cgra.v");
 
     // PERFORMANCE TEST
-    nCycles = 10000;
+    nCycles = 200000;
     cout << "Running cgra for " << nCycles << endl;
 
     auto start = high_resolution_clock::now();
@@ -2145,18 +2145,41 @@ namespace FlatCircuit {
     auto start = high_resolution_clock::now();
 
     input = BitVector(16, 0);
+    CellId cid = def.getPortCellId("clk_in");
+
+    CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
+    CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
+    CellId s2t2 = def.getPortCellId("pad_S2_T2_in");
+    CellId s2t3 = def.getPortCellId("pad_S2_T3_in");
+    CellId s2t4 = def.getPortCellId("pad_S2_T4_in");
+    CellId s2t5 = def.getPortCellId("pad_S2_T5_in");
+    CellId s2t6 = def.getPortCellId("pad_S2_T6_in");
+    CellId s2t7 = def.getPortCellId("pad_S2_T7_in");
+    CellId s2t8 = def.getPortCellId("pad_S2_T8_in");
+    CellId s2t9 = def.getPortCellId("pad_S2_T9_in");
+    CellId s2t10 = def.getPortCellId("pad_S2_T10_in");
+    CellId s2t11 = def.getPortCellId("pad_S2_T11_in");
+    CellId s2t12 = def.getPortCellId("pad_S2_T12_in");
+    CellId s2t13 = def.getPortCellId("pad_S2_T13_in");
+    CellId s2t14 = def.getPortCellId("pad_S2_T14_in");
+    CellId s2t15 = def.getPortCellId("pad_S2_T15_in");
+    
     for (int i = 0; i < nCycles; i++) {
       if ((i % 100) == 0) {
         cout << "i = " << i << endl;
       }
 
-      sim.setFreshValue("clk_in", BitVec(1, 0));
+      //sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 0));
+      //sim.setFreshValue(s0t0, BitVec(
       sim.update();
 
       input = BitVector(16, i);
-      setCGRAInput(2, input, sim);
+      
+      //setCGRAInput(2, input, sim);
 
-      sim.setFreshValue("clk_in", BitVec(1, 1));
+      //sim.setFreshValue("clk_in", BitVec(1, 1));
+      sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 1));
       sim.update();
     }
 

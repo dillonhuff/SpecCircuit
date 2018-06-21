@@ -1113,6 +1113,10 @@ namespace FlatCircuit {
     std::string
     sequentialBlockCode(const std::vector<SigPort>& levelized,
                         CodeGenState& state);
+
+    std::string
+    sequentialBlockUpdates(const std::vector<SigPort>& levelized,
+                           CodeGenState& codeState);
     
     std::string
     combinationalBlockCode(const std::vector<SigPort>& levelized,

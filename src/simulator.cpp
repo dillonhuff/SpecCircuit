@@ -473,6 +473,66 @@ namespace FlatCircuit {
   }
 
   std::string
+  Simulator::sequentialBlockUpdates(const std::vector<SigPort>& levelized,
+                                    CodeGenState& codeState) {
+    for (auto sigPort : levelized) {
+      CellId cid = sigPort.cell;
+      const Cell& cell = def.getCellRefConst(cid);
+
+      codeState.addComment(ln("// ----- Sequential update for cell " + def.cellName(cid)));
+
+
+      CellType tp = cell.getCellType();
+      if (tp == CELL_TYPE_REG_ARST) {
+
+        string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+        string rstVar = codeState.getVariableName(cid, PORT_ID_ARST, valueStore);
+        string lastRstVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_ARST, valueStore);
+
+        codeState.addRegisterAssign(cid, inVar, valueStore);
+
+        BitVector init = cell.getParameterValue(PARAM_INIT_VALUE);
+
+        
+      } else if (tp == CELL_TYPE_REG) {
+
+
+        string inVar = codeState.getVariableName(cid, PORT_ID_IN, valueStore);
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+        
+        codeState.addRegisterAssign(cid, inVar, valueStore);
+
+        
+      } else if (tp == CELL_TYPE_MEM) {
+
+        string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+        string lastClkVar =
+          codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+        
+        string waddrName = codeState.getVariableName(cid, PORT_ID_WADDR, valueStore);
+        string wdataName = codeState.getVariableName(cid, PORT_ID_WDATA, valueStore);
+        string wenName = codeState.getVariableName(cid, PORT_ID_WEN, valueStore);
+
+        codeState.addUpdateMemoryCode(cid, waddrName, wdataName, valueStore);
+
+      } else {
+        cout << "Unsupported cell " << def.cellName(cid) << " in sequentialBlockCode" << endl;
+        assert(false);
+      }
+
+    }
+
+
+    return "";
+  }
+  
+  std::string
   Simulator::combinationalBlockCode(const std::vector<SigPort>& levelized,
                                     CodeGenState& codeState) {
 
@@ -579,17 +639,134 @@ namespace FlatCircuit {
     }
   }
 
+  bool
+  canCompressSequentialTests(const std::vector<std::vector<SigPort> >& updates,
+                             const CellDefinition& def) {
+
+    if ((updates.size() == 4) && (updates[3].size() == 0)) {
+      cout << "Found example of possible clock compressible app" << endl;
+      std::set<SigPort> clockDrivers;
+      std::set<SigPort> rstDrivers;
+      auto seqUpdates = updates[1];
+
+      for (auto sigPort : seqUpdates) {
+        CellId cid = sigPort.cell;
+        const Cell& cell = def.getCellRefConst(cid);
+        PortId pid = sigPort.port;
+
+        assert((pid == PORT_ID_CLK) ||
+               (pid == PORT_ID_ARST));
+        assert(cell.getPortWidth(pid) == 1);
+
+        auto drivers = cell.getDrivers(pid).signals;
+        
+        if (pid == PORT_ID_CLK) {
+          for (auto driverBit : drivers) {
+            assert(notEmpty(driverBit));
+            clockDrivers.insert({driverBit.cell, driverBit.port});
+          }
+        } else {
+          assert(pid == PORT_ID_ARST);
+
+          for (auto driverBit : drivers) {
+            assert(notEmpty(driverBit));
+            rstDrivers.insert({driverBit.cell, driverBit.port});
+          }
+        }
+      }
+
+      cout << "Clock drivers" << endl;
+      for (auto sps : clockDrivers) {
+        cout << "\t" << sigPortString(def, sps) << endl;
+      }
+
+      cout << "Reset drivers" << endl;
+      for (auto sps : rstDrivers) {
+        cout << "\t" << sigPortString(def, sps) << endl;
+      }
+      
+      bool oneClockDriver = false;
+      
+      if ((clockDrivers.size() == 1) &&
+          def.isPortCell((*begin(clockDrivers)).cell)) {
+        cout << "Uniform clock drivers " << endl;
+        oneClockDriver = true;
+      }
+
+      bool allRstConst = true;
+      for (auto driverPort : rstDrivers) {
+        CellId cid = driverPort.cell;
+        if (!(def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST)) {
+          allRstConst = false;
+        }
+      }
+
+      if (allRstConst) {
+        cout << "All resets are constants" << endl;
+      }
+
+      if (allRstConst && oneClockDriver) {
+        cout << "Can do sequential test folding" << endl;
+      }
+
+      return allRstConst && oneClockDriver;
+    }
+
+    return false;
+  }
+
   void
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
 
+    // TODO: Check edge types on registers!!
+    bool canCompress = canCompressSequentialTests(updates, def);
     CodeGenState codeState(def);
-    for (int i = 0; i < (int) updates.size(); i += 2) {
-      combinationalBlockCode(updates[i + 0], codeState);
-      sequentialBlockCode(updates[i + 1], codeState);
+
+    if (!canCompress) {
+
+      for (int i = 0; i < (int) updates.size(); i += 2) {
+        combinationalBlockCode(updates[i + 0], codeState);
+        sequentialBlockCode(updates[i + 1], codeState);
+      }
+
+    } else {
+      // PROBLEM: Jeffs designs are not registered, need some updates
+
+      string lbl = codeState.getNewLabel("clk_is_high");
+
+      SigPort sp = *begin(updates[1]);
+      CellId cid = sp.cell;
+
+      cout << "Cellid = " << cid << endl;
+      
+      const Cell& cell = def.getCellRefConst(cid);
+
+      cout << "SigPort = " << sigPortString(def, sp) << endl;
+
+      string clkVar = codeState.getVariableName(cid, PORT_ID_CLK, valueStore);
+      string lastClkVar =
+        codeState.getLastValueVariableName(cid, PORT_ID_CLK, valueStore);
+
+      cout << "Got clock names" << endl;
+
+      EdgeType edgeType = EDGE_TYPE_POSEDGE;
+      if (isRegister(cell.getCellType())) {
+        edgeType =
+          cell.clkPosedge() ? EDGE_TYPE_POSEDGE : EDGE_TYPE_NEGEDGE;
+      }
+
+      codeState.addEdgeTestJNE(edgeType, lastClkVar, clkVar, lbl);
+
+      combinationalBlockCode(updates[0], codeState);
+      sequentialBlockUpdates(updates[1], codeState);
+
+      codeState.addLabel(lbl);
+
+      combinationalBlockCode(updates[2], codeState);
     }
 
     sequentialPortUpdateCode(codeState);
-
+    
     //string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
     string cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"
       "using namespace bsim;\n\n";
