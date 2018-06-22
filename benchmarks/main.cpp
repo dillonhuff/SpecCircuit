@@ -268,7 +268,9 @@ void iverilogBenchmarks() {
 
 
   // Test specialized
-  system("./benchmarks/run_iverilog_specialized.sh > iverilog_specialized_time.txt");
+  int i =
+    system("./benchmarks/run_iverilog_specialized.sh > iverilog_specialized_time.txt");
+  assert(i == 0);
 
   cout << "================== Done iverilog     ==================" << endl;
 }
