@@ -4,6 +4,9 @@
 #include "transformations.h"
 #include "utils.h"
 
+#include <chrono>
+
+using namespace std::chrono;
 using namespace std;
 using namespace CoreIR;
 using namespace FlatCircuit;
@@ -20,6 +23,25 @@ int main(const int argc, const char** argv) {
                    "./test/top.json");
 
   CellDefinition& def = circuitEnv.getDef("top");
+
+  CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
+  CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
+  CellId s2t2 = def.getPortCellId("pad_S2_T2_in");
+  CellId s2t3 = def.getPortCellId("pad_S2_T3_in");
+  CellId s2t4 = def.getPortCellId("pad_S2_T4_in");
+  CellId s2t5 = def.getPortCellId("pad_S2_T5_in");
+  CellId s2t6 = def.getPortCellId("pad_S2_T6_in");
+  CellId s2t7 = def.getPortCellId("pad_S2_T7_in");
+  CellId s2t8 = def.getPortCellId("pad_S2_T8_in");
+  CellId s2t9 = def.getPortCellId("pad_S2_T9_in");
+  CellId s2t10 = def.getPortCellId("pad_S2_T10_in");
+  CellId s2t11 = def.getPortCellId("pad_S2_T11_in");
+  CellId s2t12 = def.getPortCellId("pad_S2_T12_in");
+  CellId s2t13 = def.getPortCellId("pad_S2_T13_in");
+  CellId s2t14 = def.getPortCellId("pad_S2_T14_in");
+  CellId s2t15 = def.getPortCellId("pad_S2_T15_in");
+
+  CellId clkCell = def.getPortCellId("clk_in");
 
   BitVector input(16, 0);
   BitVector correctOutput(16, 2*0);
@@ -132,58 +154,54 @@ int main(const int argc, const char** argv) {
 
   setCGRAInput(2, input, sim);
 
-  CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
-  CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
-  CellId s2t2 = def.getPortCellId("pad_S2_T2_in");
-  CellId s2t3 = def.getPortCellId("pad_S2_T3_in");
-  CellId s2t4 = def.getPortCellId("pad_S2_T4_in");
-  CellId s2t5 = def.getPortCellId("pad_S2_T5_in");
-  CellId s2t6 = def.getPortCellId("pad_S2_T6_in");
-  CellId s2t7 = def.getPortCellId("pad_S2_T7_in");
-  CellId s2t8 = def.getPortCellId("pad_S2_T8_in");
-  CellId s2t9 = def.getPortCellId("pad_S2_T9_in");
-  CellId s2t10 = def.getPortCellId("pad_S2_T10_in");
-  CellId s2t11 = def.getPortCellId("pad_S2_T11_in");
-  CellId s2t12 = def.getPortCellId("pad_S2_T12_in");
-  CellId s2t13 = def.getPortCellId("pad_S2_T13_in");
-  CellId s2t14 = def.getPortCellId("pad_S2_T14_in");
-  CellId s2t15 = def.getPortCellId("pad_S2_T15_in");
+  auto start = high_resolution_clock::now();
+  auto stop = high_resolution_clock::now();
 
-  CellId clkCell = def.getPortCellId("clk_in");
+  auto duration = duration_cast<milliseconds>(stop - start);
+  
+  start = high_resolution_clock::now();
 
   for (int i = 0; i < nCycles; i++) {
 
-    sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 0));
+    sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 0));
     sim.update();
     
     input = BitVector(16, i);
 
-    sim.setFreshValue(s2t0, PORT_ID_IN, BitVec(1, input.get(15 - 0).binary_value()));
-    sim.setFreshValue(s2t1, PORT_ID_IN, BitVec(1, input.get(14 - 0).binary_value()));
-    sim.setFreshValue(s2t2, PORT_ID_IN, BitVec(1, input.get(13 - 0).binary_value()));
-    sim.setFreshValue(s2t3, PORT_ID_IN, BitVec(1, input.get(12 - 0).binary_value()));
-    sim.setFreshValue(s2t4, PORT_ID_IN, BitVec(1, input.get(11 - 0).binary_value()));
-    sim.setFreshValue(s2t5, PORT_ID_IN, BitVec(1, input.get(10 - 0).binary_value()));
-    sim.setFreshValue(s2t6, PORT_ID_IN, BitVec(1, input.get(9 - 0).binary_value()));
-    sim.setFreshValue(s2t7, PORT_ID_IN, BitVec(1, input.get(8 - 0).binary_value()));
-    sim.setFreshValue(s2t8, PORT_ID_IN, BitVec(1, input.get(7 - 0).binary_value()));
-    sim.setFreshValue(s2t9, PORT_ID_IN, BitVec(1, input.get(6 - 0).binary_value()));
-    sim.setFreshValue(s2t10, PORT_ID_IN, BitVec(1, input.get(5 - 0).binary_value()));
-    sim.setFreshValue(s2t11, PORT_ID_IN, BitVec(1, input.get(4 - 0).binary_value()));
-    sim.setFreshValue(s2t12, PORT_ID_IN, BitVec(1, input.get(3 - 0).binary_value()));
-    sim.setFreshValue(s2t13, PORT_ID_IN, BitVec(1, input.get(2 - 0).binary_value()));
-    sim.setFreshValue(s2t14, PORT_ID_IN, BitVec(1, input.get(1 - 0).binary_value()));
-    sim.setFreshValue(s2t15, PORT_ID_IN, BitVec(1, input.get(0 - 0).binary_value()));
+    sim.setFreshValue(s2t0, PORT_ID_OUT, BitVec(1, input.get(15 ).binary_value()));
+    sim.setFreshValue(s2t1, PORT_ID_OUT, BitVec(1, input.get(14 ).binary_value()));
+    sim.setFreshValue(s2t2, PORT_ID_OUT, BitVec(1, input.get(13 ).binary_value()));
+    sim.setFreshValue(s2t3, PORT_ID_OUT, BitVec(1, input.get(12 ).binary_value()));
+    sim.setFreshValue(s2t4, PORT_ID_OUT, BitVec(1, input.get(11 ).binary_value()));
+    sim.setFreshValue(s2t5, PORT_ID_OUT, BitVec(1, input.get(10 ).binary_value()));
+    sim.setFreshValue(s2t6, PORT_ID_OUT, BitVec(1, input.get(9 ).binary_value()));
+    sim.setFreshValue(s2t7, PORT_ID_OUT, BitVec(1, input.get(8 ).binary_value()));
+    sim.setFreshValue(s2t8, PORT_ID_OUT, BitVec(1, input.get(7 ).binary_value()));
+    sim.setFreshValue(s2t9, PORT_ID_OUT, BitVec(1, input.get(6 ).binary_value()));
+    sim.setFreshValue(s2t10, PORT_ID_OUT, BitVec(1, input.get(5 ).binary_value()));
+    sim.setFreshValue(s2t11, PORT_ID_OUT, BitVec(1, input.get(4 ).binary_value()));
+    sim.setFreshValue(s2t12, PORT_ID_OUT, BitVec(1, input.get(3 ).binary_value()));
+    sim.setFreshValue(s2t13, PORT_ID_OUT, BitVec(1, input.get(2 ).binary_value()));
+    sim.setFreshValue(s2t14, PORT_ID_OUT, BitVec(1, input.get(1 ).binary_value()));
+    sim.setFreshValue(s2t15, PORT_ID_OUT, BitVec(1, input.get(0 ).binary_value()));
     
-    sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 1));
+    sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 1));
     sim.update();
 
   }
 
-  BitVector outputS0 = getCGRAOutput(0, sim);
+  stop = high_resolution_clock::now();
+  duration = duration_cast<milliseconds>(stop - start);
+  cout << "Time taken for " << nCycles << ": "
+       << duration.count() << " milliseconds" << endl;
+  
+  outputS0 = getCGRAOutput(0, sim);
   
   cout << "Outputs" << endl;
   printCGRAOutputs(sim);
+
+  cout << "input    = " << input << endl;
+  cout << "outputS0 = " << outputS0 << endl;
 
   outputVerilog(sim.def, outputName);
 

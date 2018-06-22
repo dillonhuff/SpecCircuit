@@ -2170,7 +2170,7 @@ namespace FlatCircuit {
       }
 
       //sim.setFreshValue("clk_in", BitVec(1, 0));
-      sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 0));
+      sim.setFreshValue(cid, PORT_ID_OUT, BitVec(1, 0);)
       //sim.setFreshValue(s0t0, BitVec(
       sim.update();
 
