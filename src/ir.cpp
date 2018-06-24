@@ -62,20 +62,24 @@ namespace FlatCircuit {
       //return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
     case CELL_TYPE_UGE:
-      return ln(receiver + " = BitVector((" +
-                arg0 + " > " + arg1 + ") || (" +
-                arg0 + " == " + arg1 + "))");
+      return ln("greater_than_or_equal(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      // return ln(receiver + " = BitVector((" +
+      //           arg0 + " > " + arg1 + ") || (" +
+      //           arg0 + " == " + arg1 + "))");
 
     case CELL_TYPE_ULE:
-      return ln(receiver + " = BitVector((" +
-                arg0 + " < " + arg1 + ") || (" +
-                arg0 + " == " + arg1 + "))");
+      return ln("less_than_or_equal(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      // return ln(receiver + " = BitVector((" +
+      //           arg0 + " < " + arg1 + ") || (" +
+      //           arg0 + " == " + arg1 + "))");
 
     case CELL_TYPE_UGT:
-      return ln(receiver + " = BitVector((" + arg0 + " > " + arg1 + "))");
+      //return ln(receiver + " = BitVector((" + arg0 + " > " + arg1 + "))");
+      return ln("greater_than(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_ULT:
-      return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
+      return ln("less_than(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
         
     case CELL_TYPE_OR:
       return ln("static_bv_or(" + receiver + ", " + arg0 + ", " + arg1 + ")");

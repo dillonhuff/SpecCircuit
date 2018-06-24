@@ -483,7 +483,6 @@ namespace bsim {
     //return res;
   }
 
-  template<int N>
   static inline
   void
   sub_general_width_bv(bv_wrapper& diff,
@@ -527,6 +526,110 @@ namespace bsim {
 
     //return diff;
   }    
+
+  static inline
+  void
+  greater_than(bv_wrapper& res,
+               const bv_wrapper& a,
+               const bv_wrapper& b) {
+    if (!a.is_binary() || !b.is_binary()) {
+      res.set(0, quad_value(0));
+      return;
+      //return false;
+    }
+
+    int N = a.bitLength();
+    for (int i = N - 1; i >= 0; i--) {
+      if (a.get(i) > b.get(i)) {
+        res.set(0, quad_value(1));
+        return;
+  	//return true;
+      }
+
+      if (a.get(i) < b.get(i)) {
+        res.set(0, quad_value(0));
+        return;
+  	//return false;
+      }
+    }
+
+    res.set(0, quad_value(0));
+    return;
+
+    //return false;
+  }
+
+  static inline void
+  greater_than_or_equal(bv_wrapper& res,
+                        const bv_wrapper& a,
+                        const bv_wrapper& b) {
+    if (!a.is_binary() || !b.is_binary()) {
+      res.set(0, quad_value(0));
+      return;
+      //return false;
+    }
+
+    greater_than(res, a, b);
+    if (res.get(0) == quad_value(1)) {
+      return;
+    }
+
+    equals(res, a, b);
+    //return (a > b) || (a == b);
+  }
+
+  static inline void
+  less_than_or_equal(bv_wrapper& res,
+                        const bv_wrapper& a,
+                        const bv_wrapper& b) {
+    greater_than(res, a, b);
+
+    res.set(0, ~res.get(0));
+
+    // if (res.get(0) == quad_value(1)) {
+    //   res.set(0, quad_value
+    //   return;
+    // }
+    // return !(a > b);
+    // if (!a.is_binary() || !b.is_binary()) {
+    //   res.set(0, quad_value(0));
+    //   return;
+    //   //return false;
+    // }
+
+    // greater_than(res, a, b);
+    // if (res.get(0) == quad_value(1)) {
+    //   return;
+    // }
+
+    // equals(res, a, b);
+    //return (a > b) || (a == b);
+  }
+  
+  static inline void
+  less_than(bv_wrapper& res,
+            const bv_wrapper& a,
+            const bv_wrapper& b) {
+    equals(res, a, b);
+    if (a.get(0) == quad_value(1)) {
+      res.set(0, quad_value(0));
+      return;
+    }
+
+    less_than_or_equal(res, a, b);
+  }
+  
+  // template<int N>
+  // static inline bool operator<(const bv_wrapper& a,
+  // 			       const bv_wrapper& b) {
+  //   if (!a.is_binary() || !b.is_binary()) {
+  //     return false;
+  //   }
+
+  //   if (a == b) { return false; }
+
+  //   return !(a > b);
+  // }
   
   // template<int N>
   // class static_quad_value_bit_vector {
