@@ -277,8 +277,49 @@ namespace bsim {
   class bv_wrapper {
     quad_value* bits;
     int N;
+
+  public:
+
+    bv_wrapper() {}
+
+    int bitLength() const { return N; }
+
+    quad_value get(const int i) const { return bits[i]; }
+
+    quad_value set(const int i, quad_value val) const { return bits[i] = val; }
   };
 
+  static inline bool posedge(const bv_wrapper& a, const bv_wrapper& b) {
+    assert(a.bitLength() == 1);
+    assert(b.bitLength() == 1);
+
+    return (a.get(0) == 0) && (b.get(0) == 1);
+  }
+
+  static inline bool negedge(const bv_wrapper& a, const bv_wrapper& b) {
+    assert(a.bitLength() == 1);
+    assert(b.bitLength() == 1);
+
+    return (a.get(0) == 1) && (b.get(0) == 0);
+  }
+
+  static inline void storeToTable(quad_value* values,
+                                  const unsigned long offset,
+                                  const bv_wrapper& bv) {
+    for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
+      values[offset + i] = bv.get(i);
+    }
+  }
+
+  static inline void
+  loadBitFromTable(bsim::quad_value* values,
+                   bv_wrapper& bv,
+                   const unsigned long receiverOffset,
+                   const unsigned long sourceBV,
+                   unsigned long sourceOffset) {
+    bv.set(receiverOffset, values[sourceBV + sourceOffset]);
+  }
+  
   // template<int N>
   // class static_quad_value_bit_vector {
   //   quad_value bits[N];
