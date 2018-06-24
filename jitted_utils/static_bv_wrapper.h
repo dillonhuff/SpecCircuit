@@ -282,6 +282,8 @@ namespace bsim {
 
     bv_wrapper() {}
 
+    bv_wrapper(quad_value* const bits_, const int N_) : bits(bits_), N(N_) {}
+
     int bitLength() const { return N; }
 
     quad_value get(const int i) const { return bits[i]; }
@@ -311,6 +313,17 @@ namespace bsim {
     }
   }
 
+  static inline
+  void
+  loadFromTable(bv_wrapper& bv,
+                bsim::quad_value* values,
+                const unsigned long offset,
+                const unsigned long width) {
+    for (unsigned long i = 0; i < (unsigned long) width; i++) {
+      bv.set(i, values[offset + i]);
+    }
+  }
+  
   static inline void
   loadBitFromTable(bsim::quad_value* values,
                    bv_wrapper& bv,

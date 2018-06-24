@@ -26,7 +26,8 @@ namespace FlatCircuit {
 
   static inline std::string
   loadTableString(const std::string& value, const std::string& offset, const std::string& width) {
-    return ln(value + " = loadFromTable<" + width + ">(values, " + offset + ", " + width + ")");
+    //return ln(value + " = loadFromTable<" + width + ">(values, " + offset + ", " + width + ")");
+    return ln("loadFromTable(" + value + ", values, " + offset + ", " + width + ")");
   }
 
   enum IRInstrType {
@@ -405,7 +406,10 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       //return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
-      return ln("bsim::static_quad_value_bit_vector< " + std::to_string(bitWidth) + " > " + name + "(0)");
+      std::string widthStr = std::to_string(bitWidth);
+      
+      return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
+        ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ")");
     }
     
   };

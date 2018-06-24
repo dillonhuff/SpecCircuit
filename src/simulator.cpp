@@ -815,13 +815,13 @@ namespace FlatCircuit {
       // "\t}\n"
       // "}\n\n"
 
-      "template<int N> static inline bsim::static_quad_value_bit_vector<N> loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
-      "\tbsim::static_quad_value_bit_vector<N> bv(0);\n"
-      "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
-      "\t\tbv.set(i, values[offset + i]);\n"
-      "\t}\n"
-      "\treturn bv;\n"
-      "}\n\n"
+      // "template<int N> static inline bsim::static_quad_value_bit_vector<N> loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
+      // "\tbsim::static_quad_value_bit_vector<N> bv(0);\n"
+      // "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
+      // "\t\tbv.set(i, values[offset + i]);\n"
+      // "\t}\n"
+      // "\treturn bv;\n"
+      // "}\n\n"
 
       // "template<int N> static inline void loadBitFromTable(bsim::quad_value* values, bsim::static_quad_value_bit_vector<N>& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
 
