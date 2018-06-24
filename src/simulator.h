@@ -1168,7 +1168,10 @@ namespace FlatCircuit {
     void specializePort(const std::string& port, const BitVector& value);
 
     void sequentialPortUpdateCode(CodeGenState& codeState);
-    
+
+    CodeGenState
+    buildCodeGenState(const std::vector<std::vector<SigPort> >& updates);
+
     ~Simulator();
     
   };

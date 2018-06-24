@@ -355,7 +355,7 @@ namespace FlatCircuit {
     void* simFuncHandle;
     void* rawSimFuncHandle;
   };
-  
+
   DylibInfo loadLibWithFunc(const std::string& targetBinary) {
     void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_NOW);
 
@@ -368,9 +368,6 @@ namespace FlatCircuit {
 
     void* myFuncFunV;
     // Must remove the first underscore from the symbol name to find it?
-    //    myFuncFunV = dlsym(myLibHandle, "_Z8simulateRNSt3__16vectorIN4bsim21quad_value_bit_vectorENS_9allocatorIS2_EEEE");
-
-    //myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim21quad_value_bit_vectorE");
     myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim10quad_valueE");
     if (myFuncFunV == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
@@ -720,9 +717,8 @@ namespace FlatCircuit {
     return false;
   }
 
-  void
-  Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
-
+  CodeGenState
+  Simulator::buildCodeGenState(const std::vector<std::vector<SigPort> >& updates) {
     // TODO: Check edge types on registers!!
     bool canCompress = canCompressSequentialTests(updates, def);
     CodeGenState codeState(def);
@@ -771,8 +767,14 @@ namespace FlatCircuit {
     }
 
     sequentialPortUpdateCode(codeState);
-    
-    //string cppCode = "#include <vector>\n#include \"quad_value_bit_vector.h\"\n"
+
+    return codeState;
+  }
+
+  void
+  Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
+    CodeGenState codeState = buildCodeGenState(updates);
+
     string cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"
       "using namespace bsim;\n\n";
 
