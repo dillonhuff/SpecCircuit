@@ -353,10 +353,12 @@ namespace FlatCircuit {
   struct DylibInfo {
     void* libHandle;
     void* simFuncHandle;
-    void* rawSimFuncHandle;
+    //void* rawSimFuncHandle;
   };
 
-  DylibInfo loadLibWithFunc(const std::string& targetBinary) {
+  DylibInfo loadLibWithFunc(const std::string& targetBinary,
+                            const std::string& symbolName) {
+    
     void* myLibHandle = dlopen(targetBinary.c_str(), RTLD_NOW);
 
     if (myLibHandle == nullptr) {
@@ -368,7 +370,7 @@ namespace FlatCircuit {
 
     void* myFuncFunV;
     // Must remove the first underscore from the symbol name to find it?
-    myFuncFunV = dlsym(myLibHandle, "_Z8simulatePN4bsim10quad_valueE");
+    myFuncFunV = dlsym(myLibHandle, symbolName.c_str()); //"_Z8simulatePN4bsim10quad_valueE");
     if (myFuncFunV == nullptr) {
       printf("dlsym failed: %s\n", dlerror());
       assert(false);
@@ -376,15 +378,17 @@ namespace FlatCircuit {
       printf("FOUND\n");
     }
 
-    void* rawSimFunc = dlsym(myLibHandle, "_Z18simulate_two_statePh");
-    if (rawSimFunc == nullptr) {
-      printf("dlsym failed: %s\n", dlerror());
-      assert(false);
-    } else {
-      printf("FOUND\n");
-    }
+    return {myLibHandle, myFuncFunV};
+
+    // void* rawSimFunc = dlsym(myLibHandle, "_Z18simulate_two_statePh");
+    // if (rawSimFunc == nullptr) {
+    //   printf("dlsym failed: %s\n", dlerror());
+    //   assert(false);
+    // } else {
+    //   printf("FOUND\n");
+    // }
     
-    return {myLibHandle, myFuncFunV, rawSimFunc};
+    // return {myLibHandle, myFuncFunV, rawSimFunc};
   }
 
   std::string
@@ -853,10 +857,18 @@ namespace FlatCircuit {
 
     compileCppLib(cppName, targetBinary);
 
-    DylibInfo dlib = loadLibWithFunc(targetBinary);
+    DylibInfo dlib = loadLibWithFunc(targetBinary,
+                                     "_Z8simulatePN4bsim10quad_valueE");
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
-    rawSimulateFuncHandle = dlib.rawSimFuncHandle;
+    //rawSimulateFuncHandle = dlib.rawSimFuncHandle;
+
+    // DylibInfo dlibRaw = loadLibWithFunc(targetBinary,
+    //                                     "_Z18simulate_two_statePh");
+    // rawLibHandle = dlibRaw.libHandle;
+    // //simulateFuncHandle = dlibRaw.simFuncHandle;
+    // rawSimulateFuncHandle = dlibRaw.simFuncHandle; //dlibRaw.rawSimFuncHandle;
+
   }
 
   // An update to a node is dead if:
