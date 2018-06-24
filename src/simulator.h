@@ -186,7 +186,7 @@ namespace FlatCircuit {
     void* libHandle;
     void* simulateFuncHandle;
 
-    void* rawLibHandle;
+    //void* rawLibHandle;
     void* rawSimulateFuncHandle;
 
     bool simRaw;
