@@ -298,6 +298,27 @@ namespace bsim {
     quad_value get(const int i) const { return bits[i]; }
 
     quad_value set(const int i, quad_value val) const { return bits[i] = val; }
+
+    template<typename ConvType>
+    ConvType to_type() const {
+      ConvType tmp = 0;
+      ConvType exp = 1;
+      for (int i = 0; i < bitLength(); i++) {
+        tmp += exp*get(i).binary_value();
+        exp *= 2;
+      }
+      return tmp;
+    }
+
+    bool is_binary() const {
+      for (int i = 0; i < ((int) bitLength()); i++) {
+        if (!get(i).is_binary()) {
+          return false;
+        }
+      }
+      return true;
+    }
+    
   };
 
   static inline bool posedge(const bv_wrapper& a, const bv_wrapper& b) {
@@ -340,6 +361,28 @@ namespace bsim {
                    const unsigned long sourceBV,
                    unsigned long sourceOffset) {
     bv.set(receiverOffset, values[sourceBV + sourceOffset]);
+  }
+
+  static inline
+  void
+  static_bv_and(bv_wrapper& a_and_b,
+                const bv_wrapper& a,
+                const bv_wrapper& b) {
+    for (int i = 0; i < a.bitLength(); i++) {
+      a_and_b.set(i, a.get(i) & b.get(i));
+    }
+
+  }
+
+  static inline
+  void
+  static_bv_or(bv_wrapper& a_or_b,
+                const bv_wrapper& a,
+                const bv_wrapper& b) {
+    for (int i = 0; i < a.bitLength(); i++) {
+      a_or_b.set(i, a.get(i) | b.get(i));
+    }
+
   }
   
   // template<int N>

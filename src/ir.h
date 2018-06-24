@@ -87,7 +87,8 @@ namespace FlatCircuit {
                                               label(label_) {}
 
     virtual std::string toString(ValueStore& valueStore) const {
-      return "\tif (!((" + wenName + " == BitVector(1)))) { goto " + label + "; }\n";
+      //return "\tif (!((" + wenName + " == BitVector(1)))) { goto " + label + "; }\n";
+      return "\tif (!((" + wenName + ".get(0) == quad_value(1)))) { goto " + label + "; }\n";
     }
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
@@ -419,7 +420,6 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      //return ln("BitVector " + name + "(" + std::to_string(bitWidth) + ", 0)");
       std::string widthStr = std::to_string(bitWidth);
       
       return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
@@ -628,7 +628,8 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
+      //return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
+      return ln(receiver + " = (" + sel + ".get(0) == quad_value(1) ? " + arg1 + " : " + arg0 + ")");
     }
     
   };

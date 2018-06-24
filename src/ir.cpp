@@ -21,6 +21,7 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
     case CELL_TYPE_OR:
+
       return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
     case CELL_TYPE_XOR:
@@ -56,7 +57,9 @@ namespace FlatCircuit {
     CellType tp = cell.getCellType();
     switch (tp) {
     case CELL_TYPE_AND:
-      return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
+      return ln("static_bv_and(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+
+      //return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
     case CELL_TYPE_UGE:
       return ln(receiver + " = BitVector((" +
@@ -75,7 +78,8 @@ namespace FlatCircuit {
       return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
         
     case CELL_TYPE_OR:
-      return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
+      return ln("static_bv_or(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
     case CELL_TYPE_XOR:
       return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
