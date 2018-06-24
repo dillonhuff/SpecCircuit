@@ -788,32 +788,19 @@ namespace FlatCircuit {
     for (auto cid : def.getPortCells()) {
       const Cell& cell = def.getCellRefConst(cid);
       if (cell.isInputPortCell()) {
+
         cppCode += ln("// " + def.getCellName(cid) + " ---> " +
                       to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)));
 
-        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
-                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_OUT)));
-        if (sequentialDependencies(cell, PORT_ID_OUT).size() > 0) {
-          cppCode += ln("// RAW Offset past value: " + def.getCellName(cid) + " ---> " +
-                        to_string(valueStore.rawPortPastValueOffset(cid, PORT_ID_OUT)));
-        }
       } else if (def.isPortCell(cid)) {
+
         // Output cell
         cppCode += ln("// " + def.getCellName(cid) + " ---> " +
                       to_string(valueStore.portValueOffset(cid, PORT_ID_IN)));
 
-        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
-                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_IN)));
       }
     }
 
-    cppCode +=
-      "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
-      "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
-      "void simulate_two_state(unsigned char* values) {\n";
-    cppCode += codeState.getTwoStateCode(valueStore);
-    cppCode += "}\n\n";
-    
     cppCode +=
       "typedef bsim::static_quad_value_bit_vector<1> BitVector;\n\n"
       "bool posedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(0)) && (b == BitVector(1)); }\n\n"
@@ -854,6 +841,7 @@ namespace FlatCircuit {
     string cppName = "./" + libName + ".cpp";
     ofstream out(cppName);
     out << cppCode << endl;
+    out.close();
 
     compileCppLib(cppName, targetBinary);
 
@@ -861,13 +849,47 @@ namespace FlatCircuit {
                                      "_Z8simulatePN4bsim10quad_valueE");
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
-    //rawSimulateFuncHandle = dlib.rawSimFuncHandle;
 
-    // DylibInfo dlibRaw = loadLibWithFunc(targetBinary,
-    //                                     "_Z18simulate_two_statePh");
-    // rawLibHandle = dlibRaw.libHandle;
-    // //simulateFuncHandle = dlibRaw.simFuncHandle;
-    // rawSimulateFuncHandle = dlibRaw.simFuncHandle; //dlibRaw.rawSimFuncHandle;
+    // Generate and load 2 state code
+    cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"
+      "using namespace bsim;\n\n";
+    
+    cppCode += ln("// Input layout");
+    for (auto cid : def.getPortCells()) {
+      const Cell& cell = def.getCellRefConst(cid);
+      if (cell.isInputPortCell()) {
+        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_OUT)));
+        if (sequentialDependencies(cell, PORT_ID_OUT).size() > 0) {
+          cppCode += ln("// RAW Offset past value: " + def.getCellName(cid) + " ---> " +
+                        to_string(valueStore.rawPortPastValueOffset(cid, PORT_ID_OUT)));
+        }
+      } else if (def.isPortCell(cid)) {
+        cppCode += ln("// RAW Offset: " + def.getCellName(cid) + " ---> " +
+                      to_string(valueStore.rawPortValueOffset(cid, PORT_ID_IN)));
+      }
+    }
+
+    cppCode +=
+      "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
+      "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
+      "void simulate_two_state(unsigned char* values) {\n";
+    cppCode += codeState.getTwoStateCode(valueStore);
+    cppCode += "}\n\n";
+
+    libName = "circuit_jit_raw";
+    targetBinary = cppLibName(libName);
+    cppName = "./" + libName + ".cpp";
+    ofstream outRaw(cppName);
+    outRaw << cppCode << endl;
+    outRaw.close();
+
+    compileCppLib(cppName, targetBinary);
+    
+    DylibInfo dlibRaw = loadLibWithFunc(targetBinary,
+                                        "_Z18simulate_two_statePh");
+    rawLibHandle = dlibRaw.libHandle;
+    rawSimulateFuncHandle = dlibRaw.simFuncHandle;
 
   }
 
@@ -916,6 +938,11 @@ namespace FlatCircuit {
     if (libHandle != nullptr) {
       dlclose(libHandle);
     }
+
+    if (rawLibHandle != nullptr) {
+      dlclose(rawLibHandle);
+    }
+
   }
 
   void Simulator::debugPrintTableValues() const {
