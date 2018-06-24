@@ -344,7 +344,7 @@ namespace FlatCircuit {
     int iterCount = 0;
     while (candidates.size() > 0) {
 
-      if ((iterCount % 1000) == 0) {
+      if ((iterCount % 10000) == 0) {
         cout << "# of candidates = " << candidates.size() << endl;
       }
       iterCount++;
