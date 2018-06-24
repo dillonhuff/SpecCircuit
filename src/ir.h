@@ -409,7 +409,7 @@ namespace FlatCircuit {
       std::string widthStr = std::to_string(bitWidth);
       
       return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
-        ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ")");
+        ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ", true)");
     }
     
   };
