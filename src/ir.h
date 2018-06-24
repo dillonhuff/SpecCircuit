@@ -10,6 +10,12 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  static inline
+  std::string
+  setTableBitString(const std::string& offset, const std::string& bitString) {
+    return ln("values[ " + offset + " ] = " + bitString);
+  }
+
   static inline std::string
   storeTableString(const std::string& offset,
                    const std::string& value) {
@@ -318,11 +324,11 @@ namespace FlatCircuit {
   public:
     CellId cid;
     BitVector result;
-    std::string resString;
+    //std::string resString;
 
     IRRegisterReset(const CellId cid_,
                     const BitVector& result_) : cid(cid_), result(result_) {
-      resString = result.hex_string();
+      //resString = result.hex_string();
     }
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
@@ -338,11 +344,19 @@ namespace FlatCircuit {
     virtual std::string toString(ValueStore& valueStore) const {
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
       std::string widthStr = std::to_string(bitWidth);
-      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
-                              "bsim::static_quad_value_bit_vector<" + widthStr + ">(\"" + resString + "\")");
+      int regOffset = valueStore.getRegisterOffset(cid);
 
-      // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) +
-      //           "] = BitVector(\"" + resString + "\")");
+      std::string code = "";
+      for (int i = 0; i < bitWidth; i++) {
+        std::string bitString = "quad_value(" + result.get(i).binary_string() + ")";
+        code += setTableBitString(std::to_string(regOffset + i), bitString);
+      }
+
+      return code;
+
+      // return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
+      //                         "bsim::static_quad_value_bit_vector<" + widthStr + ">(\"" + resString + "\")");
+
     }
 
   };

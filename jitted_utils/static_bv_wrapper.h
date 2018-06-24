@@ -283,6 +283,7 @@ namespace bsim {
     bv_wrapper() {}
 
     bv_wrapper(quad_value* const bits_, const int N_) : bits(bits_), N(N_) {}
+
     bv_wrapper(quad_value* const bits_, const int N_, bool zero) :
       bits(bits_), N(N_) {
       if (zero) {
