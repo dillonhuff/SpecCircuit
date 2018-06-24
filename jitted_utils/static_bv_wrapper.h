@@ -384,6 +384,149 @@ namespace bsim {
     }
 
   }
+
+  static inline
+  void
+  zero_extend(bv_wrapper& res,
+              const bv_wrapper& in) {
+    for (int i = 0; i < in.bitLength(); i++) {
+      res.set(i, in.get(i));
+    }
+
+    for (int i = in.bitLength(); i < res.bitLength(); i++) {
+      res.set(i, 0);
+    }
+  }
+
+  static inline
+  void
+  logical_not(bv_wrapper& not_a, const bv_wrapper& a) {
+    for (int i = 0; i < a.bitLength(); i++) {
+      not_a.set(i, ~a.get(i));
+    }
+  }
+
+  static inline
+  void
+  orr(bv_wrapper& orr_a,
+      const bv_wrapper& a) {
+    for (int i = 0; i < a.bitLength(); i++) {
+      if (a.get(i) == 1) {
+        orr_a.set(0, quad_value(1));
+        return;
+        //return static_quad_value_bit_vector<1>(1);
+      }
+    }
+
+    orr_a.set(0, quad_value(0));
+    //return static_quad_value_bit_vector<1>(0);
+  }
+
+  static inline
+  void equals(bv_wrapper& res,
+              const bv_wrapper& a,
+              const bv_wrapper& b) {
+
+    if (a.bitLength() != b.bitLength()) {
+      res.set(0, quad_value(0));
+      return;
+    }
+
+    for (int i = 0; i < a.bitLength(); i++) {
+      if (a.get(i) != b.get(i)) {
+        res.set(0, quad_value(0));
+        return;
+        //return false;
+      }
+    }
+
+    res.set(0, quad_value(1));
+    //return true;
+    
+  }
+
+  static inline void set_unknown(bv_wrapper& res) {
+    for (int i = 0; i < res.bitLength(); i++) {
+      res.set(i, quad_value(QBV_UNKNOWN_VALUE));
+    }
+  }
+
+  static inline
+  void
+  add_general_width_bv(bv_wrapper& res,
+                       const bv_wrapper& a,
+  		       const bv_wrapper& b) {
+
+    //static_quad_value_bit_vector<N> res;
+    unsigned char carry = 0;
+    for (int i = 0; i < ((int) a.bitLength()); i++) {
+
+      if (!a.get(i).is_binary() ||
+          !b.get(i).is_binary()) {
+        set_unknown(res);
+        //return unknown_bv<N>();
+      }
+
+      unsigned char sum = a.get(i).binary_value() + b.get(i).binary_value() + carry;
+
+      carry = 0;
+
+      unsigned char z_i = sum & 0x01;
+      res.set(i, quad_value(z_i));
+
+      if (sum >= 2) {
+  	carry = 1;
+      }
+
+    }
+
+    //return res;
+  }
+
+  template<int N>
+  static inline
+  void
+  sub_general_width_bv(bv_wrapper& diff,
+                       const bv_wrapper& a,
+  		       const bv_wrapper& b) {
+    // int Width = a.bitLength();
+    // //static_quad_value_bit_vector<N> diff;
+    // //quad_value a_cpy[
+    // static_quad_value_bit_vector<N> a_cpy = a;
+
+    // for (int i = 0; i < Width; i++) {
+
+    //   if ((a_cpy.get(i) == 0) &&
+    //       (b.get(i) == 1)) {
+
+    //     int j = i + 1;
+
+    //     diff.set(i, 1);	  
+
+    //     // Modify to carry
+    //     while ((j < Width) && (a_cpy.get(j) != 1)) {
+    //       a_cpy.set(j, 1);
+    //       j++;
+    //     }
+
+    //     if (j >= Width) {
+    //     } else {
+    //       a_cpy.set(j, 0);
+    //     }
+
+    //   } else if (a_cpy.get(i) == b.get(i)) {
+    //     diff.set(i, 0);
+    //   } else if ((a_cpy.get(i) == 1) &&
+    //     	 (b.get(i) == 0)) {
+    //     diff.set(i, 1);
+    //   } else {
+    //     set_unknown(diff);
+    //     //return unknown_bv<N>();
+    //   }
+    // }
+
+    //return diff;
+  }    
   
   // template<int N>
   // class static_quad_value_bit_vector {

@@ -85,13 +85,15 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
 
     case CELL_TYPE_ADD:
-      return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      return ln("add_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_MUL:
       return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_SUB:
-      return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_LSHR:
       return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
@@ -103,7 +105,8 @@ namespace FlatCircuit {
       return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
         
     case CELL_TYPE_EQ:
-      return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
+      //return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
+      return ln("equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_NEQ:
       return ln(receiver + " = BitVector(" + arg0 + " != " + arg1 + ")");
@@ -167,10 +170,11 @@ namespace FlatCircuit {
       return ln(receiver + " = " + arg);
 
     case CELL_TYPE_NOT:
-      return ln(receiver + " = ~(" + arg + ")");
+      //return ln(receiver + " = ~(" + arg + ")");
+      return ln("logical_not(" + receiver + ", " + arg + ")");
 
     case CELL_TYPE_ORR:
-      return ln(receiver + " = orr(" + arg + ")");
+      return ln("orr(" + receiver + ", " + arg + ")");
 
     case CELL_TYPE_SLICE:
       return ln(receiver + " = slice(" + arg + ", " +
@@ -178,9 +182,11 @@ namespace FlatCircuit {
                 to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
         
     case CELL_TYPE_ZEXT:
-      return ln(receiver + " = zero_extend<" + to_string(cell.getPortWidth(PORT_ID_IN)) + ", " + to_string(cell.getPortWidth(PORT_ID_OUT)) + ">(" +
-                to_string(cell.getPortWidth(PORT_ID_OUT)) + 
-                ", " + arg + ")");
+      return ln("zero_extend(" + receiver + ", " + arg + ")");
+
+      // return ln(receiver + " = zero_extend<" + to_string(cell.getPortWidth(PORT_ID_IN)) + ", " + to_string(cell.getPortWidth(PORT_ID_OUT)) + ">(" +
+      //           to_string(cell.getPortWidth(PORT_ID_OUT)) + 
+      //           ", " + arg + ")");
     default:
       std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
       assert(false);
