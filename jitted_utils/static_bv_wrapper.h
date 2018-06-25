@@ -485,6 +485,13 @@ namespace bsim {
 
   static inline
   void
+  mul_bv(bv_wrapper& diff,
+                       const bv_wrapper& a,
+  		       const bv_wrapper& b) {
+  }
+  
+  static inline
+  void
   sub_general_width_bv(bv_wrapper& diff,
                        const bv_wrapper& a,
   		       const bv_wrapper& b) {
@@ -585,25 +592,6 @@ namespace bsim {
     greater_than(res, a, b);
 
     res.set(0, ~res.get(0));
-
-    // if (res.get(0) == quad_value(1)) {
-    //   res.set(0, quad_value
-    //   return;
-    // }
-    // return !(a > b);
-    // if (!a.is_binary() || !b.is_binary()) {
-    //   res.set(0, quad_value(0));
-    //   return;
-    //   //return false;
-    // }
-
-    // greater_than(res, a, b);
-    // if (res.get(0) == quad_value(1)) {
-    //   return;
-    // }
-
-    // equals(res, a, b);
-    //return (a > b) || (a == b);
   }
   
   static inline void
@@ -618,18 +606,8 @@ namespace bsim {
 
     less_than_or_equal(res, a, b);
   }
+
   
-  // template<int N>
-  // static inline bool operator<(const bv_wrapper& a,
-  // 			       const bv_wrapper& b) {
-  //   if (!a.is_binary() || !b.is_binary()) {
-  //     return false;
-  //   }
-
-  //   if (a == b) { return false; }
-
-  //   return !(a > b);
-  // }
   
   // template<int N>
   // class static_quad_value_bit_vector {
@@ -1453,18 +1431,5 @@ namespace bsim {
 
   // //   return res;
   // // }
-
-  // template<int InWidth, int OutWidth>
-  // static inline
-  // static_quad_value_bit_vector<OutWidth>
-  // zero_extend(const int outWidth,
-  //             const static_quad_value_bit_vector<InWidth>& in) {
-  //   static_quad_value_bit_vector<OutWidth> res(0);
-  //   for (uint i = 0; i < in.bitLength(); i++) {
-  //     res.set(i, in.get(i));
-  //   }
-
-  //   return res;
-  // }
   
 }

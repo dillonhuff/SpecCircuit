@@ -93,7 +93,8 @@ namespace FlatCircuit {
       return ln("add_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_MUL:
-      return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
+      return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_SUB:
       //return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
