@@ -486,8 +486,34 @@ namespace bsim {
   static inline
   void
   mul_bv(bv_wrapper& diff,
-                       const bv_wrapper& a,
-  		       const bv_wrapper& b) {
+         
+         const bv_wrapper& a,
+         const bv_wrapper& b) {
+
+    int Width = a.bitLength();
+    //static_quad_value_bit_vector<N + N> full_len;
+
+    for (int i = 0; i < Width; i++) {
+      if (b.get(i) == 1) {
+
+  	static_quad_value_bit_vector<N + N> shifted_a;
+
+  	for (int j = 0; j < Width; j++) {
+  	  shifted_a.set(j + i, a.get(j));
+  	}
+
+        add_general_width_bv(full_len, full_len, shifted_a);
+  	// full_len =
+  	//   add_general_width_bv(full_len, shifted_a);
+      }
+    }
+
+    static_quad_value_bit_vector<N> res;
+    for (int i = 0; i < Width; i++) {
+      res.set(i, full_len.get(i));
+    }
+
+    return res;
   }
   
   static inline
