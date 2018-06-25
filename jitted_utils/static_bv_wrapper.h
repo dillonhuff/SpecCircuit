@@ -484,11 +484,21 @@ namespace bsim {
   }
 
   static inline
+  void set_bv(const bv_wrapper& dest,
+              const bv_wrapper& src) {
+    for (int i = 0; i < dest.bitLength(); i++) {
+      dest.set(i, src.get(i));
+    }
+  }
+
+  static inline
   void
-  mul_bv(bv_wrapper& diff,
-         
+  mul_bv(bv_wrapper& res,
          const bv_wrapper& a,
-         const bv_wrapper& b) {
+         const bv_wrapper& b,
+         bv_wrapper& full_len,
+         bv_wrapper& shifted_a,
+         bv_wrapper& accum_temp) {
 
     int Width = a.bitLength();
     //static_quad_value_bit_vector<N + N> full_len;
@@ -496,24 +506,32 @@ namespace bsim {
     for (int i = 0; i < Width; i++) {
       if (b.get(i) == 1) {
 
-  	static_quad_value_bit_vector<N + N> shifted_a;
+  	//static_quad_value_bit_vector<N + N> shifted_a;
+        for (int j = 0; j < i; j++) {
+          shifted_a.set(j + i, 0);
+        }
 
   	for (int j = 0; j < Width; j++) {
   	  shifted_a.set(j + i, a.get(j));
   	}
 
-        add_general_width_bv(full_len, full_len, shifted_a);
+        for (int j = 0; j < Width; j++) {
+          accum_temp.set(j, 0);
+        }
+
+        add_general_width_bv(accum_temp, full_len, shifted_a);
+        set_bv(full_len, accum_temp);
+
   	// full_len =
   	//   add_general_width_bv(full_len, shifted_a);
       }
     }
 
-    static_quad_value_bit_vector<N> res;
+    //static_quad_value_bit_vector<N> res;
     for (int i = 0; i < Width; i++) {
       res.set(i, full_len.get(i));
     }
 
-    return res;
   }
   
   static inline
