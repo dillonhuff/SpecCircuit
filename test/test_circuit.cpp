@@ -1110,6 +1110,7 @@ namespace FlatCircuit {
 
     sim.setFreshValue("clk_in", BitVec(1, 0));
     sim.setFreshValue("config_en_sram", BitVec(4, 0));
+    sim.setFreshValue("config_en_linebuf", BitVec(1, 1));
     sim.update();
 
     BitVector configAddr(32, 0);
@@ -1128,6 +1129,7 @@ namespace FlatCircuit {
 
     posedge("clk_in", sim);
 
+    sim.setFreshValue("config_en_linebuf", BitVec(1, 0));    
     sim.setFreshValue("config_en", BitVec(1, 0));
     sim.update();
     
