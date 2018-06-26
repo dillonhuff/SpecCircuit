@@ -1151,22 +1151,22 @@ namespace FlatCircuit {
       dataOutputs.push_back(sim.getBitVec("data_out"));
     }
 
-    for (int i = 0; i < dataCycles; i++) {
-      cout << "Read cycle " << i << " in linebuffer mode" << endl;
+    // for (int i = 0; i < dataCycles; i++) {
+    //   cout << "Read cycle " << i << " in linebuffer mode" << endl;
 
-      sim.setFreshValue("wen_in", BitVec(1, 0));
-      posedge("clk_in", sim);
+    //   sim.setFreshValue("wen_in", BitVec(1, 0));
+    //   posedge("clk_in", sim);
 
-      cout << sim.getBitVec("almost_empty") << endl;
-      cout << sim.getBitVec("almost_full") << endl;
-      cout << sim.getBitVec("chain_out") << endl;
-      cout << sim.getBitVec("chain_valid_out") << endl;
-      cout << "data_out = " << sim.getBitVec("data_out") << endl;
-      cout << "read_data = " << sim.getBitVec("read_data") << endl;
-      cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
-      cout << "read_data_sram = " << sim.getBitVec("read_data_sram") << endl;
-      cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
-    }
+    //   cout << sim.getBitVec("almost_empty") << endl;
+    //   cout << sim.getBitVec("almost_full") << endl;
+    //   cout << sim.getBitVec("chain_out") << endl;
+    //   cout << sim.getBitVec("chain_valid_out") << endl;
+    //   cout << "data_out = " << sim.getBitVec("data_out") << endl;
+    //   cout << "read_data = " << sim.getBitVec("read_data") << endl;
+    //   cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
+    //   cout << "read_data_sram = " << sim.getBitVec("read_data_sram") << endl;
+    //   cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
+    // }
     
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 2));
