@@ -445,6 +445,27 @@ namespace bsim {
     
   }
 
+  static inline
+  void not_equals(bv_wrapper& res,
+                  const bv_wrapper& a,
+                  const bv_wrapper& b) {
+
+    if (a.bitLength() != b.bitLength()) {
+      res.set(0, quad_value(1));
+      return;
+    }
+
+    for (int i = 0; i < a.bitLength(); i++) {
+      if (a.get(i) != b.get(i)) {
+        res.set(0, quad_value(1));
+        return;
+      }
+    }
+
+    res.set(0, quad_value(0));
+    
+  }
+  
   static inline void set_unknown(bv_wrapper& res) {
     for (int i = 0; i < res.bitLength(); i++) {
       res.set(i, quad_value(QBV_UNKNOWN_VALUE));
@@ -532,6 +553,21 @@ namespace bsim {
       res.set(i, full_len.get(i));
     }
 
+  }
+
+  static inline
+  void
+  slice(bv_wrapper& res,
+        const bv_wrapper& a,
+        const int start,
+        const int end) {
+    //static_quad_value_bit_vector<N> res(end - start);
+
+    for (int i = 0; i < res.bitLength(); i++) {
+      res.set(i, a.get(i + start));
+    }
+
+    //return res;
   }
   
   static inline
@@ -652,6 +688,124 @@ namespace bsim {
   }
 
   
+  static inline
+  bv_uint64 get_shift_int(const bv_wrapper& shift_amount) {
+    bv_uint64 shift_int = 0;
+    if (shift_amount.bitLength() > 64) {
+      assert(false);
+    }
+
+    else if (shift_amount.bitLength() > 32) {
+      shift_int = shift_amount.to_type<bv_uint64>();
+    }
+
+    else if (shift_amount.bitLength() > 16) {
+      shift_int = (bv_uint64) (shift_amount.to_type<bv_uint32>());
+    }
+
+    else if (shift_amount.bitLength() > 8) {
+      shift_int = (bv_uint64) (shift_amount.to_type<bv_uint16>());
+    } else {
+      shift_int = (bv_uint64) (shift_amount.to_type<bv_uint8>());
+    }
+
+    //std::cout << "shift_int = " << shift_int << std::endl;
+    assert(shift_int < 65);
+
+    return shift_int;
+  }
+
+  static inline
+  void
+  lshr(bv_wrapper& res,
+       const bv_wrapper& a,
+       const bv_wrapper& shift_amount) {
+
+    if (!a.is_binary() || !shift_amount.is_binary()) {
+      set_unknown(res);
+      return;
+      //return unknown_bv(a.bitLength());
+    }
+    
+    //static_quad_value_bit_vector<N> res(a.bitLength());
+
+    bv_uint64 shift_int = get_shift_int(shift_amount);
+
+    if (shift_int == 0) {
+      set_bv(res, a);
+      return;
+      //return a;
+    }
+
+    //unsigned char sign_bit = a.get(a.bitLength() - 1);
+    for (uint i = a.bitLength() - 1; i >= shift_int; i--) {
+      res.set(i - shift_int, a.get(i));
+    }
+
+    for (uint i = a.bitLength() - 1; i >= (a.bitLength() - shift_int); i--) {
+      res.set(i, 0);
+    }
+
+    //return res;
+  }
+
+  // Arithmetic shift right
+  static inline
+  void
+  ashr(bv_wrapper& res,
+       const bv_wrapper& a,
+       const bv_wrapper& shift_amount) {
+
+    if (!a.is_binary() || !shift_amount.is_binary()) {
+      //return unknown_bv(a.bitLength());
+      set_unknown(res);
+      return;
+    }
+
+    if (shift_amount.to_type<int>() == 0) {
+      //static_quad_value_bit_vector<N>(shift_amount.bitLength(), 0)) {
+      set_bv(res, a);
+      //returnb a;
+    }
+
+    //static_quad_value_bit_vector<N> res(a.bitLength());
+
+    bv_uint64 shift_int = get_shift_int(shift_amount);
+
+    quad_value sign_bit = a.get(a.bitLength() - 1);
+    for (uint i = a.bitLength() - 1; i >= shift_int; i--) {
+      res.set(i - shift_int, a.get(i));
+    }
+
+    int last_index = (int)a.bitLength() - shift_int;
+    for (int i = a.bitLength() - 1; i >= last_index && i >= 0; i--) {
+      res.set(i, sign_bit);
+    }
+
+    //return res;
+  }
+  
+  static inline
+  void
+  shl(bv_wrapper& res,
+      const bv_wrapper& a,
+      const bv_wrapper& shift_amount) {
+
+    if (!a.is_binary() || !shift_amount.is_binary()) {
+      set_unknown(res);
+      return;
+      //return unknown_bv(a.bitLength());
+    }
+
+    //static_quad_value_bit_vector<N> res(a.bitLength());
+
+    bv_uint64 shift_int = get_shift_int(shift_amount);    
+    for (int i = shift_int; i < a.bitLength(); i++) {
+      res.set(i, a.get(i - shift_int));
+    }
+
+    //return res;
+  }
   
   // template<int N>
   // class static_quad_value_bit_vector {

@@ -149,20 +149,24 @@ namespace FlatCircuit {
       return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_LSHR:
-      return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
+      return ln("lshr(" + receiver + ", " + arg0 + ", " + arg1 + ")");
         
     case CELL_TYPE_ASHR:
-      return ln(receiver + " = ashr(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = ashr(" + arg0 + ", " + arg1 + ")");
+      return ln("ashr(" + receiver + ", " + arg0 + ", " + arg1 + ")");
         
     case CELL_TYPE_SHL:
-      return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = shl(" + arg0 + ", " + arg1 + ")");
+      return ln("shl(" + receiver + ", " + arg0 + ", " + arg1 + ")");
         
     case CELL_TYPE_EQ:
       //return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
       return ln("equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_NEQ:
-      return ln(receiver + " = BitVector(" + arg0 + " != " + arg1 + ")");
+      return ln("not_equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = BitVector(" + arg0 + " != " + arg1 + ")");
         
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -220,7 +224,8 @@ namespace FlatCircuit {
     switch (unop) {
 
     case CELL_TYPE_PASSTHROUGH:
-      return ln(receiver + " = " + arg);
+      return ln("set_bv(" + receiver + ", " + arg + ")");
+        //return ln(receiver + " = " + arg);
 
     case CELL_TYPE_NOT:
       //return ln(receiver + " = ~(" + arg + ")");
@@ -230,9 +235,13 @@ namespace FlatCircuit {
       return ln("orr(" + receiver + ", " + arg + ")");
 
     case CELL_TYPE_SLICE:
-      return ln(receiver + " = slice(" + arg + ", " +
+      return ln("slice(" + receiver + ", " + arg + ", " +
                 to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
                 to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
+      
+      // return ln(receiver + " = slice(" + arg + ", " +
+      //           to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+      //           to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
         
     case CELL_TYPE_ZEXT:
       return ln("zero_extend(" + receiver + ", " + arg + ")");
