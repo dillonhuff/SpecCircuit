@@ -1128,20 +1128,24 @@ namespace FlatCircuit {
 
     posedge("clk_in", sim);
 
+    sim.setFreshValue("config_en", BitVec(1, 0));
+    sim.update();
+    
     vector<BitVector> dataOutputs;
     BitVector lbIn(16, 13);
     int dataCycles = 99;
     for (int i = 0; i < dataCycles; i++) {
-      lbIn = BitVector(16, i);
+      //lbIn = BitVector(16, i);
+
       cout << "Cycle " << i << " in linebuffer mode" << endl;
       sim.setFreshValue("wen_in", BitVec(1, 1));
       sim.setFreshValue("data_in", lbIn);
       posedge("clk_in", sim);
 
-      cout << sim.getBitVec("almost_empty") << endl;
-      cout << sim.getBitVec("almost_full") << endl;
-      cout << sim.getBitVec("chain_out") << endl;
-      cout << sim.getBitVec("chain_valid_out") << endl;
+      cout << "almost_empty = " << sim.getBitVec("almost_empty") << endl;
+      cout << "almost_full = " << sim.getBitVec("almost_full") << endl;
+      cout << "chain_out = " << sim.getBitVec("chain_out") << endl;
+      cout << "chain_valid_out = " << sim.getBitVec("chain_valid_out") << endl;
       cout << "data_out = " << sim.getBitVec("data_out") << endl;
       cout << "read_data = " << sim.getBitVec("read_data") << endl;
       cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
