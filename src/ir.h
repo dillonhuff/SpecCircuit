@@ -412,7 +412,7 @@ namespace FlatCircuit {
 
     IRDeclareTemp(const unsigned long bitWidth_, const std::string& name_) :
       bitWidth(bitWidth_), name(name_) {
-      assert(bitWidth < 64);
+      //assert(bitWidth < 64);
     }
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
@@ -434,6 +434,7 @@ namespace FlatCircuit {
     std::string arg0;
     std::string arg1;
     const Cell& cell;
+    std::vector<std::string> temps;
     
     IRBinop(const std::string& receiver_,
             const std::string& arg0_,
@@ -441,6 +442,13 @@ namespace FlatCircuit {
             const Cell& cell_) :
       receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_) {}
 
+    IRBinop(const std::string& receiver_,
+            const std::string& arg0_,
+            const std::string& arg1_,
+            const Cell& cell_,
+            const std::vector<std::string>& temps_) :
+      receiver(receiver_), arg0(arg0_), arg1(arg1_), cell(cell_), temps(temps_) {}
+    
     virtual std::string twoStateCppCode(ValueStore& valueStore) const;
     
     virtual std::string toString(ValueStore& valueStore) const;

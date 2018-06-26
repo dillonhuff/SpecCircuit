@@ -28,22 +28,22 @@ namespace FlatCircuit {
     string shift_temp_buffer = shift_temp + "_buffer";
     string accum_temp_buffer = accum_temp + "_buffer";
     
-    code += quadValueArrayDecl(res_temp_buffer,
-                               2*cell.getPortWidth(PORT_ID_OUT));
-    code += quadValueArrayDecl(shift_temp_buffer,
-                               2*cell.getPortWidth(PORT_ID_OUT));
-    code += quadValueArrayDecl(accum_temp_buffer,
-                               2*cell.getPortWidth(PORT_ID_OUT));
+    // code += quadValueArrayDecl(res_temp_buffer,
+    //                            2*cell.getPortWidth(PORT_ID_OUT));
+    // code += quadValueArrayDecl(shift_temp_buffer,
+    //                            2*cell.getPortWidth(PORT_ID_OUT));
+    // code += quadValueArrayDecl(accum_temp_buffer,
+    //                            2*cell.getPortWidth(PORT_ID_OUT));
 
-    code += bvWrapperDecl(res_temp,
-                          res_temp_buffer,
-                          2*cell.getPortWidth(PORT_ID_OUT));
-    code += bvWrapperDecl(shift_temp,
-                          shift_temp_buffer,
-                          2*cell.getPortWidth(PORT_ID_OUT));
-    code += bvWrapperDecl(accum_temp,
-                          accum_temp_buffer,
-                          2*cell.getPortWidth(PORT_ID_OUT));
+    // code += bvWrapperDecl(res_temp,
+    //                       res_temp_buffer,
+    //                       2*cell.getPortWidth(PORT_ID_OUT));
+    // code += bvWrapperDecl(shift_temp,
+    //                       shift_temp_buffer,
+    //                       2*cell.getPortWidth(PORT_ID_OUT));
+    // code += bvWrapperDecl(accum_temp,
+    //                       accum_temp_buffer,
+    //                       2*cell.getPortWidth(PORT_ID_OUT));
     
     string res_line = ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + res_temp + ", " + shift_temp + ", " + accum_temp + ")");
     code += res_line;
@@ -141,7 +141,10 @@ namespace FlatCircuit {
 
     case CELL_TYPE_MUL:
       //return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
-      return mul_quad_state_code(receiver, arg0, arg1, cell);
+
+      return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ", " + temps[1] + ", " + temps[2] + ")");
+
+      //return mul_quad_state_code(receiver, arg0, arg1, cell);
       //return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_SUB:

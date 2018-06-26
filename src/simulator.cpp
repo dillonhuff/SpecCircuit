@@ -581,6 +581,27 @@ namespace FlatCircuit {
         codeState.addComment(ln("// No code for input port " + def.cellName(cid)));
       } else if (cell.getCellType() == CELL_TYPE_CONST) {
         codeState.addComment(ln("// No code for const port " + def.cellName(cid)));
+      } else if (cell.getCellType() == CELL_TYPE_MUL) {
+        std::string argName0 =
+          codeState.getVariableName(cid, PORT_ID_IN0, valueStore);
+        std::string argName1 =
+          codeState.getVariableName(cid, PORT_ID_IN1, valueStore);
+
+        std::string outName = codeState.getPortTemp(cid, PORT_ID_OUT);
+
+        string resTemp = argName0 + "_" + argName1 + "_mul_res_temp";
+        string shiftTemp = argName0 + "_" + argName1 + "_mul_shift_temp";
+        string accumTemp = argName0 + "_" + argName1 + "_mul_accum_temp";
+
+        int tempWidth = 2*def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+        codeState.addInstruction(new IRDeclareTemp(tempWidth, resTemp));
+        codeState.addInstruction(new IRDeclareTemp(tempWidth, shiftTemp));
+        codeState.addInstruction(new IRDeclareTemp(tempWidth, accumTemp));
+        
+        codeState.addInstruction(new IRBinop(outName, argName0, argName1, def.getCellRefConst(cid), {resTemp, shiftTemp, accumTemp}));
+        codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
+        
+        //assert(false);
       } else if (isBinop(cell.getCellType())) {
         binopCode(codeState, cid);
       } else if (isUnop(cell.getCellType())) {
