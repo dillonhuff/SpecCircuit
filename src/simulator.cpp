@@ -600,8 +600,7 @@ namespace FlatCircuit {
         
         codeState.addInstruction(new IRBinop(outName, argName0, argName1, def.getCellRefConst(cid), {resTemp, shiftTemp, accumTemp}));
         codeState.addAssign(cid, PORT_ID_OUT, outName, valueStore);
-        
-        //assert(false);
+
       } else if (isBinop(cell.getCellType())) {
         binopCode(codeState, cid);
       } else if (isUnop(cell.getCellType())) {
