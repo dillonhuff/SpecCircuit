@@ -1095,20 +1095,9 @@ namespace FlatCircuit {
       
     }
 
-  }    
+  }
 
-  TEST_CASE("Memory core linebuffer") {
-
-    // Testing Linebuffer mode
-
-    Env circuitEnv =
-      loadFromCoreIR("global.memory_core_unq1",
-                     "./test/memory_tile_unq1.json");
-
-    CellDefinition& def = circuitEnv.getDef("memory_core_unq1");
-    
-    //REQUIRE(circuitEnv.getCellDefs().size() == 1);
-    
+  vector<BitVector> lineBufferInterpResults(Env& circuitEnv, CellDefinition& def) {
     cout << "Testing linebuffer mode" << endl;
 
     Simulator sim(circuitEnv, def);
@@ -1139,7 +1128,8 @@ namespace FlatCircuit {
 
     posedge("clk_in", sim);
 
-    BitVector lbIn(16, 0);
+    vector<BitVector> dataOutputs;
+    BitVector lbIn(16, 13);
     int dataCycles = 99;
     for (int i = 0; i < dataCycles; i++) {
       lbIn = BitVector(16, i);
@@ -1157,6 +1147,8 @@ namespace FlatCircuit {
       cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
       cout << "read_data_sram = " << sim.getBitVec("read_data_sram") << endl;
       cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
+
+      dataOutputs.push_back(sim.getBitVec("data_out"));
     }
 
     for (int i = 0; i < dataCycles; i++) {
@@ -1176,8 +1168,6 @@ namespace FlatCircuit {
       cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
     }
     
-    //sim.debugPrintMemories();
-
     sim.setFreshValue("wen_in", BitVec(1, 1));
     sim.setFreshValue("addr_in", BitVec(16, 2));
     sim.setFreshValue("data_in", BitVec(16, 45));
@@ -1191,9 +1181,107 @@ namespace FlatCircuit {
     posedge("clk_in", sim);
     posedge("clk_in", sim);
 
-    // sim.debugPrintMemories();
+    return dataOutputs;
+  }
 
-    //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
+  TEST_CASE("Memory core linebuffer") {
+
+    // Testing Linebuffer mode
+
+    Env circuitEnv =
+      loadFromCoreIR("global.memory_core_unq1",
+                     "./test/memory_tile_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("memory_core_unq1");
+
+    auto interpResults = lineBufferInterpResults(circuitEnv, def);
+    //REQUIRE(circuitEnv.getCellDefs().size() == 1);
+    
+    // cout << "Testing linebuffer mode" << endl;
+
+    // Simulator sim(circuitEnv, def);
+    // reset("reset", sim);
+
+    // sim.setFreshValue("flush", BitVec(1, 0));
+    // sim.setFreshValue("clk_en", BitVec(1, 1));
+    // sim.setFreshValue("config_en", BitVec(1, 1));
+    // sim.update();
+
+    // sim.setFreshValue("clk_in", BitVec(1, 0));
+    // sim.setFreshValue("config_en_sram", BitVec(4, 0));
+    // sim.update();
+
+    // BitVector configAddr(32, 0);
+    // sim.setFreshValue("config_addr", configAddr);
+    // sim.update();
+
+    // uint32_t configDataInt = 0;
+    // configDataInt |= ((uint32_t) 0) << 0; // Linebuffer mode
+    // configDataInt |= ((uint32_t) 1) << 2; // Tile enabled
+    // configDataInt |= ((uint32_t) 10) << 3; // Depth 10
+    
+    // BitVector configData(32, configDataInt);
+
+    // cout << "Memory tile config data = " << configData << endl;
+    // sim.setFreshValue("config_data", configData);
+
+    // posedge("clk_in", sim);
+
+    // BitVector lbIn(16, 0);
+    // int dataCycles = 99;
+    // for (int i = 0; i < dataCycles; i++) {
+    //   lbIn = BitVector(16, i);
+    //   cout << "Cycle " << i << " in linebuffer mode" << endl;
+    //   sim.setFreshValue("wen_in", BitVec(1, 1));
+    //   sim.setFreshValue("data_in", lbIn);
+    //   posedge("clk_in", sim);
+
+    //   cout << sim.getBitVec("almost_empty") << endl;
+    //   cout << sim.getBitVec("almost_full") << endl;
+    //   cout << sim.getBitVec("chain_out") << endl;
+    //   cout << sim.getBitVec("chain_valid_out") << endl;
+    //   cout << "data_out = " << sim.getBitVec("data_out") << endl;
+    //   cout << "read_data = " << sim.getBitVec("read_data") << endl;
+    //   cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
+    //   cout << "read_data_sram = " << sim.getBitVec("read_data_sram") << endl;
+    //   cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
+    // }
+
+    // for (int i = 0; i < dataCycles; i++) {
+    //   cout << "Read cycle " << i << " in linebuffer mode" << endl;
+
+    //   sim.setFreshValue("wen_in", BitVec(1, 0));
+    //   posedge("clk_in", sim);
+
+    //   cout << sim.getBitVec("almost_empty") << endl;
+    //   cout << sim.getBitVec("almost_full") << endl;
+    //   cout << sim.getBitVec("chain_out") << endl;
+    //   cout << sim.getBitVec("chain_valid_out") << endl;
+    //   cout << "data_out = " << sim.getBitVec("data_out") << endl;
+    //   cout << "read_data = " << sim.getBitVec("read_data") << endl;
+    //   cout << "read_data_linebuf = " << sim.getBitVec("read_data_linebuf") << endl;
+    //   cout << "read_data_sram = " << sim.getBitVec("read_data_sram") << endl;
+    //   cout << "valid_out = " << sim.getBitVec("valid_out") << endl;
+    // }
+    
+    // //sim.debugPrintMemories();
+
+    // sim.setFreshValue("wen_in", BitVec(1, 1));
+    // sim.setFreshValue("addr_in", BitVec(16, 2));
+    // sim.setFreshValue("data_in", BitVec(16, 45));
+    // posedge("clk_in", sim);
+    
+    // sim.setFreshValue("wen_in", BitVec(1, 0));
+    // sim.setFreshValue("addr_in", BitVec(16, 4));
+    // sim.setFreshValue("ren_in", BitVec(1, 1));
+    // posedge("clk_in", sim);
+
+    // posedge("clk_in", sim);
+    // posedge("clk_in", sim);
+
+    // // sim.debugPrintMemories();
+
+    // //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 72));
       
       
   }
@@ -1715,6 +1803,119 @@ namespace FlatCircuit {
 
     REQUIRE(sim.def.numCells() < (int) 2*sim.def.getPortCells().size());
 
+  }
+
+  TEST_CASE("Pre specialized CGRA conv 2 x 1") {
+    auto convConfigValues = loadBitStream("./test/conv_2_1_only_config_lines.bsa");
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "pre_specialized_conv_2_1.json");
+
+    CellDefinition& def = circuitEnv.getDef("top");
+
+    BitVector input(16, 0);
+    BitVector correctOutput(16, 2*0);
+
+    Simulator sim(circuitEnv, def);
+    setCGRAInput(0, BitVector("16'h0"), sim);
+    setCGRAInput(1, BitVector("16'h0"), sim);
+    setCGRAInput(2, BitVector("16'h0"), sim);
+    setCGRAInput(3, BitVector("16'h0"), sim);
+
+    loadCGRAConfig(convConfigValues, sim);
+
+    setCGRAInput(2, input, sim);
+    sim.update();
+
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
+
+    int nCycles = 20;
+    cout << "Computing " << nCycles << " cycles of data in interpreted mode" << endl;
+    setCGRAInput(2, input, sim);
+
+    for (int i = 0; i < nCycles; i++) {
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      cout << "Cycle " << i << endl;
+
+      posedge("clk_in", sim);
+
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
+
+    BitVector interpOutputS0 = getCGRAOutput(0, sim);
+    cout << "interpOutputS0 = " << interpOutputS0 << endl;
+    
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
+    
+    BitVector outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
+
+    input = BitVector(16, 18);
+    setCGRAInput(2, input, sim);
+    sim.update();
+
+    outputS0 = getCGRAOutput(0, sim);
+    cout << "outputS0 = " << outputS0 << endl;
+
+    //    REQUIRE(outputS0 == mul_general_width_bv(input, BitVec(16, 2)));
+    REQUIRE(sim.compileCircuit());
+    REQUIRE(sim.hasSimulateFunction());
+
+    input = BitVector(16, 23);
+    setCGRAInput(input, sim);
+    sim.update();
+
+    cout << "Inputs" << endl;
+    printCGRAInputs(sim);
+
+    cout << "Outputs after compiling" << endl;
+    printCGRAOutputs(sim);
+
+    outputS0 = getCGRAOutput(0, sim);    
+    
+    cout << "outputS0 = " << outputS0 << endl;;
+
+    cout << "Clearing linebuffer" << endl;
+    for (int i = 0; i < 100; i++) {
+      cout << "Clearing cycle " << i << endl;
+      setCGRAInput(2, BitVector(16, 0), sim);
+
+      cout << "Cycle " << i << endl;
+
+      posedge("clk_in", sim);
+
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
+    
+    cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
+    setCGRAInput(2, input, sim);
+    for (int i = 0; i < nCycles; i++) {
+
+      input = BitVector(16, i);
+      setCGRAInput(2, input, sim);
+
+      cout << "Cycle " << i << endl;
+
+      posedge("clk_in", sim);
+
+      BitVector outputS0 = getCGRAOutput(0, sim);
+      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
+      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    }
+
+    cout << "Outputs" << endl;
+    printCGRAOutputs(sim);
+
+    REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
   }
 
   TEST_CASE("Pre specialized CGRA multiply by 2") {
@@ -2332,9 +2533,9 @@ namespace FlatCircuit {
     cout << "Outputs" << endl;
     printCGRAOutputs(sim);
 
-    REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
+    outputVerilog(sim.def, "conv_2_1_cgra.v");    
 
-    outputVerilog(sim.def, "conv_2_1_cgra.v");
+    REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
 
     // PERFORMANCE TEST
     nCycles = 10000;

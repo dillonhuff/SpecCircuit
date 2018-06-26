@@ -113,7 +113,7 @@ namespace FlatCircuit {
                                               label(label_) {}
 
     virtual std::string toString(ValueStore& valueStore) const {
-      return "\tif (!((" + wenName + " == BitVector(1)) && posedge(" +
+      return "\tif (!((" + wenName + ".get(0) == quad_value(1)) && posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
 
     }
