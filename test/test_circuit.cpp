@@ -1889,7 +1889,7 @@ namespace FlatCircuit {
     cout << "outputS0 = " << outputS0 << endl;;
 
     cout << "Clearing linebuffer" << endl;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 200; i++) {
       cout << "Clearing cycle " << i << endl;
       setCGRAInput(2, BitVector(16, 0), sim);
 
@@ -1903,7 +1903,8 @@ namespace FlatCircuit {
     }
     
     cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
-    setCGRAInput(2, input, sim);
+    //setCGRAInput(2, input, sim);
+    setCGRAInput(2, BitVector(16, 0), sim);
     for (int i = 0; i < nCycles; i++) {
 
       input = BitVector(16, i);

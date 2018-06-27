@@ -765,6 +765,7 @@ namespace bsim {
     if (shift_amount.to_type<int>() == 0) {
       //static_quad_value_bit_vector<N>(shift_amount.bitLength(), 0)) {
       set_bv(res, a);
+      return;
       //returnb a;
     }
 

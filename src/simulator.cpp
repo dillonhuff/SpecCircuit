@@ -744,7 +744,8 @@ namespace FlatCircuit {
   CodeGenState
   Simulator::buildCodeGenState(const std::vector<std::vector<SigPort> >& updates) {
     // TODO: Check edge types on registers!!
-    bool canCompress = canCompressSequentialTests(updates, def);
+    //bool canCompress = canCompressSequentialTests(updates, def);
+    bool canCompress = false;
     CodeGenState codeState(def);
 
     if (!canCompress) {
