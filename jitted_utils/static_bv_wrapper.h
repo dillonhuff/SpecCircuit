@@ -532,7 +532,8 @@ namespace bsim {
 
   	//static_quad_value_bit_vector<N + N> shifted_a;
         for (int j = 0; j < i; j++) {
-          shifted_a.set(j + i, 0);
+          //shifted_a.set(j + i, 0);
+          shifted_a.set(j, 0);
         }
 
   	for (int j = 0; j < Width; j++) {
@@ -540,7 +541,7 @@ namespace bsim {
   	}
 
         for (int j = 0; j < Width; j++) {
-          accum_temp.set(j, 0);
+          accum_temp.set(j, quad_value(0));
         }
 
         add_general_width_bv(accum_temp, full_len, shifted_a);
@@ -582,10 +583,8 @@ namespace bsim {
                        const bv_wrapper& a,
   		       const bv_wrapper& b) {
     int Width = a.bitLength();
-    //static_quad_value_bit_vector<N> diff;
-    //quad_value a_cpy[
-    //static_quad_value_bit_vector<N> a_cpy = a;
 
+    // TODO: Remove this dynamic allocation!
     quad_value* qvs = (quad_value*) malloc(sizeof(quad_value)*a.bitLength());
     bv_wrapper a_cpy(qvs, a.bitLength(), true);
     set_bv(a_cpy, a);
@@ -663,6 +662,8 @@ namespace bsim {
   greater_than_or_equal(bv_wrapper& res,
                         const bv_wrapper& a,
                         const bv_wrapper& b) {
+    // res.set(0, quad_value(0));
+    // return;
     if (!a.is_binary() || !b.is_binary()) {
       res.set(0, quad_value(0));
       return;

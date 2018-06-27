@@ -4,17 +4,16 @@
 
 namespace FlatCircuit {
 
-  TEST_CASE("Comparing binary ops in simulation and interpretation") {
-    Env e;
-    CellType notChainType = e.addCellType("binop_test_cell");
+  CellDefinition& buildBinopCellDef(Env& e, CellType opType) {
+    CellType notChainType = e.addCellType(toString(opType) + "_test_cell");
     CellDefinition& def = e.getDef(notChainType);
     def.addPort("in0", 16, PORT_TYPE_IN);
     def.addPort("in1", 16, PORT_TYPE_IN);
     def.addPort("out", 16, PORT_TYPE_OUT);
 
     CellId binop =
-      def.addCell("sub",
-                  CELL_TYPE_SUB,
+      def.addCell(toString(opType) + "_test_inst",
+                  opType,
                   {{PARAM_WIDTH, BitVector(32, 16)}});
 
     CellId in0Cell = def.getPortCellId("in0");
@@ -24,50 +23,55 @@ namespace FlatCircuit {
     def.connect(in1Cell, PORT_ID_OUT, binop, PORT_ID_IN1);
     def.connect(binop, PORT_ID_OUT, outCell, PORT_ID_IN);
 
-    Simulator interpSim(e, def);
+    return def;
+  }
 
-    Simulator compileSim(e, def);
-    compileSim.compileCircuit();
+  TEST_CASE("Comparing binary ops in simulation and interpretation") {
+    Env e;
+    int max = 1 << 15;
+    int min = 0;
 
     vector<BitVector> interpResults;
-    for (int i = 0; i < 200; i++) {
-      int j = (i % 7) + 23;
-      BitVector in0 = BitVector(16, i);
-      BitVector in1 = BitVector(16, j);
+    srand(23419);
 
-      cout << "in0 = " << in0 << endl;
-      cout << "in1 = " << in1 << endl;
+    vector<CellType> binops{CELL_TYPE_SUB, CELL_TYPE_MUL};
+    for (auto binop : binops) {
 
-      interpSim.setFreshValue("in0", in0);
-      interpSim.setFreshValue("in1", in1);
-      interpSim.update();
+      CellDefinition& def = buildBinopCellDef(e, binop);
 
-      compileSim.setFreshValue("in0", in0);
-      compileSim.setFreshValue("in1", in1);
-      compileSim.update();
+      Simulator interpSim(e, def);
 
-      REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
-      //interpResults.push_back(interpSim.getBitVec("out"));
+      Simulator compileSim(e, def);
+      compileSim.compileCircuit();
+
+
+      for (int i = 0; i < 200; i++) {
+
+        int in0V = min + (rand() % static_cast<int>(max - min + 1));
+        int in1V = min + (rand() % static_cast<int>(max - min + 1));
+        BitVector in0 = BitVector(16, in0V);
+        BitVector in1 = BitVector(16, in1V);
+
+        cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
+        cout << "in1 = " << in1 << ", " << in1.to_type<int>() << endl;
+
+        interpSim.setFreshValue("in0", in0);
+        interpSim.setFreshValue("in1", in1);
+        interpSim.update();
+
+        compileSim.setFreshValue("in0", in0);
+        compileSim.setFreshValue("in1", in1);
+        compileSim.update();
+
+        auto interpOut = interpSim.getBitVec("out");
+        auto compiledOut = compileSim.getBitVec("out");
+        
+        cout << "interp out    = " << interpOut << ", " << interpOut.to_type<int>() << endl;
+        cout << "compiled out  = " << compiledOut << ", " << compiledOut.to_type<int>() << endl;
+        
+        REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
+      }
     }
 
-    // vector<BitVector> compileResults;
-    // for (int i = 0; i < 200; i++) {
-    //   int j = (i % 7) + 23;
-    //   BitVector in0 = BitVector(16, i);
-    //   BitVector in1 = BitVector(16, j);
-
-    //   compileSim.setFreshValue("in0", in0);
-    //   compileSim.setFreshValue("in1", in1);
-
-    //   compileSim.update();
-
-    //   compileResults.push_back(compileSim.getBitVec("out"));
-    // }
-
-    // REQUIRE(compileResults.size() == interpResults.size());
-
-    // for (int i = 0; i < (int) compileResults.size(); i++) {
-    //   REQUIRE(compileResults[i] == interpResults[i]);
-    // }
   }
 }
