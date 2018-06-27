@@ -49,6 +49,9 @@ namespace FlatCircuit {
   }
 
   void compareSimulators(Simulator& interpSim, Simulator& compileSim) {
+    int max = 1 << 15;
+    int min = 0;
+
     for (int i = 0; i < 200; i++) {
 
       int in0V = min + (rand() % static_cast<int>(max - min + 1));
@@ -79,9 +82,6 @@ namespace FlatCircuit {
 
   TEST_CASE("Comparing binary ops in simulation and interpretation") {
     Env e;
-    int max = 1 << 15;
-    int min = 0;
-
     vector<BitVector> interpResults;
     srand(23419);
 

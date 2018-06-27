@@ -532,7 +532,6 @@ namespace bsim {
 
   	//static_quad_value_bit_vector<N + N> shifted_a;
         for (int j = 0; j < i; j++) {
-          //shifted_a.set(j + i, 0);
           shifted_a.set(j, 0);
         }
 
