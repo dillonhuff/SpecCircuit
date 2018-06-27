@@ -692,7 +692,7 @@ namespace bsim {
             const bv_wrapper& a,
             const bv_wrapper& b) {
     equals(res, a, b);
-    if (a.get(0) == quad_value(1)) {
+    if (res.get(0) == quad_value(1)) {
       res.set(0, quad_value(0));
       return;
     }

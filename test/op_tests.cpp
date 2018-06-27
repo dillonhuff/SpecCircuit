@@ -98,5 +98,20 @@ namespace FlatCircuit {
       compareSimulators(interpSim, compileSim);
     }
 
+    vector<CellType> reduceOps{CELL_TYPE_UGT, CELL_TYPE_ULT, CELL_TYPE_UGE, CELL_TYPE_ULE, CELL_TYPE_EQ, CELL_TYPE_NEQ};
+    for (auto binop : reduceOps) {
+
+      cout << "Testing operation " << toString(binop) << endl;
+      
+      CellDefinition& def = buildReduceBinopCellDef(e, binop);
+
+      Simulator interpSim(e, def);
+
+      Simulator compileSim(e, def);
+      compileSim.compileCircuit();
+
+      compareSimulators(interpSim, compileSim);
+    }
+    
   }
 }
