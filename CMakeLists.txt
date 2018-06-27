@@ -24,7 +24,7 @@ SET(CPP_FILES ./src/simulator.cpp
 
 add_library(flatcircuit ${CPP_FILES})
 
-SET(TEST_FILES ./test/test_circuit.cpp)
+SET(TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
 
 add_executable(all-tests ${TEST_FILES})
 
