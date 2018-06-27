@@ -394,7 +394,7 @@ namespace bsim {
     }
 
     for (int i = in.bitLength(); i < res.bitLength(); i++) {
-      res.set(i, 0);
+      res.set(i, quad_value(0));
     }
   }
 
@@ -524,6 +524,8 @@ namespace bsim {
     int Width = a.bitLength();
     //static_quad_value_bit_vector<N + N> full_len;
 
+    //assert(false);
+
     for (int i = 0; i < Width; i++) {
       if (b.get(i) == 1) {
 
@@ -563,7 +565,10 @@ namespace bsim {
         const int end) {
     //static_quad_value_bit_vector<N> res(end - start);
 
-    for (int i = 0; i < res.bitLength(); i++) {
+    //assert(false);
+
+    //for (int i = 0; i < res.bitLength(); i++) {
+    for (int i = 0; i < end; i++) {
       res.set(i, a.get(i + start));
     }
 
@@ -575,41 +580,41 @@ namespace bsim {
   sub_general_width_bv(bv_wrapper& diff,
                        const bv_wrapper& a,
   		       const bv_wrapper& b) {
-    // int Width = a.bitLength();
-    // //static_quad_value_bit_vector<N> diff;
-    // //quad_value a_cpy[
-    // static_quad_value_bit_vector<N> a_cpy = a;
+    int Width = a.bitLength();
+    //static_quad_value_bit_vector<N> diff;
+    //quad_value a_cpy[
+    //static_quad_value_bit_vector<N> a_cpy = a;
 
-    // for (int i = 0; i < Width; i++) {
+    for (int i = 0; i < Width; i++) {
 
-    //   if ((a_cpy.get(i) == 0) &&
-    //       (b.get(i) == 1)) {
+      if ((a_cpy.get(i) == 0) &&
+          (b.get(i) == 1)) {
 
-    //     int j = i + 1;
+        int j = i + 1;
 
-    //     diff.set(i, 1);	  
+        diff.set(i, 1);	  
 
-    //     // Modify to carry
-    //     while ((j < Width) && (a_cpy.get(j) != 1)) {
-    //       a_cpy.set(j, 1);
-    //       j++;
-    //     }
+        // Modify to carry
+        while ((j < Width) && (a_cpy.get(j) != 1)) {
+          a_cpy.set(j, 1);
+          j++;
+        }
 
-    //     if (j >= Width) {
-    //     } else {
-    //       a_cpy.set(j, 0);
-    //     }
+        if (j >= Width) {
+        } else {
+          a_cpy.set(j, 0);
+        }
 
-    //   } else if (a_cpy.get(i) == b.get(i)) {
-    //     diff.set(i, 0);
-    //   } else if ((a_cpy.get(i) == 1) &&
-    //     	 (b.get(i) == 0)) {
-    //     diff.set(i, 1);
-    //   } else {
-    //     set_unknown(diff);
-    //     //return unknown_bv<N>();
-    //   }
-    // }
+      } else if (a_cpy.get(i) == b.get(i)) {
+        diff.set(i, 0);
+      } else if ((a_cpy.get(i) == 1) &&
+        	 (b.get(i) == 0)) {
+        diff.set(i, 1);
+      } else {
+        set_unknown(diff);
+        //return unknown_bv<N>();
+      }
+    }
 
     //return diff;
   }    
