@@ -485,6 +485,7 @@ namespace bsim {
       if (!a.get(i).is_binary() ||
           !b.get(i).is_binary()) {
         set_unknown(res);
+        return;
         //return unknown_bv<N>();
       }
 
@@ -585,6 +586,9 @@ namespace bsim {
     //quad_value a_cpy[
     //static_quad_value_bit_vector<N> a_cpy = a;
 
+    quad_value* qvs = (quad_value*) malloc(sizeof(quad_value)*a.bitLength());
+    bv_wrapper a_cpy(qvs, a.bitLength(), true);
+
     for (int i = 0; i < Width; i++) {
 
       if ((a_cpy.get(i) == 0) &&
@@ -612,9 +616,12 @@ namespace bsim {
         diff.set(i, 1);
       } else {
         set_unknown(diff);
+        return;
         //return unknown_bv<N>();
       }
     }
+
+    free(qvs);
 
     //return diff;
   }    

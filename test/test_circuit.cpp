@@ -1898,8 +1898,22 @@ namespace FlatCircuit {
       posedge("clk_in", sim);
 
       BitVector outputS0 = getCGRAOutput(0, sim);
-      cout << "input    = " << input << ", " << input.to_type<int>() << endl;
-      cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+      cout << "input    = " << input << ", ";
+      if (input.is_binary()) {
+        cout << input.to_type<int>();
+      } else {
+        cout << "no int conversion";
+      }
+      cout << endl;
+
+      cout << "outputS0 = " << outputS0 << ", ";
+
+      if (outputS0.is_binary()) {
+        cout << outputS0.to_type<int>();
+      } else {
+        cout << "no int conversion";
+      }
+      cout << endl;
     }
     
     cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
