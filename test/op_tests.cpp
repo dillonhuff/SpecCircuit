@@ -25,40 +25,49 @@ namespace FlatCircuit {
     def.connect(binop, PORT_ID_OUT, outCell, PORT_ID_IN);
 
     Simulator interpSim(e, def);
+
+    Simulator compileSim(e, def);
+    compileSim.compileCircuit();
+
     vector<BitVector> interpResults;
     for (int i = 0; i < 200; i++) {
       int j = (i % 7) + 23;
       BitVector in0 = BitVector(16, i);
       BitVector in1 = BitVector(16, j);
 
+      cout << "in0 = " << in0 << endl;
+      cout << "in1 = " << in1 << endl;
+
       interpSim.setFreshValue("in0", in0);
       interpSim.setFreshValue("in1", in1);
-
       interpSim.update();
-
-      interpResults.push_back(interpSim.getBitVec("out"));
-    }
-
-    Simulator compileSim(e, def);
-    compileSim.compileCircuit();
-    vector<BitVector> compileResults;
-    for (int i = 0; i < 200; i++) {
-      int j = (i % 7) + 23;
-      BitVector in0 = BitVector(16, i);
-      BitVector in1 = BitVector(16, j);
 
       compileSim.setFreshValue("in0", in0);
       compileSim.setFreshValue("in1", in1);
-
       compileSim.update();
 
-      compileResults.push_back(compileSim.getBitVec("out"));
+      REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
+      //interpResults.push_back(interpSim.getBitVec("out"));
     }
 
-    REQUIRE(compileResults.size() == interpResults.size());
+    // vector<BitVector> compileResults;
+    // for (int i = 0; i < 200; i++) {
+    //   int j = (i % 7) + 23;
+    //   BitVector in0 = BitVector(16, i);
+    //   BitVector in1 = BitVector(16, j);
 
-    for (int i = 0; i < (int) compileResults.size(); i++) {
-      REQUIRE(compileResults[i] == interpResults[i]);
-    }
+    //   compileSim.setFreshValue("in0", in0);
+    //   compileSim.setFreshValue("in1", in1);
+
+    //   compileSim.update();
+
+    //   compileResults.push_back(compileSim.getBitVec("out"));
+    // }
+
+    // REQUIRE(compileResults.size() == interpResults.size());
+
+    // for (int i = 0; i < (int) compileResults.size(); i++) {
+    //   REQUIRE(compileResults[i] == interpResults[i]);
+    // }
   }
 }

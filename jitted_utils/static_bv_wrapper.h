@@ -588,6 +588,7 @@ namespace bsim {
 
     quad_value* qvs = (quad_value*) malloc(sizeof(quad_value)*a.bitLength());
     bv_wrapper a_cpy(qvs, a.bitLength(), true);
+    set_bv(a_cpy, a);
 
     for (int i = 0; i < Width; i++) {
 
