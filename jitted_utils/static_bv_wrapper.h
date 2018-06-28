@@ -580,12 +580,13 @@ namespace bsim {
   void
   sub_general_width_bv(bv_wrapper& diff,
                        const bv_wrapper& a,
-  		       const bv_wrapper& b) {
+  		       const bv_wrapper& b,
+                       bv_wrapper& a_cpy) {
     int Width = a.bitLength();
 
     // TODO: Remove this dynamic allocation!
-    quad_value* qvs = (quad_value*) malloc(sizeof(quad_value)*a.bitLength());
-    bv_wrapper a_cpy(qvs, a.bitLength(), true);
+    // quad_value* qvs = (quad_value*) malloc(sizeof(quad_value)*a.bitLength());
+    // bv_wrapper a_cpy(qvs, a.bitLength(), true);
     set_bv(a_cpy, a);
 
     for (int i = 0; i < Width; i++) {
@@ -620,7 +621,7 @@ namespace bsim {
       }
     }
 
-    free(qvs);
+    //free(qvs);
 
     //return diff;
   }    

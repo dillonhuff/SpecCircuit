@@ -15,40 +15,23 @@ namespace FlatCircuit {
     return ln("quad_value " + name + "[ " + to_string(width) + " ]");
   }
 
-  std::string mul_quad_state_code(const std::string& receiver,
-                                  const std::string& arg0,
-                                  const std::string& arg1,
-                                  const Cell& cell) {
-    string code = "";
-    string res_temp = arg0 + "_" + arg1 + "_mul_res_temp";
-    string shift_temp = arg0 + "_" + arg1 + "_mul_shift_temp";
-    string accum_temp = arg0 + "_" + arg1 + "_mul_accum_temp";
+  // std::string mul_quad_state_code(const std::string& receiver,
+  //                                 const std::string& arg0,
+  //                                 const std::string& arg1,
+  //                                 const Cell& cell) {
+  //   string code = "";
+  //   string res_temp = arg0 + "_" + arg1 + "_mul_res_temp";
+  //   string shift_temp = arg0 + "_" + arg1 + "_mul_shift_temp";
+  //   string accum_temp = arg0 + "_" + arg1 + "_mul_accum_temp";
 
-    string res_temp_buffer = res_temp + "_buffer";
-    string shift_temp_buffer = shift_temp + "_buffer";
-    string accum_temp_buffer = accum_temp + "_buffer";
+  //   string res_temp_buffer = res_temp + "_buffer";
+  //   string shift_temp_buffer = shift_temp + "_buffer";
+  //   string accum_temp_buffer = accum_temp + "_buffer";
     
-    // code += quadValueArrayDecl(res_temp_buffer,
-    //                            2*cell.getPortWidth(PORT_ID_OUT));
-    // code += quadValueArrayDecl(shift_temp_buffer,
-    //                            2*cell.getPortWidth(PORT_ID_OUT));
-    // code += quadValueArrayDecl(accum_temp_buffer,
-    //                            2*cell.getPortWidth(PORT_ID_OUT));
-
-    // code += bvWrapperDecl(res_temp,
-    //                       res_temp_buffer,
-    //                       2*cell.getPortWidth(PORT_ID_OUT));
-    // code += bvWrapperDecl(shift_temp,
-    //                       shift_temp_buffer,
-    //                       2*cell.getPortWidth(PORT_ID_OUT));
-    // code += bvWrapperDecl(accum_temp,
-    //                       accum_temp_buffer,
-    //                       2*cell.getPortWidth(PORT_ID_OUT));
-    
-    string res_line = ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + res_temp + ", " + shift_temp + ", " + accum_temp + ")");
-    code += res_line;
-    return code;
-  }
+  //   string res_line = ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + res_temp + ", " + shift_temp + ", " + accum_temp + ")");
+  //   code += res_line;
+  //   return code;
+  // }
 
 
   std::string IRBinop::twoStateCppCode(ValueStore& valueStore) const {
@@ -149,7 +132,7 @@ namespace FlatCircuit {
 
     case CELL_TYPE_SUB:
       //return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
-      return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ")");
 
     case CELL_TYPE_LSHR:
       //return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
