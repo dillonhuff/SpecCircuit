@@ -165,7 +165,7 @@ int main(const int argc, const char** argv) {
 
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 0));
     sim.update();
-    
+
     input = BitVector(16, i);
 
     sim.setFreshValue(s2t0, PORT_ID_OUT, BitVec(1, input.get(15 ).binary_value()));

@@ -501,14 +501,6 @@ namespace FlatCircuit {
                            const PortId pid) {
 
       return materializePastValue({cid, pid});
-      // std::cout << "Getting past value for " << sigPortString(def, {cid, pid}) << std::endl;
-      // assert(def.getCellRefConst(cid).getPortWidth(pid) == 1);
-      
-      // BitVector res = simValueTable.getBitVector(pastValueOffset(cid, pid),
-      //                                   def.getCellRefConst(cid).getPortWidth(pid));
-      // std::cout << "Got past value" << std::endl;
-
-      // return res;
     }
 
     unsigned long pastValueOffset(const CellId cid,

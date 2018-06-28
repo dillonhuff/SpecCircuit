@@ -9,7 +9,7 @@ namespace FlatCircuit {
   void compileCppLib(const std::string& cppName,
                      const std::string& targetBinary) {
 
-    std::string optFlags = "-O0";
+    std::string optFlags = "-O3";
 
 #ifdef _WIN32
     //define something for Windows (32-bit and 64-bit, this part is common)
