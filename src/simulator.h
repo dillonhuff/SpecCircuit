@@ -203,9 +203,11 @@ namespace FlatCircuit {
     std::set<SigPort> seqChanges;
 
     Simulator(Env& e_, CellDefinition& def_) :
-      valueStore(def_),
+    valueStore(def_),
       libHandle(nullptr),
       simulateFuncHandle(nullptr),
+
+      rawLibHandle(nullptr),
       rawSimulateFuncHandle(nullptr),
       simRaw(false),
       def(def_) {
