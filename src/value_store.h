@@ -19,9 +19,20 @@ namespace FlatCircuit {
     BitVector getBitVector(const unsigned long offset,
                            const unsigned long width) const {
       BitVector bv(width, 0);
-      // for (unsigned long i = 0; i < width; i++) {
-      //   bv.set(i, simValueTable.at(offset + i));
-      // }
+      unsigned long byteWidth = storedByteLength(width);
+
+      unsigned long bvOffset = 0;
+
+      for (unsigned long i = 0; i < byteWidth; i++) {
+        unsigned long byteOffset = offset + i;
+        for (unsigned long bitOffset = 0; bitOffset < 8; bitOffset++) {
+          // TODO: Update to include x mask buffer
+          bv.set(bvOffset, bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
+          bvOffset += 1;
+        }
+
+        //bv.set(i, simValueTable.at(offset + i));
+      }
       return bv;
     }
 
