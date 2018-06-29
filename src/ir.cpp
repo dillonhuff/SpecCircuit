@@ -2,18 +2,37 @@
 
 using namespace std;
 
+// Alternative X value strategy: Simulate the X values with raw code
+// and then simulate X value propagation with another raw bit vector.
+// Not sure how well this would work in practice. Can a precise X-value
+// strategy be implemented this way?
+// Another question: this strategy uses 2 real bits per 4-value sim bit, which
+// is theoretically optimal, but can the operations on X values be done in
+// parallel?
+
+// For and, or, xor I think the answer is yes:
+// Suppose 1 indicates the presence of an x value:
+
+// and((a0, ax0), (a1, ax1)) = ((a0 & a1), (ax0 | ax1))?
+
+// ax0 | ax1 gives an x value anywhere that either one had an x value
+
+// The x value policy I currently have in interpretation is so imprecise
+// that I could probably implement it in this split scheme.
+
+// Implementing other operations precisely might be doable the same way: Ex:
+// ult((a, ax), (b, bx)) = (ult_bit(a, b) or unknown if either one has an x value
+// before the other has a 1 in its binary, ())
+
+// Q: Do simulators implement this semantics?xoalways #2 clk = ~clk;
+
 namespace FlatCircuit {
 
-  std::string bvWrapperDecl(const std::string name,
-                            const std::string& buf_name,
-                            const int width) {
-    return ln("bv_wrapper " + name + "( " + buf_name + ", " + to_string(width) + ", true )");
-  }
-
-  std::string quadValueArrayDecl(const std::string& name,
-                                 const int width) {
-    return ln("quad_value " + name + "[ " + to_string(width) + " ]");
-  }
+  // std::string bvWrapperDecl(const std::string name,
+  //                           const std::string& buf_name,
+  //                           const int width) {
+  //   return ln("bv_wrapper " + name + "( " + buf_name + ", " + to_string(width) + ", true )");
+  // }
 
   // std::string mul_quad_state_code(const std::string& receiver,
   //                                 const std::string& arg0,
