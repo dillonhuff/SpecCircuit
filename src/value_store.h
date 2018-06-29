@@ -36,13 +36,28 @@ namespace FlatCircuit {
       return bv;
     }
 
+    std::pair<unsigned long, unsigned long>
+    bitOffsetInBytes(const unsigned long bitOffset) {
+      return {(bitOffset / 8), bitOffset % 8};
+    }
+
     void setBitVector(const unsigned long offset,
                       const BitVector& bv) {
 
-      // for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-      //   simValueTable[offset + i] = bv.get(i);
-      // }
+      //std::cout << "setBitVector at " << offset << " to " << bv << std::endl;
+      for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
 
+        // TODO: Handle x mask
+
+        std::pair<unsigned long, unsigned long> bitOffset =
+          bitOffsetInBytes(i);
+        if (bv.get(i).is_binary()) {
+          simValueTable[offset + bitOffset.first] |=
+            0 | (bv.get(i).binary_value() << bitOffset.second);
+        }
+      }
+      //std::cout << "done setting" << std::endl;
+      
     }
     
     unsigned long addBitVector(const unsigned long width) {
@@ -54,6 +69,12 @@ namespace FlatCircuit {
     unsigned long addBitVector(const BitVector& bv) {
 
       unsigned long nextInd = simValueTable.size();
+
+      for (unsigned long i = 0; i < (unsigned long) storedByteLength(bv.bitLength()); i++) {
+        simValueTable.push_back(0);
+      }
+
+      setBitVector(nextInd, bv);
 
       // for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
       //   simValueTable.push_back(bv.get(i));
