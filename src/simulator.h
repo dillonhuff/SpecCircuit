@@ -154,7 +154,6 @@ namespace FlatCircuit {
         }
       }
 
-
       return cppCode;
     }
 

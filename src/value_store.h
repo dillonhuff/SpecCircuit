@@ -11,7 +11,8 @@ namespace FlatCircuit {
 
   class QBitTable {
 
-    std::vector<bsim::quad_value> simValueTable;
+    //std::vector<bsim::quad_value> simValueTable;
+    std::vector<unsigned char> simValueTable;
 
   public:
 
