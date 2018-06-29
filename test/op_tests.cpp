@@ -85,7 +85,7 @@ namespace FlatCircuit {
     vector<BitVector> interpResults;
     srand(23419);
 
-    vector<CellType> binops{CELL_TYPE_SUB, CELL_TYPE_MUL};
+    vector<CellType> binops{CELL_TYPE_SUB, CELL_TYPE_MUL, CELL_TYPE_AND, CELL_TYPE_OR, CELL_TYPE_XOR};
     for (auto binop : binops) {
 
       CellDefinition& def = buildBinopCellDef(e, binop);

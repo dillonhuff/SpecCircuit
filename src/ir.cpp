@@ -116,7 +116,8 @@ namespace FlatCircuit {
       //return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
     case CELL_TYPE_XOR:
-      return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
+      return ln("static_bv_xor(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      //return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
 
     case CELL_TYPE_ADD:
       //return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");

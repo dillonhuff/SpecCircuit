@@ -376,6 +376,17 @@ namespace bsim {
 
   static inline
   void
+  static_bv_xor(bv_wrapper& a_and_b,
+                const bv_wrapper& a,
+                const bv_wrapper& b) {
+    for (int i = 0; i < a.bitLength(); i++) {
+      a_and_b.set(i, a.get(i) ^ b.get(i));
+    }
+
+  }
+  
+  static inline
+  void
   static_bv_or(bv_wrapper& a_or_b,
                 const bv_wrapper& a,
                 const bv_wrapper& b) {
@@ -523,9 +534,6 @@ namespace bsim {
          bv_wrapper& accum_temp) {
 
     int Width = a.bitLength();
-    //static_quad_value_bit_vector<N + N> full_len;
-
-    //assert(false);
 
     for (int i = 0; i < Width; i++) {
       if (b.get(i) == 1) {
