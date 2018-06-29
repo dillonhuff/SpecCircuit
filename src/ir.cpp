@@ -24,7 +24,8 @@ using namespace std;
 // ult((a, ax), (b, bx)) = (ult_bit(a, b) or unknown if either one has an x value
 // before the other has a 1 in its binary, ())
 
-// Q: Do simulators implement this semantics?xoalways #2 clk = ~clk;
+// Q: Do simulators implement this semantics? Apparently iverilog is not
+// very precise with its x value propagation. So maybe this is the way to go.
 
 namespace FlatCircuit {
 
