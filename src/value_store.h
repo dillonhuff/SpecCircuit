@@ -70,7 +70,9 @@ namespace FlatCircuit {
 
       unsigned long nextInd = simValueTable.size();
 
-      for (unsigned long i = 0; i < (unsigned long) storedByteLength(bv.bitLength()); i++) {
+      for (unsigned long i = 0;
+           i < (unsigned long) storedByteLength(bv.bitLength());
+           i++) {
         simValueTable.push_back(0);
       }
 

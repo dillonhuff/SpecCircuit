@@ -839,13 +839,17 @@ namespace FlatCircuit {
     }
 
     cppCode +=
-      "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
-      "\tfor (unsigned long i = 0; i < width; i++) {\n"
-      "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
-      "\t}\n"
-      "}\n\n"
+      // "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
+      // "\tfor (unsigned long i = 0; i < width; i++) {\n"
+      // "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
+      // "\t}\n"
+      // "}\n\n"
 
-      "void simulate(bsim::quad_value* values) {\n";
+      //"void simulate(bsim::quad_value* values) {\n";
+
+      "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
+      "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
+      "void simulate_two_state(unsigned char* values) {\n";
     
     assert((updates.size() % 2) == 0);
 
