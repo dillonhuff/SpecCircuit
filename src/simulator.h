@@ -204,9 +204,10 @@ namespace FlatCircuit {
 
     Simulator(Env& e_, CellDefinition& def_) :
       valueStore(def_),
-      rawLibHandle(nullptr),
       libHandle(nullptr),
       simulateFuncHandle(nullptr),
+
+      rawLibHandle(nullptr),
       rawSimulateFuncHandle(nullptr),
       simRaw(false),
       def(def_) {
