@@ -393,9 +393,12 @@ namespace FlatCircuit {
 
       assert(hasSimulateFunction());
 
-      void (*simFunc)(bsim::quad_value*) =
-        reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
-        
+      // void (*simFunc)(bsim::quad_value*) =
+      //   reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
+
+      void (*simFunc)(unsigned char*) =
+        reinterpret_cast<void (*)(unsigned char*)>(simulateFuncHandle);
+      
       simFunc(&(valueStore.getValueTable()[0]));
       return;
     }

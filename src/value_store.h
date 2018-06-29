@@ -19,18 +19,18 @@ namespace FlatCircuit {
     BitVector getBitVector(const unsigned long offset,
                            const unsigned long width) const {
       BitVector bv(width, 0);
-      for (unsigned long i = 0; i < width; i++) {
-        bv.set(i, simValueTable.at(offset + i));
-      }
+      // for (unsigned long i = 0; i < width; i++) {
+      //   bv.set(i, simValueTable.at(offset + i));
+      // }
       return bv;
     }
 
     void setBitVector(const unsigned long offset,
                       const BitVector& bv) {
 
-      for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-        simValueTable[offset + i] = bv.get(i);
-      }
+      // for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
+      //   simValueTable[offset + i] = bv.get(i);
+      // }
 
     }
     
@@ -44,9 +44,9 @@ namespace FlatCircuit {
 
       unsigned long nextInd = simValueTable.size();
 
-      for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-        simValueTable.push_back(bv.get(i));
-      }
+      // for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
+      //   simValueTable.push_back(bv.get(i));
+      // }
 
       return nextInd;
     }
@@ -55,10 +55,14 @@ namespace FlatCircuit {
       return simValueTable.size();
     }
 
-    std::vector<bsim::quad_value>& getValueVector() {
+    std::vector<unsigned char>& getValueVector() {
       return simValueTable;
     }
 
+    // std::vector<bsim::quad_value>& getValueVector() {
+    //   return simValueTable;
+    // }
+    
   };
 
   class ValueStore {
@@ -166,7 +170,10 @@ namespace FlatCircuit {
 
     void debugPrintTableValues() const;
 
-    std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
+    //std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
+
+    std::vector<unsigned char>& getValueTable() { return simValueTable.getValueVector(); }
+
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 
     unsigned long getMemoryOffset(const CellId cid) const {
