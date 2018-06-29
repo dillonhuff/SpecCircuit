@@ -22,19 +22,7 @@ namespace FlatCircuit {
         bv.set(i, simValueTable.at(offset + i));
       }
       return bv;
-      // BitVector bv = simValueTable.at(offset);
-      // if (width != (unsigned long) bv.bitLength()) {
-      //   std::cout << "Error: Input width = " << width << " but actual width = " << bv.bitLength() << std::endl;
-      // }
-      // assert(width == (unsigned long) bv.bitLength());
-
-      // return bv;
     }
-
-    // TODO: Remove when transistioning to raw bit vectors
-    // BitVector bitVectorAt(const unsigned long i) const {
-    //   return simValueTable.at(i);
-    // }
 
     void setBitVector(const unsigned long offset,
                       const BitVector& bv) {
@@ -42,8 +30,7 @@ namespace FlatCircuit {
       for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
         simValueTable[offset + i] = bv.get(i);
       }
-      
-      //simValueTable[offset] = bv;
+
     }
     
     unsigned long addBitVector(const unsigned long width) {

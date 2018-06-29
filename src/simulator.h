@@ -367,11 +367,6 @@ namespace FlatCircuit {
     }
 
     void updateCompiledTwoState() {
-      // Set past values for inputs connected to clocks
-      // for (auto sp : sequentialPorts) {
-      //   setPastValue(sp.cell, sp.port,
-      //                getPortValue(sp.cell, sp.port));
-      // }
 
       for (auto in : userInputs) {
         setPortValue(in.first.cell, in.first.port, in.second);
