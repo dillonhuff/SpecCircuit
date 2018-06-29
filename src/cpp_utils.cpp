@@ -1,5 +1,8 @@
 #include "cpp_utils.h"
 
+#include <chrono>
+
+using namespace std::chrono;
 using namespace std;
 
 #include <iostream>
@@ -64,9 +67,19 @@ namespace FlatCircuit {
 
     cout << "Compile command = " << compileCommand << endl;
 
+    auto start = high_resolution_clock::now();
+
     int ret =
       system(compileCommand.c_str());
 
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<milliseconds>(stop - start);
+
+    cout << "Time taken to compile " << cppName
+         << " " << "to binary " << targetBinary << " : "
+         << duration.count() << " milliseconds" << endl;
+    
     assert(ret == 0);
   }
 

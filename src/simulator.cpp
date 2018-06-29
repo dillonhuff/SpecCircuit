@@ -816,9 +816,6 @@ namespace FlatCircuit {
   Simulator::compileLevelizedCircuit(const std::vector<std::vector<SigPort> >& updates) {
     CodeGenState codeState = buildCodeGenState(updates);
 
-    // string cppCode = "#include <vector>\n#include \"static_quad_value_bit_vector.h\"\n"
-    //   "using namespace bsim;\n\n";
-
     string cppCode = "#include <vector>\n#include \"static_bv_wrapper.h\"\n"
       "using namespace bsim;\n\n";
     
@@ -842,26 +839,6 @@ namespace FlatCircuit {
     }
 
     cppCode +=
-      // "typedef bsim::static_quad_value_bit_vector<1> BitVector;\n\n"
-      // "bool posedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(0)) && (b == BitVector(1)); }\n\n"
-      // "bool negedge(const bsim::static_quad_value_bit_vector<1>& a, const bsim::static_quad_value_bit_vector<1>& b) { return (a == BitVector(1)) && (b == BitVector(0)); }\n\n"
-
-      // "template<int N> static inline void storeToTable(bsim::quad_value* values, const unsigned long offset, bsim::static_quad_value_bit_vector<N> bv) {\n"
-      // "\tfor (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {\n"
-      // "\t\tvalues[offset + i] = bv.get(i);\n"
-      // "\t}\n"
-      // "}\n\n"
-
-      // "template<int N> static inline bsim::static_quad_value_bit_vector<N> loadFromTable(bsim::quad_value* values, const unsigned long offset, const unsigned long width) {\n"
-      // "\tbsim::static_quad_value_bit_vector<N> bv(0);\n"
-      // "\tfor (unsigned long i = 0; i < (unsigned long) width; i++) {\n"
-      // "\t\tbv.set(i, values[offset + i]);\n"
-      // "\t}\n"
-      // "\treturn bv;\n"
-      // "}\n\n"
-
-      // "template<int N> static inline void loadBitFromTable(bsim::quad_value* values, bsim::static_quad_value_bit_vector<N>& bv, const unsigned long receiverOffset, const unsigned long sourceBV, unsigned long sourceOffset) { bv.set(receiverOffset, values[sourceBV + sourceOffset]); }\n\n"
-
       "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
       "\tfor (unsigned long i = 0; i < width; i++) {\n"
       "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
