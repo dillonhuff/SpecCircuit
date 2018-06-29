@@ -387,12 +387,6 @@ namespace FlatCircuit {
 
     void updateCompiledFourState() {
 
-      // This should be compiled into the simulator code
-      // for (auto sp : sequentialPorts) {
-      //   setPastValue(sp.cell, sp.port,
-      //                getPortValue(sp.cell, sp.port));
-      // }
-
       for (auto in : userInputs) {
         setPortValue(in.first.cell, in.first.port, in.second);
       }
