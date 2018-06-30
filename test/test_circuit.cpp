@@ -281,6 +281,8 @@ namespace FlatCircuit {
 
     }
 
+    //assert(false);
+    
     SECTION("One register with clock gating") {
       Env e;
       CellType modType = e.addCellType("reg_circ");

@@ -119,7 +119,7 @@ namespace FlatCircuit {
                                               label(label_) {}
 
     virtual std::string toString(ValueStore& valueStore) const {
-      return "\tif (!((" + wenName + ".get(0) == quad_value(1)) && posedge(" +
+      return "\tif (!((" + wenName + ".get(0) == quad_value(1)) && two_state_posedge(" +
         lastClkVar + ", " + clkVar + "))) { goto " + label + "; }\n";
 
     }
@@ -148,12 +148,13 @@ namespace FlatCircuit {
 
     virtual std::string toString(ValueStore& valueStore) const {
       std::string edgeName =
-        (edgeType == EDGE_TYPE_POSEDGE) ? "!posedge" : "!negedge";
+        (edgeType == EDGE_TYPE_POSEDGE) ? "!two_state_posedge" : "!two_state_negedge";
 
       return ln("if (" + edgeName + "(" + prev + ", " + curr + ")) { goto " +
                 label + "; }");
     }
 
+    // TODO: Replace edge tests!
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
       std::string edgeName =
         (edgeType == EDGE_TYPE_POSEDGE) ? "!two_state_posedge" : "!two_state_negedge";
@@ -279,6 +280,22 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+
+      unsigned long offset = valueStore.rawPortValueOffset(cid, PORT_ID_OUT);
+      unsigned long regOffset = valueStore.getRawRegisterOffset(cid);
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+      std::string registerStr = accessString("values", regOffset, bitWidth);
+
+      std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string registerStrX = accessString("x_mask", regOffset, bitWidth);
+      
+      return ln(accessStr + " = " + registerStr + "; // register state copy") +
+        ln(accessStrX + " = " + registerStrX + "; // register state copy");
+        //ln("std::cout << \"After storing value = \" << " + accessStr + " << std::endl");
+
       // std::string state =
       //   "values[" + to_string(valueStore.getRegisterOffset(cid)) + "]";
 
@@ -288,9 +305,9 @@ namespace FlatCircuit {
       //   "]";
 
       // Changing this causes an error?
-      return storeRegisterStateString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
-                                      to_string(valueStore.getRegisterOffset(cid)),
-                                      to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT)));
+      // return storeRegisterStateString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
+      //                                 to_string(valueStore.getRegisterOffset(cid)),
+      //                                 to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT)));
 
       // return storeTableString(to_string(valueStore.portValueOffset(cid, PORT_ID_OUT)),
       //                         state);
@@ -299,6 +316,7 @@ namespace FlatCircuit {
 
   };
 
+  // Is this class even used anywhere?
   class IRRegisterStore : public IRInstruction {
   public:
     CellId cid;
@@ -319,8 +337,17 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
-                              result);
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+      unsigned long offset = valueStore.getRawRegisterOffset(cid);
+
+      std::string accessStr = accessString("values", offset, bitWidth);
+      std::string accessStrX = accessString("x_mask", offset, bitWidth);
+
+      return ln(accessStr + " = " + result + "; // IRRegisterStore") +
+        ln(accessStrX + " = " + xMask(result) + "; // IRRegisterStore");
+      
+        //return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
+      //                              result);
       // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
       //           result);
     }
@@ -349,17 +376,28 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
-      std::string widthStr = std::to_string(bitWidth);
-      int regOffset = valueStore.getRegisterOffset(cid);
+      unsigned long offset = valueStore.getRawRegisterOffset(cid);
 
-      std::string code = "";
-      for (int i = 0; i < bitWidth; i++) {
-        std::string bitString = "quad_value(" + result.get(i).binary_string() + ")";
-        code += setTableBitString(std::to_string(regOffset + i), bitString);
-      }
+      std::string accessStr = accessString("values", offset, bitWidth);
+      std::string accessStrX = accessString("x_mask", offset, bitWidth);
 
-      return code;
+      return ln(accessStr + " = " + std::to_string(result.to_type<uint64_t>())) +
+        ln(accessStrX + " = " + std::to_string(0));
+        //ln(accessStrX + " = " + std::to_string(result.to_type<uint64_t>()));
+
+      // int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_OUT);
+      // std::string widthStr = std::to_string(bitWidth);
+      // int regOffset = valueStore.getRegisterOffset(cid);
+
+      // std::string code = "";
+      // for (int i = 0; i < bitWidth; i++) {
+      //   std::string bitString = "quad_value(" + result.get(i).binary_string() + ")";
+      //   code += setTableBitString(std::to_string(regOffset + i), bitString);
+      // }
+
+      // return code;
 
       // return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
       //                         "bsim::static_quad_value_bit_vector<" + widthStr + ">(\"" + resString + "\")");
