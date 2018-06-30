@@ -13,6 +13,7 @@ namespace FlatCircuit {
 
     //std::vector<bsim::quad_value> simValueTable;
     std::vector<unsigned char> simValueTable;
+    std::vector<unsigned char> bitMaskTable;
 
   public:
 
@@ -54,6 +55,10 @@ namespace FlatCircuit {
         if (bv.get(i).is_binary()) {
           simValueTable[offset + bitOffset.first] |=
             0 | (bv.get(i).binary_value() << bitOffset.second);
+        } else {
+          bitMaskTable[offset + bitOffset.first] |=
+            0 | (1 << bitOffset.second);
+          //assert(false);
         }
       }
       //std::cout << "done setting" << std::endl;
@@ -74,6 +79,7 @@ namespace FlatCircuit {
            i < (unsigned long) storedByteLength(bv.bitLength());
            i++) {
         simValueTable.push_back(0);
+        bitMaskTable.push_back(0);
       }
 
       setBitVector(nextInd, bv);
