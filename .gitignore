@@ -32,3 +32,7 @@ conv_2_1_specialized
 conv_bw_specialized
 *.txt
 specialize-bitstream
+x_prop
+top.json
+.DS_Store
+lb_test
