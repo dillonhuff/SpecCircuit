@@ -59,14 +59,6 @@ namespace FlatCircuit {
 
           simValueTable[offset + bitOffset.first] ^=
             (-bv.get(i).binary_value() ^ simValueTable[offset + bitOffset.first]) & (1UL << bitOffset.second);
-          // if (bv.get(i).binary_value() == 0) {
-            
-          // } else {
-          //   assert(bv.get(i).binary_value() == 1);
-          //   // TODO: Update this to be 
-          //   simValueTable[offset + bitOffset.first] |=
-          //     (0 | (bv.get(i).binary_value() << bitOffset.second));
-          // }
 
           bitMaskTable[offset + bitOffset.first] &=
             ~(0x00 | (1 << bitOffset.second));
