@@ -37,11 +37,21 @@ namespace FlatCircuit {
     REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
 
     sim.compileCircuit();
-    sim.setFreshValue("in", BitVec(8, 12));
-    sim.update();
+    
+    SECTION("Copying binary value") {
+      sim.setFreshValue("in", BitVec(8, 12));
+      sim.update();
 
-    REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+    }
 
+    SECTION("Copying x value") {
+      sim.setFreshValue("in", BitVec("8'hxx"));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == BitVec("8'hxx"));
+    }
+    
   }  
 
   TEST_CASE("Constant fold line of nots") {
