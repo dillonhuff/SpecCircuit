@@ -29,6 +29,11 @@ namespace FlatCircuit {
         for (unsigned long bitOffset = 0; bitOffset < 8; bitOffset++) {
           // TODO: Update to include x mask buffer
           bv.set(bvOffset, bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
+
+          bool isX = (bitMaskTable.at(byteOffset) >> bitOffset) & 0x01;
+          if (isX) {
+            bv.set(bvOffset, bsim::quad_value(QBV_UNKNOWN_VALUE));
+          }
           bvOffset += 1;
         }
 
@@ -48,17 +53,17 @@ namespace FlatCircuit {
       //std::cout << "setBitVector at " << offset << " to " << bv << std::endl;
       for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
 
-        // TODO: Handle x mask
-
         std::pair<unsigned long, unsigned long> bitOffset =
           bitOffsetInBytes(i);
         if (bv.get(i).is_binary()) {
           simValueTable[offset + bitOffset.first] |=
             0 | (bv.get(i).binary_value() << bitOffset.second);
+          bitMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
         } else {
           bitMaskTable[offset + bitOffset.first] |=
             0 | (1 << bitOffset.second);
-          //assert(false);
+
         }
       }
       //std::cout << "done setting" << std::endl;
@@ -99,6 +104,10 @@ namespace FlatCircuit {
       return simValueTable;
     }
 
+    std::vector<unsigned char>& getXMaskVector() {
+      return bitMaskTable;
+    }
+    
     // std::vector<bsim::quad_value>& getValueVector() {
     //   return simValueTable;
     // }
@@ -213,6 +222,7 @@ namespace FlatCircuit {
     //std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
 
     std::vector<unsigned char>& getValueTable() { return simValueTable.getValueVector(); }
+    std::vector<unsigned char>& getXMaskTable() { return simValueTable.getXMaskVector(); }
 
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 

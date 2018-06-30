@@ -849,7 +849,7 @@ namespace FlatCircuit {
 
       "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
       "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
-      "void simulate_four_state(unsigned char* values) {\n";
+      "void simulate_four_state(unsigned char* values, unsigned char* x_mask) {\n";
     
     assert((updates.size() % 2) == 0);
 
@@ -867,7 +867,8 @@ namespace FlatCircuit {
     compileCppLib(cppName, targetBinary);
 
     DylibInfo dlib = loadLibWithFunc(targetBinary,
-                                     "_Z19simulate_four_statePh");
+                                     "_Z19simulate_four_statePhS_");
+    //"_Z19simulate_four_statePh");
                                      //"_Z8simulatePN4bsim10quad_valueE");
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
