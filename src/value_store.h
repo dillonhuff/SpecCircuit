@@ -288,7 +288,7 @@ namespace FlatCircuit {
       assert(addr >= 0);
 
       int memWidth = def.getCellRefConst(cid).getMemWidth();
-      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) memWidth*addr), writeData);
+      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) storedByteLength(memWidth)*addr), writeData);
     }
 
     void debugPrintRawValueTable() const;
