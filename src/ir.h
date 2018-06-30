@@ -494,6 +494,7 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
       unsigned long offset;
       if (!isPast) {
         offset = valueStore.portValueOffset(cid, pid);
@@ -501,9 +502,13 @@ namespace FlatCircuit {
         offset = valueStore.pastValueOffset(cid, pid);
       }
 
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(receiver + " = " + accessStr + "; // IRPortLoad");
+      
       //unsigned long offset = valueStore.portValueOffset(cid, pid);
       //return ln(receiver + " = values[" + std::to_string(offset) + "]");
-      return loadTableString(receiver, std::to_string(offset), std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(pid)));
+      //return loadTableString(receiver, std::to_string(offset), std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(pid)));
     }
 
   };
