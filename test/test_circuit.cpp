@@ -780,14 +780,12 @@ namespace FlatCircuit {
       sim.setFreshValue("data_in", BitVector(16, 4965));
       posedge("clk", sim);
 
-      cout << "data_out = " << sim.getBitVec("data_out") << endl;
       REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
       //REQUIRE(sim.getBitVec("data_out") == BitVector("16'hxxxx"));
 
       sim.setFreshValue("wen", BitVector(1, 1));
       posedge("clk", sim);
 
-      cout << "data_out = " << sim.getBitVec("data_out") << endl;
       REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
       //REQUIRE(sim.getBitVec("data_out") == BitVector("16'hxxxx"));
       //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
@@ -836,12 +834,14 @@ namespace FlatCircuit {
       sim.setFreshValue("data_in", BitVector(16, 4965));
       posedge("clk", sim);
 
+      cout << "data_out = " << sim.getBitVec("data_out") << endl;
       REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
       //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
       sim.setFreshValue("wen", BitVector(1, 1));
       posedge("clk", sim);
 
+      cout << "data_out = " << sim.getBitVec("data_out") << endl;      
       REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
       //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 
