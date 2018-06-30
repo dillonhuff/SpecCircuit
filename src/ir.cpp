@@ -107,9 +107,8 @@ namespace FlatCircuit {
     CellType tp = cell.getCellType();
     switch (tp) {
     case CELL_TYPE_AND:
-      return ln("static_bv_and(" + receiver + ", " + arg0 + ", " + arg1 + ")");
-
-      //return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " & " + arg1 + ")") +
+        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
 
     case CELL_TYPE_UGE:
       return ln("greater_than_or_equal(" + receiver + ", " + arg0 + ", " + arg1 + ")");
