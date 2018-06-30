@@ -49,7 +49,7 @@ namespace FlatCircuit {
       sim.setFreshValue("in", BitVec("8'hxx"));
       sim.update();
 
-      REQUIRE(sim.getBitVec("out") == BitVec("8'hxx"));
+      REQUIRE(same_representation(sim.getBitVec("out"), BitVec("8'hxx")));
     }
     
   }  

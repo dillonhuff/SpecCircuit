@@ -72,7 +72,7 @@ namespace FlatCircuit {
                const std::string& offsetStr,
                const int bitWidth) {
     auto cBvType = containerPrimitive(bitWidth);
-    return "*((" + cBvType + "*)(values + "  + offsetStr + "))";
+    return "*((" + cBvType + "*)(" + arrayName + " + "  + offsetStr + "))";
   }
   
   static inline

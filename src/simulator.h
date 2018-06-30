@@ -396,10 +396,10 @@ namespace FlatCircuit {
       // void (*simFunc)(bsim::quad_value*) =
       //   reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
 
-      void (*simFunc)(unsigned char*) =
-        reinterpret_cast<void (*)(unsigned char*)>(simulateFuncHandle);
+      void (*simFunc)(unsigned char*, unsigned char*) =
+        reinterpret_cast<void (*)(unsigned char*, unsigned char*)>(simulateFuncHandle);
       
-      simFunc(&(valueStore.getValueTable()[0]));
+      simFunc(&(valueStore.getValueTable()[0]), &(valueStore.getXMaskTable()[0]));
       return;
     }
 

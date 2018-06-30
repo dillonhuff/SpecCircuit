@@ -56,8 +56,11 @@ namespace FlatCircuit {
         std::pair<unsigned long, unsigned long> bitOffset =
           bitOffsetInBytes(i);
         if (bv.get(i).is_binary()) {
+
+          // TODO: Update this to be 
           simValueTable[offset + bitOffset.first] |=
             0 | (bv.get(i).binary_value() << bitOffset.second);
+
           bitMaskTable[offset + bitOffset.first] &=
             ~(0x00 | (1 << bitOffset.second));
         } else {
