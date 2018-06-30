@@ -394,8 +394,13 @@ namespace FlatCircuit {
       if (isPast) {
         offset = valueStore.pastValueOffset(cid, pid);
       }
+
+      int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
+      std::string accessStr = accessString("values", offset, bitWidth);
+
+      return ln(accessStr + " = " + value + "; // table store");
       
-      return storeTableString(std::to_string(offset), value);
+      //return storeTableString(std::to_string(offset), value);
       //return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
     }
     
@@ -420,10 +425,11 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      std::string widthStr = std::to_string(bitWidth);
+      return ln(containerPrimitive(bitWidth) + " " + name + " = 0");
+      // std::string widthStr = std::to_string(bitWidth);
       
-      return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
-        ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ", true)");
+      // return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
+      //   ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ", true)");
     }
     
   };

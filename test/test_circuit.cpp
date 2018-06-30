@@ -16,6 +16,34 @@ using namespace CoreIR;
 
 namespace FlatCircuit {
 
+  TEST_CASE("Compiling 4 state passthrough") {
+
+    Env e;
+    CellType modType = e.addCellType("in_to_out");
+    CellDefinition& def = e.getDef(modType);
+    def.addPort("in", 8, PORT_TYPE_IN);
+    def.addPort("out", 8, PORT_TYPE_OUT);
+
+    CellId in = def.getPortCellId("in");
+    CellId out = def.getPortCellId("out");
+
+    def.connect(in, PORT_ID_OUT,
+                out, PORT_ID_IN);
+
+    Simulator sim(e, def);
+    sim.setFreshValue("in", BitVec(8, 0));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
+
+    sim.compileCircuit();
+    sim.setFreshValue("in", BitVec(8, 12));
+    sim.update();
+
+    REQUIRE(sim.getBitVec("out") == BitVec(8, 12));
+
+  }  
+
   TEST_CASE("Constant fold line of nots") {
     Env e;
     CellType notChainType = e.addCellType("not_chain");
