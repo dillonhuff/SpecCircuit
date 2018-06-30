@@ -54,6 +54,10 @@ namespace FlatCircuit {
   // }
 
 
+  std::string orrStr(const std::string& name) {
+    return "!!(" + name + ")";
+  }
+
   std::string IRBinop::twoStateCppCode(ValueStore& valueStore) const {
 
     CellType tp = cell.getCellType();
@@ -168,7 +172,9 @@ namespace FlatCircuit {
         
     case CELL_TYPE_EQ:
       //return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
-      return ln("equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " == " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(arg0) + " || " + orrStr(arg1));
+      //return ln("equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_NEQ:
       return ln("not_equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
@@ -230,15 +236,20 @@ namespace FlatCircuit {
     switch (unop) {
 
     case CELL_TYPE_PASSTHROUGH:
-      return ln("set_bv(" + receiver + ", " + arg + ")");
-        //return ln(receiver + " = " + arg);
+      //return ln("set_bv(" + receiver + ", " + arg + ")");
+      return ln(receiver + " = " + arg) +
+        ln(xMask(receiver) + " = " + xMask(arg));
 
     case CELL_TYPE_NOT:
+      // NOTE: Not is a no-op for the x mask
+      return ln(receiver + " = ~(" + arg + ") & " + maskWidth(cell.getPortWidth(PORT_ID_OUT)));
       //return ln(receiver + " = ~(" + arg + ")");
-      return ln("logical_not(" + receiver + ", " + arg + ")");
+      //return ln("logical_not(" + receiver + ", " + arg + ")");
 
     case CELL_TYPE_ORR:
-      return ln("orr(" + receiver + ", " + arg + ")");
+      //return ln("orr(" + receiver + ", " + arg + ")");
+      return ln(receiver + " = !!(" + arg + ")") +
+        ln(xMask(receiver) + " = !!(" + xMask(arg) + ")");
 
     case CELL_TYPE_SLICE:
       return ln("slice(" + receiver + ", " + arg + ", " +
@@ -250,7 +261,9 @@ namespace FlatCircuit {
       //           to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
         
     case CELL_TYPE_ZEXT:
-      return ln("zero_extend(" + receiver + ", " + arg + ")");
+      return ln(receiver + " = " + arg);
+      return ln(xMask(receiver) + " = " + xMask(arg));
+      //return ln("zero_extend(" + receiver + ", " + arg + ")");
 
       // return ln(receiver + " = zero_extend<" + to_string(cell.getPortWidth(PORT_ID_IN)) + ", " + to_string(cell.getPortWidth(PORT_ID_OUT)) + ">(" +
       //           to_string(cell.getPortWidth(PORT_ID_OUT)) + 

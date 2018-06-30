@@ -89,4 +89,14 @@ namespace FlatCircuit {
                      const std::string& targetBinary);
 
   std::string cppLibName(const std::string& baseName);
+
+  static inline
+  std::string
+  maskWidth(const int numBitsToMask) {
+    std::string bitMask = "0b";
+    for (int i = 0; i < numBitsToMask; i++) {
+      bitMask += "1";
+    }
+    return bitMask;
+  }
 }

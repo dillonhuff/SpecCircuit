@@ -628,11 +628,8 @@ namespace FlatCircuit {
       isPastValue(isPastValue_) {}
 
     virtual std::string twoStateCppCode(ValueStore& valueStore) const {
-      //int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
       int bitWidth =
         valueStore.def.getCellRefConst(driverBit.cell).getPortWidth(driverBit.port);
-
-      //      std::cout << "Getting offset for " << sigPortString(valueStore.def, {cid, pid}) << std::endl;
 
       unsigned long offset;
       if (!isPastValue) {
@@ -654,48 +651,47 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
 
-      string valString = "";
-      unsigned long offset = 0;
+      int bitWidth =
+        valueStore.def.getCellRefConst(driverBit.cell).getPortWidth(driverBit.port);
 
-      if (isPastValue) {
-        // string valString = "values[" +
-        //   std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
-        //                  "].get(" + std::to_string(driverBit.offset) + ")";
-
-        // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
-        //           valString + ")");
-
-        offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
-
-        // valString = "values[" +
-        //   std::to_string(valueStore.pastValueOffset(driverBit.cell, driverBit.port)) +
-        //   "].get(" + std::to_string(driverBit.offset) + ")";
-
+      unsigned long offset;
+      if (!isPastValue) {
+        offset = valueStore.rawPortValueOffset(driverBit.cell, driverBit.port);
       } else {
-        // string valString = "values[" +
-        //   std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
-        //                  "].get(" + std::to_string(driverBit.offset) + ")";
-
-        // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
-        //           valString + ")");
-
-        offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
-
-        // valString = "values[" +
-        //   std::to_string(valueStore.portValueOffset(driverBit.cell, driverBit.port)) +
-        //   "].get(" + std::to_string(driverBit.offset) + ")";
-        
+        offset = valueStore.rawPortPastValueOffset(driverBit.cell, driverBit.port);
       }
 
-      return ln("loadBitFromTable(values," + receiver +
-                ", " + std::to_string(setOffset) +
-                ", " + std::to_string(offset) +
-                ", " + std::to_string(driverBit.offset) + ")");
+      //std::cout << "Got offset" << std::endl;
 
-      // valString = "values[" + std::to_string(offset) +
-      //   "].get(" + std::to_string(driverBit.offset) + ")";
-      // return ln(receiver + ".set(" + std::to_string(setOffset) + ", " +
-      //           valString + ")");
+      std::string valString = accessString("values", offset, bitWidth);
+      std::string valStringX = accessString("x_mask", offset, bitWidth);
+
+      std::string receiverBV =
+        containerPrimitive(valueStore.def.getCellRefConst(cid).getPortWidth(pid));
+      return ln(receiver + " |= ((" + receiverBV+ ")((" + valString + " >> " +
+                std::to_string(driverBit.offset) + " ) & 0x1))<< " +
+                std::to_string(setOffset)) +
+        ln(xMask(receiver) + " |= ((" + receiverBV+ ")((" + valStringX + " >> " +
+           std::to_string(driverBit.offset) + " ) & 0x1))<< " +
+           std::to_string(setOffset));
+      
+      // string valString = "";
+      // unsigned long offset = 0;
+
+      // if (isPastValue) {
+
+      //   offset = valueStore.pastValueOffset(driverBit.cell, driverBit.port);
+
+      // } else {
+
+      //   offset = valueStore.portValueOffset(driverBit.cell, driverBit.port);
+
+      // }
+
+      // return ln("loadBitFromTable(values," + receiver +
+      //           ", " + std::to_string(setOffset) +
+      //           ", " + std::to_string(offset) +
+      //           ", " + std::to_string(driverBit.offset) + ")");
     }
   };
 
@@ -720,7 +716,9 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       //return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
-      return ln(receiver + " = (" + sel + ".get(0) == quad_value(1) ? " + arg1 + " : " + arg0 + ")");
+      //return ln(receiver + " = (" + sel + ".get(0) == quad_value(1) ? " + arg1 + " : " + arg0 + ")");
+
+      return ln(receiver + " = (" + sel + " ? " + arg1 + " : " + arg0 + ")");
     }
     
   };
