@@ -443,9 +443,12 @@ namespace FlatCircuit {
           SigPort nextComb = *std::begin(combChanges);
           combChanges.erase(nextComb);
 
+          //std::cout << "Doing comb change " << sigPortString(def, nextComb) << std::endl;
           updatePort(nextComb);
         }
 
+
+        std::cout << "Finshed comb changes" << std::endl;
 
         std::vector<CellId> registersToUpdate;
         std::vector<CellId> memoriesToUpdate;
@@ -463,6 +466,8 @@ namespace FlatCircuit {
           }
         }
 
+        std::cout << "Done seq changes" << std::endl;
+
         seqChanges = {};
 
         //std::cout << "# of memory updates = " << memoriesToUpdate.size() << std::endl;
@@ -476,6 +481,8 @@ namespace FlatCircuit {
         for (auto cid : memoriesToUpdate) {
           updatePort({cid, PORT_ID_RDATA});
         }
+
+        std::cout << "Updates registers" << std::endl;
         
       } while (combChanges.size() > 0);
 

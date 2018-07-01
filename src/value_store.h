@@ -27,7 +27,12 @@ namespace FlatCircuit {
       for (unsigned long i = 0; i < byteWidth; i++) {
         unsigned long byteOffset = offset + i;
         for (unsigned long bitOffset = 0; bitOffset < 8; bitOffset++) {
-          // TODO: Update to include x mask buffer
+
+          if (bvOffset >= bv.bitLength()) {
+            break;
+          }
+          assert(byteOffset < simValueTable.size());
+
           bv.set(bvOffset, bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
 
           bool isX = (bitMaskTable.at(byteOffset) >> bitOffset) & 0x01;
@@ -37,8 +42,8 @@ namespace FlatCircuit {
           bvOffset += 1;
         }
 
-        //bv.set(i, simValueTable.at(offset + i));
       }
+
       return bv;
     }
 
