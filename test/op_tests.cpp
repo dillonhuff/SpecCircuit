@@ -83,7 +83,7 @@ namespace FlatCircuit {
   TEST_CASE("Unary op x propagation") {
     Env e;
 
-    vector<CellType> unops{CELL_TYPE_PASSTHROUGH};
+    vector<CellType> unops{CELL_TYPE_PASSTHROUGH, CELL_TYPE_NOT};
     for (auto opType : unops) {
       //CellType opType = CELL_TYPE_PASSTHROUGH;
 
