@@ -24,11 +24,17 @@ SET(CPP_FILES ./src/simulator.cpp
 
 add_library(flatcircuit ${CPP_FILES})
 
-SET(TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
+# Test executables
+SET(CGRA_TEST_FILES ./test/cgra_tests.cpp)
+SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
 
-add_executable(all-tests ${TEST_FILES})
-
+add_executable(all-tests test/test_main.cpp ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
 target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(small-tests test/test_main.cpp ${SMALL_TEST_FILES})
+target_link_libraries(small-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+# End test executables
 
 SET(BENCHMARK_FILES ./benchmarks/main.cpp)
 add_executable(run-benchmarks ${BENCHMARK_FILES})

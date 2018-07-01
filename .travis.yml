@@ -21,7 +21,7 @@ before_install:
   - make -j
 
 script:
-  - ./all-tests
+  - ./small-tests
 
 compiler:
   - gcc
