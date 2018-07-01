@@ -114,7 +114,10 @@ namespace FlatCircuit {
         ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
 
     case CELL_TYPE_UGE:
-      return ln("greater_than_or_equal(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " >= " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+
+      //return ln("greater_than_or_equal(" + receiver + ", " + arg0 + ", " + arg1 + ")");
       // return ln(receiver + " = BitVector((" +
       //           arg0 + " > " + arg1 + ") || (" +
       //           arg0 + " == " + arg1 + "))");
@@ -130,7 +133,10 @@ namespace FlatCircuit {
       return ln("greater_than(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_ULT:
-      return ln("less_than(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " < " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+      
+      //return ln("less_than(" + receiver + ", " + arg0 + ", " + arg1 + ")");
       //return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
         
     case CELL_TYPE_OR:
@@ -147,8 +153,10 @@ namespace FlatCircuit {
       //return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
 
     case CELL_TYPE_ADD:
+      return ln(receiver + " = (" + arg0 + " + " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
       //return ln(receiver + " = add_general_width_bv(" + arg0 + ", " + arg1 + ")");
-      return ln("add_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      //return ln("add_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_MUL:
       //return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
