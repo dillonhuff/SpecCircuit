@@ -76,13 +76,6 @@ namespace FlatCircuit {
     sim.update();
   }
   
-  void posedge(const std::string& clkName, Simulator& sim) {
-    sim.setFreshValue(clkName, BitVec(1, 0));
-    sim.update();
-    sim.setFreshValue(clkName, BitVec(1, 1));
-    sim.update();
-  }
-
   void negedge(const std::string& clkName, Simulator& sim) {
     sim.setFreshValue(clkName, BitVec(1, 1));
     sim.update();

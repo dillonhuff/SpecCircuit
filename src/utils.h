@@ -15,8 +15,16 @@ namespace FlatCircuit {
                             Simulator& sim);
 
   void reset(const std::string& rstName, Simulator& sim);
-  
-  void posedge(const std::string& clkName, Simulator& sim);
+
+  template<typename SimulatorType>
+  void posedge(const std::string& clkName, SimulatorType& sim) {
+    sim.setFreshValue(clkName, BitVec(1, 0));
+    sim.update();
+    sim.setFreshValue(clkName, BitVec(1, 1));
+    sim.update();
+  }
+
+  //void posedge(const std::string& clkName, Simulator& sim);
 
   void negedge(const std::string& clkName, Simulator& sim);
 

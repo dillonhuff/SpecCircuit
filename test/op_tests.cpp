@@ -1,6 +1,8 @@
 #include "catch.hpp"
 
+#include "convert_coreir.h"
 #include "simulator.h"
+#include "utils.h"
 
 namespace FlatCircuit {
 
@@ -80,6 +82,151 @@ namespace FlatCircuit {
     }
   }
 
+  class RegressionSimulator {
+    Simulator interpSim;
+    Simulator compileSim;
+
+  public:
+    RegressionSimulator(Env& e, CellDefinition& def) :
+      interpSim(e, def), compileSim(e, def) {
+      compileSim.compileCircuit();
+    }
+
+    void setFreshValue(const std::string& val, const BitVector& bv) {
+      interpSim.setFreshValue(val, bv);
+      compileSim.setFreshValue(val, bv);
+    }
+
+    void refreshConstants() {
+      interpSim.refreshConstants();
+      compileSim.refreshConstants();
+    }
+
+    void update() {
+      interpSim.update();
+      compileSim.update();
+    }
+
+    void debugPrintPorts() {
+      interpSim.debugPrintPorts();
+      compileSim.debugPrintPorts();
+    }
+
+    void debugPrintTableValues() {
+      interpSim.debugPrintTableValues();
+      compileSim.debugPrintTableValues();
+    }
+
+    BitVector getBitVec(const std::string& cellName) {
+      auto interpBv = interpSim.getBitVec(cellName);
+      auto compileBv = compileSim.getBitVec(cellName);
+
+      if (!same_representation(interpBv, compileBv)) {
+        cout << "ERROR: " << interpBv << " != " << compileBv << endl;
+        assert(same_representation(interpBv, compileBv));
+      }
+
+      return interpBv;
+    }
+
+  };
+
+  TEST_CASE("Regression test mem unq internals") {
+    Env circuitEnv = loadFromCoreIR("global.mem_unq1",
+                                    "./test/memory_tile_unq1.json");
+    CellDefinition& def = circuitEnv.getDef("mem_unq1");
+
+    RegressionSimulator sim(circuitEnv, def);
+    sim.refreshConstants();
+
+    cout << "Compiling mem unq" << endl;
+    //sim.compileCircuit();
+    cout << "Done compiling mem unq" << endl;
+
+    sim.setFreshValue("addr", BitVector(9, 13));
+    sim.setFreshValue("cen", BitVector(1, 1));
+    sim.setFreshValue("wen", BitVector(1, 1));
+    sim.setFreshValue("data_in", BitVector(16, 562));
+
+    posedge("clk", sim);
+
+    sim.debugPrintPorts();
+
+    sim.setFreshValue("wen", BitVector(1, 0));
+    posedge("clk", sim);
+
+    posedge("clk", sim);
+    posedge("clk", sim);
+    posedge("clk", sim);
+
+    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
+
+    sim.setFreshValue("addr", BitVector(9, 0));
+    sim.setFreshValue("data_in", BitVector(16, 4965));
+    posedge("clk", sim);
+
+    cout << "data_out first = " << sim.getBitVec("data_out") << endl;
+    cout << "Table values" << endl;
+    sim.debugPrintTableValues();
+    REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
+    //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+    sim.setFreshValue("wen", BitVector(1, 1));
+    posedge("clk", sim);
+
+    cout << "data_out = " << sim.getBitVec("data_out") << endl;
+    REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
+    //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
+
+    posedge("clk", sim);
+
+    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 4965));
+
+  }
+
+  TEST_CASE("Register x propagation") {
+    Env e;
+
+    CellType opType = CELL_TYPE_REG;
+    CellType notChainType = e.addCellType(toString(opType) + "_test_cell");
+    CellDefinition& def = e.getDef(notChainType);
+    def.addPort("in", 16, PORT_TYPE_IN);
+    def.addPort("clk", 1, PORT_TYPE_IN);
+    def.addPort("out", 16, PORT_TYPE_OUT);
+
+    CellId binop =
+      def.addCell(toString(opType) + "_test_inst",
+                  opType,
+                  {{PARAM_WIDTH, BitVector(32, 16)},
+                      {PARAM_INIT_VALUE, BitVector(16, 0)},
+                        {PARAM_CLK_POSEDGE, BitVector(1, 1)}});
+
+    CellId inCell = def.getPortCellId("in");
+    CellId clkCell = def.getPortCellId("clk");
+    CellId outCell = def.getPortCellId("out");
+    def.connect(inCell, PORT_ID_OUT, binop, PORT_ID_IN);
+    def.connect(clkCell, PORT_ID_OUT, binop, PORT_ID_CLK);
+    def.connect(binop, PORT_ID_OUT, outCell, PORT_ID_IN);
+
+    Simulator interpSim(e, def);
+
+    Simulator compileSim(e, def);
+    compileSim.compileCircuit();
+
+    interpSim.setFreshValue("in", BitVector("16'hxxxx"));
+    posedge("clk", interpSim);
+    
+    compileSim.setFreshValue("in", BitVector("16'hxxxx"));
+    posedge("clk", compileSim);
+
+    REQUIRE(same_representation(interpSim.getBitVec("out"),
+                                compileSim.getBitVec("out")));
+
+    REQUIRE(same_representation(compileSim.getBitVec("out"),
+                                BitVector("16'hxxxx")));
+
+  }
+
   TEST_CASE("Unary op x propagation") {
     Env e;
 
@@ -114,6 +261,9 @@ namespace FlatCircuit {
 
       REQUIRE(same_representation(interpSim.getBitVec("out"),
                                   compileSim.getBitVec("out")));
+
+      REQUIRE(same_representation(compileSim.getBitVec("out"),
+                                  BitVector("16'hxxxx")));
     }
   }
 
