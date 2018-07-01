@@ -418,6 +418,7 @@ namespace FlatCircuit {
         return;
       }
 
+      std::cout << "Adding port changes" << std::endl;
       // Add user inputs to combChanges
       for (auto portCell : def.getPortCells()) {
         if (def.getCellRefConst(portCell).isInputPortCell()) {
@@ -427,7 +428,8 @@ namespace FlatCircuit {
       }
 
       // If there is no simulate function use the interpreter
-      
+
+      std::cout << "Adding user inputs" << std::endl;
       // Add user inputs 
       for (auto in : userInputs) {
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);
@@ -436,6 +438,7 @@ namespace FlatCircuit {
 
       do {
 
+        std::cout << "Doing comb changes" << std::endl;
         while (combChanges.size() > 0) {
           SigPort nextComb = *std::begin(combChanges);
           combChanges.erase(nextComb);
