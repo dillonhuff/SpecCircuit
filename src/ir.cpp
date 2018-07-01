@@ -75,7 +75,6 @@ namespace FlatCircuit {
       return ln(receiver + " = (" + arg0 + " & " + arg1 + ")");
 
     case CELL_TYPE_OR:
-
       return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
     case CELL_TYPE_XOR:
@@ -135,11 +134,16 @@ namespace FlatCircuit {
       //return ln(receiver + " = BitVector((" + arg0 + " < " + arg1 + "))");
         
     case CELL_TYPE_OR:
-      return ln("static_bv_or(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " | " + arg1 + ")") +
+        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
+      //return ln("static_bv_or(" + receiver + ", " + arg0 + ", " + arg1 + ")");
       //return ln(receiver + " = (" + arg0 + " | " + arg1 + ")");
 
     case CELL_TYPE_XOR:
-      return ln("static_bv_xor(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")") +
+        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
+      
+      //return ln("static_bv_xor(" + receiver + ", " + arg0 + ", " + arg1 + ")");
       //return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")");
 
     case CELL_TYPE_ADD:
@@ -149,14 +153,16 @@ namespace FlatCircuit {
     case CELL_TYPE_MUL:
       //return ln(receiver + " = mul_general_width_bv(" + arg0 + ", " + arg1 + ")");
 
-      return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ", " + temps[1] + ", " + temps[2] + ")");
+      return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
+      //return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ", " + temps[1] + ", " + temps[2] + ")");
 
       //return mul_quad_state_code(receiver, arg0, arg1, cell);
       //return ln("mul_bv(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_SUB:
+      return ln(receiver + " = (" + arg0 + " - " + arg1 + ")");
       //return ln(receiver + " = sub_general_width_bv(" + arg0 + ", " + arg1 + ")");
-      return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ")");
+      //return ln("sub_general_width_bv(" + receiver + ", " + arg0 + ", " + arg1 + ", " + temps[0] + ")");
 
     case CELL_TYPE_LSHR:
       //return ln(receiver + " = lshr(" + arg0 + ", " + arg1 + ")");
@@ -242,12 +248,10 @@ namespace FlatCircuit {
 
     case CELL_TYPE_NOT:
       // NOTE: Not is a no-op for the x mask
-      return ln(receiver + " = ~(" + arg + ") & " + maskWidth(cell.getPortWidth(PORT_ID_OUT)));
-      //return ln(receiver + " = ~(" + arg + ")");
-      //return ln("logical_not(" + receiver + ", " + arg + ")");
+      return ln(receiver + " = ~(" + arg + ") & " + maskWidth(cell.getPortWidth(PORT_ID_OUT))) +
+        ln(xMask(receiver) + " = " + xMask(arg));
 
     case CELL_TYPE_ORR:
-      //return ln("orr(" + receiver + ", " + arg + ")");
       return ln(receiver + " = !!(" + arg + ")") +
         ln(xMask(receiver) + " = !!(" + xMask(arg) + ")");
 
@@ -256,18 +260,10 @@ namespace FlatCircuit {
                 to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
                 to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
       
-      // return ln(receiver + " = slice(" + arg + ", " +
-      //           to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
-      //           to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
-        
     case CELL_TYPE_ZEXT:
-      return ln(receiver + " = " + arg);
-      return ln(xMask(receiver) + " = " + xMask(arg));
-      //return ln("zero_extend(" + receiver + ", " + arg + ")");
+      return ln(receiver + " = " + arg)
+        + ln(xMask(receiver) + " = " + xMask(arg));
 
-      // return ln(receiver + " = zero_extend<" + to_string(cell.getPortWidth(PORT_ID_IN)) + ", " + to_string(cell.getPortWidth(PORT_ID_OUT)) + ">(" +
-      //           to_string(cell.getPortWidth(PORT_ID_OUT)) + 
-      //           ", " + arg + ")");
     default:
       std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
       assert(false);

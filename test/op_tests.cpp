@@ -80,6 +80,43 @@ namespace FlatCircuit {
     }
   }
 
+  TEST_CASE("Unary op x propagation") {
+    Env e;
+
+    vector<CellType> unops{CELL_TYPE_PASSTHROUGH};
+    for (auto opType : unops) {
+      //CellType opType = CELL_TYPE_PASSTHROUGH;
+
+      CellType notChainType = e.addCellType(toString(opType) + "_test_cell");
+      CellDefinition& def = e.getDef(notChainType);
+      def.addPort("in", 16, PORT_TYPE_IN);
+      def.addPort("out", 16, PORT_TYPE_OUT);
+
+      CellId binop =
+        def.addCell(toString(opType) + "_test_inst",
+                    opType,
+                    {{PARAM_WIDTH, BitVector(32, 16)}});
+
+      CellId inCell = def.getPortCellId("in");
+      CellId outCell = def.getPortCellId("out");
+      def.connect(inCell, PORT_ID_OUT, binop, PORT_ID_IN);
+      def.connect(binop, PORT_ID_OUT, outCell, PORT_ID_IN);
+
+      Simulator interpSim(e, def);
+
+      Simulator compileSim(e, def);
+      compileSim.compileCircuit();
+
+      interpSim.setFreshValue("in", BitVector("16'hxxxx"));
+      interpSim.update();
+      compileSim.setFreshValue("in", BitVector("16'hxxxx"));
+      compileSim.update();
+
+      REQUIRE(same_representation(interpSim.getBitVec("out"),
+                                  compileSim.getBitVec("out")));
+    }
+  }
+
   TEST_CASE("Comparing binary ops in simulation and interpretation") {
     Env e;
     vector<BitVector> interpResults;

@@ -49,6 +49,7 @@ namespace FlatCircuit {
   }
 
   void ValueStore::debugPrintTableValues() const {
+    simValueTable.debugPrintTableValues();
     // cout << "Table values" << endl;
     // for (int i = 0; i < (int) simValueTable.size(); i++) {
     //   cout << "\t" << i << " = " << simValueTable.getBitVector(i) << endl;

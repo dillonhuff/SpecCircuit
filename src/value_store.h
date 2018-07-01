@@ -110,6 +110,13 @@ namespace FlatCircuit {
     std::vector<unsigned char>& getXMaskVector() {
       return bitMaskTable;
     }
+
+    void debugPrintTableValues() const {
+      for (int i = 0; i < (int) bitMaskTable.size(); i++) {
+        std::cout << "\tvalue[" << i << "] = " << (int) simValueTable[i] << std::endl;
+        std::cout << "\tmask  [" << i << "] = " << (int) bitMaskTable[i] << std::endl;
+      }
+    }
     
     // std::vector<bsim::quad_value>& getValueVector() {
     //   return simValueTable;
