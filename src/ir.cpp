@@ -179,7 +179,7 @@ namespace FlatCircuit {
     case CELL_TYPE_EQ:
       //return ln(receiver + " = BitVector(" + arg0 + " == " + arg1 + ")");
       return ln(receiver + " = (" + arg0 + " == " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(arg0) + " || " + orrStr(arg1));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
       //return ln("equals(" + receiver + ", " + arg0 + ", " + arg1 + ")");
 
     case CELL_TYPE_NEQ:

@@ -144,6 +144,14 @@ namespace FlatCircuit {
               sigPortString(interpSim.def, {cid, outPort}) << ": " <<
               interpBv << " != " << compileBv << endl;
             allConsistent = false;
+
+            for (auto inPort : cell.inputPorts()) {
+              auto interpInput = interpSim.materializeInput({cid, inPort});
+              auto compileInput = compileSim.materializeInput({cid, inPort});
+
+              cout << "\t" << interpInput << endl;
+              cout << "\t" << compileInput << endl;
+            }
           }
           
         }
@@ -182,7 +190,7 @@ namespace FlatCircuit {
     posedge("clk", sim);
     posedge("clk", sim);
 
-    //assert(sim.internalStatesConsistent());
+    assert(sim.internalStatesConsistent());
     //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
     sim.setFreshValue("addr", BitVector(9, 0));
