@@ -718,7 +718,8 @@ namespace FlatCircuit {
       //return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
       //return ln(receiver + " = (" + sel + ".get(0) == quad_value(1) ? " + arg1 + " : " + arg0 + ")");
 
-      return ln(receiver + " = (" + sel + " ? " + arg1 + " : " + arg0 + ")");
+      return ln(receiver + " = (" + sel + " ? " + arg1 + " : " + arg0 + ")") +
+        ln(xMask(receiver) + " = (" + sel + " ? " + xMask(arg1) + " : " + xMask(arg0) + ")");
     }
     
   };

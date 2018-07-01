@@ -129,6 +129,29 @@ namespace FlatCircuit {
       return interpBv;
     }
 
+    bool internalStatesConsistent() {
+
+      bool allConsistent = true;
+      for (auto ctp : interpSim.def.getCellMap()) {
+        CellId cid = ctp.first;
+        const Cell& cell = interpSim.def.getCellRefConst(cid);
+        for (auto outPort : cell.outputPorts()) {
+          auto interpBv = interpSim.getBitVec(cid, outPort);
+          auto compileBv = compileSim.getBitVec(cid, outPort);
+
+          if (!same_representation(interpBv, compileBv)) {
+            cout << "ERROR: Simulators disagree on " <<
+              sigPortString(interpSim.def, {cid, outPort}) << ": " <<
+              interpBv << " != " << compileBv << endl;
+            allConsistent = false;
+          }
+          
+        }
+      }
+
+      return allConsistent;
+    }
+
   };
 
   TEST_CASE("Regression test mem unq internals") {
@@ -159,7 +182,8 @@ namespace FlatCircuit {
     posedge("clk", sim);
     posedge("clk", sim);
 
-    REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
+    assert(sim.internalStatesConsistent());
+    //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 562));
 
     sim.setFreshValue("addr", BitVector(9, 0));
     sim.setFreshValue("data_in", BitVector(16, 4965));
