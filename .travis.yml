@@ -8,6 +8,7 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.9
+    - valgrind
 
 before_install:
   - export COREIRCONFIG="g++-4.9";
@@ -21,7 +22,7 @@ before_install:
   - make -j
 
 script:
-  - ./small-tests
+  - valgrind ./small-tests
 
 compiler:
   - gcc

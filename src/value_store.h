@@ -28,7 +28,7 @@ namespace FlatCircuit {
         unsigned long byteOffset = offset + i;
         for (unsigned long bitOffset = 0; bitOffset < 8; bitOffset++) {
 
-          if (bvOffset >= bv.bitLength()) {
+          if (bvOffset >= (unsigned long) bv.bitLength()) {
             break;
           }
           assert(byteOffset < simValueTable.size());
