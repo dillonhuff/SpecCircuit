@@ -22,7 +22,7 @@ before_install:
   - make -j
 
 script:
-  - valgrind ./small-tests
+  - valgrind ./regression-tests
 
 compiler:
   - gcc
