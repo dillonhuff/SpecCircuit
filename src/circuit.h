@@ -367,8 +367,8 @@ namespace FlatCircuit {
     std::map<Parameter, BitVector> parameters;
     CellType cellType;
     std::map<PortId, Port> portWidths;
-    std::map<PortId, SignalBus> drivers;
-    //std::vector<SignalBus> drivers;
+    //std::map<PortId, SignalBus> drivers;
+    std::vector<SignalBus> drivers;
 
     std::map<PortId, std::vector<std::set<SignalBit> > > receivers;
 
@@ -377,12 +377,20 @@ namespace FlatCircuit {
 
     void addInputPort(const PortId pid, const int wd) {
       portWidths.insert({pid, {wd, PORT_TYPE_IN}});
-      drivers.insert({pid, SignalBus(wd)});
+      //drivers.insert({pid, SignalBus(wd)});
+      //drivers.resize(pid);
+      
+      //std::cout << "pid = " << pid << std::endl;
+      //std::cout << "wd = " << wd << std::endl;
+
+      drivers.at(pid) = SignalBus(wd);
+      //drivers[0] = SignalBus(0);
+      //std::cout << "set pid" << pid << std::endl;
     }
 
     Cell(const CellType cellType_,
          const std::map<Parameter, BitVector> & parameters_) :
-      parameters(parameters_), cellType(cellType_) {
+      parameters(parameters_), cellType(cellType_), drivers(100, 0) {
       //std::cout << "Creating cell type " << cellType << std::endl;
 
       // NOTE: Need to include input port type and output port type
@@ -617,7 +625,7 @@ namespace FlatCircuit {
     }
 
     const SignalBus& getDrivers(const PortId port) const {
-      assert(contains_key(port, drivers));
+      //assert(contains_key(port, drivers));
 
       return drivers.at(port);
     }
@@ -767,7 +775,7 @@ namespace FlatCircuit {
 
     void removeDriver(const PortId port,
                       const int offset) {
-      assert(contains_key(port, drivers));
+      //assert(contains_key(port, drivers));
       auto& dv = drivers[port];
       dv.signals[offset] = {0, 0, 0};
     }
@@ -795,13 +803,13 @@ namespace FlatCircuit {
     }
 
     void setDriver(const PortId port, const int offset, const SignalBit driver) {
-      if (!contains_key(port, drivers)) {
-        std::cout << "All ports: " << std::endl;
-        for (auto port : drivers) {
-          std::cout << "\t" << port.first << std::endl;
-        }
-      }
-      assert(contains_key(port, drivers));
+      // if (!contains_key(port, drivers)) {
+      //   std::cout << "All ports: " << std::endl;
+      //   for (auto port : drivers) {
+      //     std::cout << "\t" << port.first << std::endl;
+      //   }
+      // }
+      // assert(contains_key(port, drivers));
 
       auto& sigBus = drivers[port];
 
