@@ -59,7 +59,7 @@ namespace FlatCircuit {
     def.addPort("in", 16, PORT_TYPE_IN);
     def.addPort("out", 16, PORT_TYPE_OUT);
 
-    int chainLength = 100000;
+    int chainLength = 100;
     CellId baseConstant =
       def.addCell("base_const",
                   CELL_TYPE_CONST,

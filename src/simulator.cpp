@@ -7,6 +7,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+using namespace std::chrono;
 using namespace std;
 
 namespace FlatCircuit {
@@ -1085,10 +1086,15 @@ namespace FlatCircuit {
       sim.def.replacePortWithConstant(portName, currentValue);
     }
     specializeCircuit(sim);
+
+    
   }
 
 
   void specializeCircuit(Simulator& sim) {
+    auto start = high_resolution_clock::now();
+    
+
     cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
     foldConstants(sim.def, sim.allRegisterValues());
     cout << "# of cells after constant deleting instances = " <<
@@ -1099,8 +1105,17 @@ namespace FlatCircuit {
     cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
 
     deDuplicate(sim.def);
-
+    
     sim.refreshConstants();
+
+
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<milliseconds>(stop - start);
+
+    cout << "Time taken to specialize = "
+         << duration.count() << " milliseconds" << endl;
+
   }
 
 }
