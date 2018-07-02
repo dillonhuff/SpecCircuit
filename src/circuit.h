@@ -368,11 +368,17 @@ namespace FlatCircuit {
     CellType cellType;
     std::map<PortId, Port> portWidths;
     std::map<PortId, SignalBus> drivers;
+    //std::vector<SignalBus> drivers;
 
     std::map<PortId, std::vector<std::set<SignalBit> > > receivers;
 
   public:
     Cell() {}
+
+    void addInputPort(const PortId pid, const int wd) {
+      portWidths.insert({pid, {wd, PORT_TYPE_IN}});
+      drivers.insert({pid, SignalBus(wd)});
+    }
 
     Cell(const CellType cellType_,
          const std::map<Parameter, BitVector> & parameters_) :
@@ -394,8 +400,9 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(hi - lo);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {wd, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+        addInputPort(PORT_ID_IN, wd);
+        // portWidths.insert({PORT_ID_IN, {wd, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (cellType == CELL_TYPE_MEM) {
         // TODO: Fill in the memory cell
@@ -404,20 +411,25 @@ namespace FlatCircuit {
         BitVector width = map_find(PARAM_MEM_WIDTH, parameters);
         int addrWidth = ceil(log2(depth.to_type<int>()));
 
-        portWidths.insert({PORT_ID_RADDR, {addrWidth, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_RADDR, SignalBus(addrWidth)});
+        addInputPort(PORT_ID_RADDR, addrWidth);
+        // portWidths.insert({PORT_ID_RADDR, {addrWidth, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_RADDR, SignalBus(addrWidth)});
 
-        portWidths.insert({PORT_ID_WADDR, {addrWidth, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_WADDR, SignalBus(addrWidth)});
+        addInputPort(PORT_ID_WADDR, addrWidth);
+        // portWidths.insert({PORT_ID_WADDR, {addrWidth, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_WADDR, SignalBus(addrWidth)});
 
-        portWidths.insert({PORT_ID_WDATA, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_WDATA, SignalBus(width.to_type<int>())});
+        addInputPort(PORT_ID_WDATA, width.to_type<int>());
+        // portWidths.insert({PORT_ID_WDATA, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_WDATA, SignalBus(width.to_type<int>())});
 
-        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_CLK, SignalBus(1)});
+        addInputPort(PORT_ID_CLK, 1);
+        // portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_CLK, SignalBus(1)});
 
-        portWidths.insert({PORT_ID_WEN, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_WEN, SignalBus(1)});
+        addInputPort(PORT_ID_WEN, 1);
+        // portWidths.insert({PORT_ID_WEN, {1, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_WEN, SignalBus(1)});
         
         portWidths.insert({PORT_ID_RDATA, {width.to_type<int>(), PORT_TYPE_OUT}});
         std::vector<std::set<SignalBit> > bus(width.to_type<int>());
@@ -436,8 +448,9 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(out_wd);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {in_wd, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(in_wd)});
+        addInputPort(PORT_ID_IN, in_wd);
+        // portWidths.insert({PORT_ID_IN, {in_wd, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(in_wd)});
         
       } else if (cellType == CELL_TYPE_PORT) {
         BitVector width = map_find(PARAM_OUT_WIDTH, parameters); //.at(PARAM_OUT_WIDTH);
@@ -461,8 +474,9 @@ namespace FlatCircuit {
         } else {
           assert(ptpInt == PORT_CELL_FOR_OUTPUT);
 
-          portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-          drivers.insert({PORT_ID_IN, SignalBus(wd)});
+          addInputPort(PORT_ID_IN, width.to_type<int>());
+          // portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+          // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
         }
       } else if (isBinop(cellType)) {
@@ -485,11 +499,13 @@ namespace FlatCircuit {
 
         }
 
-        portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN0, SignalBus(wd)});
+        addInputPort(PORT_ID_IN0, width.to_type<int>());
+        addInputPort(PORT_ID_IN1, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN0, SignalBus(wd)});
 
-        portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN1, SignalBus(wd)});
+        // portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN1, SignalBus(wd)});
         
       } else if (cellType == CELL_TYPE_REG_ARST) {
 
@@ -501,14 +517,17 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+        addInputPort(PORT_ID_IN, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
-        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_CLK, SignalBus(1)});
+        addInputPort(PORT_ID_CLK, 1);
+        // portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_CLK, SignalBus(1)});
 
-        portWidths.insert({PORT_ID_ARST, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_ARST, SignalBus(1)});
+        addInputPort(PORT_ID_ARST, 1);
+        // portWidths.insert({PORT_ID_ARST, {1, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_ARST, SignalBus(1)});
         
       } else if (cellType == CELL_TYPE_MUX) {
 
@@ -520,27 +539,31 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN0, SignalBus(wd)});
+        addInputPort(PORT_ID_IN0, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN0, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN0, SignalBus(wd)});
 
-        portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN1, SignalBus(wd)});
+        addInputPort(PORT_ID_IN1, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN1, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN1, SignalBus(wd)});
 
-        portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_SEL, SignalBus(1)});
+        addInputPort(PORT_ID_SEL, 1);
+        // portWidths.insert({PORT_ID_SEL, {1, PORT_TYPE_IN}})
+        // drivers.insert({PORT_ID_SEL, SignalBus(1)});
         
       } else if (isUnop(cellType) && isReduceOp(cellType)) {
 
         BitVector width = parameters.at(PARAM_WIDTH);
-        int wd = width.to_type<int>();
+        //int wd = width.to_type<int>();
         assert(width.bitLength() == 32);
 
         portWidths.insert({PORT_ID_OUT, {1, PORT_TYPE_OUT}});
         std::vector<std::set<SignalBit> > bus(1);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+        addInputPort(PORT_ID_IN, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (isUnop(cellType)) {
 
@@ -554,8 +577,9 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+        addInputPort(PORT_ID_IN, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
       } else if (cellType == CELL_TYPE_CONST) {
 
@@ -576,11 +600,13 @@ namespace FlatCircuit {
         std::vector<std::set<SignalBit> > bus(wd);
         receivers.insert({PORT_ID_OUT, bus});
 
-        portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_IN, SignalBus(wd)});
+        addInputPort(PORT_ID_IN, width.to_type<int>());
+        // portWidths.insert({PORT_ID_IN, {width.to_type<int>(), PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_IN, SignalBus(wd)});
 
-        portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
-        drivers.insert({PORT_ID_CLK, SignalBus(1)});
+        addInputPort(PORT_ID_CLK, 1);
+        // portWidths.insert({PORT_ID_CLK, {1, PORT_TYPE_IN}});
+        // drivers.insert({PORT_ID_CLK, SignalBus(1)});
 
       } else {
         std::cout << "No processing rule for cell type " << cellType << std::endl;
