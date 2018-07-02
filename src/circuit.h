@@ -390,7 +390,7 @@ namespace FlatCircuit {
 
     Cell(const CellType cellType_,
          const std::map<Parameter, BitVector> & parameters_) :
-      parameters(parameters_), cellType(cellType_), drivers(100, 0) {
+      parameters(parameters_), cellType(cellType_), drivers(20) {
       //std::cout << "Creating cell type " << cellType << std::endl;
 
       // NOTE: Need to include input port type and output port type
