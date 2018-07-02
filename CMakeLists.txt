@@ -27,12 +27,16 @@ add_library(flatcircuit ${CPP_FILES})
 # Test executables
 SET(CGRA_TEST_FILES ./test/cgra_tests.cpp)
 SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
+SET(REGRESSION_TEST_FILES ./test/op_tests.cpp)
 
 add_executable(all-tests test/test_main.cpp ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
 target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
 add_executable(small-tests test/test_main.cpp ${SMALL_TEST_FILES})
 target_link_libraries(small-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(regression-tests test/test_main.cpp ${REGRESSION_TEST_FILES})
+target_link_libraries(regression-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
 # End test executables
 

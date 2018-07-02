@@ -59,7 +59,7 @@ namespace FlatCircuit {
     def.addPort("in", 16, PORT_TYPE_IN);
     def.addPort("out", 16, PORT_TYPE_OUT);
 
-    int chainLength = 1000;
+    int chainLength = 100000;
     CellId baseConstant =
       def.addCell("base_const",
                   CELL_TYPE_CONST,
@@ -89,6 +89,7 @@ namespace FlatCircuit {
     cout << "Done updating" << endl;
 
     foldConstantsWRTState(def, sim.getValueStore());
+    //foldConstants(def, sim.allRegisterValues());
     deleteDeadInstances(def);
 
     REQUIRE(def.numCells() == 3);
