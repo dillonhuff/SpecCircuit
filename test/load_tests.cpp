@@ -50,6 +50,15 @@ namespace FlatCircuit {
                   const std::string& fileName) {
     ofstream out(fileName);
     writeCSVLine({"NAME", e.getCellTypeName(def)}, out);
+    writeCSVLine({"PORT_NAMES"}, out);
+    for (auto pn : def.getPortNames()) {
+      CellId cid = def.getPortCellId(pn);
+      const Cell& pcell = def.getCellRefConst(cid);
+      writeCSVLine({pn,
+            pcell.getParameterValue(PARAM_OUT_WIDTH).binary_string(),
+            to_string(bvToInt(pcell.getParameterValue(PARAM_PORT_TYPE)))},
+        out);
+    }
     writeCSVLine({"END"}, out);
     out.close();
   }
@@ -106,6 +115,13 @@ namespace FlatCircuit {
     loadFromFile(e, "passthrough.csv");
 
     REQUIRE(e.hasCellType("passthrough"));
+
+    Simulator simLoaded(e, e.getDef(e.getCellType("passthrough")));
+    simLoaded.setFreshValue("in", BitVec(8, 156));
+    simLoaded.update();
+
+    REQUIRE(simLoaded.getBitVec("out") == BitVec(8, 156));
+
   }
   
 }
