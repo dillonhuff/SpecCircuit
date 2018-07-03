@@ -8,6 +8,44 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  Parameter intToParameter(const int i) {
+    switch(i) {
+    case 0:
+      return PARAM_PORT_TYPE;
+    case 1:
+      return PARAM_WIDTH;
+    case 2:
+      return PARAM_HIGH;
+    case 3:
+      return PARAM_LOW;
+    case 4:
+      return PARAM_IN_WIDTH;
+    case 5:
+      return PARAM_IN0_WIDTH;
+    case 6:
+      return PARAM_IN1_WIDTH;
+    case 7:
+      return PARAM_OUT_WIDTH;
+    case 8:
+      return PARAM_SEL_WIDTH;
+    case 9:
+      return PARAM_CLK_POSEDGE;
+    case 10:
+      return PARAM_ARST_POSEDGE;
+    case 11:
+      return PARAM_INIT_VALUE;
+    case 12:
+      return PARAM_MEM_WIDTH;
+    case 13:
+      return PARAM_MEM_DEPTH;
+    case 14:
+      return PARAM_HAS_INIT;
+
+    default:
+      assert(false);
+    }
+  }
+
   std::vector<std::string> readCSVLine(std::istream& in) {
     std::string line;
     getline(in, line);
@@ -164,12 +202,16 @@ namespace FlatCircuit {
       auto paramsLine = readCSVLine(in);
       assert((paramsLine.size() % 2) == 0);
 
-      // TODO: Add real parameter loading
       map<Parameter, BitVector> parameters;
+      for (int i = 0; i < (int) paramsLine.size(); i += 2) {
+        Parameter p = intToParameter(stoi(paramsLine[i]));
+        cout << "Creating bit vector from " << paramsLine[i + 1] << endl;
+        BitVector value(paramsLine[i + 1].size(), paramsLine[i + 1]);
+        parameters[p] = value;
+      }
 
       // Port cells have already been created
       if (ctp != CELL_TYPE_PORT) {
-        assert(false);
         def.addCell(cellName, ctp, parameters);
       }
 
@@ -305,7 +347,7 @@ namespace FlatCircuit {
 
       CellDefinition& loadedDef = e.getDef(e.getCellType("negate"));
 
-      REQUIRE(loadedDef.numCells() == 2);
+      REQUIRE(loadedDef.numCells() == 3);
 
       Simulator simLoaded(e, loadedDef);
       simLoaded.setFreshValue("in", BitVec(16, 156));
