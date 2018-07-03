@@ -109,6 +109,13 @@ namespace FlatCircuit {
     out.close();
   }
 
+  struct CellLines {
+    vector<string> decl;
+    vector<string> ports;
+    vector<string> parameters;
+    vector<string> drivers;
+  };
+
   void loadFromFile(Env& e,
                     const std::string& fileName) {
     ifstream in(fileName);
@@ -144,8 +151,10 @@ namespace FlatCircuit {
     assert(nextLine.size() == 1);
     assert(nextLine[0] == "CELLS");
 
+    vector<CellLines> cells;
     nextLine = readCSVLine(in);
     while (nextLine.size() == 2) {
+      auto declLine = nextLine;
       string cellName = nextLine[0];
       CellType ctp = stoi(nextLine[1]);
       // Read ports
@@ -160,12 +169,25 @@ namespace FlatCircuit {
 
       // Port cells have already been created
       if (ctp != CELL_TYPE_PORT) {
+        assert(false);
         def.addCell(cellName, ctp, parameters);
       }
 
-      CellId cid = def.getCellId(cellName);
+
       // Read drivers
       auto driversLine = readCSVLine(in);
+
+      cells.push_back({declLine, portsLine, paramsLine, driversLine});
+
+      // Read next cell
+      nextLine = readCSVLine(in);
+    }
+
+    for (auto cellLine : cells) {
+      string cellName = cellLine.decl[0];
+      CellId cid = def.getCellId(cellName);
+      auto driversLine = cellLine.drivers;
+
       if (driversLine[0] != "NO_INPUTS") {
         int i = 0;
         while (i < driversLine.size()) {
@@ -191,8 +213,6 @@ namespace FlatCircuit {
         }
       }
 
-      // Read next cell
-      nextLine = readCSVLine(in);
     }
 
     assert(nextLine.size() == 1);
@@ -203,46 +223,97 @@ namespace FlatCircuit {
 
   }
 
-  TEST_CASE("Storing and then loading a passthrough circuit") {
-    Env e;
+  TEST_CASE("Storing and loading circuits") {
 
-    CellType modType = e.addCellType("passthrough");
-    CellDefinition& def = e.getDef(modType);
-    def.addPort("in", 8, PORT_TYPE_IN);
-    def.addPort("out", 8, PORT_TYPE_OUT);
+    SECTION("Passthrough") {
+      Env e;
 
-    CellId in = def.getPortCellId("in");
-    CellId out = def.getPortCellId("out");
+      CellType modType = e.addCellType("passthrough");
+      CellDefinition& def = e.getDef(modType);
+      def.addPort("in", 8, PORT_TYPE_IN);
+      def.addPort("out", 8, PORT_TYPE_OUT);
 
-    def.connect(in, PORT_ID_OUT,
-                out, PORT_ID_IN);
+      CellId in = def.getPortCellId("in");
+      CellId out = def.getPortCellId("out");
 
-    Simulator sim(e, def);
-    sim.setFreshValue("in", BitVec(8, 0));
-    sim.update();
+      def.connect(in, PORT_ID_OUT,
+                  out, PORT_ID_IN);
 
-    REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
+      Simulator sim(e, def);
+      sim.setFreshValue("in", BitVec(8, 0));
+      sim.update();
 
-    saveToFile(e, def, "passthrough.csv");
+      REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
 
-    e.deleteCellType(modType);
+      saveToFile(e, def, "passthrough.csv");
 
-    REQUIRE(!e.hasCellType(modType));
+      e.deleteCellType(modType);
 
-    loadFromFile(e, "passthrough.csv");
+      REQUIRE(!e.hasCellType(modType));
 
-    REQUIRE(e.hasCellType("passthrough"));
+      loadFromFile(e, "passthrough.csv");
 
-    CellDefinition& loadedDef = e.getDef(e.getCellType("passthrough"));
+      REQUIRE(e.hasCellType("passthrough"));
 
-    REQUIRE(loadedDef.numCells() == 2);
+      CellDefinition& loadedDef = e.getDef(e.getCellType("passthrough"));
 
-    Simulator simLoaded(e, loadedDef);
-    simLoaded.setFreshValue("in", BitVec(8, 156));
-    simLoaded.update();
+      REQUIRE(loadedDef.numCells() == 2);
 
-    REQUIRE(simLoaded.getBitVec("out") == BitVec(8, 156));
+      Simulator simLoaded(e, loadedDef);
+      simLoaded.setFreshValue("in", BitVec(8, 156));
+      simLoaded.update();
 
+      REQUIRE(simLoaded.getBitVec("out") == BitVec(8, 156));
+    }
+
+    SECTION("Negation") {
+      Env e;
+
+      CellType modType = e.addCellType("negate");
+      CellDefinition& def = e.getDef(modType);
+      def.addPort("in", 16, PORT_TYPE_IN);
+      def.addPort("out", 16, PORT_TYPE_OUT);
+
+      CellId in = def.getPortCellId("in");
+      CellId out = def.getPortCellId("out");
+
+      CellId neg = def.addCell("neg",
+                               CELL_TYPE_NOT,
+                               {{PARAM_WIDTH, BitVector(32, 16)}});
+
+      def.connect(in, PORT_ID_OUT,
+                  neg, PORT_ID_IN);
+
+      def.connect(neg, PORT_ID_OUT,
+                  out, PORT_ID_IN);
+      
+      Simulator sim(e, def);
+      sim.setFreshValue("in", BitVec(16, 0));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out") == ~BitVec(16, 0));
+
+      saveToFile(e, def, "passthrough.csv");
+
+      e.deleteCellType(modType);
+
+      REQUIRE(!e.hasCellType(modType));
+
+      loadFromFile(e, "passthrough.csv");
+
+      REQUIRE(e.hasCellType("negate"));
+
+      CellDefinition& loadedDef = e.getDef(e.getCellType("negate"));
+
+      REQUIRE(loadedDef.numCells() == 2);
+
+      Simulator simLoaded(e, loadedDef);
+      simLoaded.setFreshValue("in", BitVec(16, 156));
+      simLoaded.update();
+
+      REQUIRE(simLoaded.getBitVec("out") == ~BitVec(16, 156));
+    }
+    
   }
   
 }
