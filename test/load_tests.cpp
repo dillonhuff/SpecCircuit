@@ -85,6 +85,20 @@ namespace FlatCircuit {
       writeCSVLine(parameters, out);
 
       // Write drivers
+      
+      for (auto inPort : cell.inputPorts()) {
+        auto drivers = cell.getDrivers(inPort);
+        vector<string> driverLines;
+        for (int i = 0; i < (int) drivers.size(); i++) {
+          SignalBit dt = drivers.signals[i];
+          string driverName = def.getCellName(dt.cell);
+          driverLines.push_back(driverName);
+          driverLines.push_back(to_string(dt.port));
+          driverLines.push_back(to_string(dt.offset));
+        }
+        writeCSVLine(driverLines, out);
+      }
+
       // Write receivers
     }
 
