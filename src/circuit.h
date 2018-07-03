@@ -1141,6 +1141,20 @@ namespace FlatCircuit {
     // Save space for 100 primitive operations
     Env() : nextType(100) {}
 
+    void deleteCellType(const CellType tp) {
+      cellDefs.erase(tp);
+      for (auto k : cellTypeNames) {
+        if (k.second == tp) {
+          cellTypeNames.erase(k.first);
+          break;
+        }
+      }
+    }
+
+    bool hasCellType(const CellType tp) const {
+      return contains_key(tp, cellDefs);
+    }
+
     CellType addCellType(const std::string& name) {
       auto tp = nextType;
       cellDefs[tp] = {};

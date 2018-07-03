@@ -26,7 +26,7 @@ add_library(flatcircuit ${CPP_FILES})
 
 # Test executables
 SET(CGRA_TEST_FILES ./test/cgra_tests.cpp)
-SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
+SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp ./test/load_tests.cpp)
 SET(REGRESSION_TEST_FILES ./test/op_tests.cpp)
 
 add_executable(all-tests test/test_main.cpp ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
