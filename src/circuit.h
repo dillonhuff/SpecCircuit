@@ -1080,6 +1080,11 @@ namespace FlatCircuit {
       return id;
     }
 
+    CellId getCellId(const std::string& name) const {
+      assert(contains_key(name, cellNames));
+      return map_find(name, cellNames);
+    }
+
     std::string getCellName(const CellId cellId) const {
       assert(contains_key(cellId, cellIdsToNames));
       return cellIdsToNames.at(cellId);

@@ -146,14 +146,50 @@ namespace FlatCircuit {
 
     nextLine = readCSVLine(in);
     while (nextLine.size() == 2) {
+      string cellName = nextLine[0];
+      CellType ctp = stoi(nextLine[1]);
       // Read ports
       auto portsLine = readCSVLine(in);
 
       // Read parameters
       auto paramsLine = readCSVLine(in);
+      assert((paramsLine.size() % 2) == 0);
 
+      // TODO: Add real parameter loading
+      map<Parameter, BitVector> parameters;
+
+      // Port cells have already been created
+      if (ctp != CELL_TYPE_PORT) {
+        def.addCell(cellName, ctp, parameters);
+      }
+
+      CellId cid = def.getCellId(cellName);
       // Read drivers
       auto driversLine = readCSVLine(in);
+      if (driversLine[0] != "NO_INPUTS") {
+        int i = 0;
+        while (i < driversLine.size()) {
+          assert(driversLine[i] == "D");
+          i++;
+
+          PortId pid = stoi(driversLine[i]);
+          i++;
+
+          int receiverOffset = 0;
+          while (i < driversLine.size() && (driversLine[i] != "D")) {
+            string driverCellName = driversLine[i];
+            cout << "Looking for name " << driverCellName << endl;
+            CellId driverCellId = def.getCellId(driverCellName);
+            PortId driverCellPort = stoi(driversLine[i + 1]);
+            int driverCellOffset = stoi(driversLine[i + 2]);
+            def.setDriver({cid, pid, receiverOffset},
+                          {driverCellId, driverCellPort, driverCellOffset});
+            i += 3;
+            receiverOffset++;
+          }
+
+        }
+      }
 
       // Read next cell
       nextLine = readCSVLine(in);
