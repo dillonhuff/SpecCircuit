@@ -85,10 +85,11 @@ namespace FlatCircuit {
       writeCSVLine(parameters, out);
 
       // Write drivers
-      
       for (auto inPort : cell.inputPorts()) {
         auto drivers = cell.getDrivers(inPort);
         vector<string> driverLines;
+        driverLines.push_back("D");
+        driverLines.push_back(to_string(inPort));
         for (int i = 0; i < (int) drivers.size(); i++) {
           SignalBit dt = drivers.signals[i];
           string driverName = def.getCellName(dt.cell);
@@ -99,7 +100,9 @@ namespace FlatCircuit {
         writeCSVLine(driverLines, out);
       }
 
-      // Write receivers
+      if (cell.inputPorts().size() == 0) {
+        writeCSVLine({"NO_INPUTS"}, out);
+      }
     }
 
     writeCSVLine({"END"}, out);
@@ -144,9 +147,13 @@ namespace FlatCircuit {
     nextLine = readCSVLine(in);
     while (nextLine.size() == 2) {
       // Read ports
-      nextLine = readCSVLine(in);
+      auto portsLine = readCSVLine(in);
+
       // Read parameters
-      nextLine = readCSVLine(in);
+      auto paramsLine = readCSVLine(in);
+
+      // Read drivers
+      auto driversLine = readCSVLine(in);
 
       // Read next cell
       nextLine = readCSVLine(in);
