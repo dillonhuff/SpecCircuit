@@ -50,15 +50,17 @@ namespace FlatCircuit {
                   const std::string& fileName) {
     ofstream out(fileName);
     writeCSVLine({"NAME", e.getCellTypeName(def)}, out);
+
     writeCSVLine({"PORT_NAMES"}, out);
     for (auto pn : def.getPortNames()) {
       CellId cid = def.getPortCellId(pn);
       const Cell& pcell = def.getCellRefConst(cid);
       writeCSVLine({pn,
-            pcell.getParameterValue(PARAM_OUT_WIDTH).binary_string(),
+            to_string(pcell.getParameterValue(PARAM_OUT_WIDTH).to_type<int>()),
             to_string(bvToInt(pcell.getParameterValue(PARAM_PORT_TYPE)))},
         out);
     }
+
     writeCSVLine({"END"}, out);
     out.close();
   }
@@ -75,11 +77,27 @@ namespace FlatCircuit {
     std::string name = nameLine[1];
 
     CellType modType = e.addCellType(name);
-    //CellDefinition& def = e.getDef(modType);
-    
-    vector<string> endLine = readCSVLine(in);
-    assert(endLine.size() == 1);
-    assert(endLine[0] == "END");
+    CellDefinition& def = e.getDef(modType);
+
+    auto portDeclLine = readCSVLine(in);
+    assert(portDeclLine.size() == 1);
+    assert(portDeclLine[0] == "PORT_NAMES");
+
+    vector<string> nextLine = readCSVLine(in);
+    while (nextLine.size() == 3) {
+      auto portName = nextLine[0];
+      auto portWidthStr = nextLine[1];
+      auto portTypeStr = nextLine[2];
+      assert((portTypeStr == "0") || (portTypeStr == "1"));
+      PortType portType = portTypeStr == "0" ? PORT_TYPE_IN : PORT_TYPE_OUT;
+      int portWidth = stoi(portWidthStr);
+      def.addPort(portName, portWidth, portType);
+      nextLine = readCSVLine(in);
+    }
+
+    //cout << "nextline = " << nextLine[0] << endl;
+    assert(nextLine.size() == 1);
+    assert(nextLine[0] == "END");
 
     // parse end of file
     in.close();
