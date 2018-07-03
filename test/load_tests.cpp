@@ -51,7 +51,7 @@ namespace FlatCircuit {
     ofstream out(fileName);
     writeCSVLine({"NAME", e.getCellTypeName(def)}, out);
 
-    writeCSVLine({"PORT_NAMES"}, out);
+    writeCSVLine({"PORTS"}, out);
     for (auto pn : def.getPortNames()) {
       CellId cid = def.getPortCellId(pn);
       const Cell& pcell = def.getCellRefConst(cid);
@@ -59,6 +59,33 @@ namespace FlatCircuit {
             to_string(pcell.getParameterValue(PARAM_OUT_WIDTH).to_type<int>()),
             to_string(bvToInt(pcell.getParameterValue(PARAM_PORT_TYPE)))},
         out);
+    }
+
+    writeCSVLine({"CELLS"}, out);
+    for (auto ctp : def.getCellMap()) {
+      CellId cid = ctp.first;
+      const Cell& cell = def.getCellRefConst(cid);
+      writeCSVLine({def.getCellName(cid), to_string(cell.getCellType())}, out);
+
+      // Write ports
+      vector<string> ports;
+      for (auto pt : cell.getPorts()) {
+        ports.push_back(to_string(pt.first));
+        ports.push_back(to_string(pt.second.width));
+        ports.push_back(to_string(pt.second.type));
+      }
+      writeCSVLine(ports, out);
+
+      // Write parameters
+      vector<string> parameters;
+      for (auto pm : cell.getParameters()) {
+        parameters.push_back(to_string(pm.first));
+        parameters.push_back(pm.second.binary_string());
+      }
+      writeCSVLine(parameters, out);
+
+      // Write drivers
+      // Write receivers
     }
 
     writeCSVLine({"END"}, out);
@@ -81,7 +108,7 @@ namespace FlatCircuit {
 
     auto portDeclLine = readCSVLine(in);
     assert(portDeclLine.size() == 1);
-    assert(portDeclLine[0] == "PORT_NAMES");
+    assert(portDeclLine[0] == "PORTS");
 
     vector<string> nextLine = readCSVLine(in);
     while (nextLine.size() == 3) {
@@ -89,6 +116,7 @@ namespace FlatCircuit {
       auto portWidthStr = nextLine[1];
       auto portTypeStr = nextLine[2];
       assert((portTypeStr == "0") || (portTypeStr == "1"));
+
       PortType portType = portTypeStr == "0" ? PORT_TYPE_IN : PORT_TYPE_OUT;
       int portWidth = stoi(portWidthStr);
       def.addPort(portName, portWidth, portType);
@@ -97,8 +125,22 @@ namespace FlatCircuit {
 
     //cout << "nextline = " << nextLine[0] << endl;
     assert(nextLine.size() == 1);
-    assert(nextLine[0] == "END");
+    assert(nextLine[0] == "CELLS");
 
+    nextLine = readCSVLine(in);
+    while (nextLine.size() == 2) {
+      // Read ports
+      nextLine = readCSVLine(in);
+      // Read parameters
+      nextLine = readCSVLine(in);
+
+      // Read next cell
+      nextLine = readCSVLine(in);
+    }
+
+    assert(nextLine.size() == 1);
+    assert(nextLine[0] == "END");
+    
     // parse end of file
     in.close();
 
@@ -134,7 +176,11 @@ namespace FlatCircuit {
 
     REQUIRE(e.hasCellType("passthrough"));
 
-    Simulator simLoaded(e, e.getDef(e.getCellType("passthrough")));
+    CellDefinition& loadedDef = e.getDef(e.getCellType("passthrough"));
+
+    REQUIRE(loadedDef.numCells() == 2);
+
+    Simulator simLoaded(e, loadedDef);
     simLoaded.setFreshValue("in", BitVec(8, 156));
     simLoaded.update();
 
