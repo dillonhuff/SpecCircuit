@@ -1,17 +1,82 @@
 #include "catch.hpp"
 
 #include "simulator.h"
+#include <fstream>
 
 using namespace CoreIR;
+using namespace std;
 
 namespace FlatCircuit {
 
-  void saveToFile(const CellDefinition& def, const std::string& fileName) {
-  }
+  std::vector<std::string> readCSVLine(std::istream& in) {
+    std::string line;
+    getline(in, line);
 
-  void loadFromFile(const Env& e, const std::string& fileName) {
+    cout << "Read line = " << line << endl;
+    
+    vector<string> tokens;
+    string currentToken = "";
+    int i = 0;
+    while (i < (int) line.size()) {
+      if (line[i] != ',') {
+        currentToken += line[i];
+      } else {
+        tokens.push_back(currentToken);
+        currentToken = "";
+      }
+      
+      i++;
+    }
+
+    cout << "Parsed into tokens" << endl;
+    for (auto tok : tokens) {
+      cout << "\t" << tok << endl;
+    }
+    
+    return tokens;
   }
   
+  void writeCSVLine(const std::vector<std::string>& tokens,
+                    std::ostream& out) {
+    for (auto token : tokens) {
+      out << token << ",";
+    }
+
+    out << std::endl;
+  }
+
+  void saveToFile(const Env& e,
+                  const CellDefinition& def,
+                  const std::string& fileName) {
+    ofstream out(fileName);
+    writeCSVLine({"NAME", e.getCellTypeName(def)}, out);
+    writeCSVLine({"END"}, out);
+    out.close();
+  }
+
+  void loadFromFile(Env& e,
+                    const std::string& fileName) {
+    ifstream in(fileName);
+
+    // parse name
+    vector<string> nameLine = readCSVLine(in);
+    assert(nameLine.size() == 2);
+    assert(nameLine[0] == "NAME");
+
+    std::string name = nameLine[1];
+
+    CellType modType = e.addCellType(name);
+    //CellDefinition& def = e.getDef(modType);
+    
+    vector<string> endLine = readCSVLine(in);
+    assert(endLine.size() == 1);
+    assert(endLine[0] == "END");
+
+    // parse end of file
+    in.close();
+
+  }
+
   TEST_CASE("Storing and then loading a passthrough circuit") {
     Env e;
 
@@ -32,7 +97,7 @@ namespace FlatCircuit {
 
     REQUIRE(sim.getBitVec("out") == BitVec(8, 0));
 
-    saveToFile(def, "passthrough.csv");
+    saveToFile(e, def, "passthrough.csv");
 
     e.deleteCellType(modType);
 
@@ -40,7 +105,7 @@ namespace FlatCircuit {
 
     loadFromFile(e, "passthrough.csv");
 
-    REQUIRE(e.hasCellType(modType));
+    REQUIRE(e.hasCellType("passthrough"));
   }
   
 }
