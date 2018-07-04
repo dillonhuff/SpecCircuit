@@ -89,6 +89,35 @@ namespace FlatCircuit {
     out << std::endl;
   }
 
+  bool isBulkConnection(const CellId cid,
+                        const PortId pid,
+                        const CellDefinition& def) {
+    const Cell& cell = def.getCellRefConst(cid);
+    auto drivers = cell.getDrivers(pid);
+
+    for (int i = 0; i < drivers.size(); i++) {
+      SignalBit driverBit = drivers.signals[i];
+      if (driverBit.offset != i) {
+        return false;
+      }
+    }
+
+    CellId driverCell = drivers.signals[0].cell;
+    PortId driverPort = drivers.signals[0].port;
+    for (int i = 0; i < drivers.size(); i++) {
+      if (driverPort != drivers.signals[i].port) {
+        return false;
+      }
+
+      if (driverCell != drivers.signals[i].cell) {
+        return false;
+      }
+
+    }
+
+    return true;
+  }
+
   void saveToFile(const Env& e,
                   const CellDefinition& def,
                   const std::string& fileName) {
@@ -139,12 +168,20 @@ namespace FlatCircuit {
 
         driverLines.push_back("D");
         driverLines.push_back(to_string(inPort));
-        for (int i = 0; i < (int) drivers.size(); i++) {
-          SignalBit dt = drivers.signals[i];
-          string driverName = def.getCellName(dt.cell);
-          driverLines.push_back(driverName);
-          driverLines.push_back(to_string(dt.port));
-          driverLines.push_back(to_string(dt.offset));
+        if (isBulkConnection(cid, inPort, def) && cell.getPortWidth(inPort) > 1) {
+            SignalBit dt = drivers.signals[0];
+            string driverName = def.getCellName(dt.cell);
+            driverLines.push_back(driverName);
+            driverLines.push_back(to_string(dt.port));
+            driverLines.push_back("B");
+        } else {
+          for (int i = 0; i < (int) drivers.size(); i++) {
+            SignalBit dt = drivers.signals[i];
+            string driverName = def.getCellName(dt.cell);
+            driverLines.push_back(driverName);
+            driverLines.push_back(to_string(dt.port));
+            driverLines.push_back(to_string(dt.offset));
+          }
         }
       }
 
@@ -440,6 +477,31 @@ namespace FlatCircuit {
         sim.update();
         REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
       }
+
+    }
+
+    SECTION("Top") {
+      // Env circuitEnv = loadFromCoreIR("global.top", "./test/top.json");
+      // CellDefinition& def = circuitEnv.getDef("top");
+
+      // cout << "Starting to save" << endl;
+
+      // saveToFile(circuitEnv, def, "top.csv");
+
+      // cout << "Done saving" << endl;
+
+      // CellType cbTp = circuitEnv.getCellType("top");
+      // circuitEnv.deleteCellType(cbTp);
+
+      // cout << "Done deleting" << endl;
+      
+      // REQUIRE(!circuitEnv.hasCellType(cbTp));
+
+      // cout << "Loading" << endl;
+      // loadFromFile(circuitEnv, "top.csv");
+      // cout << "Done loading" << endl;
+
+      // REQUIRE(circuitEnv.hasCellType("top"));
 
     }
     
