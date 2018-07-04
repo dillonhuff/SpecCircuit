@@ -320,6 +320,21 @@ namespace FlatCircuit {
     assert(false);
   }
 
+  void insertNewCandidates(const Cell& cell,
+                           const PortId pid,
+                           const CellDefinition& def,
+                           std::set<CellId>& candidates) {
+    for (auto sigBus : cell.getPortReceivers(pid)) {
+      for (auto sigBit : sigBus) {
+        if (notEmpty(sigBit) && def.getCellRefConst(sigBit.cell).getCellType() !=
+            CELL_TYPE_CONST) {
+          candidates.insert(sigBit.cell);
+        }
+      }
+    }
+    
+  }
+
   // Other constant folding mechanisms:
   // 1. Partially evaluating ands / ors, x + 0, etc.
   // 2. Evaluating registers whose inputs are constant and whose current value
@@ -333,11 +348,15 @@ namespace FlatCircuit {
     for (auto& cellPair : def.getCellMap()) {
       Cell& cell = def.getCellRef(cellPair.first);
       if (cell.getCellType() == CELL_TYPE_CONST) {
-        for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
-          for (auto sigBit : sigBus) {
-            candidates.insert(sigBit.cell);
-          }
-        }
+        insertNewCandidates(cell, PORT_ID_OUT, def, candidates);
+        // for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
+        //   for (auto sigBit : sigBus) {
+        //     if (notEmpty(sigBit) && def.getCellRefConst(sigBit.cell).getCellType() !=
+        //         CELL_TYPE_CONST) {
+        //       candidates.insert(sigBit.cell);
+        //     }
+        //   }
+        // }
       }
     }
 
@@ -366,14 +385,15 @@ namespace FlatCircuit {
 
           assert(bitVec.bitLength() == 1);
 
-          for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-            for (auto sigBit : sigBus) {
-              if (def.getCellRefConst(sigBit.cell).getCellType() !=
-                  CELL_TYPE_CONST) {
-                candidates.insert(sigBit.cell);
-              }
-            }
-          }
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          // for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
+          //   for (auto sigBit : sigBus) {
+          //     if (def.getCellRefConst(sigBit.cell).getCellType() !=
+          //         CELL_TYPE_CONST) {
+          //       candidates.insert(sigBit.cell);
+          //     }
+          //   }
+          // }
 
           bool selIn1 = 0;
           if (bitVec.get(0).is_binary()) {
@@ -435,14 +455,15 @@ namespace FlatCircuit {
         maybe<BitVector> bv = getOutput(next, def, registerValues);
 
         if (bv.has_value()) {
-          for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-            for (auto sigBit : sigBus) {
-              if (def.getCellRefConst(sigBit.cell).getCellType() !=
-                  CELL_TYPE_CONST) {
-                candidates.insert(sigBit.cell);
-              }
-            }
-          }
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          // for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
+          //   for (auto sigBit : sigBus) {
+          //     if (def.getCellRefConst(sigBit.cell).getCellType() !=
+          //         CELL_TYPE_CONST) {
+          //       candidates.insert(sigBit.cell);
+          //     }
+          //   }
+          // }
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
           def.deleteCell(next);
