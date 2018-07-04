@@ -1,12 +1,18 @@
 #include "catch.hpp"
 
+#include "convert_coreir.h"
 #include "simulator.h"
+#include "utils.h"
+
 #include <fstream>
 
 using namespace CoreIR;
 using namespace std;
 
 namespace FlatCircuit {
+
+  void printVec() {
+  }
 
   Parameter intToParameter(const int i) {
     switch(i) {
@@ -50,7 +56,7 @@ namespace FlatCircuit {
     std::string line;
     getline(in, line);
 
-    cout << "Read line = " << line << endl;
+    //cout << "Read line = " << line << endl;
     
     vector<string> tokens;
     string currentToken = "";
@@ -66,10 +72,10 @@ namespace FlatCircuit {
       i++;
     }
 
-    cout << "Parsed into tokens" << endl;
-    for (auto tok : tokens) {
-      cout << "\t" << tok << endl;
-    }
+    // cout << "Parsed into tokens" << endl;
+    // for (auto tok : tokens) {
+    //   cout << "\t" << tok << endl;
+    // }
     
     return tokens;
   }
@@ -115,17 +121,22 @@ namespace FlatCircuit {
       writeCSVLine(ports, out);
 
       // Write parameters
-      vector<string> parameters;
-      for (auto pm : cell.getParameters()) {
-        parameters.push_back(to_string(pm.first));
-        parameters.push_back(pm.second.binary_string());
+      if (cell.getParameters().size() > 0) {
+        vector<string> parameters;
+        for (auto pm : cell.getParameters()) {
+          parameters.push_back(to_string(pm.first));
+          parameters.push_back(pm.second.binary_string());
+        }
+        writeCSVLine(parameters, out);
+      } else {
+        writeCSVLine({"NO_PARAMETERS"}, out);
       }
-      writeCSVLine(parameters, out);
 
       // Write drivers
+      vector<string> driverLines;      
       for (auto inPort : cell.inputPorts()) {
         auto drivers = cell.getDrivers(inPort);
-        vector<string> driverLines;
+
         driverLines.push_back("D");
         driverLines.push_back(to_string(inPort));
         for (int i = 0; i < (int) drivers.size(); i++) {
@@ -135,10 +146,11 @@ namespace FlatCircuit {
           driverLines.push_back(to_string(dt.port));
           driverLines.push_back(to_string(dt.offset));
         }
-        writeCSVLine(driverLines, out);
       }
 
-      if (cell.inputPorts().size() == 0) {
+      if (driverLines.size() > 0) {
+        writeCSVLine(driverLines, out);
+      } else {
         writeCSVLine({"NO_INPUTS"}, out);
       }
     }
@@ -205,26 +217,38 @@ namespace FlatCircuit {
       map<Parameter, BitVector> parameters;
       for (int i = 0; i < (int) paramsLine.size(); i += 2) {
         Parameter p = intToParameter(stoi(paramsLine[i]));
-        cout << "Creating bit vector from " << paramsLine[i + 1] << endl;
+        //cout << "Creating bit vector from " << paramsLine[i + 1] << endl;
         BitVector value(paramsLine[i + 1].size(), paramsLine[i + 1]);
         parameters[p] = value;
       }
 
       // Port cells have already been created
       if (ctp != CELL_TYPE_PORT) {
+        cout << "adding cell " << cellName << endl;
         def.addCell(cellName, ctp, parameters);
+      } else {
+        cout << "cell " << cellName << " is a port" << endl;
       }
-
 
       // Read drivers
       auto driversLine = readCSVLine(in);
 
       cells.push_back({declLine, portsLine, paramsLine, driversLine});
-
+      cout << "Parsed Cell" << endl;
+      cout << "\t";
+      writeCSVLine(declLine, cout);
+      cout << endl;
       // Read next cell
       nextLine = readCSVLine(in);
     }
 
+    cout << "Nextline = " << nextLine[0] << endl;
+    cout << "# of cells = " << cells.size() << endl;
+
+    assert(nextLine.size() == 1);
+    assert(nextLine[0] == "END");
+
+    // Wire up the circuit
     for (auto cellLine : cells) {
       string cellName = cellLine.decl[0];
       CellId cid = def.getCellId(cellName);
@@ -257,9 +281,6 @@ namespace FlatCircuit {
 
     }
 
-    assert(nextLine.size() == 1);
-    assert(nextLine[0] == "END");
-    
     // parse end of file
     in.close();
 
@@ -335,13 +356,13 @@ namespace FlatCircuit {
 
       REQUIRE(sim.getBitVec("out") == ~BitVec(16, 0));
 
-      saveToFile(e, def, "passthrough.csv");
+      saveToFile(e, def, "negate.csv");
 
       e.deleteCellType(modType);
 
       REQUIRE(!e.hasCellType(modType));
 
-      loadFromFile(e, "passthrough.csv");
+      loadFromFile(e, "negate.csv");
 
       REQUIRE(e.hasCellType("negate"));
 
@@ -354,6 +375,47 @@ namespace FlatCircuit {
       simLoaded.update();
 
       REQUIRE(simLoaded.getBitVec("out") == ~BitVec(16, 156));
+    }
+
+    SECTION("Connect box") {
+      Env circuitEnv = loadFromCoreIR("global.cb_unq1", "./test/cb_unq1.json");
+      CellDefinition& def = circuitEnv.getDef("cb_unq1");
+      Simulator sim(circuitEnv, def);
+      reset("reset", sim);
+
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+      posedge("clk", sim);
+
+      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+      sim.update();
+    
+      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+      sim.update();
+
+      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+
+      cout << "Starting to save" << endl;
+
+      saveToFile(circuitEnv, def, "connect_box.csv");
+
+      cout << "Done saving" << endl;
+
+      CellType cbTp = circuitEnv.getCellType("cb_unq1");
+      circuitEnv.deleteCellType(cbTp);
+
+      cout << "Done deleting" << endl;
+      
+      REQUIRE(!circuitEnv.hasCellType(cbTp));
+
+      cout << "Loading" << endl;
+      loadFromFile(circuitEnv, "connect_box.csv");
+      cout << "Done loading" << endl;
+
+      REQUIRE(circuitEnv.hasCellType("cb_unq1"));
     }
     
   }
