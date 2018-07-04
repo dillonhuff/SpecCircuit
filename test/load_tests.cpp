@@ -289,6 +289,7 @@ namespace FlatCircuit {
     for (auto cellLine : cells) {
       string cellName = cellLine.decl[0];
       CellId cid = def.getCellId(cellName);
+      const Cell& cell = def.getCellRefConst(cid);
       auto driversLine = cellLine.drivers;
 
       if (driversLine[0] != "NO_INPUTS") {
@@ -306,9 +307,21 @@ namespace FlatCircuit {
             //cout << "Looking for name " << driverCellName << endl;
             CellId driverCellId = def.getCellId(driverCellName);
             PortId driverCellPort = stoi(driversLine[i + 1]);
-            int driverCellOffset = stoi(driversLine[i + 2]);
-            def.setDriver({cid, pid, receiverOffset},
-                          {driverCellId, driverCellPort, driverCellOffset});
+            string driverOffsetVal = driversLine[i + 2];
+            if (driverOffsetVal != "B") {
+              int driverCellOffset = stoi(driversLine[i + 2]);
+              def.setDriver({cid, pid, receiverOffset},
+                            {driverCellId, driverCellPort, driverCellOffset});
+            } else {
+              assert(receiverOffset == 0);
+
+              for (int k = 0; k < (int) cell.getPortWidth(pid); k++) {
+                def.setDriver({cid, pid, k},
+                              {driverCellId, driverCellPort, k});
+              }
+              i += 3;
+              break;
+            }
             i += 3;
             receiverOffset++;
           }
@@ -480,28 +493,30 @@ namespace FlatCircuit {
 
     }
 
+    // original size   : du -s 1588152	top.csv
+    // with bulk conns : du -s 856816	top.csv
     SECTION("Top") {
-      // Env circuitEnv = loadFromCoreIR("global.top", "./test/top.json");
-      // CellDefinition& def = circuitEnv.getDef("top");
+      Env circuitEnv = loadFromCoreIR("global.top", "./test/top.json");
+      CellDefinition& def = circuitEnv.getDef("top");
 
-      // cout << "Starting to save" << endl;
+      cout << "Starting to save" << endl;
 
-      // saveToFile(circuitEnv, def, "top.csv");
+      saveToFile(circuitEnv, def, "top.csv");
 
-      // cout << "Done saving" << endl;
+      cout << "Done saving" << endl;
 
-      // CellType cbTp = circuitEnv.getCellType("top");
-      // circuitEnv.deleteCellType(cbTp);
+      CellType cbTp = circuitEnv.getCellType("top");
+      circuitEnv.deleteCellType(cbTp);
 
-      // cout << "Done deleting" << endl;
+      cout << "Done deleting" << endl;
       
-      // REQUIRE(!circuitEnv.hasCellType(cbTp));
+      REQUIRE(!circuitEnv.hasCellType(cbTp));
 
-      // cout << "Loading" << endl;
-      // loadFromFile(circuitEnv, "top.csv");
-      // cout << "Done loading" << endl;
+      cout << "Loading" << endl;
+      loadFromFile(circuitEnv, "top.csv");
+      cout << "Done loading" << endl;
 
-      // REQUIRE(circuitEnv.hasCellType("top"));
+      REQUIRE(circuitEnv.hasCellType("top"));
 
     }
     
