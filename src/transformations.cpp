@@ -330,7 +330,7 @@ namespace FlatCircuit {
                      const std::map<CellId, BitVector>& registerValues) {
 
     set<CellId> candidates;
-    for (auto cellPair : def.getCellMap()) {
+    for (auto& cellPair : def.getCellMap()) {
       Cell& cell = def.getCellRef(cellPair.first);
       if (cell.getCellType() == CELL_TYPE_CONST) {
         for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
@@ -494,7 +494,7 @@ namespace FlatCircuit {
 
   std::set<CellId> innerCellsWithNoReceivers(CellDefinition& def) {
     std::set<CellId> toDelete;
-    for (auto cellPair : def.getCellMap()) {
+    for (auto& cellPair : def.getCellMap()) {
 
       Cell& cell = def.getCellRef(cellPair.first);
       bool allOutputsHaveNoReceivers = true;
@@ -573,7 +573,7 @@ namespace FlatCircuit {
     cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
 
     set<CellId> innerCells;
-    for (auto ctp : def.getCellMap()) {
+    for (auto& ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       if (!elem(cid, connectedCells)) {
         innerCells.insert(cid);
@@ -588,7 +588,7 @@ namespace FlatCircuit {
     vector<CellId> zeroConstants;
     vector<CellId> oneConstants;
 
-    for (auto ctp : def.getCellMap()) {
+    for (auto& ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
         BitVector initVal = def.getCellRef(cid).getParameterValue(PARAM_INIT_VALUE);

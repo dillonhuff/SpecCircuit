@@ -212,7 +212,7 @@ namespace FlatCircuit {
       def(def_) {
 
       std::cout << "Start init" << std::endl;
-      for (auto c : def.getCellMap()) {
+      for (auto& c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
         CellId cid = c.first;
@@ -1087,7 +1087,7 @@ namespace FlatCircuit {
     }
 
     void refreshConstants() {
-      for (auto cp : def.getCellMap()) {
+      for (auto& cp : def.getCellMap()) {
         CellId cid = cp.first;
 
         if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
