@@ -866,7 +866,7 @@ namespace FlatCircuit {
         cells.erase(cid);
       }
 
-      for (auto ctp : getCellMap()) {
+      for (auto& ctp : getCellMap()) {
         CellId cid = ctp.first;
         Cell& c = getCellRef(cid);
 

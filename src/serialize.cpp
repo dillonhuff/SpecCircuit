@@ -105,7 +105,7 @@ namespace FlatCircuit {
     const Cell& cell = def.getCellRefConst(cid);
     auto drivers = cell.getDrivers(pid);
 
-    for (int i = 0; i < drivers.size(); i++) {
+    for (int i = 0; i < (int) drivers.size(); i++) {
       SignalBit driverBit = drivers.signals[i];
       if (driverBit.offset != i) {
         return false;
@@ -114,7 +114,7 @@ namespace FlatCircuit {
 
     CellId driverCell = drivers.signals[0].cell;
     PortId driverPort = drivers.signals[0].port;
-    for (int i = 0; i < drivers.size(); i++) {
+    for (int i = 0; i < (int) drivers.size(); i++) {
       if (driverPort != drivers.signals[i].port) {
         return false;
       }
@@ -307,7 +307,7 @@ namespace FlatCircuit {
 
       if (driversLine[0] != "NO_INPUTS") {
         int i = 0;
-        while (i < driversLine.size()) {
+        while (i < (int) driversLine.size()) {
           assert(driversLine[i] == "D");
           i++;
 
@@ -315,7 +315,7 @@ namespace FlatCircuit {
           i++;
 
           int receiverOffset = 0;
-          while (i < driversLine.size() && (driversLine[i] != "D")) {
+          while ((i < (int) driversLine.size()) && (driversLine[i] != "D")) {
             string driverCellName = driversLine[i];
             //cout << "Looking for name " << driverCellName << endl;
             CellId driverCellId = def.getCellId(driverCellName);
