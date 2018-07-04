@@ -328,8 +328,8 @@ namespace FlatCircuit {
     for (auto sigBus : cell.getPortReceivers(pid)) {
       for (auto sigBit : sigBus) {
         if (//!elem(sigBit.cell, alreadyDeleted) &&
-            notEmpty(sigBit) &&
-            (def.getCellRefConst(sigBit.cell).getCellType() != CELL_TYPE_CONST)) {
+            notEmpty(sigBit)) { // &&
+          //            (//def.getCellRefConst(sigBit.cell).getCellType() != CELL_TYPE_CONST)) {
           candidates.insert(sigBit.cell);
         }
       }
