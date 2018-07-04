@@ -805,10 +805,10 @@ namespace FlatCircuit {
 
   public:
 
-    std::map<std::string, PortId> getPortNameMap() const { return portNames; }
-    std::map<PortId, std::string> getPortIdsToNames() const { return portIdsToNames; }
-    std::map<std::string, CellId> getCellNames() const { return cellNames; }
-    std::map<CellId, std::string> getCellIdsToNames() const { return cellIdsToNames; }
+    // std::map<std::string, PortId> getPortNameMap() const { return portNames; }
+    // std::map<PortId, std::string> getPortIdsToNames() const { return portIdsToNames; }
+    // std::map<std::string, CellId> getCellNames() const { return cellNames; }
+    // std::map<CellId, std::string> getCellIdsToNames() const { return cellIdsToNames; }
 
     // Cell 0 is reserved to indicated a non-existant cell
     CellDefinition(const CellType tp_) : thisType(tp_), next(1), nextPort(0) {}
@@ -818,6 +818,14 @@ namespace FlatCircuit {
     CellType getCellType() const {
       return thisType;
     }
+
+    // std::vector<CellId> activeCellsVector() const {
+    //   std::vector<CellId> activeCellsVec;
+    //   for (auto cell : cells) {
+    //     activeCellsVec.push_back();
+    //   }
+    //   return activeCellsVec;
+    // }
 
     std::vector<CellId> getCellList() const {
       std::vector<CellId> cellList;

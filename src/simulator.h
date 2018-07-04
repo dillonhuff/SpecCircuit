@@ -1045,7 +1045,7 @@ namespace FlatCircuit {
     
     std::map<CellId, BitVector> allRegisterValues() const {
       std::map<CellId, BitVector> regValues;
-      for (auto roff : def.getCellMap()) {
+      for (auto& roff : def.getCellMap()) {
         if (isRegister(def.getCellRefConst(roff.first).getCellType())) {
           regValues.insert({roff.first, getRegisterValue(roff.first)});
         }
