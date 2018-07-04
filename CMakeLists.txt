@@ -39,6 +39,9 @@ target_link_libraries(small-tests flatcircuit dl coreir coreir-rtlil coreir-comm
 add_executable(regression-tests test/test_main.cpp ${REGRESSION_TEST_FILES})
 target_link_libraries(regression-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
+add_executable(constant-fold-benchmark test/test_main.cpp ./test/constant_folding_benchmark)
+target_link_libraries(constant-fold-benchmark flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
 # End test executables
 
 SET(BENCHMARK_FILES ./benchmarks/main.cpp)

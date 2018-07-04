@@ -14,6 +14,7 @@ using namespace std::chrono;
 using namespace CoreIR;
 
 namespace FlatCircuit {
+
   TEST_CASE("CGRA convolution 3 x 3") {
     auto convConfigValues = loadBitStream("./test/conv_bw_only_config_lines.bsa");
     Env circuitEnv =
@@ -562,12 +563,12 @@ namespace FlatCircuit {
   TEST_CASE("CGRA multiply by 2") {
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
 
-    // Env circuitEnv =
-    //   loadFromCoreIR("global.top",
-    //                  "./test/top.json");
+    Env circuitEnv =
+      loadFromCoreIR("global.top",
+                     "./test/top.json");
 
-    Env circuitEnv;
-    loadFromFile(circuitEnv, "top.csv");
+    // Env circuitEnv;
+    // loadFromFile(circuitEnv, "top.csv");
       
     CellDefinition& def = circuitEnv.getDef("top");
 
