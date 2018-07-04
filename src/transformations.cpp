@@ -323,14 +323,13 @@ namespace FlatCircuit {
   void insertNewCandidates(const Cell& cell,
                            const PortId pid,
                            const CellDefinition& def,
-                           std::set<CellId>& candidates,
-                           std::set<CellId>& alreadyDeleted) {
+                           std::set<CellId>& candidates) {
+                           //                           std::set<CellId>& alreadyDeleted) {
     for (auto sigBus : cell.getPortReceivers(pid)) {
       for (auto sigBit : sigBus) {
-        if (!elem(sigBit.cell, alreadyDeleted) &&
+        if (//!elem(sigBit.cell, alreadyDeleted) &&
             notEmpty(sigBit) &&
-            def.getCellRefConst(sigBit.cell).getCellType() !=
-            CELL_TYPE_CONST) {
+            (def.getCellRefConst(sigBit.cell).getCellType() != CELL_TYPE_CONST)) {
           candidates.insert(sigBit.cell);
         }
       }
@@ -348,20 +347,15 @@ namespace FlatCircuit {
                      const std::map<CellId, BitVector>& registerValues) {
 
     set<CellId> candidates;
-    set<CellId> cellsToDelete;
+    //set<CellId> cellsToDelete;
     
     for (auto& cellPair : def.getCellMap()) {
       Cell& cell = def.getCellRef(cellPair.first);
       if (cell.getCellType() == CELL_TYPE_CONST) {
-        insertNewCandidates(cell, PORT_ID_OUT, def, candidates, cellsToDelete);
-        // for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
-        //   for (auto sigBit : sigBus) {
-        //     if (notEmpty(sigBit) && def.getCellRefConst(sigBit.cell).getCellType() !=
-        //         CELL_TYPE_CONST) {
-        //       candidates.insert(sigBit.cell);
-        //     }
-        //   }
-        // }
+        //insertNewCandidates(cell, PORT_ID_OUT, def, candidates, cellsToDelete);
+
+        insertNewCandidates(cell, PORT_ID_OUT, def, candidates);
+
       }
     }
 
@@ -389,16 +383,8 @@ namespace FlatCircuit {
 
           assert(bitVec.bitLength() == 1);
 
-          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
-          // for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-          //   for (auto sigBit : sigBus) {
-          //     if (def.getCellRefConst(sigBit.cell).getCellType() !=
-          //         CELL_TYPE_CONST) {
-          //       candidates.insert(sigBit.cell);
-          //     }
-          //   }
-          // }
-
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          //insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
           bool selIn1 = 0;
           if (bitVec.get(0).is_binary()) {
             selIn1 = bitVec.get(0).binary_value() == 1;
@@ -426,8 +412,8 @@ namespace FlatCircuit {
             }
           }
 
-          //def.deleteCell(next);
-          cellsToDelete.insert(next);
+          def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
         }
       } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
@@ -450,8 +436,8 @@ namespace FlatCircuit {
           int width = nextCell.getMemWidth();
           def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
 
-          //def.deleteCell(next);
-          cellsToDelete.insert(next);
+          def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
         }
         
@@ -459,26 +445,19 @@ namespace FlatCircuit {
         maybe<BitVector> bv = getOutput(next, def, registerValues);
 
         if (bv.has_value()) {
-          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
-          // for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-          //   for (auto sigBit : sigBus) {
-          //     if (def.getCellRefConst(sigBit.cell).getCellType() !=
-          //         CELL_TYPE_CONST) {
-          //       candidates.insert(sigBit.cell);
-          //     }
-          //   }
-          // }
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          //insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
-          //def.deleteCell(next);
-          cellsToDelete.insert(next);
+          def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
 
         }
       }
     }
 
-    def.bulkDelete(cellsToDelete);
+    //def.bulkDelete(cellsToDelete);
 
     // Checking the result has no unfolded sources
     for (auto& ctp : def.getCellMap()) {
