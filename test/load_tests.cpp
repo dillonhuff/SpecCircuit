@@ -224,20 +224,20 @@ namespace FlatCircuit {
 
       // Port cells have already been created
       if (ctp != CELL_TYPE_PORT) {
-        cout << "adding cell " << cellName << endl;
+        //cout << "adding cell " << cellName << endl;
         def.addCell(cellName, ctp, parameters);
       } else {
-        cout << "cell " << cellName << " is a port" << endl;
+        //cout << "cell " << cellName << " is a port" << endl;
       }
 
       // Read drivers
       auto driversLine = readCSVLine(in);
 
       cells.push_back({declLine, portsLine, paramsLine, driversLine});
-      cout << "Parsed Cell" << endl;
-      cout << "\t";
-      writeCSVLine(declLine, cout);
-      cout << endl;
+      // cout << "Parsed Cell" << endl;
+      // cout << "\t";
+      //writeCSVLine(declLine, cout);
+      //cout << endl;
       // Read next cell
       nextLine = readCSVLine(in);
     }
@@ -266,7 +266,7 @@ namespace FlatCircuit {
           int receiverOffset = 0;
           while (i < driversLine.size() && (driversLine[i] != "D")) {
             string driverCellName = driversLine[i];
-            cout << "Looking for name " << driverCellName << endl;
+            //cout << "Looking for name " << driverCellName << endl;
             CellId driverCellId = def.getCellId(driverCellName);
             PortId driverCellPort = stoi(driversLine[i + 1]);
             int driverCellOffset = stoi(driversLine[i + 2]);
@@ -380,23 +380,26 @@ namespace FlatCircuit {
     SECTION("Connect box") {
       Env circuitEnv = loadFromCoreIR("global.cb_unq1", "./test/cb_unq1.json");
       CellDefinition& def = circuitEnv.getDef("cb_unq1");
-      Simulator sim(circuitEnv, def);
-      reset("reset", sim);
+      {
+        Simulator sim(circuitEnv, def);
+        reset("reset", sim);
 
-      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
-      sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
-      sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+        sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+        sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+        sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
 
-      posedge("clk", sim);
+        posedge("clk", sim);
 
-      sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
-      sim.update();
+        sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+        sim.update();
     
-      sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
-      sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
-      sim.update();
+        sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+        sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+        sim.update();
+        REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+      }
 
-      REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+
 
       cout << "Starting to save" << endl;
 
@@ -416,6 +419,28 @@ namespace FlatCircuit {
       cout << "Done loading" << endl;
 
       REQUIRE(circuitEnv.hasCellType("cb_unq1"));
+
+      {
+        CellDefinition& loadedDef =
+          circuitEnv.getDef(circuitEnv.getCellType("cb_unq1"));
+        Simulator sim(circuitEnv, loadedDef);
+        reset("reset", sim);
+
+        sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 1));
+        sim.setFreshValue("config_data", PORT_ID_OUT, BitVec(32, 3));
+        sim.setFreshValue("config_addr", PORT_ID_OUT, BitVec(32, 0));
+
+        posedge("clk", sim);
+
+        sim.setFreshValue("clk", PORT_ID_OUT, BitVec(1, 0));
+        sim.update();
+    
+        sim.setFreshValue("config_en", PORT_ID_OUT, BitVec(1, 0));
+        sim.setFreshValue("in_3", PORT_ID_OUT, BitVec(16, 239));
+        sim.update();
+        REQUIRE(sim.getBitVec("out", PORT_ID_IN) == BitVec(16, 239));
+      }
+
     }
     
   }
