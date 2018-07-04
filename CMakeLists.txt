@@ -20,7 +20,8 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/cpp_utils.cpp
               ./src/ir.cpp
               ./src/utils.cpp
-              ./src/value_store.cpp)
+              ./src/value_store.cpp
+              ./src/serialize.cpp)
 
 add_library(flatcircuit ${CPP_FILES})
 

@@ -3,6 +3,7 @@
 #include "analysis.h"
 #include "convert_coreir.h"
 #include "output_verilog.h"
+#include "serialize.h"
 #include "transformations.h"
 #include "utils.h"
 
@@ -560,10 +561,14 @@ namespace FlatCircuit {
 
   TEST_CASE("CGRA multiply by 2") {
     auto configValues = loadBitStream("./test/pw2_16x16_only_config_lines.bsa");
-    Env circuitEnv =
-      loadFromCoreIR("global.top",
-                     "./test/top.json");
 
+    // Env circuitEnv =
+    //   loadFromCoreIR("global.top",
+    //                  "./test/top.json");
+
+    Env circuitEnv;
+    loadFromFile(circuitEnv, "top.csv");
+      
     CellDefinition& def = circuitEnv.getDef("top");
 
     BitVector input(16, 23);
