@@ -50,7 +50,8 @@ namespace FlatCircuit {
     size_t len = 0;
     //ssize_t read;
 
-    getline(&linePtr, &len, in);
+    int res = getline(&linePtr, &len, in);
+    assert(res != 0);
 
     std::string line(linePtr);
     //while ((read = getline(&line, &len, fp)) != -1) {
