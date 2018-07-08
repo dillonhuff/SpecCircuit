@@ -4,11 +4,6 @@ using namespace std;
 
 namespace FlatCircuit {
 
-  // void loadCGRAConfig(const std::string& resetPort,
-  //                     const std::string& configAddrPo
-  //                     const CGRABitStream& configValues,
-  //                     Simulator& sim) {
-  
   void loadCGRAConfig(const CGRABitStream& configValues,
                       Simulator& sim) {
     reset("reset_in", sim);

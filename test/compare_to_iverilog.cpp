@@ -66,12 +66,8 @@ namespace FlatCircuit {
                      "./test/pe_tile_new_unq1.json");
 
     CellDefinition& def = circuitEnv.getDef("pe_tile_new_unq1");
-    
-    //REQUIRE(circuitEnv.getCellDefs().size() == 1);
-
     auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
 
-    // NOTE: Unknown value on cg_en causes problems?
     Simulator sim(circuitEnv, def);
 
     sim.setFreshValue("tile_id", BitVector("16'h15"));
@@ -125,19 +121,18 @@ namespace FlatCircuit {
     posedge("clk_in", sim);
     posedge("clk_in", sim);
     
-    // cout << "Outputs" << endl;
-    // for (int s = 0; s < 4; s++) {
-    //   for (int t = 0; t < 5; t++) {
-    //     cout << sim.getBitVec("out_BUS16_S" + to_string(s) + "_T" + to_string(t))
-    //          << endl;
-    //   }
-    // }
-
     REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
 
+    outputVerilog(def, "pe_tile_x2_test.v");
+
+    int iverilogCompile = system("iverilog -o pe_x2_tb pe_tb_x2.v pe_tile_x2_test.v");
+    assert(iverilogCompile == 0);
+    int iverilogRun = system("./pe_x2_tb");
+    assert(iverilogRun == 0);
+    
   }
 
 }
