@@ -40,3 +40,8 @@ lb_test
 regression-tests
 small-tests
 *.dylib
+adder_tb
+compare-to-iverilog
+conv_3_1_specialized
+negate.csv
+passthrough.csv
