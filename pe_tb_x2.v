@@ -1,7 +1,6 @@
 module test();
 
    reg config_loaded;
-   
 
    reg [31:0] config_addr_in;
    reg [31:0] config_data_in;
@@ -16,7 +15,6 @@ module test();
    reg        in_BUS1_S1_T2;
    reg        in_BUS1_S1_T3;
    reg        in_BUS1_S1_T4;
-   
 
    reg [15:0] in_BUS16_S0_T0;
    reg [15:0] in_BUS16_S0_T1;
