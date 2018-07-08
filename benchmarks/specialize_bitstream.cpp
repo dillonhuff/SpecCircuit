@@ -1,6 +1,7 @@
 #include "analysis.h"
 #include "convert_coreir.h"
 #include "output_verilog.h"
+#include "serialize.h"
 #include "transformations.h"
 #include "utils.h"
 
@@ -21,6 +22,8 @@ int main(const int argc, const char** argv) {
   Env circuitEnv =
     loadFromCoreIR("global.top",
                    "./test/top.json");
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "top.csv");
 
   CellDefinition& def = circuitEnv.getDef("top");
 
@@ -158,6 +161,8 @@ int main(const int argc, const char** argv) {
   auto stop = high_resolution_clock::now();
 
   auto duration = duration_cast<milliseconds>(stop - start);
+
+  FILE* out = fopen("specialize_bs_log.txt", "w");
   
   start = high_resolution_clock::now();
 
@@ -205,4 +210,5 @@ int main(const int argc, const char** argv) {
 
   outputVerilog(sim.def, outputName);
 
+  fclose(out);
 }

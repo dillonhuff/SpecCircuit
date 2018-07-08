@@ -42,6 +42,9 @@ target_link_libraries(regression-tests flatcircuit dl coreir coreir-rtlil coreir
 add_executable(constant-fold-benchmark test/test_main.cpp ./test/constant_folding_benchmark)
 target_link_libraries(constant-fold-benchmark flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
+add_executable(compare-to-iverilog test/test_main.cpp ./test/compare_to_iverilog.cpp)
+target_link_libraries(compare-to-iverilog flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
 # End test executables
 
 SET(BENCHMARK_FILES ./benchmarks/main.cpp)

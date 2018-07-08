@@ -85,19 +85,12 @@ namespace FlatCircuit {
   
   void writeCSVLine(const std::vector<std::string>& tokens,
                     FILE* out) {
-                    //std::ostream& out) {
     for (auto token : tokens) {
       fprintf(out, "%s,", token.c_str());
-      //vf
     }
 
     fprintf(out, "\n");
-    // for (auto token : tokens) {
-      
-    //   out << token << ",";
-    // }
 
-    // out << std::endl;
   }
 
   bool isBulkConnection(const CellId cid,
