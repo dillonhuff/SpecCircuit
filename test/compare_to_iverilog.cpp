@@ -120,7 +120,7 @@ namespace FlatCircuit {
 
     posedge("clk_in", sim);
     posedge("clk_in", sim);
-    
+
     REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
     REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
@@ -132,7 +132,6 @@ namespace FlatCircuit {
     assert(iverilogCompile == 0);
     int iverilogRun = system("./pe_x2_tb");
     assert(iverilogRun == 0);
-    
   }
 
 }
