@@ -1,5 +1,6 @@
 #include "catch.hpp"
 
+#include "output_verilog.h"
 #include "simulator.h"
 
 namespace FlatCircuit {
@@ -30,6 +31,14 @@ namespace FlatCircuit {
     Env e;
     CellDefinition& def = buildBinopCellDef(e, CELL_TYPE_AND);
 
+    Simulator sim(e, def);
+    sim.setFreshValue("in0", BitVector(16, "0010101000111000"));
+    sim.setFreshValue("in1", BitVector(16, "1101101000010101"));
+    sim.update();
+
+    cout << "flat sim out = " << sim.getBitVec("out") << endl;
+
+    outputVerilog(def, "adder_test.v");
     
   }
 
