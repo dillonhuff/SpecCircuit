@@ -45,3 +45,8 @@ compare-to-iverilog
 conv_3_1_specialized
 negate.csv
 passthrough.csv
+pe_tb_x2.v
+pe_x2_tb
+pre_specialized_conv_2_1_cgra.v
+circuit_jit_conv_3_1.cpp
+circuit_jit_raw.cpp
