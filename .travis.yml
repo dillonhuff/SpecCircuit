@@ -10,7 +10,6 @@ addons:
     - g++-4.9
     - valgrind
     - yosys
-    - iverilog
 
 before_install:
   - export COREIRCONFIG="g++-4.9";
