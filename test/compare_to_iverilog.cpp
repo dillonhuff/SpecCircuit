@@ -107,7 +107,7 @@ namespace FlatCircuit {
 
     posedge("clk_in", sim);
 
-    int top_val = 5;
+    int top_val = 490;
 
     for (int s = 0; s < 4; s++) {
       for (int t = 0; t < 5; t++) {
@@ -132,6 +132,22 @@ namespace FlatCircuit {
     assert(iverilogCompile == 0);
     int iverilogRun = system("./pe_x2_tb");
     assert(iverilogRun == 0);
+
+    ifstream in("tb_output.txt");
+    string line;
+    string lastLine;
+    while (getline(in, line)) {
+      lastLine = line;
+    }
+
+    cout << "Last line = " << lastLine << endl;
+
+    BitVector iverilogRes = BitVector(16, lastLine);
+
+    REQUIRE(sim.getBitVec("out_BUS16_S0_T0") == iverilogRes);
+    
   }
 
 }
+
+

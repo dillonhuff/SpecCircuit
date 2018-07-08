@@ -118,7 +118,8 @@ module test();
          end
       end
       
-      $fwrite(output_file, "%b, %d\n", out_BUS16_S3_T1, out_BUS16_S3_T1);
+      $fwrite(output_file, "%b\n", out_BUS16_S3_T1);
+      
    end
 
    top pe_tile(.clk_in(clk),
