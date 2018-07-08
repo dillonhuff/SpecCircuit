@@ -23,6 +23,7 @@ before_install:
   - make -j
 
 script:
+ - ./compare-to-iverilog
   - valgrind ./regression-tests
 
 compiler:
