@@ -36,3 +36,7 @@ x_prop
 top.json
 .DS_Store
 lb_test
+*.dSYM/
+regression-tests
+small-tests
+*.dylib

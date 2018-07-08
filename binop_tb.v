@@ -13,7 +13,7 @@ module test();
       in0 = 16'b0010101000111000;
       in1 = 16'b1101101000010101;
 
-      $fwrite(outFile, "%b\n", out);
+      #1 $fwrite(outFile, "%b\n", out);
 
       $finish();
       
