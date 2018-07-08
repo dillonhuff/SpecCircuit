@@ -9,7 +9,7 @@ addons:
     packages:
     - g++-4.9
     - valgrind
-    - yosys
+    - verilog
 
 before_install:
   - export COREIRCONFIG="g++-4.9";
