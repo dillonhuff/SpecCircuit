@@ -3,6 +3,8 @@
 #include "output_verilog.h"
 #include "simulator.h"
 
+#include <fstream>
+
 namespace FlatCircuit {
 
   CellDefinition& buildBinopCellDef(Env& e, CellType opType) {
@@ -39,7 +41,21 @@ namespace FlatCircuit {
     cout << "flat sim out = " << sim.getBitVec("out") << endl;
 
     outputVerilog(def, "adder_test.v");
-    
+
+    int iverilogCompile = system("iverilog -o adder_tb binop_tb.v adder_test.v");
+    assert(iverilogCompile == 0);
+    int iverilogRun = system("./adder_tb");
+    assert(iverilogRun == 0);
+
+    ifstream in("tb_output.txt");
+    string line;
+    getline(in, line);
+
+    cout << "Line = " << line << endl;
+
+    BitVector iverilogRes = BitVector(16, line);
+
+    REQUIRE(sim.getBitVec("out") == iverilogRes);
   }
 
 }
