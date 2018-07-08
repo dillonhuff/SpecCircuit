@@ -1,7 +1,9 @@
 #include "catch.hpp"
 
+#include "convert_coreir.h"
 #include "output_verilog.h"
 #include "simulator.h"
+#include "utils.h"
 
 #include <fstream>
 
@@ -56,6 +58,86 @@ namespace FlatCircuit {
     BitVector iverilogRes = BitVector(16, line);
 
     REQUIRE(sim.getBitVec("out") == iverilogRes);
+  }
+
+  TEST_CASE("Comparing the PE tile") {
+    Env circuitEnv =
+      loadFromCoreIR("global.pe_tile_new_unq1",
+                     "./test/pe_tile_new_unq1.json");
+
+    CellDefinition& def = circuitEnv.getDef("pe_tile_new_unq1");
+    
+    //REQUIRE(circuitEnv.getCellDefs().size() == 1);
+
+    auto configValues = loadBitStream("./test/hwmaster_pw2_sixteen.bsa");
+
+    // NOTE: Unknown value on cg_en causes problems?
+    Simulator sim(circuitEnv, def);
+
+    sim.setFreshValue("tile_id", BitVector("16'h15"));
+
+    sim.setFreshValue("in_BUS1_S1_T0", BitVector("1'h1"));
+    sim.setFreshValue("in_BUS1_S1_T1", BitVector("1'h1"));
+    sim.setFreshValue("in_BUS1_S1_T2", BitVector("1'h1"));
+    sim.setFreshValue("in_BUS1_S1_T3", BitVector("1'h1"));
+    sim.setFreshValue("in_BUS1_S1_T4", BitVector("1'h1"));
+
+    cout << "Set tile_id" << endl;
+    //loadCGRAConfig(configValues, sim);
+
+    reset("reset", sim);
+
+    cout << "Reset chip" << endl;
+    for (int i = 0; i < (int) configValues.size(); i++) {
+
+      sim.setFreshValue("clk_in", BitVec(1, 0));
+      sim.update();
+
+      cout << "Evaluating " << i << endl;
+
+      unsigned int configAddr = configValues[i].first;
+      unsigned int configData = configValues[i].second;
+
+      sim.setFreshValue("config_addr", BitVec(32, configAddr));
+      sim.setFreshValue("config_data", BitVec(32, configData));
+
+      posedge("clk_in", sim);
+      
+    }
+
+    cout << "Done configuring PE tile" << endl;
+
+    sim.setFreshValue("config_addr", BitVec(32, 0));
+
+    posedge("clk_in", sim);
+
+    int top_val = 5;
+
+    for (int s = 0; s < 4; s++) {
+      for (int t = 0; t < 5; t++) {
+        sim.setFreshValue("in_BUS16_S" + to_string(s) + "_T" + to_string(t),
+                          BitVec(16, top_val));
+      }
+    }
+
+    cout << "Done setting inputs" << endl;
+
+    posedge("clk_in", sim);
+    posedge("clk_in", sim);
+    
+    // cout << "Outputs" << endl;
+    // for (int s = 0; s < 4; s++) {
+    //   for (int t = 0; t < 5; t++) {
+    //     cout << sim.getBitVec("out_BUS16_S" + to_string(s) + "_T" + to_string(t))
+    //          << endl;
+    //   }
+    // }
+
+    REQUIRE(sim.getBitVec("out_BUS16_S0_T0", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T1", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T2", PORT_ID_IN) == BitVec(16, top_val*2));
+    REQUIRE(sim.getBitVec("out_BUS16_S3_T3", PORT_ID_IN) == BitVec(16, top_val*2));
+
   }
 
 }
