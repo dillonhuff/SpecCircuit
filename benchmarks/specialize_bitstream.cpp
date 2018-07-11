@@ -193,6 +193,9 @@ int main(const int argc, const char** argv) {
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 1));
     sim.update();
 
+    auto output = getCGRAOutput(0, sim);
+
+    fprintf(out, "%s\n", output.binary_string().c_str());
   }
 
   stop = high_resolution_clock::now();
