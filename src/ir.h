@@ -361,7 +361,8 @@ namespace FlatCircuit {
       unsigned long offset = valueStore.getRawRegisterOffset(cid);
 
       std::string accessStr = accessString("values", offset, bitWidth);
-      std::string accessStrX = accessString("z_mask", offset, bitWidth);
+      std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string accessStrZ = accessString("z_mask", offset, bitWidth);
 
       return ln(accessStr + " = " + result + "; // IRRegisterStore") +
         ln(accessStrX + " = " + xMask(result) + "; // IRRegisterStore") +
@@ -563,6 +564,7 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
       std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string accessStrZ = accessString("z_mask", offset, bitWidth);
 
       return ln(receiver + " = " + accessStr + "; // IRPortLoad") +
         ln(xMask(receiver) + " = " + accessStrX + "; // IRPortLoad") +

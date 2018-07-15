@@ -41,9 +41,9 @@ namespace FlatCircuit {
             bv.set(bvOffset, bsim::quad_value(QBV_UNKNOWN_VALUE));
           }
 
-          bool isz = (zMaskTable.at(byteOffset) >> bitOffset) & 0x01;
+          bool isZ = (zMaskTable.at(byteOffset) >> bitOffset) & 0x01;
           if (isZ) {
-            bv.set(bvOffset, bsim::quad_value(QBV_HIGH_IMPEDANCE));
+            bv.set(bvOffset, bsim::quad_value(QBV_HIGH_IMPEDANCE_VALUE));
           }
 
           bvOffset += 1;
@@ -113,13 +113,10 @@ namespace FlatCircuit {
            i++) {
         simValueTable.push_back(0);
         bitMaskTable.push_back(0);
+        zMaskTable.push_back(0);
       }
 
       setBitVector(nextInd, bv);
-
-      // for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-      //   simValueTable.push_back(bv.get(i));
-      // }
 
       return nextInd;
     }
@@ -136,17 +133,18 @@ namespace FlatCircuit {
       return bitMaskTable;
     }
 
+    std::vector<unsigned char>& getZMaskVector() {
+      return zMaskTable;
+    }
+    
     void debugPrintTableValues() const {
       for (int i = 0; i < (int) bitMaskTable.size(); i++) {
         std::cout << "\tvalue[" << i << "] = " << (int) simValueTable[i] << std::endl;
         std::cout << "\tmask  [" << i << "] = " << (int) bitMaskTable[i] << std::endl;
+        std::cout << "\tzask  [" << i << "] = " << (int) zMaskTable[i] << std::endl;
       }
     }
-    
-    // std::vector<bsim::quad_value>& getValueVector() {
-    //   return simValueTable;
-    // }
-    
+
   };
 
   class ValueStore {
@@ -258,6 +256,8 @@ namespace FlatCircuit {
 
     std::vector<unsigned char>& getValueTable() { return simValueTable.getValueVector(); }
     std::vector<unsigned char>& getXMaskTable() { return simValueTable.getXMaskVector(); }
+
+    std::vector<unsigned char>& getZMaskTable() { return simValueTable.getZMaskVector(); }
 
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 

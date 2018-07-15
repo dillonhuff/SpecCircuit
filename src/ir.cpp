@@ -61,27 +61,33 @@ namespace FlatCircuit {
     switch (tp) {
     case CELL_TYPE_AND:
       return ln(receiver + " = (" + arg0 + " & " + arg1 + ")") +
-        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
+        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")") +
+        ln(zMask(receiver) + " = (" + zMask(arg0) + " | " + zMask(arg1) + ")");
 
     case CELL_TYPE_UGE:
       return ln(receiver + " = (" + arg0 + " >= " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
 
     case CELL_TYPE_ULE:
       return ln(receiver + " = (" + arg0 + " <= " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
       
     case CELL_TYPE_UGT:
       return ln(receiver + " = (" + arg0 + " > " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
 
     case CELL_TYPE_ULT:
       return ln(receiver + " = (" + arg0 + " < " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
       
     case CELL_TYPE_OR:
       return ln(receiver + " = (" + arg0 + " | " + arg1 + ")") +
-        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")");
+        ln(xMask(receiver) + " = (" + xMask(arg0) + " | " + xMask(arg1) + ")") +
+        ln(zMask(receiver) + " = (" + zMask(arg0) + " | " + zMask(arg1) + ")");
 
     case CELL_TYPE_XOR:
       return ln(receiver + " = (" + arg0 + " ^ " + arg1 + ")") +
