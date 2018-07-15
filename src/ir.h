@@ -18,6 +18,12 @@ namespace FlatCircuit {
 
   static inline
   std::string
+  zMask(const std::string& name) {
+    return name + "_z_mask";
+  }
+  
+  static inline
+  std::string
   setTableBitString(const std::string& offset, const std::string& bitString) {
     return ln("values[ " + offset + " ] = " + bitString);
   }
@@ -32,13 +38,11 @@ namespace FlatCircuit {
   storeRegisterStateString(const std::string& wireOffset,
                            const std::string& stateOffset,
                            const std::string& width) {
-    //return ln("storeRegisterState<" + width + ">(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
     return ln("storeRegisterState(values, " + wireOffset + ", " + stateOffset + ", " + width + ")");
   }
 
   static inline std::string
   loadTableString(const std::string& value, const std::string& offset, const std::string& width) {
-    //return ln(value + " = loadFromTable<" + width + ">(values, " + offset + ", " + width + ")");
     return ln("loadFromTable(" + value + ", values, " + offset + ", " + width + ")");
   }
 
@@ -216,21 +220,12 @@ namespace FlatCircuit {
       std::string offsetStr = "(" + std::to_string(offset) + " + " + waddrName + " * " + std::to_string(storedByteLength(memWidth)) + ")";
       std::string accessStr = accessString("values", offsetStr, memWidth);
       std::string accessStrX = accessString("x_mask", offsetStr, memWidth);
+      std::string accessStrZ = accessString("z_mask", offsetStr, memWidth);
 
       return ln(receiver + " = " + accessStr) +
-        ln(xMask(receiver) + " = " + accessStrX);
+        ln(xMask(receiver) + " = " + accessStrX) +
+        ln(zMask(receiver) + " = " + accessStrZ);
       
-      // return loadTableString(receiver,
-      //                        std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-      //                        to_string(valueStore.def.getCellRefConst(cid).getMemWidth()) + "* (" + waddrName + ".is_binary() ? " + waddrName +
-      //                        ".to_type<int>() : 0)",
-      //                        std::to_string(memWidth));
-      //std::to_string(valueStore.def.getCellRefConst(cid).getPortWidth(PORT_ID_RADDR)));
-
-      // return ln(receiver + " = values[" +
-      //           std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
-      //           "(" + waddrName + ".is_binary() ? " + waddrName +
-      //           ".to_type<int>() : 0)]");
     }
   };
   
@@ -265,9 +260,11 @@ namespace FlatCircuit {
         waddrName + " * " + std::to_string(storedByteLength(memWidth)) + ")";
       std::string accessStr = accessString("values", offsetStr, memWidth);
       std::string accessStrX = accessString("x_mask", offsetStr, memWidth);
+      std::string accessStrZ = accessString("z_mask", offsetStr, memWidth);
 
       return ln(accessStr + " = " + wdataName) +
-        ln(accessStrX + " = " + xMask(wdataName));
+        ln(accessStrX + " = " + xMask(wdataName)) +
+        ln(accessStrZ + " = " + zMask(wdataName));
 
       // return storeTableString(std::to_string(valueStore.getMemoryOffset(cid)) + " + " +
       //                         to_string(valueStore.def.getCellRefConst(cid).getMemWidth()) + "* (" + waddrName + ".is_binary() ? " + waddrName +
@@ -365,14 +362,11 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
       std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string accessStrZ = accessString("z_mask", offset, bitWidth);
 
       return ln(accessStr + " = " + result + "; // IRRegisterStore") +
-        ln(accessStrX + " = " + xMask(result) + "; // IRRegisterStore");
-      
-        //return storeTableString(to_string(valueStore.getRegisterOffset(cid)),
-      //                              result);
-      // return ln("values[" + to_string(valueStore.getRegisterOffset(cid)) + "] = " +
-      //           result);
+        ln(accessStrX + " = " + xMask(result) + "; // IRRegisterStore") +
+        ln(accessStrZ + " = " + zMask(result) + "; // IRRegisterStore");
     }
 
   };
@@ -465,12 +459,11 @@ namespace FlatCircuit {
       int bitWidth = valueStore.def.getCellRefConst(cid).getPortWidth(pid);
       std::string accessStr = accessString("values", offset, bitWidth);
       std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string accessStrZ = accessString("z_mask", offset, bitWidth);
 
       return ln(accessStr + " = " + value + "; // table store") +
-        ln(accessStrX + " = " + xMask(value) + "; // table store");
-      
-      //return storeTableString(std::to_string(offset), value);
-      //return ln("storeToTable(values, " + std::to_string(offset) + ", " + value + ")");
+        ln(accessStrX + " = " + xMask(value) + "; // table store") +
+        ln(accessStrZ + " = " + zMask(value) + "; // table store");
     }
     
   };
@@ -495,11 +488,8 @@ namespace FlatCircuit {
     
     virtual std::string toString(ValueStore& valueStore) const {
       return ln(containerPrimitive(bitWidth) + " " + name + " = 0") +
-        ln(containerPrimitive(bitWidth) + " " + xMask(name) + " = 0");
-      // std::string widthStr = std::to_string(bitWidth);
-      
-      // return ln("quad_value " + name + "_buffer [ " + widthStr + " ]") +
-      //   ln("bv_wrapper " + name + "(" + name + "_buffer" + ", " + widthStr + ", true)");
+        ln(containerPrimitive(bitWidth) + " " + xMask(name) + " = 0") +
+        ln(containerPrimitive(bitWidth) + " " + zMask(name) + " = 0");
     }
     
   };
@@ -574,9 +564,11 @@ namespace FlatCircuit {
 
       std::string accessStr = accessString("values", offset, bitWidth);
       std::string accessStrX = accessString("x_mask", offset, bitWidth);
+      std::string accessStrZ = accessString("z_mask", offset, bitWidth);
 
       return ln(receiver + " = " + accessStr + "; // IRPortLoad") +
-        ln(xMask(receiver) + " = " + accessStrX + "; // IRPortLoad");
+        ln(xMask(receiver) + " = " + accessStrX + "; // IRPortLoad") +
+        ln(zMask(receiver) + " = " + accessStrZ + "; // IRPortLoad");
       
       //unsigned long offset = valueStore.portValueOffset(cid, pid);
       //return ln(receiver + " = values[" + std::to_string(offset) + "]");
@@ -674,6 +666,9 @@ namespace FlatCircuit {
         ln(xMask(receiver) + " |= ((" + receiverBV+ ")((" + valStringX + " >> " +
            std::to_string(driverBit.offset) + " ) & 0x1))<< " +
            std::to_string(setOffset));
+        ln(zMask(receiver) + " |= ((" + receiverBV+ ")((" + valStringX + " >> " +
+           std::to_string(driverBit.offset) + " ) & 0x1))<< " +
+           std::to_string(setOffset));
       
       // string valString = "";
       // unsigned long offset = 0;
@@ -715,11 +710,10 @@ namespace FlatCircuit {
     }
     
     virtual std::string toString(ValueStore& valueStore) const {
-      //return ln(receiver + " = (" + sel + " == BitVector(1) ? " + arg1 + " : " + arg0 + ")");
-      //return ln(receiver + " = (" + sel + ".get(0) == quad_value(1) ? " + arg1 + " : " + arg0 + ")");
 
       return ln(receiver + " = (" + sel + " ? " + arg1 + " : " + arg0 + ")") +
-        ln(xMask(receiver) + " = (" + sel + " ? " + xMask(arg1) + " : " + xMask(arg0) + ")");
+        ln(xMask(receiver) + " = (" + sel + " ? " + xMask(arg1) + " : " + xMask(arg0) + ")") +
+        ln(zMask(receiver) + " = (" + sel + " ? " + zMask(arg1) + " : " + zMask(arg0) + ")");
     }
     
   };
