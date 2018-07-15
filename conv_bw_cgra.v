@@ -17,12 +17,28 @@ module CELL_TYPE_AND #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] POR
    assign PORT_ID_OUT = PORT_ID_IN0 & PORT_ID_IN1;
 endmodule
 
+module CELL_TYPE_LSHR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 >> PORT_ID_IN1;
+endmodule
+
+module CELL_TYPE_ASHR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 >>> PORT_ID_IN1;
+endmodule
+
+module CELL_TYPE_XOR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 ^ PORT_ID_IN1;
+endmodule
+
 module CELL_TYPE_OR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT);
    assign PORT_ID_OUT = PORT_ID_IN0 | PORT_ID_IN1;
 endmodule
 
 module CELL_TYPE_EQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT);
    assign PORT_ID_OUT = PORT_ID_IN0 == PORT_ID_IN1;
+endmodule
+
+module CELL_TYPE_NEQ #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT);
+   assign PORT_ID_OUT = PORT_ID_IN0 != PORT_ID_IN1;
 endmodule
 
 module CELL_TYPE_ULT #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN0, input [PARAM_WIDTH - 1 : 0] PORT_ID_IN1, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN0 < PORT_ID_IN1;
@@ -82,10 +98,19 @@ module CELL_TYPE_MUX #(parameter PARAM_WIDTH=1) (input PORT_ID_SEL, input [PARAM
 module CELL_TYPE_ORR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = |PORT_ID_IN;
  endmodule
 
+module CELL_TYPE_ANDR #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [0 : 0] PORT_ID_OUT); assign PORT_ID_OUT = &PORT_ID_IN;
+ endmodule
+
 module CELL_TYPE_PORT #(parameter PARAM_PORT_TYPE=0, parameter PARAM_OUT_WIDTH=1) (input [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN;
  endmodule
 
 module CELL_TYPE_ZEXT #(parameter PARAM_IN_WIDTH=1, parameter PARAM_OUT_WIDTH=1) (input [PARAM_IN_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_OUT_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = {{(PARAM_OUT_WIDTH - PARAM_IN_WIDTH){1'b0}}, PORT_ID_IN};
+ endmodule
+
+module CELL_TYPE_SLICE #(parameter PARAM_WIDTH=1, parameter PARAM_LOW=1, parameter PARAM_HIGH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_HIGH - PARAM_LOW - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN[PARAM_HIGH:PARAM_LOW];
+ endmodule
+
+module CELL_TYPE_PASSTHROUGH #(parameter PARAM_WIDTH=1) (input [PARAM_WIDTH - 1 : 0] PORT_ID_IN, output [PARAM_WIDTH - 1 : 0] PORT_ID_OUT); assign PORT_ID_OUT = PORT_ID_IN;
  endmodule
 
 

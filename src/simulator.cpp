@@ -841,17 +841,10 @@ namespace FlatCircuit {
     }
 
     cppCode +=
-      // "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
-      // "\tfor (unsigned long i = 0; i < width; i++) {\n"
-      // "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
-      // "\t}\n"
-      // "}\n\n"
-
-      //"void simulate(bsim::quad_value* values) {\n";
 
       "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
       "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
-      "void simulate_four_state(unsigned char* values, unsigned char* x_mask) {\n";
+      "void simulate_four_state(unsigned char* __restrict values, unsigned char* __restrict x_mask, unsigned char* __restrict z_mask) {\n";
     
     assert((updates.size() % 2) == 0);
 
@@ -869,9 +862,9 @@ namespace FlatCircuit {
     compileCppLib(cppName, targetBinary);
 
     DylibInfo dlib = loadLibWithFunc(targetBinary,
-                                     "_Z19simulate_four_statePhS_");
-    //"_Z19simulate_four_statePh");
-                                     //"_Z8simulatePN4bsim10quad_valueE");
+                                     "_Z19simulate_four_statePhS_S_");
+    //"_Z19simulate_four_statePhS_");
+
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
 
