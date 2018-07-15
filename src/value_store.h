@@ -11,9 +11,9 @@ namespace FlatCircuit {
 
   class QBitTable {
 
-    //std::vector<bsim::quad_value> simValueTable;
     std::vector<unsigned char> simValueTable;
     std::vector<unsigned char> bitMaskTable;
+    std::vector<unsigned char> zMaskTable;
 
   public:
 
@@ -33,12 +33,19 @@ namespace FlatCircuit {
           }
           assert(byteOffset < simValueTable.size());
 
-          bv.set(bvOffset, bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
+          bv.set(bvOffset,
+                 bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
 
           bool isX = (bitMaskTable.at(byteOffset) >> bitOffset) & 0x01;
           if (isX) {
             bv.set(bvOffset, bsim::quad_value(QBV_UNKNOWN_VALUE));
           }
+
+          bool isz = (zMaskTable.at(byteOffset) >> bitOffset) & 0x01;
+          if (isZ) {
+            bv.set(bvOffset, bsim::quad_value(QBV_HIGH_IMPEDANCE));
+          }
+
           bvOffset += 1;
         }
 
@@ -67,11 +74,24 @@ namespace FlatCircuit {
 
           bitMaskTable[offset + bitOffset.first] &=
             ~(0x00 | (1 << bitOffset.second));
+
+          zMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
           
+        } else if (bv.get(i).is_high_impedance()) {
+
+          bitMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
+          
+          zMaskTable[offset + bitOffset.first] |=
+            0 | (1 << bitOffset.second);
+
         } else {
           bitMaskTable[offset + bitOffset.first] |=
             0 | (1 << bitOffset.second);
 
+          zMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
         }
       }
       //std::cout << "done setting" << std::endl;
