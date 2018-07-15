@@ -152,7 +152,7 @@ int main(const int argc, const char** argv) {
     cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
   }
 
-  nCycles = 200000;
+  nCycles = 1000000;
   cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
 
   setCGRAInput(2, input, sim);
