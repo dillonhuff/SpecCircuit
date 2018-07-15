@@ -95,31 +95,47 @@ namespace FlatCircuit {
       
     case CELL_TYPE_ADD:
       return ln(receiver + " = (" + arg0 + " + " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
 
     case CELL_TYPE_MUL:
-
-      return ln(receiver + " = (" + arg0 + " * " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " * " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
 
     case CELL_TYPE_SUB:
-      return ln(receiver + " = (" + arg0 + " - " + arg1 + ")");
+      return ln(receiver + " = (" + arg0 + " - " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
+        
 
     case CELL_TYPE_LSHR:
-      return ln("lshr(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln("lshr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
+        
         
     case CELL_TYPE_ASHR:
-      return ln("ashr(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln("ashr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
+        
         
     case CELL_TYPE_SHL:
-      return ln("shl(" + receiver + ", " + arg0 + ", " + arg1 + ")");
+      return ln("shl(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
+        
         
     case CELL_TYPE_EQ:
       return ln(receiver + " = (" + arg0 + " == " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));        
 
     case CELL_TYPE_NEQ:
       return ln(receiver + " = (" + arg0 + " != " + arg1 + ")") +
-        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1)));
+        ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
+        ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
 
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -151,24 +167,14 @@ namespace FlatCircuit {
     case CELL_TYPE_ORR:
       return ln(receiver + " = !!(" + arg + ")");
 
-    // case CELL_TYPE_SLICE:
-    //   return ln(receiver + " = slice(" + arg + ", " +
-    //             to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
-    //             to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
-        
     case CELL_TYPE_ZEXT:
       return ln(receiver + " = " + arg);
 
-      // return ln(receiver + " = zero_extend(" +
-      //           to_string(cell.getPortWidth(PORT_ID_OUT)) + 
-      //           ", " + arg + ")");
     default:
-      //      return ln("// Unop");
       std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
       assert(false);
     }
 
-    //    return "// Unop " + receiver + "\n";
   }
     
   std::string IRUnop::toString(ValueStore& valueStore) const {
@@ -177,18 +183,20 @@ namespace FlatCircuit {
     switch (unop) {
 
     case CELL_TYPE_PASSTHROUGH:
-      //return ln("set_bv(" + receiver + ", " + arg + ")");
       return ln(receiver + " = " + arg) +
-        ln(xMask(receiver) + " = " + xMask(arg));
+        ln(xMask(receiver) + " = " + xMask(arg)) +
+        ln(zMask(receiver) + " = " + zMask(arg));
 
     case CELL_TYPE_NOT:
       // NOTE: Not is a no-op for the x mask
       return ln(receiver + " = ~(" + arg + ") & " + maskWidth(cell.getPortWidth(PORT_ID_OUT))) +
-        ln(xMask(receiver) + " = " + xMask(arg));
+        ln(xMask(receiver) + " = " + xMask(arg)) +
+        ln(zMask(receiver) + " = " + zMask(arg));
 
     case CELL_TYPE_ORR:
       return ln(receiver + " = !!(" + arg + ")") +
-        ln(xMask(receiver) + " = !!(" + xMask(arg) + ")");
+        ln(xMask(receiver) + " = !!(" + xMask(arg) + ")") +
+        ln(zMask(receiver) + " = !!(" + zMask(arg) + ")");
 
     case CELL_TYPE_SLICE:
       return ln("slice(" + receiver + ", " + arg + ", " +
@@ -196,8 +204,9 @@ namespace FlatCircuit {
                 to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
       
     case CELL_TYPE_ZEXT:
-      return ln(receiver + " = " + arg)
-        + ln(xMask(receiver) + " = " + xMask(arg));
+      return ln(receiver + " = " + arg) +
+        ln(xMask(receiver) + " = " + xMask(arg)) +
+        ln(zMask(receiver) + " = " + zMask(arg));
 
     default:
       std::cout << "IRUnop error: " << FlatCircuit::toString(unop) << std::endl;
