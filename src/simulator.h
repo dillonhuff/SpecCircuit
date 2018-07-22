@@ -478,7 +478,13 @@ namespace FlatCircuit {
         }
 
         for (auto cid : memoriesToUpdate) {
+          cout << "updating memory " << sigPortString({cid, PORT_ID_RDATA}, def) << endl;
           updatePort({cid, PORT_ID_RDATA});
+
+          for (int i = 0; i < def.getCellRefConst(cid).getParameterValue(PARAM_MEM_DEPTH).to_type<int>(); i++) {
+            auto bv = getMemoryValue(cid, i);
+            cout << "\tmem[i] = " << bv << ", " << bv.to_type<int>() << endl;
+          }
         }
 
         //std::cout << "Updates registers" << std::endl;
