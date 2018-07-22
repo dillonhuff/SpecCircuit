@@ -19,11 +19,11 @@ int main(const int argc, const char** argv) {
 
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  Env circuitEnv =
-    loadFromCoreIR("global.top",
-                   "./test/top.json");
-  // Env circuitEnv;
-  // loadFromFile(circuitEnv, "top.csv");
+  // Env circuitEnv =
+  //   loadFromCoreIR("global.top",
+  //                  "./test/top.json");
+  Env circuitEnv;
+  loadFromFile(circuitEnv, "top.csv");
 
   CellDefinition& def = circuitEnv.getDef("top");
 
@@ -63,7 +63,7 @@ int main(const int argc, const char** argv) {
   cout << "Inputs" << endl;
   printCGRAInputs(sim);
 
-  int nCycles = 10;
+  int nCycles = 1000;
   cout << "Computing " << nCycles << " cycles of data in interpreted mode" << endl;
   setCGRAInput(2, input, sim);
 

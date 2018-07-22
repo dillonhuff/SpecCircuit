@@ -478,13 +478,18 @@ namespace FlatCircuit {
         }
 
         for (auto cid : memoriesToUpdate) {
-          cout << "updating memory " << sigPortString({cid, PORT_ID_RDATA}, def) << endl;
+          // cout << "updating memory " << sigPortString(def, {cid, PORT_ID_RDATA}) << endl;
           updatePort({cid, PORT_ID_RDATA});
 
-          for (int i = 0; i < def.getCellRefConst(cid).getParameterValue(PARAM_MEM_DEPTH).to_type<int>(); i++) {
-            auto bv = getMemoryValue(cid, i);
-            cout << "\tmem[i] = " << bv << ", " << bv.to_type<int>() << endl;
-          }
+          // for (int i = 0; i < def.getCellRefConst(cid).getParameterValue(PARAM_MEM_DEPTH).to_type<int>(); i++) {
+          //   auto bv = getMemoryValue(cid, i);
+          //   cout << "\tmem[" << i << "] = ";
+          //   if (bv.is_binary()) {
+          //     cout << bv << ", " << bv.to_type<int>() << endl;
+          //   } else {
+          //     cout << bv << ", " << "NON BINARY" << endl;
+          //   }
+          // }
         }
 
         //std::cout << "Updates registers" << std::endl;
@@ -704,6 +709,7 @@ namespace FlatCircuit {
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
 
+            std::cout << "Updating output " << sigPortString(def, sigPort) << ", with new value " << materializeInput(sigPort) << std::endl;
             setPortValue(sigPort.cell, sigPort.port, materializeInput(sigPort));
 
           }
