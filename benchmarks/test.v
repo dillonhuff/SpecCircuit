@@ -37,13 +37,13 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 1000000;
+   assign max_cycles = 100000;
    
    initial begin
 
       cycle_count = 0;
-      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");
-      test_output_file = $fopen("conv_bw_gold_cgra_out.txt", "w");
+      config_file = $fopen("./test/harris6_reordered.bsa", "r");
+      test_output_file = $fopen("harris6_reordered_gold_cgra_out_100000.txt", "w");
 
       reset_done = 0;
       clear_with_zeros_done = 0;
@@ -94,8 +94,6 @@ module test();
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
 
-
-
       if (reset_done && config_done && clear_with_zeros_done) begin
 	 cycle_count <= cycle_count + 1;
 	 $fwrite(test_output_file, "%b\n", data_out_16_S0);      
@@ -139,7 +137,6 @@ module test();
 	 data_driver_16_S2 <= data_driver_16_S2 + 1;	 
       end else if (clear_zero_count >= 10000) begin
 	 $display("Clear with zeros phase done");
-	 
 	 clear_with_zeros_done <= 1;
       end else begin
 	 data_driver_16_S2 <= 0;
