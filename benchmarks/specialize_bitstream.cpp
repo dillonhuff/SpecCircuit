@@ -22,10 +22,10 @@ int main(const int argc, const char** argv) {
   
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  Env circuitEnv =
-    loadFromCoreIR("global.top",
-                   "./benchmarks/cgra_test_harris_07_22_2018/top.json");
-  CellDefinition& def = circuitEnv.getDef("top");
+  // Env circuitEnv =
+  //   loadFromCoreIR("global.top",
+  //                  "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+  // CellDefinition& def = circuitEnv.getDef("top");
 
   //                   "./test/top.json");
 
@@ -33,13 +33,13 @@ int main(const int argc, const char** argv) {
   // loadFromFile(circuitEnv, "top.csv");
   // CellDefinition& def = circuitEnv.getDef("top");
 
-  // Env circuitEnv;
-  // loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
-  // CellDefinition& def = circuitEnv.getDef("top");
+  Env circuitEnv;
+  loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
+  CellDefinition& def = circuitEnv.getDef("top");
   
-  cout << "Saving..." << endl;
-  saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
-  cout << "Done saving" << endl;
+  // cout << "Saving..." << endl;
+  // saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
+  // cout << "Done saving" << endl;
   
   CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
   CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
@@ -123,6 +123,10 @@ int main(const int argc, const char** argv) {
 
   specializeCircuit(sim);
 
+  cout << "Saving..." << endl;
+  saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top_conv_2_1.csv");
+  cout << "Done saving" << endl;
+  
   assert(definitionIsConsistent(def));
 
   input = BitVector(16, 18);
@@ -188,7 +192,8 @@ int main(const int argc, const char** argv) {
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 0));
     sim.update();
 
-    input = BitVector(16, rand() & 0xffff);
+    //input = BitVector(16, rand() & 0xffff);
+    input = BitVector(16, i);
 
 
     sim.setFreshValue(s2t0, PORT_ID_OUT, BitVec(1, input.get(15 ).binary_value()));
@@ -213,7 +218,7 @@ int main(const int argc, const char** argv) {
 
     auto output = getCGRAOutput(0, sim);
 
-    cout << "input = " << input << ", output = " << output << endl;
+    //cout << "input = " << input << ", output = " << output << endl;
 
     fprintf(out, "%s\n", output.binary_string().c_str());
   }
