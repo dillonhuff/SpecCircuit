@@ -79,6 +79,8 @@ module mdll_top #(
   output [12:0] lf_out    // LF output (MSB 7bits for mtune, LSB 6bits for dithering)
 );
 
+   assign mdllout_pad = 0;
+
 
 wire frefp_buf, frefn_buf;
 wire frefp_buf_jm, frefn_buf_jm;

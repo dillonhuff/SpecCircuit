@@ -64,5 +64,7 @@ module DW_tap (
   output  sync_update_dr;
   
   input   test;
+
+   assign sync_update_dr = 0;
  
  endmodule

@@ -22,14 +22,21 @@ int main(const int argc, const char** argv) {
   
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  // Env circuitEnv =
-  //   loadFromCoreIR("global.top",
-  //                  "./test/top.json");
-  Env circuitEnv;
-  loadFromFile(circuitEnv, "top.csv");
+  Env circuitEnv =
+    loadFromCoreIR("global.top",
+                   "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+
+
+  //                   "./test/top.json");
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "top.csv");
 
   CellDefinition& def = circuitEnv.getDef("top");
 
+  cout << "Saving..." << endl;
+  saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
+  cout << "Done saving" << endl;
+  
   CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
   CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
   CellId s2t2 = def.getPortCellId("pad_S2_T2_in");
@@ -68,14 +75,14 @@ int main(const int argc, const char** argv) {
   cout << "Inputs" << endl;
   printCGRAInputs(sim);
 
-  int nCycles = 1000;
+  int nCycles = 10;
   cout << "Computing " << nCycles << " cycles of data in interpreted mode" << endl;
   setCGRAInput(2, input, sim);
 
   for (int i = 0; i < nCycles; i++) {
 
-    //input = BitVector(16, i);
-    input = BitVector("16'hxxxx");
+    input = BitVector(16, i);
+    //input = BitVector("16'hxxxx");
     setCGRAInput(2, input, sim);
 
     cout << "Cycle " << i << endl;

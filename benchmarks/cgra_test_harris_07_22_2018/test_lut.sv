@@ -54,28 +54,32 @@ module  test_lut  #(
   output logic [DataWidth-1:0] res
 );
 
-genvar ggg;
-generate
-  for (ggg = 0; ggg < DataWidth; ggg = ggg +1) begin : GEN_LUT
+   assign read_data = 32'h0;
+   assign res = 16'hFF;
+   
 
-    logic [7:0] lut;
+// genvar ggg;
+// generate
+//   for (ggg = 0; ggg < DataWidth; ggg = ggg +1) begin : GEN_LUT
 
-    always_ff @(posedge cfg_clk or negedge cfg_rst_n) begin
-      if(~cfg_rst_n) begin
-        lut   <= 8'h0;
-      end else if(cfg_en && (cfg_a == $unsigned(ggg/4)) ) begin
-        lut   <= cfg_d[7: 0];
-      end
-    end
+//     logic [7:0] lut;
 
-    assign res[ggg] = lut[{op_c_in, op_b_in[ggg], op_a_in[ggg]}];
-    assign read_data = {24'b0, lut};
-  end
-endgenerate
+//     always_ff @(posedge cfg_clk or negedge cfg_rst_n) begin
+//       if(~cfg_rst_n) begin
+//         lut   <= 8'h0;
+//       end else if(cfg_en && (cfg_a == $unsigned(ggg/4)) ) begin
+//         lut   <= cfg_d[7: 0];
+//       end
+//     end
+
+//     assign res[ggg] = lut[{op_c_in, op_b_in[ggg], op_a_in[ggg]}];
+//     assign read_data = {24'b0, lut};
+//   end
+// endgenerate
 
 
-logic [31:0] nc_cfg_d;
-assign nc_cfg_d = cfg_d;
+// logic [31:0] nc_cfg_d;
+// assign nc_cfg_d = cfg_d;
 
 endmodule
 

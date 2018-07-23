@@ -369,6 +369,7 @@ always @(*) begin
   case(config_addr[31:24])
     32'd0: read_data = {16'b0,read_addr};
     32'd1: read_data = {16'b0,write_addr};
+    default: read_data = 0;
   endcase
 end
 
