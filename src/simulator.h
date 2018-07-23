@@ -709,7 +709,7 @@ namespace FlatCircuit {
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
 
-            std::cout << "Updating output " << sigPortString(def, sigPort) << ", with new value " << materializeInput(sigPort) << std::endl;
+            //std::cout << "Updating output " << sigPortString(def, sigPort) << ", with new value " << materializeInput(sigPort) << std::endl;
             setPortValue(sigPort.cell, sigPort.port, materializeInput(sigPort));
 
           }

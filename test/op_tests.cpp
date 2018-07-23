@@ -28,6 +28,27 @@ namespace FlatCircuit {
     return def;
   }
 
+  CellDefinition& buildSliceCellDef(Env& e, int low, int high) {
+    CellType notChainType = e.addCellType(toString(CELL_TYPE_SLICE) + "_test_cell");
+    CellDefinition& def = e.getDef(notChainType);
+    def.addPort("in", 16, PORT_TYPE_IN);
+    def.addPort("out", (high - low), PORT_TYPE_OUT);
+
+    CellId binop =
+      def.addCell("slice_" + to_string(low) + "_" + to_string(high) + "_test_inst",
+                  CELL_TYPE_SLICE,
+                  {{PARAM_WIDTH, BitVector(32, 16)},
+                      {PARAM_HIGH, BitVector(32, high)},
+                        {PARAM_LOW, BitVector(32, low)}});
+
+    CellId in0Cell = def.getPortCellId("in");
+    CellId outCell = def.getPortCellId("out");
+    def.connect(in0Cell, PORT_ID_OUT, binop, PORT_ID_IN);
+    def.connect(binop, PORT_ID_OUT, outCell, PORT_ID_IN);
+
+    return def;
+  }
+  
   CellDefinition& buildBinopCellDef(Env& e, CellType opType) {
     CellType notChainType = e.addCellType(toString(opType) + "_test_cell");
     CellDefinition& def = e.getDef(notChainType);
@@ -82,6 +103,33 @@ namespace FlatCircuit {
     }
   }
 
+  // void compareSimulatorsUnop(Simulator& interpSim, Simulator& compileSim) {
+  //   int max = 1 << 15;
+  //   int min = 0;
+
+  //   for (int i = 0; i < 200; i++) {
+
+  //     int in0V = min + (rand() % static_cast<int>(max - min + 1));
+  //     BitVector in0 = BitVector(16, in0V);
+
+  //     cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
+
+  //     interpSim.setFreshValue("in0", in0);
+  //     interpSim.update();
+
+  //     compileSim.setFreshValue("in0", in0);
+  //     compileSim.update();
+
+  //     auto interpOut = interpSim.getBitVec("out");
+  //     auto compiledOut = compileSim.getBitVec("out");
+        
+  //     cout << "interp out    = " << interpOut << ", " << interpOut.to_type<int>() << endl;
+  //     cout << "compiled out  = " << compiledOut << ", " << compiledOut.to_type<int>() << endl;
+        
+  //     REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
+  //   }
+  // }
+  
   class RegressionSimulator {
     Simulator interpSim;
     Simulator compileSim;
@@ -162,6 +210,33 @@ namespace FlatCircuit {
 
   };
 
+  TEST_CASE("Testing slice nodes") {
+    Env e;
+    vector<BitVector> interpResults;
+    srand(23419);
+
+    CellDefinition& def = buildSliceCellDef(e, 4, 12);
+
+    RegressionSimulator sim(e, def);
+    sim.refreshConstants();
+
+    int max = 1 << 15;
+    int min = 0;
+
+    for (int i = 0; i < 200; i++) {
+
+      int in0V = min + (rand() % static_cast<int>(max - min + 1));
+      BitVector in0 = BitVector(16, in0V);
+
+      cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
+
+      sim.setFreshValue("in", in0);
+      sim.update();
+      REQUIRE(sim.internalStatesConsistent());
+    }
+    
+  }
+
   TEST_CASE("Regression test mem unq internals") {
     Env circuitEnv = loadFromCoreIR("global.mem_unq1",
                                     "./test/memory_tile_unq1.json");
@@ -171,7 +246,6 @@ namespace FlatCircuit {
     sim.refreshConstants();
 
     cout << "Compiling mem unq" << endl;
-    //sim.compileCircuit();
     cout << "Done compiling mem unq" << endl;
 
     sim.setFreshValue("addr", BitVector(9, 13));

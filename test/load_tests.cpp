@@ -170,32 +170,32 @@ namespace FlatCircuit {
 
     }
 
-    // original size   : du -s 1588152	top.csv
-    // with bulk conns : du -s 856816	top.csv
-    SECTION("Top") {
-      Env circuitEnv = loadFromCoreIR("global.top", "./test/top.json");
-      CellDefinition& def = circuitEnv.getDef("top");
+    // // original size   : du -s 1588152	top.csv
+    // // with bulk conns : du -s 856816	top.csv
+    // SECTION("Top") {
+    //   Env circuitEnv = loadFromCoreIR("global.top", "./test/top.json");
+    //   CellDefinition& def = circuitEnv.getDef("top");
 
-      cout << "Starting to save" << endl;
+    //   cout << "Starting to save" << endl;
 
-      saveToFile(circuitEnv, def, "top.csv");
+    //   saveToFile(circuitEnv, def, "top.csv");
 
-      cout << "Done saving" << endl;
+    //   cout << "Done saving" << endl;
 
-      CellType cbTp = circuitEnv.getCellType("top");
-      circuitEnv.deleteCellType(cbTp);
+    //   CellType cbTp = circuitEnv.getCellType("top");
+    //   circuitEnv.deleteCellType(cbTp);
 
-      cout << "Done deleting" << endl;
+    //   cout << "Done deleting" << endl;
       
-      REQUIRE(!circuitEnv.hasCellType(cbTp));
+    //   REQUIRE(!circuitEnv.hasCellType(cbTp));
 
-      cout << "Loading" << endl;
-      loadFromFile(circuitEnv, "top.csv");
-      cout << "Done loading" << endl;
+    //   cout << "Loading" << endl;
+    //   loadFromFile(circuitEnv, "top.csv");
+    //   cout << "Done loading" << endl;
 
-      REQUIRE(circuitEnv.hasCellType("top"));
+    //   REQUIRE(circuitEnv.hasCellType("top"));
 
-    }
+    // }
     
   }
   

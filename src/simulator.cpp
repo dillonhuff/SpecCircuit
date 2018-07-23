@@ -653,6 +653,8 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         codeState.addInstruction(new IRRegisterStateCopy(cid));
 
+      } else if (cell.getCellType() == CELL_TYPE_SLICE) {
+        unopCode(codeState, cid);
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
         cout << "Insert code for unsupported node " + def.cellName(cid)

@@ -1980,113 +1980,113 @@ namespace FlatCircuit {
   //   REQUIRE(getCGRAOutput(0, sim) == interpOutputS0);
   // }
 
-  TEST_CASE("Pre specialized CGRA multiply by 2") {
-    Env circuitEnv =
-      loadFromCoreIR("global.flat_module",
-                     "./mul_2_cgra.json");
+  // TEST_CASE("Pre specialized CGRA multiply by 2") {
+  //   Env circuitEnv =
+  //     loadFromCoreIR("global.flat_module",
+  //                    "./mul_2_cgra.json");
 
-    CellDefinition& def = circuitEnv.getDef("flat_module");
-    Simulator sim(circuitEnv, def);
+  //   CellDefinition& def = circuitEnv.getDef("flat_module");
+  //   Simulator sim(circuitEnv, def);
 
-    BitVector input(16, 5485);
-    setCGRAInput(2, input, sim);
-    sim.update();
+  //   BitVector input(16, 5485);
+  //   setCGRAInput(2, input, sim);
+  //   sim.update();
 
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+  //   REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
 
-    sim.compileCircuit();
+  //   sim.compileCircuit();
 
-    input = BitVector(16, 23);
-    setCGRAInput(2, input, sim);
-    sim.update();
+  //   input = BitVector(16, 23);
+  //   setCGRAInput(2, input, sim);
+  //   sim.update();
 
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+  //   REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
 
-    sim.simulateRaw();
+  //   sim.simulateRaw();
 
-    input = BitVector(16, 876);
-    setCGRAInput(2, input, sim);
-    sim.update();
+  //   input = BitVector(16, 876);
+  //   setCGRAInput(2, input, sim);
+  //   sim.update();
 
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+  //   REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
 
-    int nCycles = 1000000;
-    cout << "Running CGRA x2 raw for " << nCycles << endl;
+  //   int nCycles = 1000000;
+  //   cout << "Running CGRA x2 raw for " << nCycles << endl;
 
-    auto start = high_resolution_clock::now();
+  //   auto start = high_resolution_clock::now();
 
-    input = BitVector(16, 0);
-    int lastVal = 0;
+  //   input = BitVector(16, 0);
+  //   int lastVal = 0;
 
-    CellId pad_S2_T0 = def.getPortCellId("pad_S2_T0_in");
-    CellId pad_S2_T1 = def.getPortCellId("pad_S2_T1_in");
-    CellId pad_S2_T2 = def.getPortCellId("pad_S2_T2_in");
-    CellId pad_S2_T3 = def.getPortCellId("pad_S2_T3_in");
-    CellId pad_S2_T4 = def.getPortCellId("pad_S2_T4_in");
-    CellId pad_S2_T5 = def.getPortCellId("pad_S2_T5_in");
-    CellId pad_S2_T6 = def.getPortCellId("pad_S2_T6_in");
-    CellId pad_S2_T7 = def.getPortCellId("pad_S2_T7_in");
-    CellId pad_S2_T8 = def.getPortCellId("pad_S2_T8_in");
-    CellId pad_S2_T9 = def.getPortCellId("pad_S2_T9_in");
-    CellId pad_S2_T10 = def.getPortCellId("pad_S2_T10_in");
-    CellId pad_S2_T11 = def.getPortCellId("pad_S2_T11_in");
-    CellId pad_S2_T12 = def.getPortCellId("pad_S2_T12_in");
-    CellId pad_S2_T13 = def.getPortCellId("pad_S2_T13_in");
-    CellId pad_S2_T14 = def.getPortCellId("pad_S2_T14_in");
-    CellId pad_S2_T15 = def.getPortCellId("pad_S2_T15_in");
+  //   CellId pad_S2_T0 = def.getPortCellId("pad_S2_T0_in");
+  //   CellId pad_S2_T1 = def.getPortCellId("pad_S2_T1_in");
+  //   CellId pad_S2_T2 = def.getPortCellId("pad_S2_T2_in");
+  //   CellId pad_S2_T3 = def.getPortCellId("pad_S2_T3_in");
+  //   CellId pad_S2_T4 = def.getPortCellId("pad_S2_T4_in");
+  //   CellId pad_S2_T5 = def.getPortCellId("pad_S2_T5_in");
+  //   CellId pad_S2_T6 = def.getPortCellId("pad_S2_T6_in");
+  //   CellId pad_S2_T7 = def.getPortCellId("pad_S2_T7_in");
+  //   CellId pad_S2_T8 = def.getPortCellId("pad_S2_T8_in");
+  //   CellId pad_S2_T9 = def.getPortCellId("pad_S2_T9_in");
+  //   CellId pad_S2_T10 = def.getPortCellId("pad_S2_T10_in");
+  //   CellId pad_S2_T11 = def.getPortCellId("pad_S2_T11_in");
+  //   CellId pad_S2_T12 = def.getPortCellId("pad_S2_T12_in");
+  //   CellId pad_S2_T13 = def.getPortCellId("pad_S2_T13_in");
+  //   CellId pad_S2_T14 = def.getPortCellId("pad_S2_T14_in");
+  //   CellId pad_S2_T15 = def.getPortCellId("pad_S2_T15_in");
 
-    CellId clkIn = def.getPortCellId("clk_in");
+  //   CellId clkIn = def.getPortCellId("clk_in");
 
-    for (int i = 0; i < nCycles; i++) {
+  //   for (int i = 0; i < nCycles; i++) {
 
-      //sim.setFreshValueTwoState("clk_in", 1, 0);
-      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 0);
-      sim.update();
+  //     //sim.setFreshValueTwoState("clk_in", 1, 0);
+  //     sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 0);
+  //     sim.update();
 
-      //input = BitVector(16, i);
-      //setCGRAInputTwoState(2, 16, i, sim);
-      //setCGRAInput(2, input, sim);
+  //     //input = BitVector(16, i);
+  //     //setCGRAInputTwoState(2, 16, i, sim);
+  //     //setCGRAInput(2, input, sim);
 
-      unsigned long value = i;
+  //     unsigned long value = i;
 
-      sim.setFreshValueTwoState(pad_S2_T0, PORT_ID_OUT, 1, (value >> (15 - 0)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T1, PORT_ID_OUT, 1, (value >> (15 - 1)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T2, PORT_ID_OUT, 1, (value >> (15 - 2)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T3, PORT_ID_OUT, 1, (value >> (15 - 3)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T4, PORT_ID_OUT, 1, (value >> (15 - 4)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T5, PORT_ID_OUT, 1, (value >> (15 - 5)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T6, PORT_ID_OUT, 1, (value >> (15 - 6)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T7, PORT_ID_OUT, 1, (value >> (15 - 7)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T8, PORT_ID_OUT, 1, (value >> (15 - 8)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T9, PORT_ID_OUT, 1, (value >> (15 - 9)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T10, PORT_ID_OUT, 1, (value >> (15 - 10)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T11, PORT_ID_OUT, 1, (value >> (15 - 11)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T12, PORT_ID_OUT, 1, (value >> (15 - 12)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T13, PORT_ID_OUT, 1, (value >> (15 - 13)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T14, PORT_ID_OUT, 1, (value >> (15 - 14)) & 0x1);
-      sim.setFreshValueTwoState(pad_S2_T15, PORT_ID_OUT, 1, (value >> (15 - 15)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T0, PORT_ID_OUT, 1, (value >> (15 - 0)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T1, PORT_ID_OUT, 1, (value >> (15 - 1)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T2, PORT_ID_OUT, 1, (value >> (15 - 2)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T3, PORT_ID_OUT, 1, (value >> (15 - 3)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T4, PORT_ID_OUT, 1, (value >> (15 - 4)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T5, PORT_ID_OUT, 1, (value >> (15 - 5)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T6, PORT_ID_OUT, 1, (value >> (15 - 6)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T7, PORT_ID_OUT, 1, (value >> (15 - 7)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T8, PORT_ID_OUT, 1, (value >> (15 - 8)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T9, PORT_ID_OUT, 1, (value >> (15 - 9)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T10, PORT_ID_OUT, 1, (value >> (15 - 10)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T11, PORT_ID_OUT, 1, (value >> (15 - 11)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T12, PORT_ID_OUT, 1, (value >> (15 - 12)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T13, PORT_ID_OUT, 1, (value >> (15 - 13)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T14, PORT_ID_OUT, 1, (value >> (15 - 14)) & 0x1);
+  //     sim.setFreshValueTwoState(pad_S2_T15, PORT_ID_OUT, 1, (value >> (15 - 15)) & 0x1);
 
-      //sim.setFreshValueTwoState("clk_in", 1, 0);
-      sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 1);
-      sim.update();
+  //     //sim.setFreshValueTwoState("clk_in", 1, 0);
+  //     sim.setFreshValueTwoState(clkIn, PORT_ID_OUT, 1, 1);
+  //     sim.update();
 
-      lastVal = i;
-    }
+  //     lastVal = i;
+  //   }
 
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(stop - start);
-    cout << "Time taken for " << nCycles << ": "
-         << duration.count() << " milliseconds" << endl;
+  //   auto stop = high_resolution_clock::now();
+  //   auto duration = duration_cast<milliseconds>(stop - start);
+  //   cout << "Time taken for " << nCycles << ": "
+  //        << duration.count() << " milliseconds" << endl;
 
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), BitVector(16, lastVal)) ==
-            getCGRAOutput(0, sim));
+  //   REQUIRE(mul_general_width_bv(BitVector(16, 2), BitVector(16, lastVal)) ==
+  //           getCGRAOutput(0, sim));
 
-    input = BitVector(16, 5923);
-    setCGRAInput(2, input, sim);
-    sim.update();
+  //   input = BitVector(16, 5923);
+  //   setCGRAInput(2, input, sim);
+  //   sim.update();
     
-    REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
+  //   REQUIRE(mul_general_width_bv(BitVector(16, 2), input) == getCGRAOutput(0, sim));
     
-  }
+  // }
 
 }
