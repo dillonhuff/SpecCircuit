@@ -17,6 +17,9 @@ int main(const int argc, const char** argv) {
   string bitstreamFile = argv[1];
   string outputName = argv[2];
 
+  BitVector inputX = BitVector("16'hxxxx");
+  cout << "inputX = " << inputX << endl;
+  
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
   // Env circuitEnv =
@@ -55,6 +58,8 @@ int main(const int argc, const char** argv) {
   setCGRAInput(2, BitVector("16'h0"), sim);
   setCGRAInput(3, BitVector("16'h0"), sim);
 
+  setCGRAInput(2, inputX, sim);
+  
   loadCGRAConfig(convConfigValues, sim);
 
   setCGRAInput(2, input, sim);
@@ -69,7 +74,8 @@ int main(const int argc, const char** argv) {
 
   for (int i = 0; i < nCycles; i++) {
 
-    input = BitVector(16, i);
+    //input = BitVector(16, i);
+    input = BitVector("16'hxxxx");
     setCGRAInput(2, input, sim);
 
     cout << "Cycle " << i << endl;
@@ -77,8 +83,8 @@ int main(const int argc, const char** argv) {
     posedge("clk_in", sim);
 
     BitVector outputS0 = getCGRAOutput(0, sim);
-    cout << "input    = " << input << ", " << input.to_type<int>() << endl;
-    cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    cout << "input    = " << input << ", " << endl; //input.to_type<int>() << endl;
+    cout << "outputS0 = " << outputS0 << ", " << endl; //outputS0.to_type<int>() << endl;
   }
 
   BitVector interpOutputS0 = getCGRAOutput(0, sim);

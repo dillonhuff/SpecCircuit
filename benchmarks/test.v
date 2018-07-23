@@ -37,13 +37,13 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 100000;
+   assign max_cycles = 30000;
    
    initial begin
 
       cycle_count = 0;
       config_file = $fopen("./test/harris6_reordered.bsa", "r");
-      test_output_file = $fopen("harris6_reordered_gold_cgra_out_100000.txt", "w");
+      test_output_file = $fopen("harris6_reordered_gold_cgra_out_30000.txt", "w");
 
       reset_done = 0;
       clear_with_zeros_done = 0;
@@ -91,6 +91,11 @@ module test();
    wire [15:0] data_in_16_S2;
    wire [15:0] data_in_16_S3;
 
+   always @(posedge clk) begin
+      $display("cycle_count = %d, out = %b", cycle_count, data_driver_16_S0);
+      
+   end
+
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
 
@@ -134,7 +139,8 @@ module test();
       end
 
       if (reset_done && config_done && clear_with_zeros_done) begin
-	 data_driver_16_S2 <= data_driver_16_S2 + 1;	 
+	 //data_driver_16_S2 <= data_driver_16_S2 + 1;
+	 data_driver_16_S2 <= 16'hxxxx;
       end else if (clear_zero_count >= 10000) begin
 	 $display("Clear with zeros phase done");
 	 clear_with_zeros_done <= 1;

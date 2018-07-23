@@ -101,7 +101,14 @@ namespace FlatCircuit {
   void setCGRAInput(const int side, const BitVector& input, Simulator& sim) {
     for (int track = 0; track < 16; track++) {
       string inName = "pad_S" + to_string(side) + "_T" + to_string(track) + "_in";
-      sim.setFreshValue(inName, BitVec(1, input.get(15 - track).binary_value()));
+      auto bit = input.get(15 - track);
+      if (bit.is_binary()) {
+        sim.setFreshValue(inName, BitVec(1, bit.binary_value()));
+      } else if (bit.is_unknown()) {
+        sim.setFreshValue(inName, BitVec(1, "x"));
+      } else {
+        assert(false);
+      }
     }
   }
 
