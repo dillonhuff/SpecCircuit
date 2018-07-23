@@ -22,10 +22,10 @@ int main(const int argc, const char** argv) {
   
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  // Env circuitEnv =
-  //   loadFromCoreIR("global.top",
-  //                  "./benchmarks/cgra_test_harris_07_22_2018/top.json");
-  // CellDefinition& def = circuitEnv.getDef("top");
+  Env circuitEnv =
+    loadFromCoreIR("global.top",
+                   "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+  CellDefinition& def = circuitEnv.getDef("top");
 
   //                   "./test/top.json");
 
@@ -33,13 +33,13 @@ int main(const int argc, const char** argv) {
   // loadFromFile(circuitEnv, "top.csv");
   // CellDefinition& def = circuitEnv.getDef("top");
 
-  Env circuitEnv;
-  loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
-  CellDefinition& def = circuitEnv.getDef("top");
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
+  // CellDefinition& def = circuitEnv.getDef("top");
   
-  // cout << "Saving..." << endl;
-  // saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
-  // cout << "Done saving" << endl;
+  cout << "Saving..." << endl;
+  saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
+  cout << "Done saving" << endl;
   
   CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
   CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
