@@ -263,7 +263,7 @@ namespace FlatCircuit {
     cout << "Starting to collect events" << endl;
     do {
 
-      cout << "In getting comb changes" << endl;
+      //cout << "In getting comb changes" << endl;
       while (freshChanges.size() > 0) {
         SigPort sigPort = *std::begin(freshChanges);
         freshChanges.erase(sigPort);
@@ -278,7 +278,7 @@ namespace FlatCircuit {
         
       }
 
-      cout << "In got " << combChanges.size() << " comb changes" << endl;
+      //cout << "In got " << combChanges.size() << " comb changes" << endl;
 
       staticEvents.push_back(combChanges);
       combChanges = {};

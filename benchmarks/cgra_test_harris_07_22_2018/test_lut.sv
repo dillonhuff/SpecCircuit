@@ -55,7 +55,10 @@ module  test_lut  #(
 );
 
    assign read_data = 32'h0;
-   assign res = 16'hFF;
+   assign res = 1;
+   
+   
+ //16'hFF;
    
 
 // genvar ggg;

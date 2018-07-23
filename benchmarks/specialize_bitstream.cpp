@@ -25,14 +25,18 @@ int main(const int argc, const char** argv) {
   Env circuitEnv =
     loadFromCoreIR("global.top",
                    "./benchmarks/cgra_test_harris_07_22_2018/top.json");
-
-
-  //                   "./test/top.json");
-  // Env circuitEnv;
-  // loadFromFile(circuitEnv, "top.csv");
-
   CellDefinition& def = circuitEnv.getDef("top");
 
+  //                   "./test/top.json");
+
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "top.csv");
+  // CellDefinition& def = circuitEnv.getDef("top");
+
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
+  // CellDefinition& def = circuitEnv.getDef("top");
+  
   cout << "Saving..." << endl;
   saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
   cout << "Done saving" << endl;
@@ -184,7 +188,8 @@ int main(const int argc, const char** argv) {
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 0));
     sim.update();
 
-    input = BitVector(16, i);
+    input = BitVector(16, rand() & 0xffff);
+
 
     sim.setFreshValue(s2t0, PORT_ID_OUT, BitVec(1, input.get(15 ).binary_value()));
     sim.setFreshValue(s2t1, PORT_ID_OUT, BitVec(1, input.get(14 ).binary_value()));
@@ -207,6 +212,8 @@ int main(const int argc, const char** argv) {
     sim.update();
 
     auto output = getCGRAOutput(0, sim);
+
+    cout << "input = " << input << ", output = " << output << endl;
 
     fprintf(out, "%s\n", output.binary_string().c_str());
   }
