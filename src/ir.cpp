@@ -25,15 +25,15 @@ namespace FlatCircuit {
       parens(parens(arg0 + " >> " + to_string(argWidth - 1)) + " & 0xb1");
 
     string maskShift =
-      parens(to_string(argWidth) + " - " + arg1);
-    string zeroMask = "0";
+      "std::max((int) " + parens(to_string(argWidth) + " - " + arg1) + ", 0)";
     string oneMask = parens(parens("1 << " + arg1) + " - 1") + " << " + maskShift;
+
     string rawShift = parens(arg0 + " >> " + arg1);
     string shiftRes =
       parens(highBitSet + " ? " +
              parens(rawShift + " | " + oneMask) + " : " +
-             parens(rawShift + " & " + zeroMask));
-    
+             parens(rawShift + " & " + "~" + parens(oneMask)));
+
     string str = receiver + " = " + shiftRes;
     return str;
   }
