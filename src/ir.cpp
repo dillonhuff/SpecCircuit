@@ -37,6 +37,23 @@ namespace FlatCircuit {
     string str = receiver + " = " + shiftRes;
     return str;
   }
+
+  std::string lshrCode(const std::string& receiver,
+                       const std::string& arg0,
+                       const std::string& arg1,
+                       const Cell& cell) {
+    int argWidth = cell.getPortWidth(PORT_ID_IN0);
+
+    string maskShift =
+      "std::max((int) " + parens(to_string(argWidth) + " - " + arg1) + ", 0)";
+    string oneMask = parens(parens("1 << " + arg1) + " - 1") + " << " + maskShift;
+    string rawShift = parens(arg0 + " >> " + arg1);
+    string shiftRes =
+      parens(rawShift + " & " + "~" + parens(oneMask));
+
+    string str = receiver + " = " + shiftRes;
+    return str;
+  }
   
   std::string sliceString(const std::string& receiver,
                           const std::string& src,
@@ -100,6 +117,9 @@ namespace FlatCircuit {
 
     case CELL_TYPE_ASHR:
       return ln(ashrCode(receiver, arg0, arg1, cell));
+
+    case CELL_TYPE_LSHR:
+      return ln(lshrCode(receiver, arg0, arg1, cell));
       
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -163,7 +183,8 @@ namespace FlatCircuit {
         
 
     case CELL_TYPE_LSHR:
-      return ln("lshr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+      //return ln("lshr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+      return ln(lshrCode(receiver, arg0, arg1, cell));
         ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
         ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
         
