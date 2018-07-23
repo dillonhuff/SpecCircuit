@@ -4,6 +4,23 @@ using namespace std;
 
 namespace FlatCircuit {
 
+  std::string parens(const std::string& s) {
+    return "(" + s + ")";
+  }
+
+  std::string sliceString(const std::string& receiver,
+                          const std::string& src,
+                          const int low,
+                          const int high) {
+    string resStr;
+    resStr +=
+      parens(parens(src + " >> " + to_string(low)) + " & " + maskWidth(high - low));
+    
+    string str;
+    str += receiver + " = " + resStr;
+    return str;
+  }
+    
   std::string orrStr(const std::string& name) {
     return "!!(" + name + ")";
   }
@@ -167,6 +184,17 @@ namespace FlatCircuit {
     case CELL_TYPE_ORR:
       return ln(receiver + " = !!(" + arg + ")");
 
+    case CELL_TYPE_SLICE:
+      return ln(sliceString(receiver,
+                            arg,
+                            bvToInt(cell.getParameterValue(PARAM_LOW)),
+                            bvToInt(cell.getParameterValue(PARAM_HIGH))));
+      
+    // case CELL_TYPE_SLICE:
+    //   return ln("slice(" + receiver + ", " + arg + ", " +
+    //             to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+    //             to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
+      
     case CELL_TYPE_ZEXT:
       return ln(receiver + " = " + arg);
 
@@ -176,7 +204,7 @@ namespace FlatCircuit {
     }
 
   }
-    
+
   std::string IRUnop::toString(ValueStore& valueStore) const {
     CellType unop = cell.getCellType();
 
@@ -199,9 +227,29 @@ namespace FlatCircuit {
         ln(zMask(receiver) + " = !!(" + zMask(arg) + ")");
 
     case CELL_TYPE_SLICE:
-      return ln("slice(" + receiver + ", " + arg + ", " +
-                to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
-                to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
+      return ln(sliceString(receiver,
+                            arg,
+                            bvToInt(cell.getParameterValue(PARAM_LOW)),
+                            bvToInt(cell.getParameterValue(PARAM_HIGH)))) +
+        ln(sliceString(xMask(receiver),
+                       xMask(arg),
+                       bvToInt(cell.getParameterValue(PARAM_LOW)),
+                       bvToInt(cell.getParameterValue(PARAM_HIGH)))) +
+        ln(sliceString(zMask(receiver),
+                       zMask(arg),
+                       bvToInt(cell.getParameterValue(PARAM_LOW)),
+                       bvToInt(cell.getParameterValue(PARAM_HIGH))));
+        
+
+      // return ln("slice(" + receiver + ", " + arg + ", " +
+      //           to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+      //           to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")") +
+      //   ln("slice(" + xMask(receiver) + ", " + xMask(arg) + ", " +
+      //      to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+      //      to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")") +
+      //   ln("slice(" + zMask(receiver) + ", " + zMask(arg) + ", " +
+      //      to_string(bvToInt(cell.getParameterValue(PARAM_LOW))) + ", " +
+      //      to_string(bvToInt(cell.getParameterValue(PARAM_HIGH))) + ")");
       
     case CELL_TYPE_ZEXT:
       return ln(receiver + " = " + arg) +
