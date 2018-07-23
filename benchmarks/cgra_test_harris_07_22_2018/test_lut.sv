@@ -38,28 +38,44 @@
 // lut_inps (_GENESIS2_INHERITANCE_PRIORITY_) = 3
 //
 module  test_lut  #(
-  parameter DataWidth = 16
-) (
-  input                  cfg_clk,
-  input                  cfg_rst_n,
-  input  [31:0]          cfg_d,
-  input  [7:0]           cfg_a,
-  input                  cfg_en,
+                    parameter DataWidth = 16
+                    ) (
+                       input                        cfg_clk,
+                       input                        cfg_rst_n,
+                       input [31:0]                 cfg_d,
+                       input [7:0]                  cfg_a,
+                       input                        cfg_en,
 
-  input  [DataWidth-1:0] op_a_in,
-  input  [DataWidth-1:0] op_b_in,
+                       input [DataWidth-1:0]        op_a_in,
+                       input [DataWidth-1:0]        op_b_in,
 
-  input               op_c_in,
-  output logic [31:0] read_data,
-  output logic [DataWidth-1:0] res
-);
+                       input                        op_c_in,
+                       output logic [31:0]          read_data,
+                       output logic [DataWidth-1:0] res
+                       );
 
-   assign read_data = 32'h0;
-   assign res = 1;
+   // assign read_data = 32'h0;
+   // assign res = 1;
    
    
- //16'hFF;
+   //16'hFF;
    
+
+   logic [7:0]                                      lut;
+
+   always_ff @(posedge cfg_clk or negedge cfg_rst_n) begin
+      if(~cfg_rst_n) begin
+         lut   <= 8'h0;
+      end else if(cfg_en && (cfg_a == $unsigned(0/4)) ) begin
+         lut   <= cfg_d[7: 0];
+      end
+   end
+
+   assign res[0] = lut[{op_c_in, op_b_in[0], op_a_in[0]}];
+   assign read_data = {24'b0, lut};
+
+   logic [31:0] nc_cfg_d;
+   assign nc_cfg_d = cfg_d;
 
 // genvar ggg;
 // generate
