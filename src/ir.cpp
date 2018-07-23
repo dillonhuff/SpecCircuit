@@ -8,6 +8,36 @@ namespace FlatCircuit {
     return "(" + s + ")";
   }
 
+  std::string shlCode(const std::string& receiver,
+                      const std::string& arg0,
+                      const std::string& arg1) {
+    string resStr = parens(arg0 + " << " + arg1);
+    string str = receiver + " = " + resStr;
+    return str;
+  }
+
+  std::string ashrCode(const std::string& receiver,
+                       const std::string& arg0,
+                       const std::string& arg1,
+                       const Cell& cell) {
+    int argWidth = cell.getPortWidth(PORT_ID_IN0);
+    string highBitSet =
+      parens(parens(arg0 + " >> " + to_string(argWidth - 1)) + " & 0xb1");
+
+    string maskShift =
+      parens(to_string(argWidth) + " - " + arg1);
+    string zeroMask = "0";
+    string oneMask = parens(parens("1 << " + arg1) + " - 1") + " << " + maskShift;
+    string rawShift = parens(arg0 + " >> " + arg1);
+    string shiftRes =
+      parens(highBitSet + " ? " +
+             parens(rawShift + " | " + oneMask) + " : " +
+             parens(rawShift + " & " + zeroMask));
+    
+    string str = receiver + " = " + shiftRes;
+    return str;
+  }
+  
   std::string sliceString(const std::string& receiver,
                           const std::string& src,
                           const int low,
@@ -64,6 +94,12 @@ namespace FlatCircuit {
 
     case CELL_TYPE_UGT:
       return ln(receiver + " = (" + arg0 + " > " + arg1 + ")");
+
+    case CELL_TYPE_SHL:
+      return ln(shlCode(receiver, arg0, arg1));
+
+    case CELL_TYPE_ASHR:
+      return ln(ashrCode(receiver, arg0, arg1, cell));
       
     default:
       std::cout << "Error: Unsupported binop " << FlatCircuit::toString(tp) << std::endl;
@@ -133,13 +169,14 @@ namespace FlatCircuit {
         
         
     case CELL_TYPE_ASHR:
-      return ln("ashr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+      return ln(ashrCode(receiver, arg0, arg1, cell)) +
+      //return ln("ashr(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
         ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
         ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
         
         
     case CELL_TYPE_SHL:
-      return ln("shl(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
+      return ln(shlCode(receiver, arg0, arg1)) + //ln("shl(" + receiver + ", " + arg0 + ", " + arg1 + ")") +
         ln(xMask(receiver) + " = " + orrStr(xMask(arg0)) + " || " + orrStr(xMask(arg1))) +
         ln(zMask(receiver) + " = " + orrStr(zMask(arg0)) + " || " + orrStr(zMask(arg1)));
         

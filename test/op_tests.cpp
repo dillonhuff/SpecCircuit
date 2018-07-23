@@ -71,14 +71,19 @@ namespace FlatCircuit {
     return def;
   }
 
-  void compareSimulators(Simulator& interpSim, Simulator& compileSim) {
-    int max = 1 << 15;
-    int min = 0;
+  void compareSimulators(Simulator& interpSim,
+                         Simulator& compileSim,
+                         const int in0Min,
+                         const int in0Max,
+                         const int in1Min,
+                         const int in1Max) {
+    // int max = 1 << 15;
+    // int min = 0;
 
     for (int i = 0; i < 200; i++) {
 
-      int in0V = min + (rand() % static_cast<int>(max - min + 1));
-      int in1V = min + (rand() % static_cast<int>(max - min + 1));
+      int in0V = in0Min + (rand() % static_cast<int>(in0Max - in0Min + 1));
+      int in1V = in1Min + (rand() % static_cast<int>(in1Max - in1Min + 1));
       BitVector in0 = BitVector(16, in0V);
       BitVector in1 = BitVector(16, in1V);
 
@@ -103,6 +108,12 @@ namespace FlatCircuit {
     }
   }
 
+  void compareSimulators(Simulator& interpSim,
+                         Simulator& compileSim) {
+    int max = 1 << 15;
+    int min = 0;
+    compareSimulators(interpSim, compileSim, min, max, min, max);
+  }  
   // void compareSimulatorsUnop(Simulator& interpSim, Simulator& compileSim) {
   //   int max = 1 << 15;
   //   int min = 0;
@@ -370,6 +381,30 @@ namespace FlatCircuit {
 
       REQUIRE(same_representation(compileSim.getBitVec("out"),
                                   BitVector("16'hxxxx")));
+    }
+  }
+
+  TEST_CASE("Compare shift ops") {
+    Env e;
+    vector<BitVector> interpResults;
+    srand(23419);
+
+    vector<CellType> binops{CELL_TYPE_SHL, CELL_TYPE_ASHR, CELL_TYPE_LSHR};
+    for (auto binop : binops) {
+
+      CellDefinition& def = buildBinopCellDef(e, binop);
+
+      Simulator interpSim(e, def);
+
+      Simulator compileSim(e, def);
+      compileSim.compileCircuit();
+
+      compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
+
+      cout << "Comparing raw to interpreted" << endl;
+      compileSim.simulateRaw();
+      compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
+
     }
   }
 
