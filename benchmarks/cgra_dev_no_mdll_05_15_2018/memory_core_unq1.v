@@ -336,10 +336,10 @@ linebuffer_control_unq1  linebuffer_control
 .read_data(read_data_linebuf)
 );
 
-   always @(posedge gclk) begin
-      $display("lb_valid  = %b", lb_valid_out);
-      $display("data_out  = %b", data_out);      
-   end
+   // always @(posedge gclk) begin
+   //    $display("lb_valid  = %b", lb_valid_out);
+   //    $display("data_out  = %b", data_out);      
+   // end
 
 fifo_control_unq1  fifo_control
 (

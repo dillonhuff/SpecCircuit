@@ -69,7 +69,7 @@ module  test_lut #(parameter DataWidth=1) (
       end
    end
 
-   assign res = (lut >> {op_c_in, op_b_in[0], op_a_in[0]}) & 1'b1;
+   assign res = (lut >> {op_c_in, op_b_in, op_a_in}) & 1'b1;
    
    assign read_data = {24'b0, lut};
 
