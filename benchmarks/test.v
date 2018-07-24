@@ -37,13 +37,13 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 30000;
+   assign max_cycles = 30;
    
    initial begin
 
       cycle_count = 0;
-      config_file = $fopen("./test/harris6_reordered.bsa", "r");
-      test_output_file = $fopen("harris6_reordered_gold_cgra_out_30000.txt", "w");
+      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");
+      test_output_file = $fopen("conv_bw_gold_cgra_out_30.txt", "w");
 
       reset_done = 0;
       clear_with_zeros_done = 0;
