@@ -37,13 +37,18 @@ module test();
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 30;
+   assign max_cycles = 1000000;
+   
    
    initial begin
 
       cycle_count = 0;
-      config_file = $fopen("./test/conv_bw_only_config_lines.bsa", "r");
-      test_output_file = $fopen("conv_bw_gold_cgra_out_30.txt", "w");
+
+      config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
+      test_output_file = $fopen("conv_2_1_gold_cgra_out.txt", "w");
+
+      //config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
+      //test_output_file = $fopen("conv_2_1_gold_cgra_out.txt", "w");
 
       reset_done = 0;
       clear_with_zeros_done = 0;
@@ -91,10 +96,10 @@ module test();
    wire [15:0] data_in_16_S2;
    wire [15:0] data_in_16_S3;
 
-   always @(posedge clk) begin
-      $display("cycle_count = %d, out = %b", cycle_count, data_driver_16_S0);
+   // always @(posedge clk) begin
+   //    $display("cycle_count = %d, in = %b, out = %b", cycle_count, data_driver_16_S2, data_out_16_S0);
       
-   end
+   // end
 
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
@@ -139,8 +144,17 @@ module test();
       end
 
       if (reset_done && config_done && clear_with_zeros_done) begin
-	 //data_driver_16_S2 <= data_driver_16_S2 + 1;
-	 data_driver_16_S2 <= 16'hxxxx;
+	 //data_driver_16_S2 <= $urandom & 16'hffff;
+	 
+	 //data_driver_16_S2 <= (cycle_count % 100) == 1;
+	 data_driver_16_S2 <= data_driver_16_S2 + 1;
+	 
+	 //data_driver_16_S2 <= 16'hxxxx;
+
+	 if ((cycle_count % 20000) == 0) begin
+	    $display("cycle_count = %d", cycle_count);
+	 end
+
       end else if (clear_zero_count >= 10000) begin
 	 $display("Clear with zeros phase done");
 	 clear_with_zeros_done <= 1;

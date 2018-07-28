@@ -22,10 +22,10 @@ int main(const int argc, const char** argv) {
   
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  // Env circuitEnv =
-  //   loadFromCoreIR("global.top",
-  //                  "./benchmarks/cgra_test_harris_07_22_2018/top.json");
-  // CellDefinition& def = circuitEnv.getDef("top");
+  Env circuitEnv =
+    loadFromCoreIR("global.top",
+                   "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+  CellDefinition& def = circuitEnv.getDef("top");
 
   //                   "./test/top.json");
 
@@ -33,9 +33,9 @@ int main(const int argc, const char** argv) {
   // loadFromFile(circuitEnv, "top.csv");
   // CellDefinition& def = circuitEnv.getDef("top");
 
-  Env circuitEnv;
-  loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
-  CellDefinition& def = circuitEnv.getDef("top");
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
+  // CellDefinition& def = circuitEnv.getDef("top");
   
   // cout << "Saving..." << endl;
   // saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
@@ -175,6 +175,8 @@ int main(const int argc, const char** argv) {
     cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
   }
 
+  outputVerilog(sim.def, outputName);
+
   nCycles = 1000000;
   cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
 
@@ -237,8 +239,6 @@ int main(const int argc, const char** argv) {
 
   cout << "input    = " << input << endl;
   cout << "outputS0 = " << outputS0 << endl;
-
-  outputVerilog(sim.def, outputName);
 
   fclose(out);
 }
