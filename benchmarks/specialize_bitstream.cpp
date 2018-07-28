@@ -123,6 +123,8 @@ int main(const int argc, const char** argv) {
 
   specializeCircuit(sim);
 
+  cout << "# of cells in specialized circuit = " << def.numCells() << endl;
+
   cout << "Saving..." << endl;
   saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top_conv_2_1.csv");
   cout << "Done saving" << endl;
