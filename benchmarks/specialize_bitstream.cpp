@@ -173,6 +173,8 @@ int main(const int argc, const char** argv) {
     cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
   }
 
+  outputVerilog(sim.def, outputName);
+
   nCycles = 1000000;
   cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
 
@@ -235,8 +237,6 @@ int main(const int argc, const char** argv) {
 
   cout << "input    = " << input << endl;
   cout << "outputS0 = " << outputS0 << endl;
-
-  outputVerilog(sim.def, outputName);
 
   fclose(out);
 }

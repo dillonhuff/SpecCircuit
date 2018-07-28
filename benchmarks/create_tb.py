@@ -124,7 +124,7 @@ def compare_output_files(file0, file1):
 
     print 'Done with comparison'
 
-remove_x_constants('conv_3_1_cgra.v')
+remove_x_constants('harris_cgra.v')
 
 # generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
 # run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
