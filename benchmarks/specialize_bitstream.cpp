@@ -12,6 +12,16 @@ using namespace std;
 using namespace CoreIR;
 using namespace FlatCircuit;
 
+int countCellsOfType(const CellType tp, const CellDefinition& def) {
+  int count = 0;
+  for (auto ctp : def.getCellMap()) {
+    if (ctp.second.getCellType() == tp) {
+      count++;
+    }
+  }
+  return count;
+}
+
 int main(const int argc, const char** argv) {
   assert(argc == 3);
   string bitstreamFile = argv[1];
@@ -22,10 +32,10 @@ int main(const int argc, const char** argv) {
   
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  Env circuitEnv =
-    loadFromCoreIR("global.top",
-                   "./benchmarks/cgra_test_harris_07_22_2018/top.json");
-  CellDefinition& def = circuitEnv.getDef("top");
+  // Env circuitEnv =
+  //   loadFromCoreIR("global.top",
+  //                  "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+  // CellDefinition& def = circuitEnv.getDef("top");
 
   //                   "./test/top.json");
 
@@ -33,9 +43,12 @@ int main(const int argc, const char** argv) {
   // loadFromFile(circuitEnv, "top.csv");
   // CellDefinition& def = circuitEnv.getDef("top");
 
-  // Env circuitEnv;
-  // loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
-  // CellDefinition& def = circuitEnv.getDef("top");
+  Env circuitEnv;
+  loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
+  CellDefinition& def = circuitEnv.getDef("top");
+
+  int numMuxes = countCellsOfType(CELL_TYPE_MUX, def);
+  cout << "Number of muxes = " << numMuxes << endl;
   
   // cout << "Saving..." << endl;
   // saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
