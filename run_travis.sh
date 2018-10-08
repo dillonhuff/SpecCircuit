@@ -1,2 +1,2 @@
  ./compare-to-iverilog
-valgrind ./regression-tests
+./small-tests
