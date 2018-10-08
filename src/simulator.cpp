@@ -1075,6 +1075,17 @@ namespace FlatCircuit {
     specializedPorts.insert(cid);
   }
 
+  void Simulator::specializePort(const std::string& port) {
+    CellId cid = def.getPortCellId(port);
+
+    specializePort(port, getBitVec(cid, PORT_ID_OUT));
+    
+    // assert(!elem(cid, specializedPorts));
+
+    // def.replacePortWithConstant(port, value);
+    // specializedPorts.insert(cid);
+  }
+  
   void specializeCircuit(const std::vector<std::string>& constantPorts,
                          Simulator& sim) {
     for (auto portName : constantPorts) {
