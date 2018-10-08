@@ -835,7 +835,7 @@ namespace FlatCircuit {
 
       cout << "data_out first = " << sim.getBitVec("data_out") << endl;
       cout << "Table values" << endl;
-      sim.debugPrintTableValues();
+      //sim.debugPrintTableValues();
       REQUIRE(same_representation(sim.getBitVec("data_out"), BitVector("16'hxxxx")));
       //REQUIRE(sim.getBitVec("data_out") == BitVector(16, 0));
 

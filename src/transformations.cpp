@@ -586,7 +586,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
+    //cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
 
     set<CellId> innerCells;
     for (auto& ctp : def.getCellMap()) {
@@ -621,8 +621,8 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of zero constants = " << zeroConstants.size() << endl;
-    cout << "# of one constants  = " << oneConstants.size() << endl;
+    // cout << "# of zero constants = " << zeroConstants.size() << endl;
+    // cout << "# of one constants  = " << oneConstants.size() << endl;
 
     if (zeroConstants.size() > 1) {
       CellId zc = zeroConstants.back();
@@ -649,7 +649,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Done removing bitconsts" << endl;
+    //cout << "Done removing bitconsts" << endl;
     
   }
 
@@ -685,7 +685,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Deleting " << passthroughs.size() << " passthroughs" << endl;
+    //cout << "Deleting " << passthroughs.size() << " passthroughs" << endl;
     for (auto cid : passthroughs) {
       elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
     }
@@ -706,7 +706,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Deleting " << idZexts.size() << " cells" << endl;
+    //cout << "Deleting " << idZexts.size() << " cells" << endl;
     for (auto cid : idZexts) {
       elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
     }
@@ -760,8 +760,8 @@ namespace FlatCircuit {
     while (foundCell) {
       foundCell = false;
 
-      cout << "# of cells connected to outputs = " << connectedToOutputs.size()
-           << endl;
+      // cout << "# of cells connected to outputs = " << connectedToOutputs.size()
+      //      << endl;
       
       for (auto ctp : def.getCellMap()) {
         CellId cid = ctp.first;
