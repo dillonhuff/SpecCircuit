@@ -213,7 +213,7 @@ namespace FlatCircuit {
       int in0V = min + (rand() % static_cast<int>(max - min + 1));
       BitVector in0 = BitVector(16, in0V);
 
-      cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
+      //cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
 
       sim.setFreshValue("in", in0);
       sim.update();
