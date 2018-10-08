@@ -13,7 +13,7 @@ addons:
 
 before_install:
   - export COREIRCONFIG="g++-4.9";
-  - wget https://github.com/rdaly525/coreir/releases/download/v0.0.11/coreir.tar.gz
+  - wget https://github.com/rdaly525/coreir/releases/download/v0.0.26/coreir.tar.gz
   - tar -xvzf coreir.tar.gz
   - cd release
   - sudo make install -j
