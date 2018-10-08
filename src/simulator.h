@@ -830,7 +830,7 @@ namespace FlatCircuit {
 
         BitVector newOut = shl(in0, in1);
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_ASHR) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
