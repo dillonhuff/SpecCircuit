@@ -371,7 +371,7 @@ namespace FlatCircuit {
       Simulator interpSim(e, def);
       // TODO: Remove this when it has been established that the
       // problem is the bit-vector library?
-      interpSim.compileCircuit();
+      //interpSim.compileCircuit();
 
       Simulator compileSim(e, def);
       compileSim.compileCircuit();
