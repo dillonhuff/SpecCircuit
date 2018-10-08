@@ -1,2 +1,2 @@
- ./compare-to-iverilog
+./compare-to-iverilog
 ./small-tests

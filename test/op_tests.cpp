@@ -114,32 +114,6 @@ namespace FlatCircuit {
     int min = 0;
     compareSimulators(interpSim, compileSim, min, max, min, max);
   }  
-  // void compareSimulatorsUnop(Simulator& interpSim, Simulator& compileSim) {
-  //   int max = 1 << 15;
-  //   int min = 0;
-
-  //   for (int i = 0; i < 200; i++) {
-
-  //     int in0V = min + (rand() % static_cast<int>(max - min + 1));
-  //     BitVector in0 = BitVector(16, in0V);
-
-  //     cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
-
-  //     interpSim.setFreshValue("in0", in0);
-  //     interpSim.update();
-
-  //     compileSim.setFreshValue("in0", in0);
-  //     compileSim.update();
-
-  //     auto interpOut = interpSim.getBitVec("out");
-  //     auto compiledOut = compileSim.getBitVec("out");
-        
-  //     cout << "interp out    = " << interpOut << ", " << interpOut.to_type<int>() << endl;
-  //     cout << "compiled out  = " << compiledOut << ", " << compiledOut.to_type<int>() << endl;
-        
-  //     REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
-  //   }
-  // }
   
   class RegressionSimulator {
     Simulator interpSim;
