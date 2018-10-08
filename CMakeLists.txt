@@ -30,7 +30,7 @@ SET(CGRA_TEST_FILES ./test/cgra_tests.cpp)
 SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp ./test/load_tests.cpp)
 SET(REGRESSION_TEST_FILES ./test/op_tests.cpp)
 
-add_executable(all-tests test/test_main.cpp ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
+add_executable(all-tests test/test_main.cpp ${REGRESSION_TEST_FILES} ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
 target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
 
 add_executable(small-tests test/test_main.cpp ${SMALL_TEST_FILES})

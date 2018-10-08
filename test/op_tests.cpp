@@ -87,9 +87,6 @@ namespace FlatCircuit {
       BitVector in0 = BitVector(16, in0V);
       BitVector in1 = BitVector(16, in1V);
 
-      cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
-      cout << "in1 = " << in1 << ", " << in1.to_type<int>() << endl;
-
       interpSim.setFreshValue("in0", in0);
       interpSim.setFreshValue("in1", in1);
       interpSim.update();
@@ -100,9 +97,12 @@ namespace FlatCircuit {
 
       auto interpOut = interpSim.getBitVec("out");
       auto compiledOut = compileSim.getBitVec("out");
-        
-      cout << "interp out    = " << interpOut << ", " << interpOut.to_type<int>() << endl;
-      cout << "compiled out  = " << compiledOut << ", " << compiledOut.to_type<int>() << endl;
+
+      // cout << "in0 = " << in0 << ", " << in0.to_type<int>() << endl;
+      // cout << "in1 = " << in1 << ", " << in1.to_type<int>() << endl;
+
+      // cout << "interp out    = " << interpOut << ", " << interpOut.to_type<int>() << endl;
+      // cout << "compiled out  = " << compiledOut << ", " << compiledOut.to_type<int>() << endl;
         
       REQUIRE(interpSim.getBitVec("out") == compileSim.getBitVec("out"));
     }
