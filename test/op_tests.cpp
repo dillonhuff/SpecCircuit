@@ -358,29 +358,29 @@ namespace FlatCircuit {
     }
   }
 
-  TEST_CASE("Compare shift ops") {
-    Env e;
-    vector<BitVector> interpResults;
-    srand(23419);
+  // TEST_CASE("Compare shift ops") {
+  //   Env e;
+  //   vector<BitVector> interpResults;
+  //   srand(23419);
 
-    vector<CellType> binops{CELL_TYPE_SHL, CELL_TYPE_ASHR, CELL_TYPE_LSHR};
-    for (auto binop : binops) {
+  //   vector<CellType> binops{CELL_TYPE_SHL, CELL_TYPE_ASHR, CELL_TYPE_LSHR};
+  //   for (auto binop : binops) {
 
-      CellDefinition& def = buildBinopCellDef(e, binop);
+  //     CellDefinition& def = buildBinopCellDef(e, binop);
 
-      Simulator interpSim(e, def);
+  //     Simulator interpSim(e, def);
 
-      Simulator compileSim(e, def);
-      compileSim.compileCircuit();
+  //     Simulator compileSim(e, def);
+  //     compileSim.compileCircuit();
 
-      compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
+  //     compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
 
-      cout << "Comparing raw to interpreted" << endl;
-      compileSim.simulateRaw();
-      compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
+  //     cout << "Comparing raw to interpreted" << endl;
+  //     compileSim.simulateRaw();
+  //     compareSimulators(interpSim, compileSim, 0, (1 << 16) - 1, 0, 17);
 
-    }
-  }
+  //   }
+  // }
 
   TEST_CASE("Comparing binary ops in simulation and interpretation") {
     Env e;
