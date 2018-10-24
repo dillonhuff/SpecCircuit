@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/dillonhuff/FlatCircuit.svg?branch=master)](https://travis-ci.org/dillonhuff/FlatCircuit)
+
 # Circuit Specialization
 
 This is an experimental RTL simulator that can perform runtime circuit
