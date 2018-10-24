@@ -320,6 +320,23 @@ namespace FlatCircuit {
     assert(false);
   }
 
+  void insertNewCandidates(const Cell& cell,
+                           const PortId pid,
+                           const CellDefinition& def,
+                           std::set<CellId>& candidates) {
+                           //                           std::set<CellId>& alreadyDeleted) {
+    for (auto sigBus : cell.getPortReceivers(pid)) {
+      for (auto sigBit : sigBus) {
+        if (//!elem(sigBit.cell, alreadyDeleted) &&
+            notEmpty(sigBit)) { // &&
+          //            (//def.getCellRefConst(sigBit.cell).getCellType() != CELL_TYPE_CONST)) {
+          candidates.insert(sigBit.cell);
+        }
+      }
+    }
+    
+  }
+
   // Other constant folding mechanisms:
   // 1. Partially evaluating ands / ors, x + 0, etc.
   // 2. Evaluating registers whose inputs are constant and whose current value
@@ -330,14 +347,15 @@ namespace FlatCircuit {
                      const std::map<CellId, BitVector>& registerValues) {
 
     set<CellId> candidates;
-    for (auto cellPair : def.getCellMap()) {
+    //set<CellId> cellsToDelete;
+    
+    for (auto& cellPair : def.getCellMap()) {
       Cell& cell = def.getCellRef(cellPair.first);
       if (cell.getCellType() == CELL_TYPE_CONST) {
-        for (auto sigBus : cell.getPortReceivers(PORT_ID_OUT)) {
-          for (auto sigBit : sigBus) {
-            candidates.insert(sigBit.cell);
-          }
-        }
+        //insertNewCandidates(cell, PORT_ID_OUT, def, candidates, cellsToDelete);
+
+        insertNewCandidates(cell, PORT_ID_OUT, def, candidates);
+
       }
     }
 
@@ -365,12 +383,8 @@ namespace FlatCircuit {
 
           assert(bitVec.bitLength() == 1);
 
-          for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-            for (auto sigBit : sigBus) {
-              candidates.insert(sigBit.cell);
-            }
-          }
-
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          //insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
           bool selIn1 = 0;
           if (bitVec.get(0).is_binary()) {
             selIn1 = bitVec.get(0).binary_value() == 1;
@@ -383,9 +397,9 @@ namespace FlatCircuit {
           auto& outReceivers = nextCell.getPortReceivers(PORT_ID_OUT);
 
           if (outReceivers.size() != inDrivers.size()) {
-            cout << "Error while folding " << def.getCellName(next) << ": outReceivers.size() = " << outReceivers.size() << ", but inDrivers = " << inDrivers.size() << endl;
-
-              
+            cout << "Error while folding " << def.getCellName(next)
+                 << ": outReceivers.size() = " << outReceivers.size()
+                 << ", but inDrivers = " << inDrivers.size() << endl;
           }
           assert(outReceivers.size() == inDrivers.size());
             
@@ -399,6 +413,7 @@ namespace FlatCircuit {
           }
 
           def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
         }
       } else if (nextCell.getCellType() == CELL_TYPE_MEM) {
@@ -422,6 +437,7 @@ namespace FlatCircuit {
           def.replaceCellPortWithConstant(next, PORT_ID_RDATA, BitVector(width, 0));
 
           def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
         }
         
@@ -429,19 +445,19 @@ namespace FlatCircuit {
         maybe<BitVector> bv = getOutput(next, def, registerValues);
 
         if (bv.has_value()) {
-          for (auto sigBus : nextCell.getPortReceivers(PORT_ID_OUT)) {
-            for (auto sigBit : sigBus) {
-              candidates.insert(sigBit.cell);
-            }
-          }
+          insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates);
+          //insertNewCandidates(nextCell, PORT_ID_OUT, def, candidates, cellsToDelete);
 
           def.replaceCellPortWithConstant(next, PORT_ID_OUT, bv.get_value());
           def.deleteCell(next);
+          //cellsToDelete.insert(next);
           candidates.erase(next);
 
         }
       }
     }
+
+    //def.bulkDelete(cellsToDelete);
 
     // Checking the result has no unfolded sources
     for (auto& ctp : def.getCellMap()) {
@@ -494,7 +510,7 @@ namespace FlatCircuit {
 
   std::set<CellId> innerCellsWithNoReceivers(CellDefinition& def) {
     std::set<CellId> toDelete;
-    for (auto cellPair : def.getCellMap()) {
+    for (auto& cellPair : def.getCellMap()) {
 
       Cell& cell = def.getCellRef(cellPair.first);
       bool allOutputsHaveNoReceivers = true;
@@ -570,10 +586,10 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
+    //cout << "# of cells connected to inputs = " << connectedCells.size() << endl;
 
     set<CellId> innerCells;
-    for (auto ctp : def.getCellMap()) {
+    for (auto& ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       if (!elem(cid, connectedCells)) {
         innerCells.insert(cid);
@@ -588,7 +604,7 @@ namespace FlatCircuit {
     vector<CellId> zeroConstants;
     vector<CellId> oneConstants;
 
-    for (auto ctp : def.getCellMap()) {
+    for (auto& ctp : def.getCellMap()) {
       CellId cid = ctp.first;
       if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
         BitVector initVal = def.getCellRef(cid).getParameterValue(PARAM_INIT_VALUE);
@@ -605,8 +621,8 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "# of zero constants = " << zeroConstants.size() << endl;
-    cout << "# of one constants  = " << oneConstants.size() << endl;
+    // cout << "# of zero constants = " << zeroConstants.size() << endl;
+    // cout << "# of one constants  = " << oneConstants.size() << endl;
 
     if (zeroConstants.size() > 1) {
       CellId zc = zeroConstants.back();
@@ -633,7 +649,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Done removing bitconsts" << endl;
+    //cout << "Done removing bitconsts" << endl;
     
   }
 
@@ -669,7 +685,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Deleting " << passthroughs.size() << " passthroughs" << endl;
+    //cout << "Deleting " << passthroughs.size() << " passthroughs" << endl;
     for (auto cid : passthroughs) {
       elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
     }
@@ -690,7 +706,7 @@ namespace FlatCircuit {
       }
     }
 
-    cout << "Deleting " << idZexts.size() << " cells" << endl;
+    //cout << "Deleting " << idZexts.size() << " cells" << endl;
     for (auto cid : idZexts) {
       elidePort(cid, PORT_ID_IN, PORT_ID_OUT, def);
     }
@@ -744,8 +760,8 @@ namespace FlatCircuit {
     while (foundCell) {
       foundCell = false;
 
-      cout << "# of cells connected to outputs = " << connectedToOutputs.size()
-           << endl;
+      // cout << "# of cells connected to outputs = " << connectedToOutputs.size()
+      //      << endl;
       
       for (auto ctp : def.getCellMap()) {
         CellId cid = ctp.first;

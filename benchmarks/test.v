@@ -31,19 +31,28 @@ module test();
    integer    test_output_file;
 
    reg 	      config_done;
+   reg 	      clear_with_zeros_done;
+   reg [31:0] clear_zero_count;
 
    reg [64:0] cycle_count;
    wire [64:0] max_cycles;
 
-   assign max_cycles = 1000;
+   assign max_cycles = 1000000;
+   
    
    initial begin
 
       cycle_count = 0;
-      config_file = $fopen("./test/pw2_16x16_only_config_lines.bsa", "r");
-      test_output_file = $fopen("tb_output.txt", "w");
+
+      config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
+      test_output_file = $fopen("conv_2_1_gold_cgra_out.txt", "w");
+
+      //config_file = $fopen("./test/conv_2_1_only_config_lines.bsa", "r");
+      //test_output_file = $fopen("conv_2_1_gold_cgra_out.txt", "w");
 
       reset_done = 0;
+      clear_with_zeros_done = 0;
+      clear_zero_count = 0;
 
       if (config_file == 0) begin
 	 $display("config_file was null");
@@ -61,7 +70,7 @@ module test();
       
       #1 clk = 0;
 
-      data_driver_16_S2 = 3;
+      data_driver_16_S2 = 0;
 
       config_addr = 0;
       config_data = 0;
@@ -87,12 +96,19 @@ module test();
    wire [15:0] data_in_16_S2;
    wire [15:0] data_in_16_S3;
 
+   // always @(posedge clk) begin
+   //    $display("cycle_count = %d, in = %b, out = %b", cycle_count, data_driver_16_S2, data_out_16_S0);
+      
+   // end
+
    // After reseting load data / configuration between rising clock edges
    always @(negedge clk) begin
 
-      cycle_count <= cycle_count + 1;
+      if (reset_done && config_done && clear_with_zeros_done) begin
+	 cycle_count <= cycle_count + 1;
+	 $fwrite(test_output_file, "%b\n", data_out_16_S0);      
+      end
 
-      $fwrite(test_output_file, "%b\n", data_out_16_S0);      
 
       if (reset_done) begin
 	 scan_file = $fscanf(config_file, "%h %h\n", config_addr, config_data);
@@ -126,6 +142,27 @@ module test();
 	    $finish();
 	 end
       end
+
+      if (reset_done && config_done && clear_with_zeros_done) begin
+	 //data_driver_16_S2 <= $urandom & 16'hffff;
+	 
+	 //data_driver_16_S2 <= (cycle_count % 100) == 1;
+	 data_driver_16_S2 <= data_driver_16_S2 + 1;
+	 
+	 //data_driver_16_S2 <= 16'hxxxx;
+
+	 if ((cycle_count % 20000) == 0) begin
+	    $display("cycle_count = %d", cycle_count);
+	 end
+
+      end else if (clear_zero_count >= 10000) begin
+	 $display("Clear with zeros phase done");
+	 clear_with_zeros_done <= 1;
+      end else begin
+	 data_driver_16_S2 <= 0;
+	 clear_zero_count <= clear_zero_count + 1;
+      end
+
    end
 
    
@@ -351,9 +388,18 @@ module test();
 			   data_in_S2_T14,
 			   data_in_S2_T15};
 
-   always @(posedge clk) begin
-      data_driver_16_S2 <= data_driver_16_S2;
-   end
+   // always @(posedge clk) begin
+   //    if (reset_done && config_done && clear_with_zeros_done) begin
+   // 	 data_driver_16_S2 <= data_driver_16_S2 + 1;	 
+   //    end else if (clear_zero_count >= 10000) begin
+   // 	 $display("Clear with zeros phase done");
+	 
+   // 	 clear_with_zeros_done <= 1;
+   //    end else begin
+   // 	 data_driver_16_S2 <= 0;
+   // 	 clear_zero_count <= clear_zero_count + 1;
+   //    end
+   // end
 
    assign    {data_in_S0_T0,
 	      data_in_S0_T1,

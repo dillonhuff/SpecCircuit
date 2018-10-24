@@ -494,7 +494,8 @@ namespace FlatCircuit {
     }
 
     for (auto ns : c->getNamespaces()) {
-      for (auto mp : ns.second->getModules()) {
+      //for (auto mp : ns.second->getModules(false)) {
+        for (auto mp : ns.second->getModules()) {
 
         // For primitives there is nothing to convert
         if (mp.second->hasDef()) {

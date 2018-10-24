@@ -13,7 +13,7 @@ def remove_x_constants(verilog_file_name):
     outfile.write(no_x_str)
     outfile.close()
 
-remove_x_constants('conv_2_1_cgra_no_x.v')
+#remove_x_constants('conv_2_1_cgra_no_x.v')
 
 def generate_tb_from_template(tb_template_file, config_file_name, output_file_name, tb_file):
     with open(tb_template_file, 'r') as myfile:
@@ -124,9 +124,11 @@ def compare_output_files(file0, file1):
 
     print 'Done with comparison'
 
-generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
-run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
-compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
+remove_x_constants('harris_cgra.v')
+
+# generate_tb_for_application_from_template('conv_3_1_specialized', 'conv_3_1', './benchmarks/test.v')
+# run_iverilog('conv_3_1_specialized', 'conv_3_1_specialized_tb.v', 'conv_3_1_cgra.v')
+# compare_output_files('conv_2_1_specialized_tb_output.txt', 'conv_3_1_specialized_tb_output.txt')
 
 # generate_tb_for_application_from_template('conv_2_1_specialized', 'conv_2_1', './benchmarks/test.v')
 # run_iverilog('conv_2_1_specialized', 'conv_2_1_specialized_tb.v', 'conv_2_1_cgra.v')

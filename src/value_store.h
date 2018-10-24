@@ -11,26 +11,91 @@ namespace FlatCircuit {
 
   class QBitTable {
 
-    std::vector<bsim::quad_value> simValueTable;
+    std::vector<unsigned char> simValueTable;
+    std::vector<unsigned char> bitMaskTable;
+    std::vector<unsigned char> zMaskTable;
 
   public:
 
     BitVector getBitVector(const unsigned long offset,
                            const unsigned long width) const {
       BitVector bv(width, 0);
-      for (unsigned long i = 0; i < width; i++) {
-        bv.set(i, simValueTable.at(offset + i));
+      unsigned long byteWidth = storedByteLength(width);
+
+      unsigned long bvOffset = 0;
+
+      for (unsigned long i = 0; i < byteWidth; i++) {
+        unsigned long byteOffset = offset + i;
+        for (unsigned long bitOffset = 0; bitOffset < 8; bitOffset++) {
+
+          if (bvOffset >= (unsigned long) bv.bitLength()) {
+            break;
+          }
+          assert(byteOffset < simValueTable.size());
+
+          bv.set(bvOffset,
+                 bsim::quad_value((simValueTable.at(byteOffset) >> bitOffset) & 0x01));
+
+          bool isX = (bitMaskTable.at(byteOffset) >> bitOffset) & 0x01;
+          if (isX) {
+            bv.set(bvOffset, bsim::quad_value(QBV_UNKNOWN_VALUE));
+          }
+
+          bool isZ = (zMaskTable.at(byteOffset) >> bitOffset) & 0x01;
+          if (isZ) {
+            bv.set(bvOffset, bsim::quad_value(QBV_HIGH_IMPEDANCE_VALUE));
+          }
+
+          bvOffset += 1;
+        }
+
       }
+
       return bv;
+    }
+
+    std::pair<unsigned long, unsigned long>
+    bitOffsetInBytes(const unsigned long bitOffset) {
+      return {(bitOffset / 8), bitOffset % 8};
     }
 
     void setBitVector(const unsigned long offset,
                       const BitVector& bv) {
 
+      //std::cout << "setBitVector at " << offset << " to " << bv << std::endl;
       for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-        simValueTable[offset + i] = bv.get(i);
-      }
 
+        std::pair<unsigned long, unsigned long> bitOffset =
+          bitOffsetInBytes(i);
+        if (bv.get(i).is_binary()) {
+
+          simValueTable[offset + bitOffset.first] ^=
+            (-bv.get(i).binary_value() ^ simValueTable[offset + bitOffset.first]) & (1UL << bitOffset.second);
+
+          bitMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
+
+          zMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
+          
+        } else if (bv.get(i).is_high_impedance()) {
+
+          bitMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
+          
+          zMaskTable[offset + bitOffset.first] |=
+            0 | (1 << bitOffset.second);
+
+        } else {
+          bitMaskTable[offset + bitOffset.first] |=
+            0 | (1 << bitOffset.second);
+
+          zMaskTable[offset + bitOffset.first] &=
+            ~(0x00 | (1 << bitOffset.second));
+        }
+      }
+      //std::cout << "done setting" << std::endl;
+      
     }
     
     unsigned long addBitVector(const unsigned long width) {
@@ -43,9 +108,15 @@ namespace FlatCircuit {
 
       unsigned long nextInd = simValueTable.size();
 
-      for (unsigned long i = 0; i < (unsigned long) bv.bitLength(); i++) {
-        simValueTable.push_back(bv.get(i));
+      for (unsigned long i = 0;
+           i < (unsigned long) storedByteLength(bv.bitLength());
+           i++) {
+        simValueTable.push_back(0);
+        bitMaskTable.push_back(0);
+        zMaskTable.push_back(0);
       }
+
+      setBitVector(nextInd, bv);
 
       return nextInd;
     }
@@ -54,8 +125,24 @@ namespace FlatCircuit {
       return simValueTable.size();
     }
 
-    std::vector<bsim::quad_value>& getValueVector() {
+    std::vector<unsigned char>& getValueVector() {
       return simValueTable;
+    }
+
+    std::vector<unsigned char>& getXMaskVector() {
+      return bitMaskTable;
+    }
+
+    std::vector<unsigned char>& getZMaskVector() {
+      return zMaskTable;
+    }
+    
+    void debugPrintTableValues() const {
+      for (int i = 0; i < (int) bitMaskTable.size(); i++) {
+        std::cout << "\tvalue[" << i << "] = " << (int) simValueTable[i] << std::endl;
+        std::cout << "\tmask  [" << i << "] = " << (int) bitMaskTable[i] << std::endl;
+        std::cout << "\tzask  [" << i << "] = " << (int) zMaskTable[i] << std::endl;
+      }
     }
 
   };
@@ -165,7 +252,13 @@ namespace FlatCircuit {
 
     void debugPrintTableValues() const;
 
-    std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
+    //std::vector<bsim::quad_value>& getValueTable() { return simValueTable.getValueVector(); }
+
+    std::vector<unsigned char>& getValueTable() { return simValueTable.getValueVector(); }
+    std::vector<unsigned char>& getXMaskTable() { return simValueTable.getXMaskVector(); }
+
+    std::vector<unsigned char>& getZMaskTable() { return simValueTable.getZMaskVector(); }
+
     unsigned char* getRawValueTable() { return rawSimValueTable; }
 
     unsigned long getMemoryOffset(const CellId cid) const {
@@ -215,7 +308,7 @@ namespace FlatCircuit {
       assert(offset >= 0);
 
       int memWidth = def.getCellRefConst(cid).getMemWidth();
-      return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) memWidth*offset), memWidth);
+      return simValueTable.getBitVector(map_find(cid, memoryOffsets) + ((unsigned long) storedByteLength(memWidth)*offset), memWidth);
 
     }
 
@@ -227,7 +320,7 @@ namespace FlatCircuit {
       assert(addr >= 0);
 
       int memWidth = def.getCellRefConst(cid).getMemWidth();
-      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) memWidth*addr), writeData);
+      simValueTable.setBitVector(map_find(cid, memoryOffsets) + ((unsigned long) storedByteLength(memWidth)*addr), writeData);
     }
 
     void debugPrintRawValueTable() const;

@@ -154,7 +154,6 @@ namespace FlatCircuit {
         }
       }
 
-
       return cppCode;
     }
 
@@ -213,7 +212,7 @@ namespace FlatCircuit {
       def(def_) {
 
       std::cout << "Start init" << std::endl;
-      for (auto c : def.getCellMap()) {
+      for (auto& c : def.getCellMap()) {
         auto tp = c.second.getCellType();
 
         CellId cid = c.first;
@@ -394,10 +393,12 @@ namespace FlatCircuit {
 
       assert(hasSimulateFunction());
 
-      void (*simFunc)(bsim::quad_value*) =
-        reinterpret_cast<void (*)(bsim::quad_value*)>(simulateFuncHandle);
-        
-      simFunc(&(valueStore.getValueTable()[0]));
+      void (*simFunc)(unsigned char*, unsigned char*, unsigned char*) =
+        reinterpret_cast<void (*)(unsigned char*, unsigned char*, unsigned char*)>(simulateFuncHandle);
+      
+      simFunc(&(valueStore.getValueTable()[0]),
+              &(valueStore.getXMaskTable()[0]),
+              &(valueStore.getZMaskTable()[0]));
       return;
     }
 
@@ -416,6 +417,7 @@ namespace FlatCircuit {
         return;
       }
 
+      //std::cout << "Adding port changes" << std::endl;
       // Add user inputs to combChanges
       for (auto portCell : def.getPortCells()) {
         if (def.getCellRefConst(portCell).isInputPortCell()) {
@@ -425,7 +427,8 @@ namespace FlatCircuit {
       }
 
       // If there is no simulate function use the interpreter
-      
+
+      //std::cout << "Adding user inputs" << std::endl;
       // Add user inputs 
       for (auto in : userInputs) {
         combinationalSignalChange({in.first.cell, in.first.port}, in.second);
@@ -434,13 +437,17 @@ namespace FlatCircuit {
 
       do {
 
+        //std::cout << "Doing comb changes" << std::endl;
         while (combChanges.size() > 0) {
           SigPort nextComb = *std::begin(combChanges);
           combChanges.erase(nextComb);
 
+          //std::cout << "Doing comb change " << sigPortString(def, nextComb) << std::endl;
           updatePort(nextComb);
         }
 
+
+        //std::cout << "Finshed comb changes" << std::endl;
 
         std::vector<CellId> registersToUpdate;
         std::vector<CellId> memoriesToUpdate;
@@ -458,6 +465,8 @@ namespace FlatCircuit {
           }
         }
 
+        //std::cout << "Done seq changes" << std::endl;
+
         seqChanges = {};
 
         //std::cout << "# of memory updates = " << memoriesToUpdate.size() << std::endl;
@@ -469,8 +478,21 @@ namespace FlatCircuit {
         }
 
         for (auto cid : memoriesToUpdate) {
+          // cout << "updating memory " << sigPortString(def, {cid, PORT_ID_RDATA}) << endl;
           updatePort({cid, PORT_ID_RDATA});
+
+          // for (int i = 0; i < def.getCellRefConst(cid).getParameterValue(PARAM_MEM_DEPTH).to_type<int>(); i++) {
+          //   auto bv = getMemoryValue(cid, i);
+          //   cout << "\tmem[" << i << "] = ";
+          //   if (bv.is_binary()) {
+          //     cout << bv << ", " << bv.to_type<int>() << endl;
+          //   } else {
+          //     cout << bv << ", " << "NON BINARY" << endl;
+          //   }
+          // }
         }
+
+        //std::cout << "Updates registers" << std::endl;
         
       } while (combChanges.size() > 0);
 
@@ -687,6 +709,7 @@ namespace FlatCircuit {
           int ptpInt = ptp.to_type<int>();
           if (ptpInt == PORT_CELL_FOR_OUTPUT) {
 
+            //std::cout << "Updating output " << sigPortString(def, sigPort) << ", with new value " << materializeInput(sigPort) << std::endl;
             setPortValue(sigPort.cell, sigPort.port, materializeInput(sigPort));
 
           }
@@ -807,7 +830,7 @@ namespace FlatCircuit {
 
         BitVector newOut = shl(in0, in1);
 
-        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);       
+        return combinationalSignalChange({sigPort.cell, PORT_ID_OUT}, newOut);
 
       } else if (tp == CELL_TYPE_ASHR) {
         BitVector in0 = materializeInput({sigPort.cell, PORT_ID_IN0});
@@ -1033,7 +1056,7 @@ namespace FlatCircuit {
     
     std::map<CellId, BitVector> allRegisterValues() const {
       std::map<CellId, BitVector> regValues;
-      for (auto roff : def.getCellMap()) {
+      for (auto& roff : def.getCellMap()) {
         if (isRegister(def.getCellRefConst(roff.first).getCellType())) {
           regValues.insert({roff.first, getRegisterValue(roff.first)});
         }
@@ -1075,7 +1098,7 @@ namespace FlatCircuit {
     }
 
     void refreshConstants() {
-      for (auto cp : def.getCellMap()) {
+      for (auto& cp : def.getCellMap()) {
         CellId cid = cp.first;
 
         if (def.getCellRefConst(cid).getCellType() == CELL_TYPE_CONST) {
@@ -1159,6 +1182,7 @@ namespace FlatCircuit {
     }
 
     void specializePort(const std::string& port, const BitVector& value);
+    void specializePort(const std::string& port);
 
     void sequentialPortUpdateCode(CodeGenState& codeState);
 

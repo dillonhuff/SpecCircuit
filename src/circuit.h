@@ -131,6 +131,10 @@ namespace FlatCircuit {
       return "CELL_TYPE_UGT";
     } else if (cellTp == CELL_TYPE_SHL) {
       return "CELL_TYPE_SHL";
+    } else if (cellTp == CELL_TYPE_ANDR) {
+      return "CELL_TYPE_ANDR";
+    } else if (cellTp == CELL_TYPE_ORR) {
+      return "CELL_TYPE_ORR";
     }
 
     std::cout << "No string for cell type " << cellTp << std::endl;
@@ -788,6 +792,8 @@ namespace FlatCircuit {
   };
 
   class CellDefinition {
+    CellType thisType;
+
     std::map<CellId, Cell> cells;
     std::map<PortId, Port> ports;
     std::map<PortId, CellId> portsToCells;
@@ -803,8 +809,27 @@ namespace FlatCircuit {
 
   public:
 
+    // std::map<std::string, PortId> getPortNameMap() const { return portNames; }
+    // std::map<PortId, std::string> getPortIdsToNames() const { return portIdsToNames; }
+    // std::map<std::string, CellId> getCellNames() const { return cellNames; }
+    // std::map<CellId, std::string> getCellIdsToNames() const { return cellIdsToNames; }
+
     // Cell 0 is reserved to indicated a non-existant cell
-    CellDefinition() : next(1), nextPort(0) {}
+    CellDefinition(const CellType tp_) : thisType(tp_), next(1), nextPort(0) {}
+
+    CellDefinition() : thisType(0), next(1), nextPort(0) {}
+
+    CellType getCellType() const {
+      return thisType;
+    }
+
+    // std::vector<CellId> activeCellsVector() const {
+    //   std::vector<CellId> activeCellsVec;
+    //   for (auto cell : cells) {
+    //     activeCellsVec.push_back();
+    //   }
+    //   return activeCellsVec;
+    // }
 
     std::vector<CellId> getCellList() const {
       std::vector<CellId> cellList;
@@ -845,7 +870,7 @@ namespace FlatCircuit {
         cells.erase(cid);
       }
 
-      for (auto ctp : getCellMap()) {
+      for (auto& ctp : getCellMap()) {
         CellId cid = ctp.first;
         Cell& c = getCellRef(cid);
 
@@ -1067,6 +1092,11 @@ namespace FlatCircuit {
       return id;
     }
 
+    CellId getCellId(const std::string& name) const {
+      assert(contains_key(name, cellNames));
+      return map_find(name, cellNames);
+    }
+
     std::string getCellName(const CellId cellId) const {
       assert(contains_key(cellId, cellIdsToNames));
       return cellIdsToNames.at(cellId);
@@ -1141,9 +1171,27 @@ namespace FlatCircuit {
     // Save space for 100 primitive operations
     Env() : nextType(100) {}
 
+    void deleteCellType(const CellType tp) {
+      cellDefs.erase(tp);
+      for (auto k : cellTypeNames) {
+        if (k.second == tp) {
+          cellTypeNames.erase(k.first);
+          break;
+        }
+      }
+    }
+
+    bool hasCellType(const CellType tp) const {
+      return contains_key(tp, cellDefs);
+    }
+
+    bool hasCellType(const std::string& name) const {
+      return contains_key(getCellType(name), cellDefs);
+    }
+    
     CellType addCellType(const std::string& name) {
       auto tp = nextType;
-      cellDefs[tp] = {};
+      cellDefs[tp] = CellDefinition(tp);
       cellTypeNames[name] = tp;
 
       nextType++;
@@ -1155,7 +1203,7 @@ namespace FlatCircuit {
       return cellDefs.at(tp);
     }
 
-    CellType getCellType(const std::string& cellName) {
+    CellType getCellType(const std::string& cellName) const {
       return map_find(cellName, cellTypeNames);
     }
 
@@ -1163,6 +1211,17 @@ namespace FlatCircuit {
       return cellDefs.at(cellTypeNames.at(cellName));
     }
 
+    std::string getCellTypeName(const CellDefinition& def) const {
+      auto tp = def.getCellType();
+
+      for (auto n : cellTypeNames) {
+        if (n.second == tp) {
+          return n.first;
+        }
+      }
+      assert(false);
+    }
+    
     const std::map<CellType, CellDefinition>& getCellDefs() const {
       return cellDefs;
     }

@@ -20,15 +20,32 @@ SET(CPP_FILES ./src/simulator.cpp
               ./src/cpp_utils.cpp
               ./src/ir.cpp
               ./src/utils.cpp
-              ./src/value_store.cpp)
+              ./src/value_store.cpp
+              ./src/serialize.cpp)
 
 add_library(flatcircuit ${CPP_FILES})
 
-SET(TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp)
+# Test executables
+SET(CGRA_TEST_FILES ./test/cgra_tests.cpp)
+SET(SMALL_TEST_FILES ./test/test_circuit.cpp ./test/op_tests.cpp ./test/load_tests.cpp)
+SET(REGRESSION_TEST_FILES ./test/op_tests.cpp)
 
-add_executable(all-tests ${TEST_FILES})
-
+add_executable(all-tests test/test_main.cpp ${REGRESSION_TEST_FILES} ${SMALL_TEST_FILES} ${CGRA_TEST_FILES})
 target_link_libraries(all-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(small-tests test/test_main.cpp ${SMALL_TEST_FILES})
+target_link_libraries(small-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(regression-tests test/test_main.cpp ${REGRESSION_TEST_FILES})
+target_link_libraries(regression-tests flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(constant-fold-benchmark test/test_main.cpp ./test/constant_folding_benchmark)
+target_link_libraries(constant-fold-benchmark flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+add_executable(compare-to-iverilog test/test_main.cpp ./test/compare_to_iverilog.cpp)
+target_link_libraries(compare-to-iverilog flatcircuit dl coreir coreir-rtlil coreir-commonlib)
+
+# End test executables
 
 SET(BENCHMARK_FILES ./benchmarks/main.cpp)
 add_executable(run-benchmarks ${BENCHMARK_FILES})

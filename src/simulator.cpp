@@ -3,10 +3,12 @@
 #include "transformations.h"
 
 #include <fstream>
+#include <chrono>
 
 #include <dlfcn.h>
 #include <unistd.h>
 
+using namespace std::chrono;
 using namespace std;
 
 namespace FlatCircuit {
@@ -261,7 +263,8 @@ namespace FlatCircuit {
     cout << "Starting to collect events" << endl;
     do {
 
-      cout << "In getting comb changes" << endl;
+      cout << "In getting comb changes, combChanges size = " << combChanges.size() << endl;
+      cout << "freshChanges.size() = " << freshChanges.size() << endl;
       while (freshChanges.size() > 0) {
         SigPort sigPort = *std::begin(freshChanges);
         freshChanges.erase(sigPort);
@@ -650,6 +653,8 @@ namespace FlatCircuit {
       } else if (cell.getCellType() == CELL_TYPE_REG) {
         codeState.addInstruction(new IRRegisterStateCopy(cid));
 
+      } else if (cell.getCellType() == CELL_TYPE_SLICE) {
+        unopCode(codeState, cid);
       } else {
         cout << "Signal Port " << toString(def, {cid, port, 0}) << endl;
         cout << "Insert code for unsupported node " + def.cellName(cid)
@@ -839,13 +844,10 @@ namespace FlatCircuit {
     }
 
     cppCode +=
-      "static inline void storeRegisterState(bsim::quad_value* values, const unsigned long wireOffset, const unsigned long stateOffset, const unsigned long width) {\n"
-      "\tfor (unsigned long i = 0; i < width; i++) {\n"
-      "\t\tvalues[wireOffset + i] = values[stateOffset + i];\n"
-      "\t}\n"
-      "}\n\n"
 
-      "void simulate(bsim::quad_value* values) {\n";
+      "bool two_state_posedge(const uint8_t a, const uint8_t b) { return !a && b; }\n\n"
+      "bool two_state_negedge(const uint8_t a, const uint8_t b) { return a && !b; }\n\n"
+      "void simulate_four_state(unsigned char* __restrict values, unsigned char* __restrict x_mask, unsigned char* __restrict z_mask) {\n";
     
     assert((updates.size() % 2) == 0);
 
@@ -863,7 +865,9 @@ namespace FlatCircuit {
     compileCppLib(cppName, targetBinary);
 
     DylibInfo dlib = loadLibWithFunc(targetBinary,
-                                     "_Z8simulatePN4bsim10quad_valueE");
+                                     "_Z19simulate_four_statePhS_S_");
+    //"_Z19simulate_four_statePhS_");
+
     libHandle = dlib.libHandle;
     simulateFuncHandle = dlib.simFuncHandle;
 
@@ -1071,6 +1075,17 @@ namespace FlatCircuit {
     specializedPorts.insert(cid);
   }
 
+  void Simulator::specializePort(const std::string& port) {
+    CellId cid = def.getPortCellId(port);
+
+    specializePort(port, getBitVec(cid, PORT_ID_OUT));
+    
+    // assert(!elem(cid, specializedPorts));
+
+    // def.replacePortWithConstant(port, value);
+    // specializedPorts.insert(cid);
+  }
+  
   void specializeCircuit(const std::vector<std::string>& constantPorts,
                          Simulator& sim) {
     for (auto portName : constantPorts) {
@@ -1079,10 +1094,15 @@ namespace FlatCircuit {
       sim.def.replacePortWithConstant(portName, currentValue);
     }
     specializeCircuit(sim);
+
+    
   }
 
 
   void specializeCircuit(Simulator& sim) {
+    auto start = high_resolution_clock::now();
+    
+
     cout << "# of cells before constant folding = " << sim.def.numCells() << endl;
     foldConstants(sim.def, sim.allRegisterValues());
     cout << "# of cells after constant deleting instances = " <<
@@ -1093,8 +1113,17 @@ namespace FlatCircuit {
     cout << "# of cells after constant folding = " << sim.def.numCells() << endl;
 
     deDuplicate(sim.def);
-
+    
     sim.refreshConstants();
+
+
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<milliseconds>(stop - start);
+
+    cout << "Time taken to specialize = "
+         << duration.count() << " milliseconds" << endl;
+
   }
 
 }

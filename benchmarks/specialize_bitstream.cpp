@@ -1,6 +1,7 @@
 #include "analysis.h"
 #include "convert_coreir.h"
 #include "output_verilog.h"
+#include "serialize.h"
 #include "transformations.h"
 #include "utils.h"
 
@@ -11,19 +12,48 @@ using namespace std;
 using namespace CoreIR;
 using namespace FlatCircuit;
 
+int countCellsOfType(const CellType tp, const CellDefinition& def) {
+  int count = 0;
+  for (auto ctp : def.getCellMap()) {
+    if (ctp.second.getCellType() == tp) {
+      count++;
+    }
+  }
+  return count;
+}
+
 int main(const int argc, const char** argv) {
   assert(argc == 3);
   string bitstreamFile = argv[1];
   string outputName = argv[2];
 
+  BitVector inputX = BitVector("16'hxxxx");
+  cout << "inputX = " << inputX << endl;
+  
   cout << "Bitstream file = " << bitstreamFile << endl;
   auto convConfigValues = loadBitStream(bitstreamFile);
-  Env circuitEnv =
-    loadFromCoreIR("global.top",
-                   "./test/top.json");
+  // Env circuitEnv =
+  //   loadFromCoreIR("global.top",
+  //                  "./benchmarks/cgra_test_harris_07_22_2018/top.json");
+  // CellDefinition& def = circuitEnv.getDef("top");
 
+  //                   "./test/top.json");
+
+  // Env circuitEnv;
+  // loadFromFile(circuitEnv, "top.csv");
+  // CellDefinition& def = circuitEnv.getDef("top");
+
+  Env circuitEnv;
+  loadFromFile(circuitEnv, "cgra_test_harris_07_22_2018_top.csv");
   CellDefinition& def = circuitEnv.getDef("top");
 
+  int numMuxes = countCellsOfType(CELL_TYPE_MUX, def);
+  cout << "Number of muxes = " << numMuxes << endl;
+  
+  // cout << "Saving..." << endl;
+  // saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top.csv");
+  // cout << "Done saving" << endl;
+  
   CellId s2t0 = def.getPortCellId("pad_S2_T0_in");
   CellId s2t1 = def.getPortCellId("pad_S2_T1_in");
   CellId s2t2 = def.getPortCellId("pad_S2_T2_in");
@@ -52,6 +82,8 @@ int main(const int argc, const char** argv) {
   setCGRAInput(2, BitVector("16'h0"), sim);
   setCGRAInput(3, BitVector("16'h0"), sim);
 
+  setCGRAInput(2, inputX, sim);
+  
   loadCGRAConfig(convConfigValues, sim);
 
   setCGRAInput(2, input, sim);
@@ -67,6 +99,7 @@ int main(const int argc, const char** argv) {
   for (int i = 0; i < nCycles; i++) {
 
     input = BitVector(16, i);
+    //input = BitVector("16'hxxxx");
     setCGRAInput(2, input, sim);
 
     cout << "Cycle " << i << endl;
@@ -74,8 +107,8 @@ int main(const int argc, const char** argv) {
     posedge("clk_in", sim);
 
     BitVector outputS0 = getCGRAOutput(0, sim);
-    cout << "input    = " << input << ", " << input.to_type<int>() << endl;
-    cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
+    cout << "input    = " << input << ", " << endl; //input.to_type<int>() << endl;
+    cout << "outputS0 = " << outputS0 << ", " << endl; //outputS0.to_type<int>() << endl;
   }
 
   BitVector interpOutputS0 = getCGRAOutput(0, sim);
@@ -103,6 +136,12 @@ int main(const int argc, const char** argv) {
 
   specializeCircuit(sim);
 
+  cout << "# of cells in specialized circuit = " << def.numCells() << endl;
+
+  cout << "Saving..." << endl;
+  saveToFile(circuitEnv, def, "cgra_test_harris_07_22_2018_top_conv_2_1.csv");
+  cout << "Done saving" << endl;
+  
   assert(definitionIsConsistent(def));
 
   input = BitVector(16, 18);
@@ -149,7 +188,9 @@ int main(const int argc, const char** argv) {
     cout << "outputS0 = " << outputS0 << ", " << outputS0.to_type<int>() << endl;
   }
 
-  nCycles = 200000;
+  outputVerilog(sim.def, outputName);
+
+  nCycles = 1000000;
   cout << "Computing " << nCycles << " cycles of data in compiled mode" << endl;
 
   setCGRAInput(2, input, sim);
@@ -158,6 +199,8 @@ int main(const int argc, const char** argv) {
   auto stop = high_resolution_clock::now();
 
   auto duration = duration_cast<milliseconds>(stop - start);
+
+  FILE* out = fopen("specialize_bs_log.txt", "w");
   
   start = high_resolution_clock::now();
 
@@ -166,7 +209,9 @@ int main(const int argc, const char** argv) {
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 0));
     sim.update();
 
+    //input = BitVector(16, rand() & 0xffff);
     input = BitVector(16, i);
+
 
     sim.setFreshValue(s2t0, PORT_ID_OUT, BitVec(1, input.get(15 ).binary_value()));
     sim.setFreshValue(s2t1, PORT_ID_OUT, BitVec(1, input.get(14 ).binary_value()));
@@ -188,6 +233,11 @@ int main(const int argc, const char** argv) {
     sim.setFreshValue(clkCell, PORT_ID_OUT, BitVec(1, 1));
     sim.update();
 
+    auto output = getCGRAOutput(0, sim);
+
+    //cout << "input = " << input << ", output = " << output << endl;
+
+    fprintf(out, "%s\n", output.binary_string().c_str());
   }
 
   stop = high_resolution_clock::now();
@@ -203,6 +253,5 @@ int main(const int argc, const char** argv) {
   cout << "input    = " << input << endl;
   cout << "outputS0 = " << outputS0 << endl;
 
-  outputVerilog(sim.def, outputName);
-
+  fclose(out);
 }
