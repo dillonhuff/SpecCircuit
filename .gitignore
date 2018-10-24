@@ -32,3 +32,8 @@ conv_2_1_specialized
 conv_bw_specialized
 *.txt
 specialize-bitstream
+*.csv
+.DS_Store
+x_prop
+adder_tb
+compare-to-iverilog
